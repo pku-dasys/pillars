@@ -1,0 +1,50 @@
+digraph Multiplier {
+stylesheet = "styles.css"
+rankdir="LR" 
+
+subgraph cluster_Multiplier {
+  label="Multiplier"
+  URL=""
+  bgcolor="#FFF8DC"
+  cluster_Multiplier_io_input_a [shape = "rectangle" style="filled" fillcolor="#CCCCCC" label="io_input_a" rank="0"]
+     
+cluster_Multiplier_io_input_b [shape = "rectangle" style="filled" fillcolor="#CCCCCC" label="io_input_b" rank="0"]
+     
+cluster_Multiplier_io_out [shape = "rectangle" style="filled" fillcolor="#E0FFFF" label="io_out" rank="1000"]
+     
+
+op_bits_1 [shape = "plaintext" label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" BGCOLOR="#D8BFD8">
+  <TR>
+    <TD PORT="in1">&#x25cf;</TD>
+    <TD ROWSPAN="2" > bits </TD>
+    <TD ROWSPAN="2" PORT="out">&#x25cf;</TD>
+  </TR>
+  <TR>
+    <TD>(31, 0)</TD>
+  </TR>
+</TABLE>>];
+       
+
+op_mul_2 [shape = "plaintext" label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" BGCOLOR="#D8BFD8">
+  <TR>
+    <TD PORT="in1">&#x25cf;</TD>
+    <TD ROWSPAN="2" > mul </TD>
+    <TD ROWSPAN="2" PORT="out">&#x25cf;</TD>
+  </TR>
+  <TR>
+    <TD PORT="in2">&#x25cf;</TD>
+  </TR>
+</TABLE>>];
+       
+
+  op_mul_2:out -> op_bits_1:in1
+  cluster_Multiplier_io_input_b -> op_mul_2:in2
+  cluster_Multiplier_io_input_a -> op_mul_2:in1
+  op_bits_1:out -> cluster_Multiplier_io_out
+  
+  
+}
+     
+}
