@@ -1,12 +1,7 @@
 package tetriski.pillars
 
-import java.util.Date
-
 import chisel3.iotesters
-
 import scala.collection.mutable.ArrayBuffer
-
-
 
 //Since almost every modules has the common 'port' array, we extract
 //the 'port' array and wrap it in the Trait to be extended.
@@ -249,7 +244,8 @@ def dumpConnect() = {
 }
 
 
-
+////This class combines the ArchitctureHierarchy class and Connect class to generate final
+////hardware modules with linking information.
 class HardwareGeneration(arch: BlockTrait, connect: Connect){
   var connectMap = Map[List[Int] , List[List[Int]]]()
   var mapRelation = connect.mapRelation
@@ -296,22 +292,6 @@ class HardwareGeneration(arch: BlockTrait, connect: Connect){
   val archList = arch.asInstanceOf[ArchitctureHierarchy].getModuleList()
 
 }
-////This class combines the ArchitctureHierarchy class and Connect class to generate final
-////hardware modules with linking information.
-//class HardwareGeneration (arch: ArchitctureHierarchy, connect: Connect) {
-//
-//  //The ArchitectureParse(to be defined) class can generate the pure hardware modules according to
-//  //the ArchitctureHierarchy class
-//  val archParser = new ArchitectureParse(arch)
-//  val pureHardModules = archParser.generateModule()
-//
-//  //The ConnectionParser(to be defined) class can link the relative ports according to
-//  //the Connect class
-//  val connectParser = new ConnectionParser(connect)
-//  val hardwareModules = connectParser.link(pureHardModules)
-//
-//}
-
 
 object Pillars{
   def main(args: Array[String]): Unit = {
@@ -320,13 +300,6 @@ object Pillars{
     arch.setPortMap(Array("output", "input1", "input0"))
 
     //Create the first Block
-//    val block_one = new Block("b_rf1")
-//
-//    block_one.setPortArray(Array("in0" ,"out0", "out1"))
-//    val rf = new Rf("rf")
-//    rf.setPortArray(Array("WE0", "address_in0", "address_out0", "address_out1", "in0", "out0", "out1"))
-//    block_one.rfArray.append(rf)
-
     val block_0 = new Block("b_0")
     block_0.setPortMap(Array("in0" ,"in1", "out"))
 
@@ -345,63 +318,17 @@ object Pillars{
     block_0.addBlock(block_0_0)
     block_0.addBlock(block_0_1)
 
-
-
     //Create the second Block
-//    val block_two = new Block("b_fun1")
-//
-//    block_two.setPortArray(Array("in0" ,"in1", "out0"))
-//    val fun = new Fun("fun")
-//    fun.setPortArray(Array("in_a", "in_b", "out", "select"))
-//    block_two.funArray.append(fun)
-
     val block_1 = new Block("b_1")
     block_1.setPortMap(Array("in0" ,"in1", "out"))
 
     val add1 = new OpAdder("adder0")
     block_1.addModule(add1.getTypeID(), add1)
 
-
-    //modules: (config units unimplemented)
-    // {
-    //   "cgra":{
-    //     "ports": "input0 input1 output",
-    //     "b_rf1":{
-    //       "ports": "in0 out0 out1",
-    //       "rf":{
-    //         "ports": "WE0 address_in0 address_out0 address_out1 in0 out0 out1"
-    //       }
-    //     },
-    //     "b_fun1":{
-    //       "ports": "in0 in1 out0",
-    //       "fun":{
-    //         "ports": "in_a in_b out select",
-    //         "ops": "add sub"
-    //       }
-    //     }
-    //   }
-    // }
     arch.addBlock(block_0)
     arch.addBlock(block_1)
 
     arch.init()
-
-    //println(arch.getModuleList())
-    //println(arch("b_1").getName())
-
-    // connections:
-    // cgra:input0 -> cgra/b_rf1:in0/rf:in0
-    // {cgra/}b_rf1:out0/rf:address_out0 -> b_fun1:in0/fun:in_a
-    // {cgra/}b_rf1:out0/rf:address_out0 -> b_fun1:in1/fun:in_b
-    // cgra/b_fun1:out0/fun:out -> cgra:input1
-//    val outArray = ArrayBuffer(List("cgra", "input0"),
-//      List("cgra/", "b_rf1", "out0", "rf", "address_out0"),
-//      List("cgra/", "b_rf1", "out0", "rf", "address_out0"),
-//      List("cgra/", "b_fun1", "out0", "fun", "out"))
-//    val inArray = ArrayBuffer(List("cgra/", "b_rf1", "in0", "rf", "in0"),
-//      List("cgra/", "b_fun1", "in0", "fun", "in_a"),
-//      List("cgra/", "b_fun1", "in1", "fun", "in_b"),
-//      List("cgra", "input1"))
 
 //   connections:
 //    {
@@ -440,9 +367,6 @@ object Pillars{
       List("cgra", "output"))
 
 
-
-
-
     val connect = new Connect (outArray, inArray)
     val test = connect.getConnect()
 
@@ -452,16 +376,8 @@ object Pillars{
     chisel3.Driver.execute(args, () => new TopModule(cp.archList,arch.typeNum, cp.connectMap))  //verilog generation
 
     iotesters.Driver.execute(args, () => new TopModule(cp.archList,arch.typeNum, cp.connectMap)) {
-      c => new TopMoUnitTest(c)
+      c => new TopModuleUnitTest(c)
     }
-
-    //println(test(List("cgra", "input0")))
-
-
-
-//    val generate = new HardwareGeneration(arch, connect)
-
-
 
   }
 }

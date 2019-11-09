@@ -21,18 +21,8 @@ object Flow {
     chisel3.Driver.execute(args, () => new TopModule(moduleNum,2, maplist))  //verilog generation
 
     iotesters.Driver.execute(args, () => new TopModule(moduleNum,2, maplist)) {
-      c => new TopMoUnitTest(c)
+      c => new TopModuleUnitTest(c)
     }
   }
 }
 
-class TopMoUnitTest(c: TopModule) extends PeekPokeTester(c) {
-  poke(c.io.input_0,2)
-  poke(c.io.input_1,3)
-  expect(c.io.out, 13)
-}
-
-
-//object TopMo extends App{
-//  chisel3.Driver.execute(args, () => new TopMo())
-//}
