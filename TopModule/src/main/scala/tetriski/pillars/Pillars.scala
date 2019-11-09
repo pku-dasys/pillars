@@ -1,4 +1,4 @@
-package flow
+package tetriski.pillars
 
 import java.util.Date
 
@@ -313,7 +313,7 @@ class HardwareGeneration(arch: BlockTrait, connect: Connect){
 //}
 
 
-object cgra{
+object Pillars{
   def main(args: Array[String]): Unit = {
 
     var arch = new ArchitctureHierarchy()
