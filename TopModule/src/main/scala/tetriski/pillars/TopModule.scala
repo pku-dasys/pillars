@@ -1,6 +1,7 @@
 package tetriski.pillars
 
 import chisel3._
+import chisel3.iotesters.PeekPokeTester
 import chisel3.{Bundle, Input, Module, Output, UInt}
 
 
@@ -73,4 +74,10 @@ class TopModule (val moduleNums: List[Int], val types : Int, val connect: Map[Li
 
   //io.out := adders(1).io.out
 
+}
+
+class TopModuleUnitTest(c: TopModule) extends PeekPokeTester(c) {
+  poke(c.io.input_0,2)
+  poke(c.io.input_1,3)
+  expect(c.io.out, 13)
 }
