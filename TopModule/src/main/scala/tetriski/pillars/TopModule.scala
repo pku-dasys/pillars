@@ -1,4 +1,4 @@
-package flow
+package tetriski.pillars
 
 import chisel3._
 import chisel3.{Bundle, Input, Module, Output, UInt}
