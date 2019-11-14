@@ -8,6 +8,7 @@ import scala.collection.mutable.ArrayBuffer
 trait Ports {
   var portMap = Map[String, Int]()
 
+  //Initial ports with portMap
   def setPortMap(args:Array[String]) : Map[String, Int] = {
     for (i <- 0 until args.length) {
       portMap += (args(i) -> i)
@@ -15,9 +16,11 @@ trait Ports {
     portMap
   }
 
+  //We can use ** operator to get a port's ID with its name
   def **(name : String ) = portMap(name)
 }
 
+//ModuleInfo is basic information of a modle
 trait ModuleInfo{
   var ModuleID = -1
   var TypeID = -1
@@ -42,11 +45,22 @@ trait ModuleInfo{
   }
 }
 
+//Important note:
+//Each module should possess this trait, with the help of which
+//we can translate a string representation of a port into a list of integer.
+
+//For example，in our minimal case, ["cgra/b_0:out/b_0_1:out/mul0:out"] can be
+//translated into [1, 0, 0], where 1 (TypeID) means this port belongs to a multiplier
+//and the first 0 (ModuleID) means this multiplier has index 0 in global,
+//while the second 0 (portID) means the taget port is "out".
+
 trait ModuleTrait extends Ports with ModuleInfo{
 
 }
 
 
+
+//############### Currently Unused #################
 //The 'MemUnit'/'MuxAddr'/'MuxData' are the submodules of the 'MemPort',
 //we abstract them and put them in the MemTrait.
 trait MemTrait extends ModuleTrait {
@@ -74,6 +88,15 @@ class Fun(name : String) extends ModuleTrait {
 //  val opSub = new OpSub(32)
 }
 
+//'Mux'/'Const'/'Rf' are the submodule candidates of 'Block'
+class Mux extends ModuleTrait {
+}
+class Const extends ModuleTrait {
+}
+class Rf(name : String)  extends ModuleTrait {
+}
+//############### Currently Unused #################
+
 
 
 class OpAdder(name : String) extends ModuleTrait {
@@ -93,17 +116,14 @@ class OpMul(name : String) extends ModuleTrait{
   setName(name)
 }
 
-//'Mux'/'Const'/'Rf' are the submodule candidates of 'Block'
-class Mux extends ModuleTrait {
-}
-class Const extends ModuleTrait {
-}
-class Rf(name : String)  extends ModuleTrait {
-}
+
 class Block(name : String) extends BlockTrait {
   setName(name)
 }
+
+
 trait BlockTrait extends ModuleTrait {
+
 //  var memPortArray = new ArrayBuffer[MemPort]
 //  var rfArray      = new ArrayBuffer[Rf]
 //  var funArray     = new ArrayBuffer[Fun]
@@ -111,24 +131,27 @@ trait BlockTrait extends ModuleTrait {
 //  var adderArray  = new ArrayBuffer[OpAdder]
 //  var mulArray  = new ArrayBuffer[OpMul]
 
-//  var modulesArray = new ArrayBuffer[ArrayBuffer[Any]]
-//
+
+  //Explicit declaration of module types
   var typeNum = 2
   var adderArray  = new ArrayBuffer[Any]
   var mulArray  = new ArrayBuffer[Any]
-//
-//  modulesArray.append(adderArray)
-//  modulesArray.append(mulArray)
+  var modulesArray = new ArrayBuffer[ArrayBuffer[Any]]
 
-  var modulesArray = List(adderArray, mulArray)
+  modulesArray.append(adderArray)
+  modulesArray.append(mulArray)
 
+ // var modulesArray = List(adderArray, mulArray)
+
+  //blockMap: name -> sub-block
   var blockMap = Map[String, Block]()
+  //modulesMap: name -> corresponding module of this block
   var modulesMap = Map[String, ModuleTrait]()
 
   //Add high level block
   def addBlock(arg: Block): Map[String, Block] = {
     blockMap += (arg.getName() -> arg)
-    //println(arg.getName())
+    //Add sub-block's realistic modules into relevant array of parent module
     for (i <- 0 until arg.modulesArray.size){
       for (j <- 0 until arg.modulesArray(i).size){
         modulesArray(i).append(arg.modulesArray(i)(j))
@@ -137,12 +160,15 @@ trait BlockTrait extends ModuleTrait {
     blockMap
   }
 
+  //Add a realistic module into this block's modulesArray
   def addModule(typeNum : Int, arg : ModuleTrait): Unit ={
     modulesArray(typeNum).append(arg)
     modulesMap += (arg.getName() -> arg)
   }
 
+  //We can use block("name") to get a sub-block
   def apply(name : String): Block = blockMap(name)
+  //We can use block.getModule("name") to get a realistic module
   def getModule(name : String) : ModuleTrait = modulesMap(name)
 }
 
@@ -151,6 +177,8 @@ class ArchitctureHierarchy extends BlockTrait{
 
   setName("cgra")
 
+  //Get integer module list.
+  //In minimal case, it's [2,1], which means this CGRA contains 2 adder and 1 multiplier.
   def getModuleList(): List[Int] ={
     var ret = List[Int]()
     for (i <- 0 until modulesArray.size){
@@ -159,6 +187,8 @@ class ArchitctureHierarchy extends BlockTrait{
     ret
   }
 
+  //After initialization, all module's ModuleID, also called global index,
+  //is set as it's sequence number in relevant array of ArchitctureHierarchy
   def init(): Unit ={
     for( i <- 0 until modulesArray.size){
       for( j <- 0 until modulesArray(i).size){
@@ -168,7 +198,7 @@ class ArchitctureHierarchy extends BlockTrait{
     }
   }
 
-  //Save hierarchy information as modules.json
+  //Save hierarchy information as modules.json (to be defined)
   def dumpArchitcture() = {}
 }
 
@@ -191,7 +221,8 @@ for (i <- 0 until outArray.length) {
 
 }
 
-// to be defined
+// (to be defined)
+  //"cgra/b_0/b_0_0:out" should be equal to "cgra/b_0/b_0_0:out/adder0:out"
   def simplify(): Map[List[String], ArrayBuffer[List[String]]] ={
     var ret = Map[List[String], ArrayBuffer[List[String]]]()
     var equivalence = Set[List[String]]()
@@ -204,6 +235,7 @@ mapRelation
 }
 
 //Save connection information as connect.txt
+  //(print currently)
 def dumpConnect() = {
 
   def printConnect(src :List[String], dsts: ArrayBuffer[List[String]], comma : Boolean): Unit ={
@@ -244,13 +276,21 @@ def dumpConnect() = {
 }
 
 
-////This class combines the ArchitctureHierarchy class and Connect class to generate final
+////This class combines the ArchitctureHierarchy class and Connect class to help TopModule generate final
 ////hardware modules with linking information.
 class HardwareGeneration(arch: BlockTrait, connect: Connect){
   var connectMap = Map[List[Int] , List[List[Int]]]()
   var mapRelation = connect.mapRelation
 
-  def getConnctList(src :List[String], dsts: ArrayBuffer[List[String]]): Map[List[Int],List[List[Int]]] = {
+  //Return integer representation of a group of connection.
+  //For example,
+  //"cgra:input0": [
+  //      "cgra/b_0:in0/b_0_0:in0/adder0:input_a",
+  //      "cgra/b_0:in0/b_0_1:in0/mul0:input_a"
+  //      ]
+  //will be translate into Map([2, 0, 1] -> [[0, 0, 2], [1, 0 ,2]]).
+  def getConnectList(src :List[String], dsts: ArrayBuffer[List[String]]): Map[List[Int],List[List[Int]]] = {
+    //Encode a string representation of a port into a list of integer as mentioned before
     def encode(strs : List[String]) : List[Int] = {
     var ret = List[Int]()
       if(strs.size == 2){
@@ -260,18 +300,14 @@ class HardwareGeneration(arch: BlockTrait, connect: Connect){
       var temp = arch
       var ii = 0
       for (i <- 0 until strs.size){
-        //println(strs(i)(strs(i).size-1))
         if(strs(i)(strs(i).size-1)=='/' ) {
           if(strs(i) != "cgra/")
           temp = temp(strs(i).substring(0, strs(i).size-1))
-          //println(temp.getName())
         }else if(i == strs.size - 2){
           var target = temp.getModule(strs(i))
           return List (target.getTypeID(), target.getModuleID(), target ** strs(strs.size - 1))
-          //println(target.getName())
         }else if(ii % 2 == 0 ){
           temp = temp(strs(i))
-          //println(temp.getName())
           ii += 1
         }else {
           ii += 1
@@ -284,10 +320,11 @@ class HardwareGeneration(arch: BlockTrait, connect: Connect){
     val encodeSrc  = encode(src)
     val encodeDsts = dsts.map(encode).toList
 
-   // println(List (encodeSrc, encodeDsts))
     Map (encodeSrc-> encodeDsts)
   }
-  var connectList = mapRelation.map((x) => getConnctList(x._1, x._2)).foreach((x) => connectMap = connectMap.++(x))
+
+  //Return integer representation of connection, which is needed in TopModule
+  var connectList = mapRelation.map((x) => getConnectList(x._1, x._2)).foreach((x) => connectMap = connectMap.++(x))
 
   val archList = arch.asInstanceOf[ArchitctureHierarchy].getModuleList()
 
@@ -297,6 +334,7 @@ object Pillars{
   def main(args: Array[String]): Unit = {
 
     var arch = new ArchitctureHierarchy()
+    //The order shoule be same as TopModule
     arch.setPortMap(Array("output", "input1", "input0"))
 
     //Create the first Block
@@ -351,6 +389,7 @@ object Pillars{
 //      ]
 //    }
 
+    //Format to be modified as  ArrayBuffer[List[List[String],List[String]]]
     val outArray = ArrayBuffer(List("cgra", "input0"),
       List("cgra", "input0"),
       List("cgra", "input1"),
@@ -373,8 +412,11 @@ object Pillars{
     connect.dumpConnect()
 
     val cp = new HardwareGeneration(arch, connect)
-    chisel3.Driver.execute(args, () => new TopModule(cp.archList,arch.typeNum, cp.connectMap))  //verilog generation
 
+    //Verilog generation
+    chisel3.Driver.execute(args, () => new TopModule(cp.archList,arch.typeNum, cp.connectMap))
+
+    //Run tester
     iotesters.Driver.execute(args, () => new TopModule(cp.archList,arch.typeNum, cp.connectMap)) {
       c => new TopModuleUnitTest(c)
     }
