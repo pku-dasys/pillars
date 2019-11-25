@@ -18,9 +18,9 @@ object Flow {
         List(0, 1 ,0) -> List(List(2, 0, 0))
     )
 //    val topmodule = Module(new TopMo())
-    chisel3.Driver.execute(args, () => new TopModule(moduleNum,2, maplist))  //verilog generation
+    chisel3.Driver.execute(args, () => new TopModule(moduleNum, maplist, 32))  //verilog generation
 
-    iotesters.Driver.execute(args, () => new TopModule(moduleNum,2, maplist)) {
+    iotesters.Driver.execute(args, () => new TopModule(moduleNum, maplist, 32)) {
       c => new TopModuleUnitTest(c)
     }
   }

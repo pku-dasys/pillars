@@ -5,40 +5,41 @@ import chisel3.iotesters.PeekPokeTester
 import chisel3.{Bundle, Input, Module, Output, UInt}
 
 
-class Adder extends Module {
+class Adder(w : Int) extends Module {
   val io = IO(new Bundle{
     //port sequnces: 0:out, 1:input_b, 2: input_a
-    val input_a = Input(UInt(32.W))
-    val input_b= Input(UInt(32.W))
-    val out = Output(UInt(32.W))
+    val input_a = Input(UInt(w.W))
+    val input_b= Input(UInt(w.W))
+    val out = Output(UInt(w.W))
   })
 
   io.out := io.input_a + io.input_b
 }
 
-class Multiplier extends Module {
+class Multiplier(w : Int) extends Module {
   val io = IO(new Bundle{
     //port sequnces: 0:out, 1:input_b, 2: input_a
-    val input_a = Input(UInt(32.W))
-    val input_b= Input(UInt(32.W))
-    val out = Output(UInt(32.W))
+    val input_a = Input(UInt(w.W))
+    val input_b= Input(UInt(w.W))
+    val out = Output(UInt((2 * w).W))
   })
 
   io.out := io.input_a * io.input_b
 }
 
-class TopModule (val moduleNums: List[Int], val types : Int, val connect: Map[List[Int] , List[List[Int]]] )  extends Module {
+class TopModule (val moduleNums: List[Int], val connect: Map[List[Int] , List[List[Int]]], w : Int)  extends Module {
   val io = IO(new Bundle{
     //port sequnces: 0:out, 1:input_1, 2: input_0
-    val input_0 = Input(UInt(32.W))
-    val input_1= Input(UInt(32.W))
-    val out = Output(UInt(32.W))
+    val input_0 = Input(UInt(w.W))
+    val input_1= Input(UInt(w.W))
+    val out = Output(UInt(w.W))
   })
+  val types = moduleNums.size
   //  println(io.getElements(0))
   val addNum = moduleNums(0)
-  val adders = (0 until addNum).toArray.map( t => Module(new Adder))
+  val adders = (0 until addNum).toArray.map( t => Module(new Adder(16)))
   val mulNum = moduleNums(1)
-  val muls = (0 until mulNum).toArray.map( t => Module(new Multiplier))
+  val muls = (0 until mulNum).toArray.map( t => Module(new Multiplier(16)))
 
   val modules = List(adders, muls)
 
