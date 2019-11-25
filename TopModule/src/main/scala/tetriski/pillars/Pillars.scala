@@ -27,6 +27,7 @@ trait ModuleInfo {
   var moduleID = -1
   var width = -1
   var name = ""
+  var supOps = new ArrayBuffer[String]
 
   def setModuleID(arg: Int): Unit = {
     moduleID = arg
@@ -44,6 +45,10 @@ trait ModuleInfo {
     name = arg
   }
 
+  def setSupOps(arg: List[String]): Unit = {
+    arg.foreach(t => supOps.append(t))
+  }
+
   def getModuleID(): Int = {
     moduleID
   }
@@ -54,6 +59,10 @@ trait ModuleInfo {
 
   def getName(): String = {
     name
+  }
+
+  def getSupOps(): ArrayBuffer[String] = {
+    supOps
   }
 
   def getWidth(): Int = {
@@ -125,6 +134,8 @@ class OpAdder(name: String, width: Int) extends ModuleTrait {
   setPortMap(Array("out", "input_b", "input_a"))
   //Module ID 0
   setTypeID(0)
+  //Support add
+  setSupOps(List("add"))
 
   setWidth(width)
   setName(name)
@@ -135,6 +146,20 @@ class OpMul(name: String, width: Int) extends ModuleTrait {
   setPortMap(Array("out", "input_b", "input_a"))
   //Module ID 1
   setTypeID(1)
+  //Support mul
+  setSupOps(List("mul"))
+
+  setWidth(width)
+  setName(name)
+}
+
+class OpAlu(name: String, width: Int) extends ModuleTrait {
+  //port sequnces: 0:out, 1:input_b, 2: input_a
+  setPortMap(Array("out", "input_b", "input_a"))
+  //Module ID 2
+  setTypeID(2)
+  //Support add, sub, and, or, xor
+  setSupOps(List("add", "sub", "and", "or", "xor"))
 
   setWidth(width)
   setName(name)
@@ -157,15 +182,16 @@ trait BlockTrait extends ModuleTrait {
 
 
   //Explicit declaration of module types
-  var typeNum = 2
   var adderArray = new ArrayBuffer[Any]
   var mulArray = new ArrayBuffer[Any]
+  var aluArray = new ArrayBuffer[Any]
   var modulesArray = new ArrayBuffer[ArrayBuffer[Any]]
 
   modulesArray.append(adderArray)
   modulesArray.append(mulArray)
+  modulesArray.append(aluArray)
+  val typeNum = modulesArray.size
 
-  // var modulesArray = List(adderArray, mulArray)
 
   //blockMap: name -> sub-block
   var blockMap = Map[String, Block]()
@@ -397,8 +423,16 @@ object Pillars {
     val add1 = new OpAdder("adder0", 32)
     block_1.addModule(add1)
 
+    //Create the third Block
+    val block_2 = new Block("b_2")
+    block_2.setPortMap(Array("in0", "in1", "out"))
+
+    val alu0 = new OpAlu("alu0", 32)
+    block_2.addModule(alu0)
+
     arch.addBlock(block_0)
     arch.addBlock(block_1)
+    arch.addBlock(block_2)
 
     arch.init()
 
@@ -426,17 +460,21 @@ object Pillars {
     //Format to be modified as  ArrayBuffer[List[List[String],List[String]]]
     val outArray = ArrayBuffer(List("cgra", "input0"),
       List("cgra", "input0"),
+      List("cgra", "input0"),
       List("cgra", "input1"),
       List("cgra", "input1"),
       List("cgra/", "b_0/", "b_0_0", "out", "adder0", "out"),
       List("cgra/", "b_0", "out", "b_0_1", "out", "mul0", "out"),
-      List("cgra/", "b_1", "out", "adder0", "out"))
+      List("cgra/", "b_1", "out", "adder0", "out"),
+      List("cgra/", "b_2", "out", "alu0", "out"))
     val inArray = ArrayBuffer(List("cgra/", "b_0", "in0", "b_0_0", "in0", "adder0", "input_a"),
       List("cgra/", "b_0", "in0", "b_0_1", "in0", "mul0", "input_a"),
+      List("cgra/", "b_2", "in1", "alu0", "input_b"),
       List("cgra/", "b_0", "in1", "b_0_0", "in1", "adder0", "input_b"),
       List("cgra/", "b_1", "in1", "adder0", "input_b"),
       List("cgra/", "b_0/", "b_0_1", "in1", "mul0", "input_b"),
       List("cgra/", "b_1", "in0", "adder0", "input_a"),
+      List("cgra/", "b_2", "in0", "alu0", "input_a"),
       List("cgra", "output"))
 
 
