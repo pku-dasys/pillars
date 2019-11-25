@@ -588,25 +588,41 @@ object Pillars {
 //      ]
 //    }
 
-    //Format to be modified as  ArrayBuffer[List[List[String],List[String]]]
-    val outArray = ArrayBuffer(List("cgra", "input0"),
-      List("cgra", "input0"),
-      List("cgra", "input0"),
-      List("cgra", "input1"),
-      List("cgra", "input1"),
-      List("cgra/", "b_0/", "b_0_0", "out", "adder0", "out"),
-      List("cgra/", "b_0", "out", "b_0_1", "out", "mul0", "out"),
-      List("cgra/", "b_1", "out", "adder0", "out"),
-      List("cgra/", "b_0", "out", "alu0", "out"))
-    val inArray = ArrayBuffer(List("cgra/", "b_0", "in0", "b_0_0", "in0", "adder0", "input_a"),
-      List("cgra/", "b_0", "in0", "b_0_1", "in0", "mul0", "input_a"),
-      List("cgra/", "b_0", "in1", "alu0", "input_b"),
-      List("cgra/", "b_0", "in1", "b_0_0", "in1", "adder0", "input_b"),
-      List("cgra/", "b_1", "in1", "adder0", "input_b"),
-      List("cgra/", "b_0/", "b_0_1", "in1", "mul0", "input_b"),
-      List("cgra/", "b_1", "in0", "adder0", "input_a"),
-      List("cgra/", "b_0", "in0", "alu0", "input_a"),
-      List("cgra", "output"))
+    val connectArray =
+      ArrayBuffer(List(List("cgra", "input0"), List("cgra/", "b_0", "in0", "b_0_0", "in0", "adder0", "input_a")),
+        List(List("cgra", "input0"),List("cgra/", "b_0", "in0", "b_0_1", "in0", "mul0", "input_a")),
+        List(List("cgra", "input0"),List("cgra/", "b_0", "in1", "alu0", "input_b")),
+        List(List("cgra", "input1"),List("cgra/", "b_0", "in1", "b_0_0", "in1", "adder0", "input_b")),
+        List(List("cgra", "input1"),List("cgra/", "b_1", "in1", "adder0", "input_b")),
+        List(List("cgra/", "b_0/", "b_0_0", "out", "adder0", "out"), List("cgra/", "b_0/", "b_0_1", "in1", "mul0", "input_b")),
+        List(List("cgra/", "b_0", "out", "b_0_1", "out", "mul0", "out"), List("cgra/", "b_1", "in0", "adder0", "input_a")),
+        List(List("cgra/", "b_1", "out", "adder0", "out"), List("cgra/", "b_0", "in0", "alu0", "input_a")),
+        List(List("cgra/", "b_0", "out", "alu0", "out"), List("cgra", "output"))
+      )
+
+    val outArray = ArrayBuffer[List[String]]()
+    val inArray = ArrayBuffer[List[String]]()
+    connectArray.foreach(t => outArray.append(t(0)))
+    connectArray.foreach(t => inArray.append(t(1)))
+
+    //    val outArray = ArrayBuffer(List("cgra", "input0"),
+    //      List("cgra", "input0"),
+    //      List("cgra", "input0"),
+    //      List("cgra", "input1"),
+    //      List("cgra", "input1"),
+    //      List("cgra/", "b_0/", "b_0_0", "out", "adder0", "out"),
+    //      List("cgra/", "b_0", "out", "b_0_1", "out", "mul0", "out"),
+    //      List("cgra/", "b_1", "out", "adder0", "out"),
+    //      List("cgra/", "b_0", "out", "alu0", "out"))
+    //    val inArray = ArrayBuffer(List("cgra/", "b_0", "in0", "b_0_0", "in0", "adder0", "input_a"),
+    //      List("cgra/", "b_0", "in0", "b_0_1", "in0", "mul0", "input_a"),
+    //      List("cgra/", "b_0", "in1", "alu0", "input_b"),
+    //      List("cgra/", "b_0", "in1", "b_0_0", "in1", "adder0", "input_b"),
+    //      List("cgra/", "b_1", "in1", "adder0", "input_b"),
+    //      List("cgra/", "b_0/", "b_0_1", "in1", "mul0", "input_b"),
+    //      List("cgra/", "b_1", "in0", "adder0", "input_a"),
+    //      List("cgra/", "b_0", "in0", "alu0", "input_a"),
+    //      List("cgra", "output"))
 
 
     val connect = new Connect(outArray, inArray)
