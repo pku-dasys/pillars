@@ -1,6 +1,7 @@
 package tetriski.pillars
 
 import chisel3.iotesters
+
 import scala.collection.mutable.ArrayBuffer
 import java.io.{File, PrintWriter}
 
@@ -17,6 +18,10 @@ trait Ports {
     portMap
   }
 
+  def getPorts(): Iterable[String] = {
+    portMap.keys
+  }
+
   //We can use ** operator to get a port's ID with its name
   def **(name: String) = portMap(name)
 }
@@ -28,6 +33,7 @@ trait ModuleInfo {
   var width = -1
   var name = ""
   var supOps = new ArrayBuffer[String]
+  var configBit = 0
 
   def setModuleID(arg: Int): Unit = {
     moduleID = arg
@@ -49,6 +55,10 @@ trait ModuleInfo {
     arg.foreach(t => supOps.append(t))
   }
 
+  def setConfigBit(arg: Int): Unit = {
+    configBit = arg
+  }
+
   def getModuleID(): Int = {
     moduleID
   }
@@ -61,13 +71,19 @@ trait ModuleInfo {
     name
   }
 
+  def getWidth(): Int = {
+    width
+  }
+
   def getSupOps(): ArrayBuffer[String] = {
     supOps
   }
 
-  def getWidth(): Int = {
-    width
+  def getConfigBit(): Int = {
+    configBit
   }
+
+
 }
 
 //Important note:
@@ -136,6 +152,8 @@ class OpAdder(name: String, width: Int) extends ModuleTrait {
   setTypeID(0)
   //Support add
   setSupOps(List("add"))
+  //No configuration
+  setConfigBit(0)
 
   setWidth(width)
   setName(name)
@@ -148,6 +166,8 @@ class OpMul(name: String, width: Int) extends ModuleTrait {
   setTypeID(1)
   //Support mul
   setSupOps(List("mul"))
+  //No configuration
+  setConfigBit(0)
 
   setWidth(width)
   setName(name)
@@ -160,6 +180,8 @@ class OpAlu(name: String, width: Int) extends ModuleTrait {
   setTypeID(2)
   //Support add, sub, and, or, xor
   setSupOps(List("add", "sub", "and", "or", "xor"))
+  //4 bit configuration
+  setConfigBit(4)
 
   setWidth(width)
   setName(name)
@@ -186,6 +208,7 @@ trait BlockTrait extends ModuleTrait {
   var mulArray = new ArrayBuffer[Any]
   var aluArray = new ArrayBuffer[Any]
   var modulesArray = new ArrayBuffer[ArrayBuffer[Any]]
+  var owningModules = new ArrayBuffer[List[Int]]
 
   modulesArray.append(adderArray)
   modulesArray.append(mulArray)
@@ -207,6 +230,7 @@ trait BlockTrait extends ModuleTrait {
         modulesArray(i).append(arg.modulesArray(i)(j))
       }
     }
+    configBit += arg.getConfigBit()
     blockMap
   }
 
@@ -215,6 +239,53 @@ trait BlockTrait extends ModuleTrait {
     val typeNum = arg.getTypeID()
     modulesArray(typeNum).append(arg)
     modulesMap += (arg.getName() -> arg)
+    owningModules.append(List(typeNum, modulesArray(typeNum).size - 1))
+    configBit += arg.getConfigBit()
+  }
+
+  //print sub-blocks and modules
+  def printModules(writer: PrintWriter): Unit = {
+    def tails(ori : List[String], tail : String): String ={
+      var ret = ""
+      for (i <- 0 until ori.size){
+        ret += ori(i)
+        if(i != ori.size-1){
+          ret += tail
+        }
+      }
+      ret
+    }
+    writer.println("\"" + getName() + "\": {")
+    val ports = getPorts()
+    val strPorts = tails(ports.toList, " ")
+    writer.print("\"ports\": \"" + strPorts + "\",\n")
+    writer.print("\"config bit\": " + getConfigBit() + ",\n")
+    var i = 0
+    for (blk <- blockMap.values) {
+      i += 1
+      blk.printModules(writer)
+      if (i < blockMap.size) {
+        writer.print(",\n")
+      } else {
+        writer.print("\n")
+      }
+    }
+
+    for (i <- 0 until owningModules.size) {
+      val typeNum = owningModules(i)(0)
+      val moduleNum = owningModules(i)(1)
+      val m = modulesArray(typeNum)(moduleNum).asInstanceOf[ModuleTrait]
+      writer.println("\"" + m.getName() + "\": {")
+      val ports = m.getPorts()
+      val strPorts = tails(ports.toList, " ")
+      writer.print("\"ports\": \"" + strPorts + "\",\n")
+      writer.print("\"config bit\": " + getConfigBit() + ",\n")
+      val ops = m.getSupOps()
+      val strOps = tails(ops.toList, " ")
+      writer.print("\"ops\": \"" + strOps + "\"\n")
+      writer.print("}\n")
+    }
+    writer.print("}")
   }
 
   //We can use block("name") to get a sub-block
@@ -237,7 +308,7 @@ class ArchitctureHierarchy extends BlockTrait {
     var moduleWidths = List[Int]()
     for (i <- 0 until modulesArray.size) {
       moduleNums = moduleNums :+ modulesArray(i).size
-      for (j <- 0 until modulesArray(i).size){
+      for (j <- 0 until modulesArray(i).size) {
         moduleWidths = moduleWidths :+ modulesArray(i)(j).asInstanceOf[ModuleTrait].getWidth()
       }
     }
@@ -256,7 +327,16 @@ class ArchitctureHierarchy extends BlockTrait {
   }
 
   //Save hierarchy information as modules.json (to be defined)
-  def dumpArchitcture() = {}
+  def dumpArchitcture() = {
+    val writer = new PrintWriter(new File("modules.json"))
+    writer.flush()
+
+    writer.println("{")
+    printModules(writer)
+    writer.println("}")
+
+    writer.close()
+  }
 }
 
 
@@ -435,6 +515,8 @@ object Pillars {
     arch.addBlock(block_2)
 
     arch.init()
+
+    arch.dumpArchitcture()
 
     //   connections:
     //    {
