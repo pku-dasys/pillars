@@ -205,12 +205,17 @@ class ArchitctureHierarchy extends BlockTrait {
 
   //Get integer module list.
   //In minimal case, it's [2,1], which means this CGRA contains 2 adder and 1 multiplier.
-  def getModuleList(): List[Int] = {
-    var ret = List[Int]()
+  def getModuleList(): List[List[Int]] = {
+    var ret = List[List[Int]]()
+    var moduleNums = List[Int]()
+    var moduleWidths = List[Int]()
     for (i <- 0 until modulesArray.size) {
-      ret = ret :+ modulesArray(i).size
+      moduleNums = moduleNums :+ modulesArray(i).size
+      for (j <- 0 until modulesArray(i).size){
+        moduleWidths = moduleWidths :+ modulesArray(i)(j).asInstanceOf[ModuleTrait].getWidth()
+      }
     }
-    ret
+    List(moduleNums, moduleWidths)
   }
 
   //After initialization, all module's ModuleID, also called global index,
