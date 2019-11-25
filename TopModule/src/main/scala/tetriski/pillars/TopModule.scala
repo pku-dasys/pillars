@@ -27,19 +27,23 @@ class Multiplier(w : Int) extends Module {
   io.out := io.input_a * io.input_b
 }
 
-class TopModule (val moduleNums: List[Int], val connect: Map[List[Int] , List[List[Int]]], w : Int)  extends Module {
+class TopModule (val moduleInfo: List[List[Int]], val connect: Map[List[Int] , List[List[Int]]], w : Int)  extends Module {
   val io = IO(new Bundle{
     //port sequnces: 0:out, 1:input_1, 2: input_0
     val input_0 = Input(UInt(w.W))
     val input_1= Input(UInt(w.W))
     val out = Output(UInt(w.W))
   })
+  val moduleNums = moduleInfo(0)
   val types = moduleNums.size
   //  println(io.getElements(0))
+  var currentNum = 0
   val addNum = moduleNums(0)
-  val adders = (0 until addNum).toArray.map( t => Module(new Adder(16)))
+  val adders = (0 until addNum).toArray.map( t => Module(new Adder(moduleInfo(1)(t + currentNum))))
+  currentNum += addNum
+
   val mulNum = moduleNums(1)
-  val muls = (0 until mulNum).toArray.map( t => Module(new Multiplier(16)))
+  val muls = (0 until mulNum).toArray.map( t => Module(new Multiplier(moduleInfo(1)(t + currentNum))))
 
   val modules = List(adders, muls)
 
