@@ -479,7 +479,7 @@ object Pillars {
   def main(args: Array[String]): Unit = {
 
     var arch = new ArchitctureHierarchy()
-    //The order shoule be same as TopModule
+    //The order of ports should be same as TopModule
     arch.setPortMap(Array("output", "input1", "input0"))
 
     //Create the first Block
