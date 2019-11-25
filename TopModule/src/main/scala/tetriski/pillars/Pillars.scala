@@ -245,16 +245,17 @@ trait BlockTrait extends ModuleTrait {
 
   //print sub-blocks and modules
   def printModules(writer: PrintWriter): Unit = {
-    def tails(ori : List[String], tail : String): String ={
+    def tails(ori: List[String], tail: String): String = {
       var ret = ""
-      for (i <- 0 until ori.size){
+      for (i <- 0 until ori.size) {
         ret += ori(i)
-        if(i != ori.size-1){
+        if (i != ori.size - 1) {
           ret += tail
         }
       }
       ret
     }
+
     writer.println("\"" + getName() + "\": {")
     val ports = getPorts()
     val strPorts = tails(ports.toList, " ")
@@ -264,7 +265,7 @@ trait BlockTrait extends ModuleTrait {
     for (blk <- blockMap.values) {
       i += 1
       blk.printModules(writer)
-      if (i < blockMap.size) {
+      if (i < blockMap.size || owningModules.size > 0) {
         writer.print(",\n")
       } else {
         writer.print("\n")
@@ -283,7 +284,11 @@ trait BlockTrait extends ModuleTrait {
       val ops = m.getSupOps()
       val strOps = tails(ops.toList, " ")
       writer.print("\"ops\": \"" + strOps + "\"\n")
-      writer.print("}\n")
+      if (i < owningModules.size - 1) {
+        writer.print("},\n")
+      } else {
+        writer.print("}\n")
+      }
     }
     writer.print("}")
   }
@@ -326,7 +331,7 @@ class ArchitctureHierarchy extends BlockTrait {
     }
   }
 
-  //Save hierarchy information as modules.json (to be defined)
+  //Save hierarchy information as modules.json
   def dumpArchitcture() = {
     val writer = new PrintWriter(new File("modules.json"))
     writer.flush()
@@ -481,6 +486,9 @@ object Pillars {
     val block_0 = new Block("b_0")
     block_0.setPortMap(Array("in0", "in1", "out"))
 
+    val alu0 = new OpAlu("alu0", 32)
+    block_0.addModule(alu0)
+
     val block_0_0 = new Block("b_0_0")
     block_0_0.setPortMap(Array("in0", "in1", "out"))
 
@@ -503,41 +511,82 @@ object Pillars {
     val add1 = new OpAdder("adder0", 32)
     block_1.addModule(add1)
 
-    //Create the third Block
-    val block_2 = new Block("b_2")
-    block_2.setPortMap(Array("in0", "in1", "out"))
+//modules:
+//    {
+//      "cgra": {
+//        "ports": "output input1 input0",
+//        "config bit": 4,
+//        "b_0": {
+//        "ports": "in0 in1 out",
+//        "config bit": 4,
+//        "b_0_0": {
+//        "ports": "in0 in1 out",
+//        "config bit": 0,
+//        "adder0": {
+//        "ports": "out input_b input_a",
+//        "config bit": 0,
+//        "ops": "add"
+//      }
+//      },
+//        "b_0_1": {
+//        "ports": "in0 in1 out",
+//        "config bit": 0,
+//        "mul0": {
+//        "ports": "out input_b input_a",
+//        "config bit": 0,
+//        "ops": "mul"
+//      }
+//      },
+//        "alu0": {
+//        "ports": "out input_b input_a",
+//        "config bit": 4,
+//        "ops": "add sub and or xor"
+//      }
+//      },
+//        "b_1": {
+//        "ports": "in0 in1 out",
+//        "config bit": 0,
+//        "adder0": {
+//        "ports": "out input_b input_a",
+//        "config bit": 0,
+//        "ops": "add"
+//      }
+//      }
+//      }
+//    }
 
-    val alu0 = new OpAlu("alu0", 32)
-    block_2.addModule(alu0)
 
     arch.addBlock(block_0)
     arch.addBlock(block_1)
-    arch.addBlock(block_2)
 
     arch.init()
 
     arch.dumpArchitcture()
 
-    //   connections:
-    //    {
-    //      "cgra/b_0/b_0_0:out/adder0:out": [
-    //      "cgra/b_0/b_0_1:in1/mul0:input_b"
-    //      ],
-    //      "cgra:input0": [
-    //      "cgra/b_0:in0/b_0_0:in0/adder0:input_a",
-    //      "cgra/b_0:in0/b_0_1:in0/mul0:input_a"
-    //      ],
-    //      "cgra/b_0:out/b_0_1:out/mul0:out": [
-    //      "cgra/b_1:in0/adder0:input_b"
-    //      ],
-    //      "cgra/b_1:out/adder0:out": [
-    //      "cgra:output"
-    //      ],
-    //      "cgra:input1": [
-    //      "cgra/b_0:in1/b_0_0:in1/adder0:input_b",
-    //      "cgra/b_1:in1/adder0:input_a"
-    //      ]
-    //    }
+//connections:
+//    {
+//      "cgra/b_0/b_0_0:out/adder0:out": [
+//      "cgra/b_0/b_0_1:in1/mul0:input_b"
+//      ],
+//      "cgra/b_0:out/alu0:out": [
+//      "cgra:output"
+//      ],
+//      "cgra:input0": [
+//      "cgra/b_0:in0/b_0_0:in0/adder0:input_a",
+//      "cgra/b_0:in0/b_0_1:in0/mul0:input_a",
+//      "cgra/b_0:in1/alu0:input_b"
+//      ],
+//      "cgra/b_0:out/b_0_1:out/mul0:out": [
+//      "cgra/b_1:in0/adder0:input_a"
+//      ],
+//      "cgra/b_1:out/adder0:out": [
+//      "cgra/b_0:in0/alu0:input_a"
+//      ],
+//      "cgra:input1": [
+//      "cgra/b_0:in1/b_0_0:in1/adder0:input_b",
+//      "cgra/b_1:in1/adder0:input_b"
+//      ]
+//    }
 
     //Format to be modified as  ArrayBuffer[List[List[String],List[String]]]
     val outArray = ArrayBuffer(List("cgra", "input0"),
@@ -548,15 +597,15 @@ object Pillars {
       List("cgra/", "b_0/", "b_0_0", "out", "adder0", "out"),
       List("cgra/", "b_0", "out", "b_0_1", "out", "mul0", "out"),
       List("cgra/", "b_1", "out", "adder0", "out"),
-      List("cgra/", "b_2", "out", "alu0", "out"))
+      List("cgra/", "b_0", "out", "alu0", "out"))
     val inArray = ArrayBuffer(List("cgra/", "b_0", "in0", "b_0_0", "in0", "adder0", "input_a"),
       List("cgra/", "b_0", "in0", "b_0_1", "in0", "mul0", "input_a"),
-      List("cgra/", "b_2", "in1", "alu0", "input_b"),
+      List("cgra/", "b_0", "in1", "alu0", "input_b"),
       List("cgra/", "b_0", "in1", "b_0_0", "in1", "adder0", "input_b"),
       List("cgra/", "b_1", "in1", "adder0", "input_b"),
       List("cgra/", "b_0/", "b_0_1", "in1", "mul0", "input_b"),
       List("cgra/", "b_1", "in0", "adder0", "input_a"),
-      List("cgra/", "b_2", "in0", "alu0", "input_a"),
+      List("cgra/", "b_0", "in0", "alu0", "input_a"),
       List("cgra", "output"))
 
 
