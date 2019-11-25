@@ -410,7 +410,7 @@ class Connect(outArray: ArrayBuffer[List[String]], inArray: ArrayBuffer[List[Str
       if (comma) writer.print("],\n")
       else writer.print("]\n")
     }
-    //mapRelation.foreach(println)
+
     writer.print("{")
     mapRelation.foreach((x) => printConnect(x._1, x._2, !x.equals(mapRelation.last)))
     writer.print("}")
@@ -511,49 +511,49 @@ object Pillars {
     val add1 = new OpAdder("adder0", 32)
     block_1.addModule(add1)
 
-//modules:
-//    {
-//      "cgra": {
-//        "ports": "output input1 input0",
-//        "config bit": 4,
-//        "b_0": {
-//        "ports": "in0 in1 out",
-//        "config bit": 4,
-//        "b_0_0": {
-//        "ports": "in0 in1 out",
-//        "config bit": 0,
-//        "adder0": {
-//        "ports": "out input_b input_a",
-//        "config bit": 0,
-//        "ops": "add"
-//      }
-//      },
-//        "b_0_1": {
-//        "ports": "in0 in1 out",
-//        "config bit": 0,
-//        "mul0": {
-//        "ports": "out input_b input_a",
-//        "config bit": 0,
-//        "ops": "mul"
-//      }
-//      },
-//        "alu0": {
-//        "ports": "out input_b input_a",
-//        "config bit": 4,
-//        "ops": "add sub and or xor"
-//      }
-//      },
-//        "b_1": {
-//        "ports": "in0 in1 out",
-//        "config bit": 0,
-//        "adder0": {
-//        "ports": "out input_b input_a",
-//        "config bit": 0,
-//        "ops": "add"
-//      }
-//      }
-//      }
-//    }
+    //modules:
+    //    {
+    //      "cgra": {
+    //        "ports": "output input1 input0",
+    //        "config bit": 4,
+    //        "b_0": {
+    //        "ports": "in0 in1 out",
+    //        "config bit": 4,
+    //        "b_0_0": {
+    //        "ports": "in0 in1 out",
+    //        "config bit": 0,
+    //        "adder0": {
+    //        "ports": "out input_b input_a",
+    //        "config bit": 0,
+    //        "ops": "add"
+    //      }
+    //      },
+    //        "b_0_1": {
+    //        "ports": "in0 in1 out",
+    //        "config bit": 0,
+    //        "mul0": {
+    //        "ports": "out input_b input_a",
+    //        "config bit": 0,
+    //        "ops": "mul"
+    //      }
+    //      },
+    //        "alu0": {
+    //        "ports": "out input_b input_a",
+    //        "config bit": 4,
+    //        "ops": "add sub and or xor"
+    //      }
+    //      },
+    //        "b_1": {
+    //        "ports": "in0 in1 out",
+    //        "config bit": 0,
+    //        "adder0": {
+    //        "ports": "out input_b input_a",
+    //        "config bit": 0,
+    //        "ops": "add"
+    //      }
+    //      }
+    //      }
+    //    }
 
 
     arch.addBlock(block_0)
@@ -563,37 +563,37 @@ object Pillars {
 
     arch.dumpArchitcture()
 
-//connections:
-//    {
-//      "cgra/b_0/b_0_0:out/adder0:out": [
-//      "cgra/b_0/b_0_1:in1/mul0:input_b"
-//      ],
-//      "cgra/b_0:out/alu0:out": [
-//      "cgra:output"
-//      ],
-//      "cgra:input0": [
-//      "cgra/b_0:in0/b_0_0:in0/adder0:input_a",
-//      "cgra/b_0:in0/b_0_1:in0/mul0:input_a",
-//      "cgra/b_0:in1/alu0:input_b"
-//      ],
-//      "cgra/b_0:out/b_0_1:out/mul0:out": [
-//      "cgra/b_1:in0/adder0:input_a"
-//      ],
-//      "cgra/b_1:out/adder0:out": [
-//      "cgra/b_0:in0/alu0:input_a"
-//      ],
-//      "cgra:input1": [
-//      "cgra/b_0:in1/b_0_0:in1/adder0:input_b",
-//      "cgra/b_1:in1/adder0:input_b"
-//      ]
-//    }
+    //connections:
+    //    {
+    //      "cgra/b_0/b_0_0:out/adder0:out": [
+    //      "cgra/b_0/b_0_1:in1/mul0:input_b"
+    //      ],
+    //      "cgra/b_0:out/alu0:out": [
+    //      "cgra:output"
+    //      ],
+    //      "cgra:input0": [
+    //      "cgra/b_0:in0/b_0_0:in0/adder0:input_a",
+    //      "cgra/b_0:in0/b_0_1:in0/mul0:input_a",
+    //      "cgra/b_0:in1/alu0:input_b"
+    //      ],
+    //      "cgra/b_0:out/b_0_1:out/mul0:out": [
+    //      "cgra/b_1:in0/adder0:input_a"
+    //      ],
+    //      "cgra/b_1:out/adder0:out": [
+    //      "cgra/b_0:in0/alu0:input_a"
+    //      ],
+    //      "cgra:input1": [
+    //      "cgra/b_0:in1/b_0_0:in1/adder0:input_b",
+    //      "cgra/b_1:in1/adder0:input_b"
+    //      ]
+    //    }
 
     val connectArray =
       ArrayBuffer(List(List("cgra", "input0"), List("cgra/", "b_0", "in0", "b_0_0", "in0", "adder0", "input_a")),
-        List(List("cgra", "input0"),List("cgra/", "b_0", "in0", "b_0_1", "in0", "mul0", "input_a")),
-        List(List("cgra", "input0"),List("cgra/", "b_0", "in1", "alu0", "input_b")),
-        List(List("cgra", "input1"),List("cgra/", "b_0", "in1", "b_0_0", "in1", "adder0", "input_b")),
-        List(List("cgra", "input1"),List("cgra/", "b_1", "in1", "adder0", "input_b")),
+        List(List("cgra", "input0"), List("cgra/", "b_0", "in0", "b_0_1", "in0", "mul0", "input_a")),
+        List(List("cgra", "input0"), List("cgra/", "b_0", "in1", "alu0", "input_b")),
+        List(List("cgra", "input1"), List("cgra/", "b_0", "in1", "b_0_0", "in1", "adder0", "input_b")),
+        List(List("cgra", "input1"), List("cgra/", "b_1", "in1", "adder0", "input_b")),
         List(List("cgra/", "b_0/", "b_0_0", "out", "adder0", "out"), List("cgra/", "b_0/", "b_0_1", "in1", "mul0", "input_b")),
         List(List("cgra/", "b_0", "out", "b_0_1", "out", "mul0", "out"), List("cgra/", "b_1", "in0", "adder0", "input_a")),
         List(List("cgra/", "b_1", "out", "adder0", "out"), List("cgra/", "b_0", "in0", "alu0", "input_a")),
