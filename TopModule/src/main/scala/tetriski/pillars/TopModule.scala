@@ -185,7 +185,9 @@ class TopModule(val moduleInfo: List[List[Int]], val connect: Map[List[Int], Lis
   dispatch.io.configuration := io.configuration
   alus(0).io.select := dispatch.io.outs(0)
   io.configTest(0) := dispatch.io.outs(0)
-  PEs(0).io.configuration := dispatch.io.outs(1)
+  if(PENum > 0){
+    PEs(0).io.configuration := dispatch.io.outs(1)
+  }
   io.configTest(1) := dispatch.io.outs(1)
 
 
