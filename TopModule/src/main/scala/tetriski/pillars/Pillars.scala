@@ -187,6 +187,20 @@ class OpAlu(name: String, width: Int) extends ModuleTrait {
   setName(name)
 }
 
+class OpADRESPE(name: String, width: Int) extends ModuleTrait {
+  //port sequnces: 0:out, 1:input_3, 2:input_2, 3:input_1, 4:input_0
+  setPortMap(Array("out", "input_3", "input_2", "input_1", "input_0"))
+  //Module ID 3
+  setTypeID(3)
+  //Support add, sub, and, or, xor
+  setSupOps(List("add", "sub", "and", "or", "xor"))
+  //4 bit configuration
+  setConfigBit(13)
+
+  setWidth(width)
+  setName(name)
+}
+
 
 class Block(name: String) extends BlockTrait {
   setName(name)
@@ -207,12 +221,14 @@ trait BlockTrait extends ModuleTrait {
   var adderArray = new ArrayBuffer[Any]
   var mulArray = new ArrayBuffer[Any]
   var aluArray = new ArrayBuffer[Any]
+  var PEArray = new ArrayBuffer[Any]
   var modulesArray = new ArrayBuffer[ArrayBuffer[Any]]
   var owningModules = new ArrayBuffer[List[Int]]
 
   modulesArray.append(adderArray)
   modulesArray.append(mulArray)
   modulesArray.append(aluArray)
+  modulesArray.append(PEArray)
   val typeNum = modulesArray.size
 
 
@@ -511,6 +527,13 @@ object Pillars {
     val add1 = new OpAdder("adder0", 32)
     block_1.addModule(add1)
 
+    //Create the third Block
+    val block_2 = new Block("b_2")
+    block_2.setPortMap(Array("in0", "in1", "in2", "in3", "out"))
+
+    val PE0 = new OpADRESPE("PE0", 32)
+    block_2.addModule(PE0)
+
     //modules:
     //    {
     //      "cgra": {
@@ -558,6 +581,7 @@ object Pillars {
 
     arch.addBlock(block_0)
     arch.addBlock(block_1)
+    arch.addBlock(block_2)
 
     arch.init()
 
@@ -597,8 +621,22 @@ object Pillars {
         List(List("cgra/", "b_0/", "b_0_0", "out", "adder0", "out"), List("cgra/", "b_0/", "b_0_1", "in1", "mul0", "input_b")),
         List(List("cgra/", "b_0", "out", "b_0_1", "out", "mul0", "out"), List("cgra/", "b_1", "in0", "adder0", "input_a")),
         List(List("cgra/", "b_1", "out", "adder0", "out"), List("cgra/", "b_0", "in0", "alu0", "input_a")),
-        List(List("cgra/", "b_0", "out", "alu0", "out"), List("cgra", "output"))
+        List(List("cgra/", "b_0", "out", "alu0", "out"), List("cgra/", "b_2", "in0", "PE0", "input_0")),
+        List(List("cgra/", "b_0/", "b_0_0", "out", "adder0", "out"), List("cgra/", "b_2", "in1", "PE0", "input_1")),
+        List(List("cgra/", "b_0", "out", "b_0_1", "out", "mul0", "out"), List("cgra/", "b_2", "in2", "PE0", "input_2")),
+        List(List("cgra", "input1"), List("cgra/", "b_2", "in3", "PE0", "input_3")),
+        List(List("cgra/", "b_2", "out", "PE0", "out"), List("cgra", "output"))
       )
+
+    // the final output is ADRES PE output
+    // input_0 : ((a+b)*a+b)?(a) //4 bit config
+    // input_1 : a+b
+    // input 2 : (a+b)*a
+    // input_3 : b
+    // ADRES PE select 4 inputs as 2 inputs of its alu // 3 + 3 = 6 bit
+    // it has a 1-in-2-out 2-RegisterFiles // (1 + 2) * log2(2) = 3 bit
+    // and a alu // 4 bit
+    // 17 bits totally
 
     val outArray = ArrayBuffer[List[String]]()
     val inArray = ArrayBuffer[List[String]]()
@@ -637,9 +675,16 @@ object Pillars {
 
     //Run tester
     iotesters.Driver.execute(args, () => new TopModule(cp.archList, cp.connectMap, 32)) {
-      c => new TopModuleUnitTest(c)
+      c => new TopModulePEUnitTest(c)
+    }
+
+
+    //RegisterFiles debug
+    iotesters.Driver.execute(args, () => new RegisterFiles(1, 1, 2, 32)) {
+      c => new RegisterFilesUnitTest(c)
     }
 
   }
 }
+
 
