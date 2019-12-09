@@ -176,8 +176,8 @@ class TopModule(val moduleInfo: List[List[Int]], val connect: Map[List[Int], Lis
   val io = IO(new Bundle {
     //port sequnces outs: 0: out
     //port sequnces inputs: 0: input_a, 1: input_b
-   // val configTest = Output(Vec(2, UInt(w.W)))
-    val configuration = Input(UInt(13.W))
+    val configTest = Output(Vec(2, UInt(w.W)))
+    val configuration = Input(UInt(26.W))
     val inputs = Input(MixedVec(Seq(UInt(w.W), UInt(w.W))))
     val outs = Output(MixedVec(Seq(UInt(w.W))))
   })
@@ -240,6 +240,7 @@ class TopModule(val moduleInfo: List[List[Int]], val connect: Map[List[Int], Lis
   inPorts.append(Muxs5.map(i => i.io.inputs.toList))
 
 
+  println(configList)
   var dispatchs = ArrayBuffer[Dispatch]()
   var regionConfigBits = List[Int]()
   for (region <- configList){
@@ -257,6 +258,7 @@ class TopModule(val moduleInfo: List[List[Int]], val connect: Map[List[Int], Lis
       configPorts = configPorts :+ configPort
     }
     val regionTotalBits = configBits.reduce(_+_)
+    println(configBits)
     regionConfigBits = regionConfigBits :+ regionTotalBits
     val dispatch = Module(new Dispatch(regionTotalBits, configBits))
     for (i <- 0 until configBits.size){
@@ -271,6 +273,10 @@ class TopModule(val moduleInfo: List[List[Int]], val connect: Map[List[Int], Lis
   for (i <- 0 until dispatchs.size){
     dispatchs(i).io.configuration := topDispatch.io.outs(i)
   }
+
+  println(regionConfigBits)
+  io.configTest(0) := topDispatch.io.outs(0)
+  io.configTest(1) := topDispatch.io.outs(1)
 
   //sent configuration to modules
 //  val dispatch = Module(new Dispatch(13, List(3, 3, 4, 3)))
@@ -295,7 +301,7 @@ class TopModule(val moduleInfo: List[List[Int]], val connect: Map[List[Int], Lis
     val dsts = connect(src)
     for (j <- 0 until dsts.size) {
       val dst = dsts(j)
-      println(dst, src)
+      //println(dst, src)
       if (dst(0) == types) {
         io.outs(dst(2)) := outPorts(src(0))(src(1))(src(2)).asInstanceOf[Data]
       } else if (src(0) == types) {
@@ -312,19 +318,30 @@ class TopModulePEUnitTest(c: TopModule) extends PeekPokeTester(c) {
   //MixedVec don't support c.io.inputs(0) in poke
   poke(c.input_0, 2)
   poke(c.input_1, 3)
-  //010 000 100 0000
-  //save (a+b) in rf(0), to next cycle //5
-  poke(c.io.configuration, 2112)
+  //010 001 001 0001 010 001 001 0000// PE1(13) PE013)
+  //PE0: 010 001 001 0000 //  mux0(3) mux1(3) register(3)(rf(0) -> out1(output), rf(1) -> out0(to self), input -> rf(0)) alu(4)
+  //PE1: 010 001 001 0001
+  //0100010010001
+  //save (a+b) in pe0.rf(0), to next cycle //5
+  //save (b-a) in pe1.rf(0), to next cycle //1
+  poke(c.io.configuration, 17967248)
   expect(c.out, 0)
-//  expect(c.io.configTest(0), 0)
-//  expect(c.io.configTest(1), 2)
+  expect(c.io.configTest(0), 2192)
+  expect(c.io.configTest(1), 2193)
   step(1)
   expect(c.out, 0)
-  //001 100 111 0011
-  // rf(1) = rf(0) or a // 5 or 2 =7
-  poke(c.io.configuration, 1651)
-//  expect(c.io.configTest(0), 4)
-//  expect(c.io.configTest(1), 1)
+  //001 100 111 0011 001 100 111 0011
+  //PE0: 001 100 111 0011
+  //PE1: 001 100 111 0011
+  // pe0.rf(1) = pe0.rf(0) or a // 5 or 2 =7
+  // pe1.rf(1) = pe1.rf(0) or a // 5 or 2 =7
+  poke(c.io.configuration, 13526643)
+  expect(c.io.configTest(0), 1651)
+  expect(c.io.configTest(1), 1651)
   step(1)
   expect(c.out, 7)
+  step(1)
+  expect(c.out, 0)
+  step(1)
+  expect(c.out, 0)
 }
