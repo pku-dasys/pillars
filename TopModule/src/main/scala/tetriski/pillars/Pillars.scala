@@ -404,8 +404,8 @@ class ArchitctureHierarchy extends BlockTrait {
     for (subBlock <- blockMap.values){
       var moduleList = List[List[Int]]()
       for (i <- 0 until subBlock.modulesArray.size) {
-        for (j <- 0 until modulesArray(i).size) {
-          val module = modulesArray(i)(j).asInstanceOf[ModuleTrait]
+        for (j <- 0 until subBlock.modulesArray(i).size) {
+          val module = subBlock.modulesArray(i)(j).asInstanceOf[ModuleTrait]
           if(module.getConfigBit()>0)
           moduleList = moduleList :+ List(module.getTypeID(), module.getModuleID())
         }
@@ -595,13 +595,19 @@ object Pillars {
     arch.setInPortMap(Array("input_0", "input_1"))
 
     val pe0 = new PEBlock("pe0")
+    val pe1 = new PEBlock("pe1")
 
     arch.addBlock(pe0)
+    arch.addBlock(pe1)
 
     arch.addConnect(List(List("input_0"),List("pe0/", "input_0")))
     arch.addConnect(List(List("input_0"),List("pe0/", "input_1")))
     arch.addConnect(List(List("input_1"),List("pe0/", "input_2")))
-    arch.addConnect(List(List("input_1"),List("pe0/", "input_3")))
+    arch.addConnect(List(List("input_1"),List("pe1/", "input_0")))
+    arch.addConnect(List(List("input_1"),List("pe1/", "input_1")))
+    arch.addConnect(List(List("input_0"),List("pe1/", "input_2")))
+    arch.addConnect(List(List("pe1/","out_0"),List("pe0/", "input_3")))
+    arch.addConnect(List(List("pe0/","out_0"),List("pe1/", "input_3")))
     arch.addConnect(List(List("pe0/","out_0"),List("output")))
 
     arch.init()
@@ -617,13 +623,13 @@ object Pillars {
     connectArray.foreach(t => inArray.append(t(1)))
 
     val connect = new Connect(outArray, inArray)
-    val test = connect.getConnect()
+    //val test = connect.getConnect()
 
     connect.dumpConnect()
 
     val cp = new HardwareGeneration(arch, connect)
 
-    println(cp.connectMap)
+    //println(cp.connectMap)
 
     //Verilog generation
     chisel3.Driver.execute(args, () => new TopModule(cp.archList, cp.connectMap, cp.configList, 32))
