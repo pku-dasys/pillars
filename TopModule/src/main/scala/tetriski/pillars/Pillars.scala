@@ -11,7 +11,14 @@ trait Ports {
   var portMap = Map[String, Int]()
 
   //Initial ports with portMap
-  def setPortMap(args: Array[String]): Map[String, Int] = {
+  def setInPortMap(args: Array[String]): Map[String, Int] = {
+    for (i <- 0 until args.length) {
+      portMap += (args(i) -> i)
+    }
+    portMap
+  }
+
+  def setOutPortMap(args: Array[String]): Map[String, Int] = {
     for (i <- 0 until args.length) {
       portMap += (args(i) -> i)
     }
@@ -146,8 +153,10 @@ class Rf(name: String) extends ModuleTrait {
 
 
 class OpAdder(name: String, width: Int) extends ModuleTrait {
-  //port sequnces: 0:out, 1:input_b, 2: input_a
-  setPortMap(Array("out", "input_b", "input_a"))
+  //port sequnces outs: 0: out
+  //port sequnces inputs: 0: input_a, 1: input_b
+  setOutPortMap(Array("out"))
+  setInPortMap(Array("input_a", "input_b"))
   //Module ID 0
   setTypeID(0)
   //Support add
@@ -160,8 +169,10 @@ class OpAdder(name: String, width: Int) extends ModuleTrait {
 }
 
 class OpMul(name: String, width: Int) extends ModuleTrait {
-  //port sequnces: 0:out, 1:input_b, 2: input_a
-  setPortMap(Array("out", "input_b", "input_a"))
+  //port sequnces outs: 0: out
+  //port sequnces inputs: 0: input_a, 1: input_b
+  setOutPortMap(Array("out"))
+  setInPortMap(Array("input_a", "input_b"))
   //Module ID 1
   setTypeID(1)
   //Support mul
@@ -174,8 +185,10 @@ class OpMul(name: String, width: Int) extends ModuleTrait {
 }
 
 class OpAlu(name: String, width: Int) extends ModuleTrait {
-  //port sequnces: 0:out, 1:input_b, 2: input_a
-  setPortMap(Array("out", "input_b", "input_a"))
+  //port sequnces outs: 0: out
+  //port sequnces inputs: 0: input_a, 1: input_b
+  setOutPortMap(Array("out"))
+  setInPortMap(Array("input_a", "input_b"))
   //Module ID 2
   setTypeID(2)
   //Support add, sub, and, or, xor
@@ -188,8 +201,10 @@ class OpAlu(name: String, width: Int) extends ModuleTrait {
 }
 
 class OpADRESPE(name: String, width: Int) extends ModuleTrait {
-  //port sequnces: 0:out, 1:input_3, 2:input_2, 3:input_1, 4:input_0
-  setPortMap(Array("out", "input_3", "input_2", "input_1", "input_0"))
+  //port sequnces outs: 0: out
+  //port sequnces inputs: 0: input_0, 1: input_1, 2: input_2, 3: input_3
+  setOutPortMap(Array("out"))
+  setInPortMap(Array("input_0", "input_1", "input_2", "input_3"))
   //Module ID 3
   setTypeID(3)
   //Support add, sub, and, or, xor
@@ -496,23 +511,27 @@ object Pillars {
 
     var arch = new ArchitctureHierarchy()
     //The order of ports should be same as TopModule
-    arch.setPortMap(Array("output", "input1", "input0"))
+    arch.setOutPortMap(Array("output"))
+    arch.setInPortMap(Array("input0", "input1"))
 
     //Create the first Block
     val block_0 = new Block("b_0")
-    block_0.setPortMap(Array("in0", "in1", "out"))
+    block_0.setOutPortMap(Array("out"))
+    block_0.setInPortMap(Array("in0", "in1"))
 
     val alu0 = new OpAlu("alu0", 32)
     block_0.addModule(alu0)
 
     val block_0_0 = new Block("b_0_0")
-    block_0_0.setPortMap(Array("in0", "in1", "out"))
+    block_0_0.setOutPortMap(Array("out"))
+    block_0_0.setInPortMap(Array("in0", "in1"))
 
     val add0 = new OpAdder("adder0", 16)
     block_0_0.addModule(add0)
 
     val block_0_1 = new Block("b_0_1")
-    block_0_1.setPortMap(Array("in0", "in1", "out"))
+    block_0_1.setOutPortMap(Array("out"))
+    block_0_1.setInPortMap(Array("in0", "in1"))
 
     val mul0 = new OpMul("mul0", 16)
     block_0_1.addModule(mul0)
@@ -522,14 +541,16 @@ object Pillars {
 
     //Create the second Block
     val block_1 = new Block("b_1")
-    block_1.setPortMap(Array("in0", "in1", "out"))
+    block_1.setOutPortMap(Array("out"))
+    block_1.setInPortMap(Array("in0", "in1"))
 
     val add1 = new OpAdder("adder0", 32)
     block_1.addModule(add1)
 
     //Create the third Block
     val block_2 = new Block("b_2")
-    block_2.setPortMap(Array("in0", "in1", "in2", "in3", "out"))
+    block_2.setOutPortMap(Array("out"))
+    block_2.setInPortMap(Array("in0", "in1", "in2", "in3"))
 
     val PE0 = new OpADRESPE("PE0", 32)
     block_2.addModule(PE0)
@@ -680,9 +701,9 @@ object Pillars {
 
 
     //RegisterFiles debug
-    iotesters.Driver.execute(args, () => new RegisterFiles(1, 1, 2, 32)) {
-      c => new RegisterFilesUnitTest(c)
-    }
+//    iotesters.Driver.execute(args, () => new RegisterFiles(1, 1, 2, 32)) {
+//      c => new RegisterFilesUnitTest(c)
+//    }
 
   }
 }
