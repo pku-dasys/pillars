@@ -5,6 +5,8 @@ import chisel3.iotesters.PeekPokeTester
 import chisel3.{Bundle, Input, Module, Output, UInt}
 import chisel3.util._
 
+import scala.collection.mutable.ArrayBuffer
+
 object Alu_Op {
   val ALU_ADD = 0.U(4.W)
   val ALU_SUB = 1.U(4.W)
@@ -23,52 +25,67 @@ object Alu_Op {
 
 import Alu_Op._
 
+trait PillarsUnit {
+
+}
+
 class Alu(w: Int) extends Module {
   val io = IO(new Bundle {
-    //port sequnces: 0:out, 1:input_b, 2: input_a, 3: select
+    //port sequnces outs: 0: out
+    //port sequnces inputs: 0: input_a, 1: input_b
     val select = Input(UInt(4.W))
-    val input_a = Input(UInt(w.W))
-    val input_b = Input(UInt(w.W))
-    val out = Output(UInt(w.W))
+    val inputs = Input(MixedVec(Seq(UInt(w.W), UInt(w.W))))
+    val outs = Output(MixedVec(Seq(UInt(w.W))))
   })
-  val shamt = io.input_b(4, 0).asUInt
 
-  io.out := MuxLookup(io.select, io.input_b, Seq(
-    ALU_ADD -> (io.input_a + io.input_b),
-    ALU_SUB -> (io.input_a - io.input_b),
-    ALU_AND -> (io.input_a & io.input_b),
-    ALU_OR -> (io.input_a | io.input_b),
-    ALU_XOR -> (io.input_a ^ io.input_b),
-    ALU_SLT -> (io.input_a.asSInt < io.input_b.asSInt),
-    ALU_SLL -> (io.input_a << shamt),
-    ALU_SLTU -> (io.input_a < io.input_b),
-    ALU_SRL -> (io.input_a >> shamt),
-    ALU_SRA -> (io.input_a.asSInt >> shamt).asUInt,
-    ALU_COPY_A -> io.input_a,
-    ALU_COPY_B -> io.input_b))
+  val input_a = io.inputs(0)
+  val input_b = io.inputs(1)
+  val out = io.outs(0)
+  val shamt = input_b(4, 0).asUInt
+
+  out := MuxLookup(io.select, input_b, Seq(
+    ALU_ADD -> (input_a + input_b),
+    ALU_SUB -> (input_a - input_b),
+    ALU_AND -> (input_a & input_b),
+    ALU_OR -> (input_a | input_b),
+    ALU_XOR -> (input_a ^ input_b),
+    ALU_SLT -> (input_a.asSInt < input_b.asSInt),
+    ALU_SLL -> (input_a << shamt),
+    ALU_SLTU -> (input_a < input_b),
+    ALU_SRL -> (input_a >> shamt),
+    ALU_SRA -> (input_a.asSInt >> shamt).asUInt,
+    ALU_COPY_A -> input_a,
+    ALU_COPY_B -> input_b))
 }
 
 
 class Adder(w: Int) extends Module {
   val io = IO(new Bundle {
-    //port sequnces: 0:out, 1:input_b, 2: input_a
-    val input_a = Input(UInt(w.W))
-    val input_b = Input(UInt(w.W))
-    val out = Output(UInt(w.W))
+    //port sequnces outs: 0: out
+    //port sequnces inputs: 0: input_a, 1: input_b
+    val inputs = Input(MixedVec(Seq(UInt(w.W), UInt(w.W))))
+    val outs = Output(MixedVec(Seq(UInt(w.W))))
   })
+  val input_a = io.inputs(0)
+  val input_b = io.inputs(1)
+  val out = io.outs(0)
 
-  io.out := io.input_a + io.input_b
+  out := input_a + input_b
 }
 
 class Multiplier(w: Int) extends Module {
   val io = IO(new Bundle {
-    //port sequnces: 0:out, 1:input_b, 2: input_a
-    val input_a = Input(UInt(w.W))
-    val input_b = Input(UInt(w.W))
-    val out = Output(UInt((2 * w).W))
+    //port sequnces outs: 0: out
+    //port sequnces inputs: 0: input_a, 1: input_b
+    val inputs = Input(MixedVec(Seq(UInt(w.W), UInt(w.W))))
+    val outs = Output(MixedVec(Seq(UInt((2 * w).W))))
   })
 
-  io.out := io.input_a * io.input_b
+  val input_a = io.inputs(0)
+  val input_b = io.inputs(1)
+  val out = io.outs(0)
+
+  out := input_a * input_b
 }
 
 
@@ -78,8 +95,8 @@ class RegisterFiles(log2Regs : Int, numIn : Int, numOut:Int, w :Int) extends Mod
     //port sequnces: 0:outs, 1:inputs, 2: configuration, 3: configTest for test
     val configTest = Output(Vec(numOut+numIn, UInt(w.W)))
     val configuration = Input(UInt((log2Regs * (numIn + numOut)).W))
-    val inputs = Input(Vec(numIn, UInt(w.W)))
-    val outs = Output(Vec(numOut, UInt(w.W)))
+    val inputs = Input(MixedVec((1 to numIn) map { i => UInt(w.W) }))
+    val outs = Output(MixedVec((1 to numOut) map { i => UInt(w.W) }))
   })
   val targets = (0 until numIn + numOut).toList.map(t => log2Regs)
   val dispatch = Module(new Dispatch((log2Regs * (numIn + numOut)), log2Regs, targets))
@@ -100,29 +117,34 @@ class RegisterFiles(log2Regs : Int, numIn : Int, numOut:Int, w :Int) extends Mod
 //to be update
 class ADRESPE(w: Int) extends Module {
   val io = IO(new Bundle {
-    //port sequnces: 0:out, 1:input_3, 2:input_2, 3:input_1, 4:input_0, 5: configuration
+    //port sequnces outs: 0: out
+    //port sequnces inputs: 0: input_0, 1: input_1, 2: input_2, 3: input_3
     val configuration = Input(UInt(13.W))
-    val input_0 = Input(UInt(w.W))
-    val input_1 = Input(UInt(w.W))
-    val input_2 = Input(UInt(w.W))
-    val input_3 = Input(UInt(w.W))
-    val out = Output(UInt(w.W))
+    val inputs = Input(MixedVec((1 to 4) map { i => UInt(w.W) }))
+    val outs = Output(MixedVec((1 to 1) map { i => UInt(w.W) }))
   })
+
+  val input_0 = io.inputs(0)
+  val input_1 = io.inputs(1)
+  val input_2 = io.inputs(2)
+  val input_3 = io.inputs(3)
+  val out = io.outs(0)
+
   val rf = Module(new RegisterFiles(1, 1, 2, 32))
   val alu = Module(new Alu(32))
   val targets = List(3, 3, 4, 3)
   val dispatch = Module(new Dispatch(13, 4, targets))
   dispatch.io.configuration := io.configuration
-  val muxIn0 = MuxLookup(dispatch.io.outs(0), rf.io.outs(0), Array(0.U -> io.input_0, 1.U -> io.input_1,
-    2.U -> io.input_2, 3.U -> io.input_3, 4.U -> rf.io.outs(0)))
-  val muxIn1 = MuxLookup(dispatch.io.outs(1), rf.io.outs(0), Array(0.U -> io.input_0, 1.U -> io.input_1,
-    2.U -> io.input_2, 3.U -> io.input_3, 4.U -> rf.io.outs(0)))
-  alu.io.input_a := muxIn0
-  alu.io.input_b := muxIn1
+  val muxIn0 = MuxLookup(dispatch.io.outs(0), rf.io.outs(0), Array(0.U -> input_0, 1.U -> input_1,
+    2.U -> input_2, 3.U -> input_3, 4.U -> rf.io.outs(0)))
+  val muxIn1 = MuxLookup(dispatch.io.outs(1), rf.io.outs(0), Array(0.U -> input_0, 1.U -> input_1,
+    2.U -> input_2, 3.U -> input_3, 4.U -> rf.io.outs(0)))
+  alu.io.inputs(0) := muxIn0
+  alu.io.inputs(1) := muxIn1
   alu.io.select := dispatch.io.outs(2)
-  rf.io.inputs(0) := alu.io.out
+  rf.io.inputs(0) := alu.io.outs(0)
   rf.io.configuration := dispatch.io.outs(3)
-  io.out := rf.io.outs(1)
+  out := rf.io.outs(1)
 }
 
 //to be update
@@ -130,7 +152,7 @@ class ADRESPE(w: Int) extends Module {
 class Dispatch(wIn: Int, wOut : Int, targets : List[Int]) extends Module {
   val io = IO(new Bundle {
     val configuration = Input(UInt(wIn.W))
-    val outs = Output(Vec(targets.size, UInt(wOut.W)))
+    val outs = Output(MixedVec(targets.map{i => UInt(i.W)}))
   })
   var i = 0
   var offset : Int= 0
@@ -144,13 +166,17 @@ class Dispatch(wIn: Int, wOut : Int, targets : List[Int]) extends Module {
 
 class TopModule(val moduleInfo: List[List[Int]], val connect: Map[List[Int], List[List[Int]]], w: Int) extends Module {
   val io = IO(new Bundle {
-    //port sequnces: 0:out, 1:input_1, 2: input_0, 3: configuration
+    //port sequnces outs: 0: out
+    //port sequnces inputs: 0: input_a, 1: input_b
     val configTest = Output(Vec(2, UInt(w.W)))
     val configuration = Input(UInt(17.W))
-    val input_0 = Input(UInt(w.W))
-    val input_1 = Input(UInt(w.W))
-    val out = Output(UInt(w.W))
+    val inputs = Input(MixedVec(Seq(UInt(w.W), UInt(w.W))))
+    val outs = Output(MixedVec(Seq(UInt(w.W))))
   })
+  val input_0 = io.inputs(0)
+  val input_1 = io.inputs(1)
+  val out = io.outs(0)
+
   val moduleNums = moduleInfo(0)
   val types = moduleNums.size
   //  println(io.getElements(0))
@@ -171,7 +197,26 @@ class TopModule(val moduleInfo: List[List[Int]], val connect: Map[List[Int], Lis
   val PEs = (0 until PENum).toArray.map(t => Module(new ADRESPE(moduleInfo(1)(t + currentNum))))
   currentNum += PENum
 
-  val modules = List(adders, muls, alus, PEs)
+  //val modules = List(adders, muls, alus, PEs)
+
+  val outPorts = new ArrayBuffer[Array[List[Any]]]
+  outPorts.append(adders.map(i => i.io.outs.toList))
+  outPorts.append(muls.map(i => i.io.outs.toList))
+  outPorts.append(alus.map(i => i.io.outs.toList))
+  outPorts.append(PEs.map(i => i.io.outs.toList))
+
+  val inPorts = new ArrayBuffer[Array[List[Any]]]
+  inPorts.append(adders.map(i => i.io.inputs.toList))
+  inPorts.append(muls.map(i => i.io.inputs.toList))
+  inPorts.append(alus.map(i => i.io.inputs.toList))
+  inPorts.append(PEs.map(i => i.io.inputs.toList))
+//  alus(0).io.inputs.getElements
+//  val outPorts = new ArrayBuffer[ArrayBuffer[ArrayBuffer[Any]]]
+//  alus.foreach(i => i.io.outs.getElements)
+//
+//  var adderArray = new ArrayBuffer[Any]
+//  val inputPorts = modules.map(i => i.map( j => j.io.getElements(1)))
+//  println("ports", inputPorts(0)(0))
 
 //  val test = Module(new ADRESPE(32))
 //  test.io.input_0 := io.input_0
@@ -199,6 +244,7 @@ class TopModule(val moduleInfo: List[List[Int]], val connect: Map[List[Int], Lis
     println(connect.keys.toList(i))
   }
 
+
   for (i <- 0 until connect.keys.size) {
     val src = connect.keys.toList(i)
     val dsts = connect(src)
@@ -206,77 +252,80 @@ class TopModule(val moduleInfo: List[List[Int]], val connect: Map[List[Int], Lis
       val dst = dsts(j)
       println(dst, src)
       if (dst(0) == types) {
-        io.getElements(dst(2)) := modules(src(0))(src(1)).io.getElements(src(2))
+        io.outs(dst(2)) := outPorts(src(0))(src(1))(src(2)).asInstanceOf[Data]
       } else if (src(0) == types) {
-        modules(dst(0))(dst(1)).io.getElements(dst(2)) := io.getElements(src(2))
+        inPorts(dst(0))(dst(1))(dst(2)).asInstanceOf[Data] := io.inputs(src(2))
       } else {
-        println(dst,src)
-        modules(dst(0))(dst(1)).io.getElements(dst(2)) := modules(src(0))(src(1)).io.getElements(src(2))
+        inPorts(dst(0))(dst(1))(dst(2)).asInstanceOf[Data] := outPorts(src(0))(src(1))(src(2)).asInstanceOf[Data]
       }
     }
   }
+
 }
 
-class TopModuleUnitTest(c: TopModule) extends PeekPokeTester(c) {
-  poke(c.io.input_0, 2)
-  poke(c.io.input_1, 3)
-  //add config
-  poke(c.io.configuration, 0)
-  expect(c.io.out, 15)
-  //sub config
-  poke(c.io.configuration, 1)
-  expect(c.io.out, 11)
-  //and config
-  poke(c.io.configuration, 2)
-  expect(c.io.out, 0)
-  //or config
-  poke(c.io.configuration, 3)
-  expect(c.io.out, 15)
-  //xor config
-  poke(c.io.configuration, 4)
-  expect(c.io.out, 15)
-}
+//class TopModuleUnitTest(c: TopModule) extends PeekPokeTester(c) {
+//  poke(c.io.inputs(0), 2)
+//  poke(c.io.inputs(1), 3)
+//  //add config
+//  poke(c.io.configuration, 0)
+//  expect(c.io.outs(0), 15)
+//  //sub config
+//  poke(c.io.configuration, 1)
+//  expect(c.io.outs(0), 11)
+//  //and config
+//  poke(c.io.configuration, 2)
+//  expect(c.io.outs(0), 0)
+//  //or config
+//  poke(c.io.configuration, 3)
+//  expect(c.io.outs(0), 15)
+//  //xor config
+//  poke(c.io.configuration, 4)
+//  expect(c.io.outs(0), 15)
+//}
 
 class TopModulePEUnitTest(c: TopModule) extends PeekPokeTester(c) {
-  poke(c.io.input_0, 2)
-  poke(c.io.input_1, 3)
+  //MixedVec don't support c.io.inputs(0) in poke
+  poke(c.input_0, 2)
+  poke(c.input_1, 3)
   //1 0 0 0001 001 000 0000
   //save (((a+b)*a+b)+(a)) - (a+b) in rf(0), to next cycle //10
   poke(c.io.configuration, 66688)
-  expect(c.io.out, 0)
+  expect(c.out, 0)
   expect(c.io.configTest(0), 0)
   expect(c.io.configTest(1), 4168)
   step(1)
-  expect(c.io.out, 0)
-  //1 1 1 0000 011 101 0000
+  expect(c.out, 0)
+  //1 1 1 0000 011 100 0000
   // rf(1) = rf(0) + b // 10 + 3 =13
-  poke(c.io.configuration, 115152)
-  step(1)
-  expect(c.io.out, 13)
-}
-
-class RegisterFilesUnitTest(c: RegisterFiles) extends PeekPokeTester(c) {
-  poke(c.io.inputs(0), 666)
-  poke(c.io.configuration, 7)
-  expect(c.io.outs(0), 0)
-  expect(c.io.outs(1), 0)
-  expect(c.io.configTest(0), 1)
-  expect(c.io.configTest(1), 1)
-  expect(c.io.configTest(2), 1)
-
-  step(1)
-
-  expect(c.io.outs(0), 666)
-  expect(c.io.outs(1), 666)
-  poke(c.io.configuration, 4)
-  poke(c.io.inputs(0), 233)
-
-
-  step(1)
+  poke(c.io.configuration, 115136)
   expect(c.io.configTest(0), 0)
-  expect(c.io.configTest(1), 0)
-  expect(c.io.configTest(2), 1)
-
-  expect(c.io.outs(1), 666)
-  expect(c.io.outs(0), 233)
+  expect(c.io.configTest(1), 7196)
+  step(1)
+  expect(c.out, 13)
 }
+
+//class RegisterFilesUnitTest(c: RegisterFiles) extends PeekPokeTester(c) {
+//  poke(c.io.inputs(0), 666)
+//  poke(c.io.configuration, 7)
+//  expect(c.io.outs(0), 0)
+//  expect(c.io.outs(1), 0)
+//  expect(c.io.configTest(0), 1)
+//  expect(c.io.configTest(1), 1)
+//  expect(c.io.configTest(2), 1)
+//
+//  step(1)
+//
+//  expect(c.io.outs(0), 666)
+//  expect(c.io.outs(1), 666)
+//  poke(c.io.configuration, 4)
+//  poke(c.io.inputs(0), 233)
+//
+//
+//  step(1)
+//  expect(c.io.configTest(0), 0)
+//  expect(c.io.configTest(1), 0)
+//  expect(c.io.configTest(2), 1)
+//
+//  expect(c.io.outs(1), 666)
+//  expect(c.io.outs(0), 233)
+//}
