@@ -114,6 +114,17 @@ class RegisterFiles(log2Regs : Int, numIn : Int, numOut:Int, w :Int) extends Mod
 
 }
 
+class Multiplexer(inNum : Int, w: Int) extends Module {
+  val io = IO(new Bundle {
+    val configuration = Input(UInt(log2Up(inNum).W))
+    val inputs = Input(MixedVec((1 to inNum) map { i => UInt(w.W) }))
+    val outs = Output(MixedVec((1 to 1) map { i => UInt(w.W) }))
+  })
+  val selectArray = (0 to inNum - 1).map(i => i.U -> io.inputs(i))
+  val muxIn0 = MuxLookup(io.configuration, io.inputs(0), selectArray)
+  io.outs(0) := muxIn0
+}
+
 //to be update
 class ADRESPE(w: Int) extends Module {
   val io = IO(new Bundle {
@@ -169,7 +180,7 @@ class TopModule(val moduleInfo: List[List[Int]], val connect: Map[List[Int], Lis
     //port sequnces outs: 0: out
     //port sequnces inputs: 0: input_a, 1: input_b
     val configTest = Output(Vec(2, UInt(w.W)))
-    val configuration = Input(UInt(17.W))
+    val configuration = Input(UInt(13.W))
     val inputs = Input(MixedVec(Seq(UInt(w.W), UInt(w.W))))
     val outs = Output(MixedVec(Seq(UInt(w.W))))
   })
@@ -181,64 +192,58 @@ class TopModule(val moduleInfo: List[List[Int]], val connect: Map[List[Int], Lis
   val types = moduleNums.size
   //  println(io.getElements(0))
   var currentNum = 0
-  val addNum = moduleNums(0)
-  val adders = (0 until addNum).toArray.map(t => Module(new Adder(moduleInfo(1)(t + currentNum))))
-  currentNum += addNum
-
-  val mulNum = moduleNums(1)
-  val muls = (0 until mulNum).toArray.map(t => Module(new Multiplier(moduleInfo(1)(t + currentNum))))
-  currentNum += mulNum
-
-  val aluNum = moduleNums(2)
+//  val addNum = moduleNums(0)
+//  val adders = (0 until addNum).toArray.map(t => Module(new Adder(moduleInfo(1)(t + currentNum))))
+//  currentNum += addNum
+//
+//  val mulNum = moduleNums(1)
+//  val muls = (0 until mulNum).toArray.map(t => Module(new Multiplier(moduleInfo(1)(t + currentNum))))
+//  currentNum += mulNum
+//
+//  val PENum = moduleNums(3)
+//  val PEs = (0 until PENum).toArray.map(t => Module(new ADRESPE(moduleInfo(1)(t + currentNum))))
+//  currentNum += PENum
+//
+  val aluNum = moduleNums(0)
   val alus = (0 until aluNum).toArray.map(t => Module(new Alu(moduleInfo(1)(t + currentNum))))
   currentNum += aluNum
 
-  val PENum = moduleNums(3)
-  val PEs = (0 until PENum).toArray.map(t => Module(new ADRESPE(moduleInfo(1)(t + currentNum))))
-  currentNum += PENum
 
-  //val modules = List(adders, muls, alus, PEs)
+
+  val RFNum1_1_2 = moduleNums(1)
+  val RFs1_1_2 = (0 until RFNum1_1_2).toArray
+    .map(t => Module(new RegisterFiles(1, 1, 2, moduleInfo(1)(t + currentNum))))
+  currentNum += RFNum1_1_2
+
+  val MuxNum5 = moduleNums(2)
+  val Muxs5 = (0 until MuxNum5).toArray
+    .map(t => Module(new Multiplexer(5, moduleInfo(1)(t + currentNum))))
+  currentNum += MuxNum5
+
 
   val outPorts = new ArrayBuffer[Array[List[Any]]]
-  outPorts.append(adders.map(i => i.io.outs.toList))
-  outPorts.append(muls.map(i => i.io.outs.toList))
   outPorts.append(alus.map(i => i.io.outs.toList))
-  outPorts.append(PEs.map(i => i.io.outs.toList))
+  outPorts.append(RFs1_1_2.map(i => i.io.outs.toList))
+  outPorts.append(Muxs5.map(i => i.io.outs.toList))
 
   val inPorts = new ArrayBuffer[Array[List[Any]]]
-  inPorts.append(adders.map(i => i.io.inputs.toList))
-  inPorts.append(muls.map(i => i.io.inputs.toList))
   inPorts.append(alus.map(i => i.io.inputs.toList))
-  inPorts.append(PEs.map(i => i.io.inputs.toList))
-//  alus(0).io.inputs.getElements
-//  val outPorts = new ArrayBuffer[ArrayBuffer[ArrayBuffer[Any]]]
-//  alus.foreach(i => i.io.outs.getElements)
-//
-//  var adderArray = new ArrayBuffer[Any]
-//  val inputPorts = modules.map(i => i.map( j => j.io.getElements(1)))
-//  println("ports", inputPorts(0)(0))
-
-//  val test = Module(new ADRESPE(32))
-//  test.io.input_0 := io.input_0
-//  test.io.input_1 := io.input_0
-//  test.io.input_2 := io.input_1
-//  test.io.input_3 := io.input_0
+  inPorts.append(RFs1_1_2.map(i => i.io.inputs.toList))
+  inPorts.append(Muxs5.map(i => i.io.inputs.toList))
 
   //sent configuration to modules
   //to be update
-  val dispatch = Module(new Dispatch(17, 13, List(4, 13)))
+  val dispatch = Module(new Dispatch(13, 4, List(3, 3, 4, 3)))
   dispatch.io.configuration := io.configuration
-  alus(0).io.select := dispatch.io.outs(0)
+
   io.configTest(0) := dispatch.io.outs(0)
-  if(PENum > 0){
-    PEs(0).io.configuration := dispatch.io.outs(1)
-  }
   io.configTest(1) := dispatch.io.outs(1)
 
+  Muxs5(0).io.configuration := dispatch.io.outs(0)
+  Muxs5(1).io.configuration := dispatch.io.outs(1)
+  alus(0).io.select := dispatch.io.outs(2)
+  RFs1_1_2(0).io.configuration := dispatch.io.outs(3)
 
-
-  //  val adder_one = Module(new Adder())
-  //  val adder_two = Module(new Adder())
 
   for (i <- 0 until connect.keys.size) {
     println(connect.keys.toList(i))
@@ -263,69 +268,23 @@ class TopModule(val moduleInfo: List[List[Int]], val connect: Map[List[Int], Lis
 
 }
 
-//class TopModuleUnitTest(c: TopModule) extends PeekPokeTester(c) {
-//  poke(c.io.inputs(0), 2)
-//  poke(c.io.inputs(1), 3)
-//  //add config
-//  poke(c.io.configuration, 0)
-//  expect(c.io.outs(0), 15)
-//  //sub config
-//  poke(c.io.configuration, 1)
-//  expect(c.io.outs(0), 11)
-//  //and config
-//  poke(c.io.configuration, 2)
-//  expect(c.io.outs(0), 0)
-//  //or config
-//  poke(c.io.configuration, 3)
-//  expect(c.io.outs(0), 15)
-//  //xor config
-//  poke(c.io.configuration, 4)
-//  expect(c.io.outs(0), 15)
-//}
-
 class TopModulePEUnitTest(c: TopModule) extends PeekPokeTester(c) {
   //MixedVec don't support c.io.inputs(0) in poke
   poke(c.input_0, 2)
   poke(c.input_1, 3)
-  //1 0 0 0001 001 000 0000
-  //save (((a+b)*a+b)+(a)) - (a+b) in rf(0), to next cycle //10
-  poke(c.io.configuration, 66688)
+  //1 0 0 0000 010 000
+  //save (a+b) in rf(0), to next cycle //10
+  poke(c.io.configuration, 4112)
   expect(c.out, 0)
   expect(c.io.configTest(0), 0)
-  expect(c.io.configTest(1), 4168)
+  expect(c.io.configTest(1), 2)
   step(1)
   expect(c.out, 0)
-  //1 1 1 0000 011 100 0000
-  // rf(1) = rf(0) + b // 10 + 3 =13
-  poke(c.io.configuration, 115136)
-  expect(c.io.configTest(0), 0)
-  expect(c.io.configTest(1), 7196)
+  //1 1 1 0011 001 100
+  // rf(1) = rf(0) or a // 5 or 2 =7
+  poke(c.io.configuration, 7372)
+  expect(c.io.configTest(0), 4)
+  expect(c.io.configTest(1), 1)
   step(1)
-  expect(c.out, 13)
+  expect(c.out, 7)
 }
-
-//class RegisterFilesUnitTest(c: RegisterFiles) extends PeekPokeTester(c) {
-//  poke(c.io.inputs(0), 666)
-//  poke(c.io.configuration, 7)
-//  expect(c.io.outs(0), 0)
-//  expect(c.io.outs(1), 0)
-//  expect(c.io.configTest(0), 1)
-//  expect(c.io.configTest(1), 1)
-//  expect(c.io.configTest(2), 1)
-//
-//  step(1)
-//
-//  expect(c.io.outs(0), 666)
-//  expect(c.io.outs(1), 666)
-//  poke(c.io.configuration, 4)
-//  poke(c.io.inputs(0), 233)
-//
-//
-//  step(1)
-//  expect(c.io.configTest(0), 0)
-//  expect(c.io.configTest(1), 0)
-//  expect(c.io.configTest(2), 1)
-//
-//  expect(c.io.outs(1), 666)
-//  expect(c.io.outs(0), 233)
-//}
