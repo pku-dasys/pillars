@@ -25,15 +25,11 @@ object Alu_Op {
 
 import Alu_Op._
 
-trait PillarsUnit {
-
-}
-
 class Alu(w: Int) extends Module {
   val io = IO(new Bundle {
     //port sequnces outs: 0: out
     //port sequnces inputs: 0: input_a, 1: input_b
-    val select = Input(UInt(4.W))
+    val configuration = Input(UInt(4.W))
     val inputs = Input(MixedVec(Seq(UInt(w.W), UInt(w.W))))
     val outs = Output(MixedVec(Seq(UInt(w.W))))
   })
@@ -43,7 +39,7 @@ class Alu(w: Int) extends Module {
   val out = io.outs(0)
   val shamt = input_b(4, 0).asUInt
 
-  out := MuxLookup(io.select, input_b, Seq(
+  out := MuxLookup(io.configuration, input_b, Seq(
     ALU_ADD -> (input_a + input_b),
     ALU_SUB -> (input_a - input_b),
     ALU_AND -> (input_a & input_b),
@@ -99,7 +95,7 @@ class RegisterFiles(log2Regs : Int, numIn : Int, numOut:Int, w :Int) extends Mod
     val outs = Output(MixedVec((1 to numOut) map { i => UInt(w.W) }))
   })
   val targets = (0 until numIn + numOut).toList.map(t => log2Regs)
-  val dispatch = Module(new Dispatch((log2Regs * (numIn + numOut)), log2Regs, targets))
+  val dispatch = Module(new Dispatch((log2Regs * (numIn + numOut)), targets))
   dispatch.io.configuration := io.configuration
   val registers = SyncReadMem(Math.pow(2, log2Regs).toInt, UInt(w.W))
   for (i <- 0 until numIn){
@@ -144,7 +140,7 @@ class ADRESPE(w: Int) extends Module {
   val rf = Module(new RegisterFiles(1, 1, 2, 32))
   val alu = Module(new Alu(32))
   val targets = List(3, 3, 4, 3)
-  val dispatch = Module(new Dispatch(13, 4, targets))
+  val dispatch = Module(new Dispatch(13,  targets))
   dispatch.io.configuration := io.configuration
   val muxIn0 = MuxLookup(dispatch.io.outs(0), rf.io.outs(0), Array(0.U -> input_0, 1.U -> input_1,
     2.U -> input_2, 3.U -> input_3, 4.U -> rf.io.outs(0)))
@@ -152,7 +148,7 @@ class ADRESPE(w: Int) extends Module {
     2.U -> input_2, 3.U -> input_3, 4.U -> rf.io.outs(0)))
   alu.io.inputs(0) := muxIn0
   alu.io.inputs(1) := muxIn1
-  alu.io.select := dispatch.io.outs(2)
+  alu.io.configuration := dispatch.io.outs(2)
   rf.io.inputs(0) := alu.io.outs(0)
   rf.io.configuration := dispatch.io.outs(3)
   out := rf.io.outs(1)
@@ -160,7 +156,7 @@ class ADRESPE(w: Int) extends Module {
 
 //to be update
 //wOut : Upper bound bits of out configuration
-class Dispatch(wIn: Int, wOut : Int, targets : List[Int]) extends Module {
+class Dispatch(wIn: Int, targets : List[Int]) extends Module {
   val io = IO(new Bundle {
     val configuration = Input(UInt(wIn.W))
     val outs = Output(MixedVec(targets.map{i => UInt(i.W)}))
@@ -175,15 +171,25 @@ class Dispatch(wIn: Int, wOut : Int, targets : List[Int]) extends Module {
 
 }
 
-class TopModule(val moduleInfo: List[List[Int]], val connect: Map[List[Int], List[List[Int]]], w: Int) extends Module {
+class TopModule(val moduleInfo: List[List[Int]], val connect: Map[List[Int], List[List[Int]]],
+                val configList : List[List[List[Int]]], w: Int) extends Module {
   val io = IO(new Bundle {
     //port sequnces outs: 0: out
     //port sequnces inputs: 0: input_a, 1: input_b
-    val configTest = Output(Vec(2, UInt(w.W)))
+   // val configTest = Output(Vec(2, UInt(w.W)))
     val configuration = Input(UInt(13.W))
     val inputs = Input(MixedVec(Seq(UInt(w.W), UInt(w.W))))
     val outs = Output(MixedVec(Seq(UInt(w.W))))
   })
+
+  def getConfigBit (typeID : Int): Int ={
+    val ret = typeID match {
+      case 0 => 4
+      case 1 => 3
+      case 2 => 3
+    }
+    ret
+  }
   val input_0 = io.inputs(0)
   val input_1 = io.inputs(1)
   val out = io.outs(0)
@@ -220,6 +226,8 @@ class TopModule(val moduleInfo: List[List[Int]], val connect: Map[List[Int], Lis
     .map(t => Module(new Multiplexer(5, moduleInfo(1)(t + currentNum))))
   currentNum += MuxNum5
 
+  val modules = List(alus, RFs1_1_2, Muxs5)
+
 
   val outPorts = new ArrayBuffer[Array[List[Any]]]
   outPorts.append(alus.map(i => i.io.outs.toList))
@@ -231,18 +239,50 @@ class TopModule(val moduleInfo: List[List[Int]], val connect: Map[List[Int], Lis
   inPorts.append(RFs1_1_2.map(i => i.io.inputs.toList))
   inPorts.append(Muxs5.map(i => i.io.inputs.toList))
 
+
+  var dispatchs = ArrayBuffer[Dispatch]()
+  var regionConfigBits = List[Int]()
+  for (region <- configList){
+    var configBits = List[Int]()
+    var configPorts = List[Data]()
+    for(moduleList <- region){
+      val typeID = moduleList(0)
+      val moduleID = moduleList(1)
+      configBits = configBits :+ getConfigBit(typeID)
+      val configPort = typeID match {
+        case 0 => alus(moduleID).io.configuration
+        case 1 => RFs1_1_2(moduleID).io.configuration
+        case 2 => Muxs5(moduleID).io.configuration
+      }
+      configPorts = configPorts :+ configPort
+    }
+    val regionTotalBits = configBits.reduce(_+_)
+    regionConfigBits = regionConfigBits :+ regionTotalBits
+    val dispatch = Module(new Dispatch(regionTotalBits, configBits))
+    for (i <- 0 until configBits.size){
+      configPorts(i) := dispatch.io.outs(i)
+    }
+    //io.configTest(0) := alus
+    dispatchs.append(dispatch)
+  }
+  val totalBits = regionConfigBits.reduce(_+_)
+  val topDispatch = Module(new Dispatch(totalBits, regionConfigBits))
+  topDispatch.io.configuration := io.configuration
+  for (i <- 0 until dispatchs.size){
+    dispatchs(i).io.configuration := topDispatch.io.outs(i)
+  }
+
   //sent configuration to modules
-  //to be update
-  val dispatch = Module(new Dispatch(13, 4, List(3, 3, 4, 3)))
-  dispatch.io.configuration := io.configuration
-
-  io.configTest(0) := dispatch.io.outs(0)
-  io.configTest(1) := dispatch.io.outs(1)
-
-  Muxs5(0).io.configuration := dispatch.io.outs(0)
-  Muxs5(1).io.configuration := dispatch.io.outs(1)
-  alus(0).io.select := dispatch.io.outs(2)
-  RFs1_1_2(0).io.configuration := dispatch.io.outs(3)
+//  val dispatch = Module(new Dispatch(13, List(3, 3, 4, 3)))
+//  dispatch.io.configuration := io.configuration
+//
+//  io.configTest(0) := dispatch.io.outs(0)
+//  io.configTest(1) := dispatch.io.outs(1)
+//
+//  Muxs5(0).io.configuration := dispatch.io.outs(0)
+//  Muxs5(1).io.configuration := dispatch.io.outs(1)
+//  alus(0).io.configuration := dispatch.io.outs(2)
+//  RFs1_1_2(0).io.configuration := dispatch.io.outs(3)
 
 
   for (i <- 0 until connect.keys.size) {
@@ -272,19 +312,19 @@ class TopModulePEUnitTest(c: TopModule) extends PeekPokeTester(c) {
   //MixedVec don't support c.io.inputs(0) in poke
   poke(c.input_0, 2)
   poke(c.input_1, 3)
-  //1 0 0 0000 010 000
-  //save (a+b) in rf(0), to next cycle //10
-  poke(c.io.configuration, 4112)
+  //010 000 100 0000
+  //save (a+b) in rf(0), to next cycle //5
+  poke(c.io.configuration, 2112)
   expect(c.out, 0)
-  expect(c.io.configTest(0), 0)
-  expect(c.io.configTest(1), 2)
+//  expect(c.io.configTest(0), 0)
+//  expect(c.io.configTest(1), 2)
   step(1)
   expect(c.out, 0)
-  //1 1 1 0011 001 100
+  //001 100 111 0011
   // rf(1) = rf(0) or a // 5 or 2 =7
-  poke(c.io.configuration, 7372)
-  expect(c.io.configTest(0), 4)
-  expect(c.io.configTest(1), 1)
+  poke(c.io.configuration, 1651)
+//  expect(c.io.configTest(0), 4)
+//  expect(c.io.configTest(1), 1)
   step(1)
   expect(c.out, 7)
 }

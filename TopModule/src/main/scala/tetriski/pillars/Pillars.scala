@@ -198,6 +198,8 @@ trait BlockTrait extends ModuleTrait {
   //  var adderArray  = new ArrayBuffer[OpAdder]
   //  var mulArray  = new ArrayBuffer[OpMul]
 
+  var isConfigRegion = false
+
 
   //Explicit declaration of module types
 //  var adderArray = new ArrayBuffer[Any]
@@ -274,7 +276,7 @@ trait BlockTrait extends ModuleTrait {
       val ret = subBlock.updateConnect()
       ret.foreach(i => connectArray.append(i))
     }
-    return  connectArray
+    connectArray
   }
 
   //print sub-blocks and modules
@@ -327,6 +329,10 @@ trait BlockTrait extends ModuleTrait {
     writer.print("}")
   }
 
+  def setConfigRegion(): Unit ={
+    isConfigRegion = true
+  }
+
   //We can use block("name") to get a sub-block
   def apply(name: String): BlockTrait = blockMap(name)
 
@@ -337,6 +343,8 @@ trait BlockTrait extends ModuleTrait {
 class PEBlock(name: String) extends BlockTrait{
   setName(name)
   hierName.append(name)
+  isConfigRegion = true
+
   setOutPortMap(Array("out"))
   setInPortMap(Array("input_0", "input_1", "input_2", "input_3"))
 
@@ -389,6 +397,22 @@ class ArchitctureHierarchy extends BlockTrait {
       }
     }
     List(moduleNums, moduleWidths)
+  }
+
+  def getConfigList(): List[List[List[Int]]] = {
+    var ret = List[List[List[Int]]]()
+    for (subBlock <- blockMap.values){
+      var moduleList = List[List[Int]]()
+      for (i <- 0 until subBlock.modulesArray.size) {
+        for (j <- 0 until modulesArray(i).size) {
+          val module = modulesArray(i)(j).asInstanceOf[ModuleTrait]
+          if(module.getConfigBit()>0)
+          moduleList = moduleList :+ List(module.getTypeID(), module.getModuleID())
+        }
+      }
+      ret = ret :+ moduleList
+    }
+    ret
   }
 
   //After initialization, all module's ModuleID, also called global index,
@@ -558,6 +582,8 @@ class HardwareGeneration(arch: BlockTrait, connect: Connect) {
 
   val archList = arch.asInstanceOf[ArchitctureHierarchy].getModuleList()
 
+  val configList = arch.asInstanceOf[ArchitctureHierarchy].getConfigList()
+
 }
 
 object Pillars {
@@ -600,10 +626,10 @@ object Pillars {
     println(cp.connectMap)
 
     //Verilog generation
-    chisel3.Driver.execute(args, () => new TopModule(cp.archList, cp.connectMap, 32))
+    chisel3.Driver.execute(args, () => new TopModule(cp.archList, cp.connectMap, cp.configList, 32))
 
     //Run tester
-    iotesters.Driver.execute(args, () => new TopModule(cp.archList, cp.connectMap, 32)) {
+    iotesters.Driver.execute(args, () => new TopModule(cp.archList, cp.connectMap, cp.configList, 32)) {
       c => new TopModulePEUnitTest(c)
     }
 
