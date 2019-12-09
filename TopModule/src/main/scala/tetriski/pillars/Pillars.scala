@@ -131,10 +131,8 @@ class MuxData extends ModuleTrait {
 class MemPort extends MemTrait {
 }
 
-
 //############### Currently Unused #################
 
-//
 
 class OpAlu(name: String, width: Int) extends ModuleTrait {
   //port sequnces outs: 0: out
@@ -185,7 +183,6 @@ class OpMux5(name: String, width: Int) extends ModuleTrait {
 }
 
 
-
 class Block(name: String) extends BlockTrait {
   setName(name)
   hierName.append(name)
@@ -203,9 +200,12 @@ trait BlockTrait extends ModuleTrait {
 
 
   //Explicit declaration of module types
+//  var adderArray = new ArrayBuffer[Any]
+//  var mulArray = new ArrayBuffer[Any]
   var aluArray = new ArrayBuffer[Any]
   var RFsArray = new ArrayBuffer[Any]
   var MuxsArray = new ArrayBuffer[Any]
+  //var PEArray = new ArrayBuffer[Any]
   var modulesArray = new ArrayBuffer[ArrayBuffer[Any]]
   var owningModules = new ArrayBuffer[List[Int]]
 
@@ -266,7 +266,8 @@ trait BlockTrait extends ModuleTrait {
       val dst = connectArray(i)(1)
       val resSrc = nameList.map( str => str+"/") ::: src
       val resDst = nameList.map( str => str+"/") ::: dst
-      resArray.append(List(resSrc, resDst))
+      resArray.append(List(resSrc, resDst).asInstanceOf[List[List[String]]])
+    }
     connectArray = resArray
     //println("connectArray", connectArray)
     for(subBlock <- blockMap.values){
@@ -434,6 +435,8 @@ class Connect(outArray: ArrayBuffer[List[String]], inArray: ArrayBuffer[List[Str
   }
   mapRelation = simplify()
 
+  // (to be defined)
+  //"cgra/b_0/b_0_0:out" should be equal to "cgra/b_0/b_0_0:out/adder0:out"
   def simplify(): Map[List[String], ArrayBuffer[List[String]]] = {
     var ret = Map[List[String], ArrayBuffer[List[String]]]()
     val srcs = outArray.toSet
@@ -516,7 +519,6 @@ class HardwareGeneration(arch: BlockTrait, connect: Connect) {
   var connectMap = Map[List[Int], List[List[Int]]]()
   var mapRelation = connect.mapRelation
 
-  //Return integer representation of a group of connection.
   def getConnectList(src: List[String], dsts: ArrayBuffer[List[String]]): Map[List[Int], List[List[Int]]] = {
     //Encode a string representation of a port into a list of integer as mentioned before
     def encode(strs: List[String]): List[Int] = {
@@ -582,6 +584,7 @@ object Pillars {
 
     val connectArray = arch.connectArray
 
+
     val outArray = ArrayBuffer[List[String]]()
     val inArray = ArrayBuffer[List[String]]()
     connectArray.foreach(t => outArray.append(t(0)))
@@ -594,7 +597,7 @@ object Pillars {
 
     val cp = new HardwareGeneration(arch, connect)
 
-    println("CP",cp.connectMap)
+    println(cp.connectMap)
 
     //Verilog generation
     chisel3.Driver.execute(args, () => new TopModule(cp.archList, cp.connectMap, 32))
@@ -603,6 +606,7 @@ object Pillars {
     iotesters.Driver.execute(args, () => new TopModule(cp.archList, cp.connectMap, 32)) {
       c => new TopModulePEUnitTest(c)
     }
+
 
 
   }
