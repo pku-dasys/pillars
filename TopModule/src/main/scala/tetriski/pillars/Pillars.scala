@@ -375,7 +375,6 @@ class PEBlock(name: String) extends BlockTrait{
       List(List("mux1","out_0"),List("alu0","input_1")),
       List(List("alu0","out_0"),List("rf0","input_0")),
       List(List("rf0","out_1"),List("out_0")))
-
 }
 
 //This class describes the archtectures of the designed CGRA Demo
