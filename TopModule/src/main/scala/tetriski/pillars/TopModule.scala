@@ -330,7 +330,7 @@ class TopModulePEUnitTest(c: TopModule) extends PeekPokeTester(c) {
   expect(c.io.configTest(1), 2273)
   step(1)
   expect(c.out, 0)
-  //001 100 001 0011 001 100 001 0011
+  //001 100 101 0011 001 100 101 0011
   //PE0: 001 100 101 0011 //output rf(1)=7
   //PE1: 001 100 101 0011
   //0011001010011
@@ -340,10 +340,10 @@ class TopModulePEUnitTest(c: TopModule) extends PeekPokeTester(c) {
   expect(c.io.configTest(0), 1619)
   expect(c.io.configTest(1), 1619)
   step(1)
-  expect(c.out, 2) //0 + 2
+  expect(c.out, 2) //0 or 2 due to SyncReadMem
   step(1)
   expect(c.out, 7)
-  //001 100 001 0011 001 100 001 0011
+  //000 000 100 0000 011 100 010 0000
   //PE0: 011 100 010 0000 //
   //PE1: 000 000 100 0000 //output rf(1) to pe0
   //0000001000000 0111000100000
@@ -352,7 +352,7 @@ class TopModulePEUnitTest(c: TopModule) extends PeekPokeTester(c) {
   expect(c.io.configTest(0), 3616)
   expect(c.io.configTest(1), 64)
   step(1)
-  expect(c.out, 8)// 1 + 7
+  expect(c.out, 8)// 1 + 7 due to SyncReadMem
   step(1)
   expect(c.out, 10)
   step(1)
