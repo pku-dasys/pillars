@@ -1,0 +1,87 @@
+digraph SimpleDualPortMem {
+stylesheet = "styles.css"
+rankdir="LR" 
+
+subgraph cluster_SimpleDualPortMem {
+  label="SimpleDualPortMem"
+  URL=""
+  bgcolor="#FFF8DC"
+  cluster_SimpleDualPortMem_clock [shape = "rectangle" style="filled" fillcolor="#CCCCCC" label="clock" rank="0"]
+     
+cluster_SimpleDualPortMem_io_a_en [shape = "rectangle" style="filled" fillcolor="#CCCCCC" label="io_a_en" rank="0"]
+     
+cluster_SimpleDualPortMem_io_a_we [shape = "rectangle" style="filled" fillcolor="#CCCCCC" label="io_a_we" rank="0"]
+     
+cluster_SimpleDualPortMem_io_a_addr [shape = "rectangle" style="filled" fillcolor="#CCCCCC" label="io_a_addr" rank="0"]
+     
+cluster_SimpleDualPortMem_io_a_din [shape = "rectangle" style="filled" fillcolor="#CCCCCC" label="io_a_din" rank="0"]
+     
+cluster_SimpleDualPortMem_io_b_en [shape = "rectangle" style="filled" fillcolor="#CCCCCC" label="io_b_en" rank="0"]
+     
+cluster_SimpleDualPortMem_io_b_addr [shape = "rectangle" style="filled" fillcolor="#CCCCCC" label="io_b_addr" rank="0"]
+     
+cluster_SimpleDualPortMem_io_b_dout [shape = "rectangle" style="filled" fillcolor="#E0FFFF" label="io_b_dout" rank="1000"]
+     
+
+struct_cluster_SimpleDualPortMem_mem [shape="plaintext" label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" BGCOLOR="#DA70D6">
+  <TR>
+    <TD>Mem mem </TD>
+  </TR>
+    
+<TR><TD>read port _T_41</TD></TR>
+            
+<TR><TD PORT="_T_41_en">en</TD></TR>
+          
+<TR><TD PORT="_T_41_addr">addr</TD></TR>
+          
+<TR><TD PORT="_T_41_data">data</TD></TR>
+          
+<TR><TD PORT="_T_41_clk">clk</TD></TR>
+    
+<TR><TD>write port _T_40</TD></TR>
+            
+<TR><TD PORT="_T_40_en">en</TD></TR>
+          
+<TR><TD PORT="_T_40_addr">addr</TD></TR>
+          
+<TR><TD PORT="_T_40_data">data</TD></TR>
+          
+<TR><TD PORT="_T_40_mask">mask</TD></TR>
+          
+<TR><TD PORT="_T_40_clk">clk</TD></TR>
+    
+</TABLE>>];
+    
+
+op_and_14651 [shape = "plaintext" label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" BGCOLOR="#D8BFD8">
+  <TR>
+    <TD PORT="in1">&#x25cf;</TD>
+    <TD ROWSPAN="2" > and </TD>
+    <TD ROWSPAN="2" PORT="out">&#x25cf;</TD>
+  </TR>
+  <TR>
+    <TD PORT="in2">&#x25cf;</TD>
+  </TR>
+</TABLE>>];
+       
+cluster_SimpleDualPortMem_lit14652 [shape="circle" style="filled" BGCOLOR="#C0C0C0" label="1"]
+     
+
+  cluster_SimpleDualPortMem_io_b_en -> struct_cluster_SimpleDualPortMem_mem:_T_41_en
+  cluster_SimpleDualPortMem_clock -> struct_cluster_SimpleDualPortMem_mem:_T_41_clk
+  cluster_SimpleDualPortMem_io_a_en -> op_and_14651:in1
+  cluster_SimpleDualPortMem_lit14652 -> struct_cluster_SimpleDualPortMem_mem:_T_40_mask
+  cluster_SimpleDualPortMem_io_a_addr -> struct_cluster_SimpleDualPortMem_mem:_T_40_addr
+  op_and_14651:out -> struct_cluster_SimpleDualPortMem_mem:_T_40_en
+  struct_cluster_SimpleDualPortMem_mem:_T_41_data -> cluster_SimpleDualPortMem_io_b_dout
+  cluster_SimpleDualPortMem_io_b_addr -> struct_cluster_SimpleDualPortMem_mem:_T_41_addr
+  cluster_SimpleDualPortMem_io_a_we -> op_and_14651:in2
+  cluster_SimpleDualPortMem_clock -> struct_cluster_SimpleDualPortMem_mem:_T_40_clk
+  cluster_SimpleDualPortMem_io_a_din -> struct_cluster_SimpleDualPortMem_mem:_T_40_data
+  
+  
+}
+     
+}
