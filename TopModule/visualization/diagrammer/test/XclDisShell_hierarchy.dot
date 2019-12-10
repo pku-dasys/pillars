@@ -1,0 +1,345 @@
+digraph XclDisShell_hierarchy { rankdir="TB" 
+ node [shape="rectangle"]; 
+rankdir="LR" 
+stylesheet = "styles.css"
+module_1 [shape= "plaintext" href="XclDisShell.dot.svg" label=<
+
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" >
+      
+  <TR >
+    <TD BGCOLOR="#FFDEAD" > XclDisShell </TD>
+  </TR>
+        
+  <TR>
+    <TD PORT="module_21" BGCOLOR="#FFF8DC" >alu</TD>
+  </TR>
+        
+  <TR>
+    <TD PORT="module_6" BGCOLOR="#FFF8DC" >dispatch</TD>
+  </TR>
+        
+  <TR>
+    <TD PORT="module_11" BGCOLOR="#FFF8DC" >load</TD>
+  </TR>
+        
+  <TR>
+    <TD PORT="module_18" BGCOLOR="#FFF8DC" >Queue</TD>
+  </TR>
+        
+  <TR>
+    <TD PORT="module_5" BGCOLOR="#FFF8DC" >Queue_1</TD>
+  </TR>
+        
+  <TR>
+    <TD PORT="module_8" BGCOLOR="#FFF8DC" >Queue_2</TD>
+  </TR>
+        
+  <TR>
+    <TD PORT="module_19" BGCOLOR="#FFF8DC" >exec_stream</TD>
+  </TR>
+        
+  <TR>
+    <TD PORT="module_2" BGCOLOR="#FFF8DC" >g2l_dep_stream</TD>
+  </TR>
+        
+  <TR>
+    <TD PORT="module_3" BGCOLOR="#FFF8DC" >g2s_dep_stream</TD>
+  </TR>
+        
+  <TR>
+    <TD PORT="module_10" BGCOLOR="#FFF8DC" >l2g_dep_stream</TD>
+  </TR>
+        
+  <TR>
+    <TD PORT="module_4" BGCOLOR="#FFF8DC" >load_stream</TD>
+  </TR>
+        
+  <TR>
+    <TD PORT="module_14" BGCOLOR="#FFF8DC" >s2g_dep_stream</TD>
+  </TR>
+        
+  <TR>
+    <TD PORT="module_9" BGCOLOR="#FFF8DC" >store_stream</TD>
+  </TR>
+        
+  <TR>
+    <TD PORT="module_20" BGCOLOR="#FFF8DC" >out_mem</TD>
+  </TR>
+        
+  <TR>
+    <TD PORT="module_15" BGCOLOR="#FFF8DC" >store</TD>
+  </TR>
+        
+</TABLE>>];
+
+      module_2 [shape= "plaintext" href="Queue_3.dot.svg" label=<
+
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" >
+      
+  <TR >
+    <TD BGCOLOR="#FFDEAD" > Queue_3 </TD>
+  </TR>
+        
+</TABLE>>];
+
+      module_3 [shape= "plaintext" href="Queue_3.dot.svg" label=<
+
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" >
+      
+  <TR >
+    <TD BGCOLOR="#FFDEAD" > Queue_3 </TD>
+  </TR>
+        
+</TABLE>>];
+
+      module_4 [shape= "plaintext" href="Queue_3.dot.svg" label=<
+
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" >
+      
+  <TR >
+    <TD BGCOLOR="#FFDEAD" > Queue_3 </TD>
+  </TR>
+        
+</TABLE>>];
+
+      module_5 [shape= "plaintext" href="Queue_1.dot.svg" label=<
+
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" >
+      
+  <TR >
+    <TD BGCOLOR="#FFDEAD" > Queue_1 </TD>
+  </TR>
+        
+</TABLE>>];
+
+      module_6 [shape= "plaintext" href="Dispatch.dot.svg" label=<
+
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" >
+      
+  <TR >
+    <TD BGCOLOR="#FFDEAD" > Dispatch </TD>
+  </TR>
+        
+  <TR>
+    <TD PORT="module_7" BGCOLOR="#FFF8DC" >hs</TD>
+  </TR>
+        
+</TABLE>>];
+
+      module_7 [shape= "plaintext" href="Handshake.dot.svg" label=<
+
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" >
+      
+  <TR >
+    <TD BGCOLOR="#FFDEAD" > Handshake </TD>
+  </TR>
+        
+</TABLE>>];
+
+      module_8 [shape= "plaintext" href="Queue_2.dot.svg" label=<
+
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" >
+      
+  <TR >
+    <TD BGCOLOR="#FFDEAD" > Queue_2 </TD>
+  </TR>
+        
+</TABLE>>];
+
+      module_9 [shape= "plaintext" href="Queue_3.dot.svg" label=<
+
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" >
+      
+  <TR >
+    <TD BGCOLOR="#FFDEAD" > Queue_3 </TD>
+  </TR>
+        
+</TABLE>>];
+
+      module_10 [shape= "plaintext" href="Queue_3.dot.svg" label=<
+
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" >
+      
+  <TR >
+    <TD BGCOLOR="#FFDEAD" > Queue_3 </TD>
+  </TR>
+        
+</TABLE>>];
+
+      module_11 [shape= "plaintext" href="Load.dot.svg" label=<
+
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" >
+      
+  <TR >
+    <TD BGCOLOR="#FFDEAD" > Load </TD>
+  </TR>
+        
+  <TR>
+    <TD PORT="module_13" BGCOLOR="#FFF8DC" >Handshake</TD>
+  </TR>
+        
+  <TR>
+    <TD PORT="module_12" BGCOLOR="#FFF8DC" >Handshake_1</TD>
+  </TR>
+        
+</TABLE>>];
+
+      module_12 [shape= "plaintext" href="Handshake.dot.svg" label=<
+
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" >
+      
+  <TR >
+    <TD BGCOLOR="#FFDEAD" > Handshake </TD>
+  </TR>
+        
+</TABLE>>];
+
+      module_13 [shape= "plaintext" href="Handshake.dot.svg" label=<
+
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" >
+      
+  <TR >
+    <TD BGCOLOR="#FFDEAD" > Handshake </TD>
+  </TR>
+        
+</TABLE>>];
+
+      module_14 [shape= "plaintext" href="Queue_3.dot.svg" label=<
+
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" >
+      
+  <TR >
+    <TD BGCOLOR="#FFDEAD" > Queue_3 </TD>
+  </TR>
+        
+</TABLE>>];
+
+      module_15 [shape= "plaintext" href="Store.dot.svg" label=<
+
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" >
+      
+  <TR >
+    <TD BGCOLOR="#FFDEAD" > Store </TD>
+  </TR>
+        
+  <TR>
+    <TD PORT="module_17" BGCOLOR="#FFF8DC" >index_cmd</TD>
+  </TR>
+        
+  <TR>
+    <TD PORT="module_16" BGCOLOR="#FFF8DC" >index_out</TD>
+  </TR>
+        
+</TABLE>>];
+
+      module_16 [shape= "plaintext" href="Queue_11.dot.svg" label=<
+
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" >
+      
+  <TR >
+    <TD BGCOLOR="#FFDEAD" > Queue_11 </TD>
+  </TR>
+        
+</TABLE>>];
+
+      module_17 [shape= "plaintext" href="Queue_10.dot.svg" label=<
+
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" >
+      
+  <TR >
+    <TD BGCOLOR="#FFDEAD" > Queue_10 </TD>
+  </TR>
+        
+</TABLE>>];
+
+      module_18 [shape= "plaintext" href="Queue.dot.svg" label=<
+
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" >
+      
+  <TR >
+    <TD BGCOLOR="#FFDEAD" > Queue </TD>
+  </TR>
+        
+</TABLE>>];
+
+      module_19 [shape= "plaintext" href="Queue_3.dot.svg" label=<
+
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" >
+      
+  <TR >
+    <TD BGCOLOR="#FFDEAD" > Queue_3 </TD>
+  </TR>
+        
+</TABLE>>];
+
+      module_20 [shape= "plaintext" href="SimpleDualPortMem.dot.svg" label=<
+
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" >
+      
+  <TR >
+    <TD BGCOLOR="#FFDEAD" > SimpleDualPortMem </TD>
+  </TR>
+        
+</TABLE>>];
+
+      module_21 [shape= "plaintext" href="ALU.dot.svg" label=<
+
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" >
+      
+  <TR >
+    <TD BGCOLOR="#FFDEAD" > ALU </TD>
+  </TR>
+        
+  <TR>
+    <TD PORT="module_22" BGCOLOR="#FFF8DC" >uop_mem</TD>
+  </TR>
+        
+  <TR>
+    <TD PORT="module_23" BGCOLOR="#FFF8DC" >acc_mem</TD>
+  </TR>
+        
+</TABLE>>];
+
+      module_22 [shape= "plaintext" href="SinglePortMem.dot.svg" label=<
+
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" >
+      
+  <TR >
+    <TD BGCOLOR="#FFDEAD" > SinglePortMem </TD>
+  </TR>
+        
+</TABLE>>];
+
+      module_23 [shape= "plaintext" href="SinglePortMem_1.dot.svg" label=<
+
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" >
+      
+  <TR >
+    <TD BGCOLOR="#FFDEAD" > SinglePortMem_1 </TD>
+  </TR>
+        
+</TABLE>>];
+
+      module_1:module_2 -> module_2
+module_1:module_3 -> module_3
+module_1:module_4 -> module_4
+module_1:module_5 -> module_5
+module_6:module_7 -> module_7
+module_1:module_6 -> module_6
+module_1:module_8 -> module_8
+module_1:module_9 -> module_9
+module_1:module_10 -> module_10
+module_11:module_12 -> module_12
+module_11:module_13 -> module_13
+module_1:module_11 -> module_11
+module_1:module_14 -> module_14
+module_15:module_16 -> module_16
+module_15:module_17 -> module_17
+module_1:module_15 -> module_15
+module_1:module_18 -> module_18
+module_1:module_19 -> module_19
+module_1:module_20 -> module_20
+module_21:module_22 -> module_22
+module_21:module_23 -> module_23
+module_1:module_21 -> module_21
+}

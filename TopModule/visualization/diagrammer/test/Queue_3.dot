@@ -1,0 +1,420 @@
+digraph Queue_3 {
+stylesheet = "styles.css"
+rankdir="LR" 
+
+subgraph cluster_Queue_3 {
+  label="Queue_3"
+  URL=""
+  bgcolor="#FFF8DC"
+  cluster_Queue_3_clock [shape = "rectangle" style="filled" fillcolor="#CCCCCC" label="clock" rank="0"]
+     
+cluster_Queue_3_reset [shape = "rectangle" style="filled" fillcolor="#CCCCCC" label="reset" rank="0"]
+     
+cluster_Queue_3_io_enq_valid [shape = "rectangle" style="filled" fillcolor="#CCCCCC" label="io_enq_valid" rank="0"]
+     
+cluster_Queue_3_io_enq_bits [shape = "rectangle" style="filled" fillcolor="#CCCCCC" label="io_enq_bits" rank="0"]
+     
+cluster_Queue_3_io_deq_ready [shape = "rectangle" style="filled" fillcolor="#CCCCCC" label="io_deq_ready" rank="0"]
+     
+cluster_Queue_3_io_enq_ready [shape = "rectangle" style="filled" fillcolor="#E0FFFF" label="io_enq_ready" rank="1000"]
+     
+cluster_Queue_3_io_deq_valid [shape = "rectangle" style="filled" fillcolor="#E0FFFF" label="io_deq_valid" rank="1000"]
+     
+cluster_Queue_3_io_deq_bits [shape = "rectangle" style="filled" fillcolor="#E0FFFF" label="io_deq_bits" rank="1000"]
+     
+
+struct_cluster_Queue_3_ram [shape="plaintext" label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" BGCOLOR="#DA70D6">
+  <TR>
+    <TD>Mem ram </TD>
+  </TR>
+    
+<TR><TD>read port _T_63</TD></TR>
+            
+<TR><TD PORT="_T_63_en">en</TD></TR>
+          
+<TR><TD PORT="_T_63_addr">addr</TD></TR>
+          
+<TR><TD PORT="_T_63_data">data</TD></TR>
+          
+<TR><TD PORT="_T_63_clk">clk</TD></TR>
+    
+<TR><TD>write port _T_49</TD></TR>
+            
+<TR><TD PORT="_T_49_en">en</TD></TR>
+          
+<TR><TD PORT="_T_49_addr">addr</TD></TR>
+          
+<TR><TD PORT="_T_49_data">data</TD></TR>
+          
+<TR><TD PORT="_T_49_mask">mask</TD></TR>
+          
+<TR><TD PORT="_T_49_clk">clk</TD></TR>
+    
+</TABLE>>];
+    
+struct_cluster_Queue_3_value [shape="plaintext" label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" BGCOLOR="#FFE4B5">
+  <TR>
+    <TD PORT="in">&#x25cf;</TD>
+    <TD>value</TD>
+    <TD PORT="out">&#x25cf;</TD>
+  </TR>
+</TABLE>>];
+struct_cluster_Queue_3_value_1 [shape="plaintext" label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" BGCOLOR="#FFE4B5">
+  <TR>
+    <TD PORT="in">&#x25cf;</TD>
+    <TD>value_1</TD>
+    <TD PORT="out">&#x25cf;</TD>
+  </TR>
+</TABLE>>];
+struct_cluster_Queue_3_maybe_full [shape="plaintext" label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" BGCOLOR="#FFE4B5">
+  <TR>
+    <TD PORT="in">&#x25cf;</TD>
+    <TD>maybe_full</TD>
+    <TD PORT="out">&#x25cf;</TD>
+  </TR>
+</TABLE>>];
+cluster_Queue_3_empty [label = "empty" shape="rectangle"]; 
+
+op_and_13443 [shape = "plaintext" label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" BGCOLOR="#D8BFD8">
+  <TR>
+    <TD PORT="in1">&#x25cf;</TD>
+    <TD ROWSPAN="2" > and </TD>
+    <TD ROWSPAN="2" PORT="out">&#x25cf;</TD>
+  </TR>
+  <TR>
+    <TD PORT="in2">&#x25cf;</TD>
+  </TR>
+</TABLE>>];
+       
+
+op_eq_13444 [shape = "plaintext" label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" BGCOLOR="#D8BFD8">
+  <TR>
+    <TD PORT="in1">&#x25cf;</TD>
+    <TD ROWSPAN="2" > eq </TD>
+    <TD ROWSPAN="2" PORT="out">&#x25cf;</TD>
+  </TR>
+  <TR>
+    <TD PORT="in2">&#x25cf;</TD>
+  </TR>
+</TABLE>>];
+       
+
+op_eq_13445 [shape = "plaintext" label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" BGCOLOR="#D8BFD8">
+  <TR>
+    <TD PORT="in1">&#x25cf;</TD>
+    <TD ROWSPAN="2" > eq </TD>
+    <TD ROWSPAN="2" PORT="out">&#x25cf;</TD>
+  </TR>
+  <TR>
+    <TD PORT="in2">0</TD>
+  </TR>
+</TABLE>>];
+       
+cluster_Queue_3_do_enq [label = "do_enq" shape="rectangle"]; 
+
+op_and_13446 [shape = "plaintext" label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" BGCOLOR="#D8BFD8">
+  <TR>
+    <TD PORT="in1">&#x25cf;</TD>
+    <TD ROWSPAN="2" > and </TD>
+    <TD ROWSPAN="2" PORT="out">&#x25cf;</TD>
+  </TR>
+  <TR>
+    <TD PORT="in2">&#x25cf;</TD>
+  </TR>
+</TABLE>>];
+       
+cluster_Queue_3_do_deq [label = "do_deq" shape="rectangle"]; 
+
+op_and_13447 [shape = "plaintext" label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" BGCOLOR="#D8BFD8">
+  <TR>
+    <TD PORT="in1">&#x25cf;</TD>
+    <TD ROWSPAN="2" > and </TD>
+    <TD ROWSPAN="2" PORT="out">&#x25cf;</TD>
+  </TR>
+  <TR>
+    <TD PORT="in2">&#x25cf;</TD>
+  </TR>
+</TABLE>>];
+       
+
+op_eq_13448 [shape = "plaintext" label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" BGCOLOR="#D8BFD8">
+  <TR>
+    <TD PORT="in1">&#x25cf;</TD>
+    <TD ROWSPAN="2" > eq </TD>
+    <TD ROWSPAN="2" PORT="out">&#x25cf;</TD>
+  </TR>
+  <TR>
+    <TD PORT="in2">0</TD>
+  </TR>
+</TABLE>>];
+       
+
+op_and_13449 [shape = "plaintext" label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" BGCOLOR="#D8BFD8">
+  <TR>
+    <TD PORT="in1">&#x25cf;</TD>
+    <TD ROWSPAN="2" > and </TD>
+    <TD ROWSPAN="2" PORT="out">&#x25cf;</TD>
+  </TR>
+  <TR>
+    <TD PORT="in2">&#x25cf;</TD>
+  </TR>
+</TABLE>>];
+       
+
+op_eq_13450 [shape = "plaintext" label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" BGCOLOR="#D8BFD8">
+  <TR>
+    <TD PORT="in1">&#x25cf;</TD>
+    <TD ROWSPAN="2" > eq </TD>
+    <TD ROWSPAN="2" PORT="out">&#x25cf;</TD>
+  </TR>
+  <TR>
+    <TD PORT="in2">&#x25cf;</TD>
+  </TR>
+</TABLE>>];
+       
+
+op_eq_13451 [shape = "plaintext" label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" BGCOLOR="#D8BFD8">
+  <TR>
+    <TD PORT="in1">&#x25cf;</TD>
+    <TD ROWSPAN="2" > eq </TD>
+    <TD ROWSPAN="2" PORT="out">&#x25cf;</TD>
+  </TR>
+  <TR>
+    <TD PORT="in2">0</TD>
+  </TR>
+</TABLE>>];
+       
+
+mux_948148993 [shape = "plaintext" label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" BGCOLOR="#AFEEEE">
+  <TR>
+    <TD PORT="in1">0</TD>
+    <TD ROWSPAN="2" PORT="select">a?</TD>
+    <TD ROWSPAN="2" PORT="out">&#x25cf;</TD>
+  </TR>
+  <TR>
+    <TD PORT="in2">&#x25cf;</TD>
+  </TR>
+</TABLE>>];
+       
+
+mux_1061973584 [shape = "plaintext" label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" BGCOLOR="#AFEEEE">
+  <TR>
+    <TD PORT="in1">&#x25cf;</TD>
+    <TD ROWSPAN="2" PORT="select">a?</TD>
+    <TD ROWSPAN="2" PORT="out">&#x25cf;</TD>
+  </TR>
+  <TR>
+    <TD PORT="in2">&#x25cf;</TD>
+  </TR>
+</TABLE>>];
+       
+
+op_tail_13452 [shape = "plaintext" label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" BGCOLOR="#D8BFD8">
+  <TR>
+    <TD PORT="in1">&#x25cf;</TD>
+    <TD ROWSPAN="2" > tail </TD>
+    <TD ROWSPAN="2" PORT="out">&#x25cf;</TD>
+  </TR>
+  <TR>
+    <TD>1</TD>
+  </TR>
+</TABLE>>];
+       
+
+op_add_13453 [shape = "plaintext" label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" BGCOLOR="#D8BFD8">
+  <TR>
+    <TD PORT="in1">&#x25cf;</TD>
+    <TD ROWSPAN="2" > add </TD>
+    <TD ROWSPAN="2" PORT="out">&#x25cf;</TD>
+  </TR>
+  <TR>
+    <TD PORT="in2">1</TD>
+  </TR>
+</TABLE>>];
+       
+
+mux_1038071030 [shape = "plaintext" label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" BGCOLOR="#AFEEEE">
+  <TR>
+    <TD PORT="in1">0</TD>
+    <TD ROWSPAN="2" PORT="select">a?</TD>
+    <TD ROWSPAN="2" PORT="out">&#x25cf;</TD>
+  </TR>
+  <TR>
+    <TD PORT="in2">&#x25cf;</TD>
+  </TR>
+</TABLE>>];
+       
+
+mux_1216025039 [shape = "plaintext" label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" BGCOLOR="#AFEEEE">
+  <TR>
+    <TD PORT="in1">&#x25cf;</TD>
+    <TD ROWSPAN="2" PORT="select">a?</TD>
+    <TD ROWSPAN="2" PORT="out">&#x25cf;</TD>
+  </TR>
+  <TR>
+    <TD PORT="in2">&#x25cf;</TD>
+  </TR>
+</TABLE>>];
+       
+
+op_tail_13454 [shape = "plaintext" label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" BGCOLOR="#D8BFD8">
+  <TR>
+    <TD PORT="in1">&#x25cf;</TD>
+    <TD ROWSPAN="2" > tail </TD>
+    <TD ROWSPAN="2" PORT="out">&#x25cf;</TD>
+  </TR>
+  <TR>
+    <TD>1</TD>
+  </TR>
+</TABLE>>];
+       
+
+op_add_13455 [shape = "plaintext" label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" BGCOLOR="#D8BFD8">
+  <TR>
+    <TD PORT="in1">&#x25cf;</TD>
+    <TD ROWSPAN="2" > add </TD>
+    <TD ROWSPAN="2" PORT="out">&#x25cf;</TD>
+  </TR>
+  <TR>
+    <TD PORT="in2">1</TD>
+  </TR>
+</TABLE>>];
+       
+
+mux_445875220 [shape = "plaintext" label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" BGCOLOR="#AFEEEE">
+  <TR>
+    <TD PORT="in1">0</TD>
+    <TD ROWSPAN="2" PORT="select">a?</TD>
+    <TD ROWSPAN="2" PORT="out">&#x25cf;</TD>
+  </TR>
+  <TR>
+    <TD PORT="in2">&#x25cf;</TD>
+  </TR>
+</TABLE>>];
+       
+
+mux_976721746 [shape = "plaintext" label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" BGCOLOR="#AFEEEE">
+  <TR>
+    <TD PORT="in1">&#x25cf;</TD>
+    <TD ROWSPAN="2" PORT="select">a?</TD>
+    <TD ROWSPAN="2" PORT="out">&#x25cf;</TD>
+  </TR>
+  <TR>
+    <TD PORT="in2">&#x25cf;</TD>
+  </TR>
+</TABLE>>];
+       
+
+op_neq_13456 [shape = "plaintext" label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" BGCOLOR="#D8BFD8">
+  <TR>
+    <TD PORT="in1">&#x25cf;</TD>
+    <TD ROWSPAN="2" > neq </TD>
+    <TD ROWSPAN="2" PORT="out">&#x25cf;</TD>
+  </TR>
+  <TR>
+    <TD PORT="in2">&#x25cf;</TD>
+  </TR>
+</TABLE>>];
+       
+cluster_Queue_3_lit13457 [shape="circle" style="filled" BGCOLOR="#C0C0C0" label="1"]
+     
+
+op_and_13458 [shape = "plaintext" label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" BGCOLOR="#D8BFD8">
+  <TR>
+    <TD PORT="in1">&#x25cf;</TD>
+    <TD ROWSPAN="2" > and </TD>
+    <TD ROWSPAN="2" PORT="out">&#x25cf;</TD>
+  </TR>
+  <TR>
+    <TD PORT="in2">&#x25cf;</TD>
+  </TR>
+</TABLE>>];
+       
+cluster_Queue_3_lit13459 [shape="circle" style="filled" BGCOLOR="#C0C0C0" label="1"]
+     
+
+  struct_cluster_Queue_3_value_1:out -> op_add_13455:in1
+  op_eq_13445:out -> op_and_13443:in2
+  op_add_13455:out -> op_tail_13454:in1
+  cluster_Queue_3_do_deq -> mux_1216025039:select
+  cluster_Queue_3_lit13459 -> struct_cluster_Queue_3_ram:_T_49_mask
+  cluster_Queue_3_io_deq_valid -> op_and_13447:in2
+  op_and_13447:out -> cluster_Queue_3_do_deq
+  cluster_Queue_3_io_enq_ready -> op_and_13446:in1
+  cluster_Queue_3_do_deq -> op_neq_13456:in2
+  cluster_Queue_3_reset -> mux_1038071030:select
+  struct_cluster_Queue_3_maybe_full:out -> mux_976721746:in2
+  mux_445875220:out -> struct_cluster_Queue_3_maybe_full:in
+  struct_cluster_Queue_3_maybe_full:out -> op_eq_13445:in1
+  mux_948148993:out -> struct_cluster_Queue_3_value:in
+  cluster_Queue_3_do_enq -> mux_1061973584:select
+  cluster_Queue_3_empty -> op_eq_13451:in1
+  op_tail_13454:out -> mux_1216025039:in1
+  op_neq_13456:out -> mux_976721746:select
+  op_and_13443:out -> cluster_Queue_3_empty
+  cluster_Queue_3_clock -> struct_cluster_Queue_3_ram:_T_63_clk
+  op_and_13458:out -> struct_cluster_Queue_3_ram:_T_49_en
+  cluster_Queue_3_do_enq -> op_neq_13456:in1
+  struct_cluster_Queue_3_value:out -> struct_cluster_Queue_3_ram:_T_49_addr
+  struct_cluster_Queue_3_value:out -> op_add_13453:in1
+  op_eq_13444:out -> op_and_13443:in1
+  op_eq_13448:out -> cluster_Queue_3_io_enq_ready
+  struct_cluster_Queue_3_value_1:out -> op_eq_13444:in2
+  cluster_Queue_3_io_deq_ready -> op_and_13447:in1
+  cluster_Queue_3_reset -> mux_445875220:select
+  mux_1216025039:out -> mux_1038071030:in2
+  cluster_Queue_3_do_enq -> mux_976721746:in1
+  struct_cluster_Queue_3_maybe_full:out -> op_and_13449:in2
+  op_eq_13451:out -> cluster_Queue_3_io_deq_valid
+  op_and_13446:out -> cluster_Queue_3_do_enq
+  struct_cluster_Queue_3_value_1:out -> op_eq_13450:in2
+  cluster_Queue_3_io_enq_valid -> op_and_13458:in2
+  mux_976721746:out -> mux_445875220:in2
+  op_add_13453:out -> op_tail_13452:in1
+  mux_1038071030:out -> struct_cluster_Queue_3_value_1:in
+  cluster_Queue_3_clock -> struct_cluster_Queue_3_ram:_T_49_clk
+  cluster_Queue_3_io_enq_bits -> struct_cluster_Queue_3_ram:_T_49_data
+  struct_cluster_Queue_3_value_1:out -> struct_cluster_Queue_3_ram:_T_63_addr
+  struct_cluster_Queue_3_ram:_T_63_data -> cluster_Queue_3_io_deq_bits
+  cluster_Queue_3_lit13457 -> struct_cluster_Queue_3_ram:_T_63_en
+  mux_1061973584:out -> mux_948148993:in2
+  cluster_Queue_3_io_enq_valid -> op_and_13446:in2
+  cluster_Queue_3_reset -> mux_948148993:select
+  struct_cluster_Queue_3_value:out -> mux_1061973584:in2
+  cluster_Queue_3_io_enq_ready -> op_and_13458:in1
+  struct_cluster_Queue_3_value:out -> op_eq_13444:in1
+  op_eq_13450:out -> op_and_13449:in1
+  struct_cluster_Queue_3_value_1:out -> mux_1216025039:in2
+  op_and_13449:out -> op_eq_13448:in1
+  struct_cluster_Queue_3_value:out -> op_eq_13450:in1
+  op_tail_13452:out -> mux_1061973584:in1
+  
+  
+}
+     
+}
