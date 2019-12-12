@@ -249,7 +249,7 @@ class TopModule(val moduleInfos: ModuleInfos, val connect: Map[List[Int], List[L
 
 
   val RFNum1_1_2 = moduleNums(1)
-  val RFs1_1_2 = (0 until RFNum1_1_2).toArray
+  val RFs = (0 until RFNum1_1_2).toArray
     .map(t => Module(new RegisterFiles(moduleInfos.getParams(t + currentNum)(0),
       moduleInfos.getParams(t + currentNum)(1),
       moduleInfos.getParams(t + currentNum)(2),
@@ -257,29 +257,30 @@ class TopModule(val moduleInfos: ModuleInfos, val connect: Map[List[Int], List[L
   currentNum += RFNum1_1_2
 
   val MuxNum5 = moduleNums(2)
-  val Muxs5 = (0 until MuxNum5).toArray
+  val Muxs = (0 until MuxNum5).toArray
     .map(t => Module(new Multiplexer(moduleInfos.getParams(t + currentNum)(0), moduleInfos.getParams(t + currentNum)(1))))
+  println("2110", moduleInfos.getParams(11 + currentNum))
   currentNum += MuxNum5
 
   val ConstNum32 = moduleNums(3)
-  val Consts32 = (0 until ConstNum32).toArray
+  val Consts = (0 until ConstNum32).toArray
     .map(t => Module(new ConstUnit(moduleInfos.getParams(t + currentNum)(0))))
   currentNum += ConstNum32
 
-  val modules = List(alus, RFs1_1_2, Muxs5, Consts32)
+  val modules = List(alus, RFs, Muxs, Consts)
 
 
   val outPorts = new ArrayBuffer[Array[List[Any]]]
   outPorts.append(alus.map(i => i.io.outs.toList))
-  outPorts.append(RFs1_1_2.map(i => i.io.outs.toList))
-  outPorts.append(Muxs5.map(i => i.io.outs.toList))
-  outPorts.append(Consts32.map(i => i.io.outs.toList))
+  outPorts.append(RFs.map(i => i.io.outs.toList))
+  outPorts.append(Muxs.map(i => i.io.outs.toList))
+  outPorts.append(Consts.map(i => i.io.outs.toList))
 
   val inPorts = new ArrayBuffer[Array[List[Any]]]
   inPorts.append(alus.map(i => i.io.inputs.toList))
-  inPorts.append(RFs1_1_2.map(i => i.io.inputs.toList))
-  inPorts.append(Muxs5.map(i => i.io.inputs.toList))
-  inPorts.append(Consts32.map(i => List()))
+  inPorts.append(RFs.map(i => i.io.inputs.toList))
+  inPorts.append(Muxs.map(i => i.io.inputs.toList))
+  inPorts.append(Consts.map(i => List()))
 
 
   println(configList)
@@ -294,9 +295,9 @@ class TopModule(val moduleInfos: ModuleInfos, val connect: Map[List[Int], List[L
       configBits = configBits :+ moduleInfos.getConfigBits(typeID, moduleID)
       val configPort = typeID match {
         case 0 => alus(moduleID).io.configuration
-        case 1 => RFs1_1_2(moduleID).io.configuration
-        case 2 => Muxs5(moduleID).io.configuration
-        case 3 => Consts32(moduleID).io.configuration
+        case 1 => RFs(moduleID).io.configuration
+        case 2 => Muxs(moduleID).io.configuration
+        case 3 => Consts(moduleID).io.configuration
       }
       configPorts = configPorts :+ configPort
     }
@@ -344,7 +345,7 @@ class TopModule(val moduleInfos: ModuleInfos, val connect: Map[List[Int], List[L
     val dsts = connect(src)
     for (j <- 0 until dsts.size) {
       val dst = dsts(j)
-      //println(dst, src)
+      println(dst, src)
       if (dst(0) == types) {
         io.outs(dst(2)) := outPorts(src(0))(src(1))(src(2)).asInstanceOf[Data]
       } else if (src(0) == types) {
@@ -357,7 +358,7 @@ class TopModule(val moduleInfos: ModuleInfos, val connect: Map[List[Int], List[L
 
 }
 
-class TopModulePEUnitTest(c: TopModule) extends PeekPokeTester(c) {
+class TopModule2PEUnitTest(c: TopModule) extends PeekPokeTester(c) {
   //MixedVec don't support c.io.inputs(0) in poke
   poke(c.input_0, 2)
   poke(c.input_1, 3)

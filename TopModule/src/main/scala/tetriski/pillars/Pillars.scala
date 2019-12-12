@@ -5,6 +5,8 @@ import chisel3.iotesters
 import scala.collection.mutable.ArrayBuffer
 import java.io.{File, PrintWriter}
 
+import chisel3.util.log2Up
+
 import scala.collection.mutable.Queue
 
 
@@ -15,14 +17,14 @@ trait Ports {
   var outPortMap = Map[String, Int]()
 
   //Initial ports with portMap
-  def setInPortMap(args: Array[String]): Map[String, Int] = {
+  def addInPorts(args: Array[String]): Map[String, Int] = {
     for (i <- 0 until args.length) {
       inPortMap += (args(i) -> i)
     }
     inPortMap
   }
 
-  def setOutPortMap(args: Array[String]): Map[String, Int] = {
+  def addOutPorts(args: Array[String]): Map[String, Int] = {
     for (i <- 0 until args.length) {
       outPortMap += (args(i) -> i)
     }
@@ -44,7 +46,7 @@ trait Ports {
     }else if (outPortMap.contains(name)){
       outPortMap(name)
     }else{
-      println("No port exception")
+      println("No port exception " + name)
       -1
     }
   }
@@ -160,10 +162,6 @@ class MemPort extends MemTrait {
 
 
 class OpAlu(name: String, params: List[Int]) extends ModuleTrait {
-  //port sequnces outs: 0: out
-  //port sequnces inputs: 0: input_a, 1: input_b
-  setOutPortMap(Array("out_0"))
-  setInPortMap(Array("input_0", "input_1"))
   //Module ID 0
   setTypeID(0)
   //Support add, sub, and, or, xor
@@ -176,11 +174,8 @@ class OpAlu(name: String, params: List[Int]) extends ModuleTrait {
   setName(name)
 }
 
-class OpRF1_1_2(name: String, params: List[Int]) extends ModuleTrait {
-  //port sequnces outs: 0: out
-  //port sequnces inputs: 0: input_a, 1: input_b
-  setOutPortMap(Array("out_0", "out_1"))
-  setInPortMap(Array("input_0"))
+class OpRF(name: String, params: List[Int]) extends ModuleTrait {
+
   //Module ID 1
   setTypeID(1)
 
@@ -193,11 +188,8 @@ class OpRF1_1_2(name: String, params: List[Int]) extends ModuleTrait {
   setName(name)
 }
 
-class OpMux5(name: String, params: List[Int]) extends ModuleTrait {
-  //port sequnces outs: 0: out
-  //port sequnces inputs: 0: input_a, 1: input_b
-  setOutPortMap(Array("out_0"))
-  setInPortMap(Array("input_0", "input_1", "input_2", "input_3", "input_4"))
+class OpMux(name: String, params: List[Int]) extends ModuleTrait {
+
   //Module ID 2
   setTypeID(2)
 
@@ -210,9 +202,9 @@ class OpMux5(name: String, params: List[Int]) extends ModuleTrait {
   setName(name)
 }
 
-class OpConst32(name: String, params: List[Int]) extends ModuleTrait {
+class OpConst(name: String, params: List[Int]) extends ModuleTrait {
   //port sequnces outs: 0: out
-  setOutPortMap(Array("out_0"))
+  addOutPorts(Array("out_0"))
   //Module ID 3
   setTypeID(3)
   //Support 5 to 1 mux
@@ -396,19 +388,35 @@ class PEBlock(name: String) extends BlockTrait{
   hierName.append(name)
   isConfigRegion = true
 
-  setOutPortMap(Array("out"))
-  setInPortMap(Array("input_0", "input_1", "input_2", "input_3"))
+  addOutPorts(Array("out"))
+  addInPorts(Array("input_0", "input_1", "input_2", "input_3"))
 
   val alu0 = new OpAlu("alu0", List(32, 4))
+  //port sequnces outs: 0: out
+  //port sequnces inputs: 0: input_a, 1: input_b
+  alu0.addOutPorts(Array("out_0"))
+  alu0.addInPorts(Array("input_a", "input_b"))
   addModule(alu0)
 
-  val mux0 = new OpMux5("mux0", List(5, 32, 3))
+  val mux0 = new OpMux("mux0", List(5, 32, 3))
+  //port sequnces outs: 0: out
+  //port sequnces inputs: 0: input_0, 1: input_1, 2: input_2, 3: input_3, 4: input_4
+  mux0.addOutPorts(Array("out_0"))
+  mux0.addInPorts(Array("input_0", "input_1", "input_2", "input_3", "input_4"))
   addModule(mux0)
 
-  val mux1 = new OpMux5("mux1", List(5, 32, 3))
+  val mux1 = new OpMux("mux1", List(5, 32, 3))
+  //port sequnces outs: 0: out
+  //port sequnces inputs: 0: input_0, 1: input_1, 2: input_2, 3: input_3, 4: input_4
+  mux1.addOutPorts(Array("out_0"))
+  mux1.addInPorts(Array("input_0", "input_1", "input_2", "input_3", "input_4"))
   addModule(mux1)
 
-  val rf0 = new OpRF1_1_2("rf0", List(1, 1, 2, 32, 3))
+  val rf0 = new OpRF("rf0", List(1, 1, 2, 32, 3))
+  //port sequnces outs: 0: out_0, 1: out_1
+  //port sequnces inputs: 0: input_0
+  rf0.addOutPorts(Array("out_0", "out_1"))
+  rf0.addInPorts(Array("input_0"))
   addModule(rf0)
 
   connectArray =
@@ -422,10 +430,169 @@ class PEBlock(name: String) extends BlockTrait{
       List(List("input_3"),List("mux1","input_3")),
       List(List("rf0", "out_0"),List("mux0","input_4")),
       List(List("rf0", "out_0"),List("mux1","input_4")),
-      List(List("mux0","out_0"),List("alu0","input_0")),
-      List(List("mux1","out_0"),List("alu0","input_1")),
+      List(List("mux0","out_0"),List("alu0","input_a")),
+      List(List("mux1","out_0"),List("alu0","input_b")),
       List(List("alu0","out_0"),List("rf0","input_0")),
       List(List("rf0","out_1"),List("out_0")))
+}
+
+class AdresPEBlock(name: String) extends BlockTrait{
+  setName(name)
+  hierName.append(name)
+  isConfigRegion = true
+
+  addOutPorts(Array("out"))
+  addInPorts(Array("input_w", "input_e", "input_n", "input_s"))
+
+  val alu0 = new OpAlu("alu0", List(32, 4))
+  //port sequnces outs: 0: out
+  //port sequnces inputs: 0: input_a, 1: input_b
+  alu0.addOutPorts(Array("out_0"))
+  alu0.addInPorts(Array("input_a", "input_b"))
+  addModule(alu0)
+
+  val mux0 = new OpMux("mux0", List(6, 32, 3))
+  //port sequnces outs: 0: out
+  //port sequnces inputs: 0: input_0, 1: input_1, 2: input_2, 3: input_3, 4: input_4, 5: input_5
+  mux0.addOutPorts(Array("out_0"))
+  mux0.addInPorts(Array("input_0", "input_1", "input_2", "input_3", "input_4", "input_5"))
+  addModule(mux0)
+
+  val mux1 = new OpMux("mux1", List(5, 32, 3))
+  //port sequnces outs: 0: out
+  //port sequnces inputs: 0: input_0, 1: input_1, 2: input_2, 3: input_3, 4: input_4
+  mux1.addOutPorts(Array("out_0"))
+  mux1.addInPorts(Array("input_0", "input_1", "input_2", "input_3", "input_4"))
+  addModule(mux1)
+
+  val muxBp = new OpMux("muxBp", List(4, 32, 2))
+  //port sequnces outs: 0: out
+  //port sequnces inputs: 0: input_0, 1: input_1, 2: input_2, 3: input_3
+  muxBp.addOutPorts(Array("out_0"))
+  muxBp.addInPorts(Array("input_0", "input_1", "input_2", "input_3"))
+  addModule(muxBp)
+
+  val muxOut = new OpMux("muxOut", List(2, 32, 1))
+  //port sequnces outs: 0: out
+  //port sequnces inputs: 0: input_0, 1: input_1
+  muxOut.addOutPorts(Array("out_0"))
+  muxOut.addInPorts(Array("input_0", "input_1"))
+  addModule(muxOut)
+
+  val rf0 = new OpRF("rf0", List(1, 1, 2, 32, 3))
+  //port sequnces outs: 0: out_0, 1: out_1
+  //port sequnces inputs: 0: input_0
+  rf0.addOutPorts(Array("out_0", "out_1"))
+  rf0.addInPorts(Array("input_0"))
+  addModule(rf0)
+
+  val const0 = new OpConst("const0", List(32, 32))
+  const0.addOutPorts(Array("out_0"))
+  addModule(const0)
+
+  connectArray =
+    ArrayBuffer(List(List("input_w"),List("mux0","input_0")),
+      List(List("input_w"),List("mux1","input_0")),
+      List(List("input_w"),List("muxBp","input_0")),
+      List(List("input_e"),List("mux0","input_1")),
+      List(List("input_e"),List("mux1","input_1")),
+      List(List("input_e"),List("muxBp","input_1")),
+      List(List("input_n"),List("mux0","input_2")),
+      List(List("input_n"),List("mux1","input_2")),
+      List(List("input_n"),List("muxBp","input_2")),
+      List(List("input_s"),List("mux0","input_3")),
+      List(List("input_s"),List("mux1","input_3")),
+      List(List("input_s"),List("muxBp","input_3")),
+      List(List("const0", "out_0"),List("mux0","input_4")),
+      List(List("const0", "out_0"),List("mux1","input_4")),
+      List(List("rf0", "out_0"),List("mux0","input_5")),
+      List(List("mux0","out_0"),List("alu0","input_a")),
+      List(List("mux1","out_0"),List("alu0","input_b")),
+      List(List("alu0","out_0"),List("rf0","input_0")),
+      List(List("muxBp","out_0"),List("muxOut","input_0")),
+      List(List("rf0","out_1"),List("muxOut","input_1")),
+      List(List("muxOut","out_0"),List("out_0")))
+}
+
+class AdresIOBlock(name: String, numIn : Int, numOut : Int, numNeighbour : Int) extends BlockTrait{
+
+  setName(name)
+  hierName.append(name)
+  isConfigRegion = true
+
+  addOutPorts((0 to numOut).map(i => "out_" + i.toString).toArray)
+  addOutPorts((0 to numNeighbour).map(i => "neighbour_out" + i.toString).toArray)
+  addInPorts((0 to numIn).map(i => "input_" + i.toString).toArray)
+  addInPorts((0 to numNeighbour).map(i => "neighbour_input_" + i.toString).toArray)
+
+  for(i <- 0 until numOut){
+    val mux = new OpMux("muxN2O_"+i.toString, List(numNeighbour, 32, log2Up(numNeighbour)))
+    mux.addOutPorts(Array("out_0"))
+    for(j <- 0 until numNeighbour){
+      mux.addInPorts(Array("input_"+j.toString))
+      addConnect(List(List("neighbour_input_"+j.toString),List(mux.getName(), "input_"+j.toString)))
+    }
+    addModule(mux)
+    addConnect(List(List(mux.getName(),"out_0"),List("out_"+i.toString)))
+  }
+
+  for(i <- 0 until numNeighbour){
+    val mux = new OpMux("muxI2N_"+i.toString, List(numIn, 32, log2Up(numIn)))
+    mux.addOutPorts(Array("out_0"))
+    for(j <- 0 until numIn){
+      mux.addInPorts(Array("input_"+j.toString))
+      addConnect(List(List("input_"+j.toString),List(mux.getName(), "input_"+j.toString)))
+    }
+    addModule(mux)
+    addConnect(List(List(mux.getName(),"out_0"),List("neighbour_out_"+i.toString)))
+  }
+  println("IOBlock!!!!",connectArray)
+
+}
+
+class TileBlock(name : String, x : Int, y : Int, numIn : Int, numOut : Int) extends BlockTrait {
+  setName(name)
+  hierName.append(name)
+  addOutPorts((0 to numOut).map(i => "out_" + i.toString).toArray)
+  addInPorts((0 to numIn).map(i => "input_" + i.toString).toArray)
+  val ioBlock = new AdresIOBlock("ioBlock", numIn, numOut, x)
+  addBlock(ioBlock)
+
+  for(i <- 0 until numOut){
+    addConnect(List(List(ioBlock.getName() + "/", "out_"+i.toString),List("out_" + i.toString)))
+  }
+  for(i <- 0 until numIn){
+    addConnect(List(List("input_" + i.toString),List(ioBlock.getName() + "/", "input_"+i.toString)))
+  }
+
+
+  var peMap = Map[Int, AdresPEBlock]()
+  for (i <- 0 until x){
+    for (j <- 0 until y){
+      val pe = new AdresPEBlock("pe_"+i.toString+"_"+j.toString)
+      peMap = peMap + ((i + j * x) -> pe)
+      addBlock(pe)
+    }
+  }
+  for (i <- 0 until x) {
+    for (j <- 0 until y) {
+      val peCurrent = peMap(i + j * x)
+      val peN = peMap(i + ((j + 1) % y) * x)
+      val peS = peMap(i + (((j - 1) + y) % y) * x)
+      val peE = peMap((i + 1) % x + j * x)
+      val peW = peMap(((i - 1) + x) % x + j * x)
+      if(j != y - 1){
+        connectArray.append(List(List(peCurrent.getName() + "/", "out_0"), List(peS.getName()+ "/", "input_n")))
+      }else{
+        connectArray.append(List(List(ioBlock.getName() + "/" ,"neighbour_out_"+i.toString), List(peS.getName()+ "/", "input_n")))
+        connectArray.append(List(List(peS.getName()+ "/", "out_0"), List(ioBlock.getName() + "/" ,"neighbour_input_"+i.toString)))
+      }
+      connectArray.append(List(List(peCurrent.getName()+ "/", "out_0"), List(peN.getName()+ "/", "input_s")))
+      connectArray.append(List(List(peCurrent.getName()+ "/", "out_0"), List(peE.getName()+ "/", "input_w")))
+      connectArray.append(List(List(peCurrent.getName()+ "/", "out_0"), List(peW.getName()+ "/", "input_e")))
+    }
+  }
+
 }
 
 //This class describes the archtectures of the designed CGRA Demo
@@ -451,11 +618,23 @@ class ArchitctureHierarchy extends BlockTrait {
 
   def getConfigList(): List[List[List[Int]]] = {
     var ret = List[List[List[Int]]]()
-    for (subBlock <- blockMap.values){
+    def findConfigRegion(blockMap : Map[String, BlockTrait]): List[BlockTrait] ={
+      var ret = List[BlockTrait]()
+      for(subBlock <- blockMap.values){
+        if(subBlock.isConfigRegion){
+          ret = ret :+ subBlock
+        }else{
+          ret = ret ::: findConfigRegion(subBlock.blockMap)
+        }
+      }
+      ret
+    }
+    val configRegions = findConfigRegion(blockMap)
+    for (configRegion <- configRegions){
       var moduleList = List[List[Int]]()
-      for (i <- 0 until subBlock.modulesArray.size) {
-        for (j <- 0 until subBlock.modulesArray(i).size) {
-          val module = subBlock.modulesArray(i)(j).asInstanceOf[ModuleTrait]
+      for (i <- 0 until configRegion.modulesArray.size) {
+        for (j <- 0 until configRegion.modulesArray(i).size) {
+          val module = configRegion.modulesArray(i)(j).asInstanceOf[ModuleTrait]
           if(module.getConfigBit()>0)
           moduleList = moduleList :+ List(module.getTypeID(), module.getModuleID())
         }
@@ -517,6 +696,8 @@ class Connect(outArray: ArrayBuffer[List[String]], inArray: ArrayBuffer[List[Str
     val dsts = inArray.toSet
     val sources = srcs&~(srcs.&(dsts))
     val sinks = dsts&~(srcs.&(dsts))
+    println(srcs)
+    println(dsts)
     println(sources)
     for (src <- sources){
       //BFS
@@ -602,19 +783,12 @@ class HardwareGeneration(arch: BlockTrait, connect: Connect) {
       }
 
       var temp = arch
-      var ii = 0
-      for (i <- 0 until strs.size) {
-        if (strs(i)(strs(i).size - 1) == '/') {
-          if (strs(i) != "cgra/")
-            temp = temp(strs(i).substring(0, strs(i).size - 1))
+      for (i <- 1 until strs.size) {
+        if (strs(i)(strs(i).size - 1) == '/' ) {
+          temp = temp(strs(i).substring(0, strs(i).size - 1))
         } else if (i == strs.size - 2) {
           var target = temp.getModule(strs(i))
           return List(target.getTypeID(), target.getModuleID(), target ** strs(strs.size - 1))
-        } else if (ii % 2 == 0) {
-          temp = temp(strs(i))
-          ii += 1
-        } else {
-          ii += 1
         }
 
       }
@@ -623,6 +797,9 @@ class HardwareGeneration(arch: BlockTrait, connect: Connect) {
 
     val encodeSrc = encode(src)
     val encodeDsts = dsts.map(encode).toList
+
+    println("src: ", encodeSrc, src)
+    println("dst: ", encodeDsts, dsts)
 
     Map(encodeSrc -> encodeDsts)
   }
@@ -639,55 +816,112 @@ class HardwareGeneration(arch: BlockTrait, connect: Connect) {
 object Pillars {
   def main(args: Array[String]): Unit = {
 
-    var arch = new ArchitctureHierarchy()
-    //The order of ports should be same as TopModule
-    arch.setOutPortMap(Array("output"))
-    arch.setInPortMap(Array("input_0", "input_1"))
+    def example2PE(): Unit ={
+      var arch = new ArchitctureHierarchy()
+      //The order of ports should be same as TopModule
+      arch.addOutPorts(Array("output"))
+      arch.addInPorts(Array("input_0", "input_1"))
 
-    val pe0 = new PEBlock("pe0")
-    val pe1 = new PEBlock("pe1")
+      val pe0 = new PEBlock("pe0")
+      val pe1 = new PEBlock("pe1")
 
-    arch.addBlock(pe0)
-    arch.addBlock(pe1)
+      arch.addBlock(pe0)
+      arch.addBlock(pe1)
 
-    arch.addConnect(List(List("input_0"),List("pe0/", "input_0")))
-    arch.addConnect(List(List("input_0"),List("pe0/", "input_1")))
-    arch.addConnect(List(List("input_1"),List("pe0/", "input_2")))
-    arch.addConnect(List(List("input_1"),List("pe1/", "input_0")))
-    arch.addConnect(List(List("input_1"),List("pe1/", "input_1")))
-    arch.addConnect(List(List("input_0"),List("pe1/", "input_2")))
-    arch.addConnect(List(List("pe1/","out_0"),List("pe0/", "input_3")))
-    arch.addConnect(List(List("pe0/","out_0"),List("pe1/", "input_3")))
-    arch.addConnect(List(List("pe0/","out_0"),List("output")))
+      arch.addConnect(List(List("input_0"),List("pe0/", "input_0")))
+      arch.addConnect(List(List("input_0"),List("pe0/", "input_1")))
+      arch.addConnect(List(List("input_1"),List("pe0/", "input_2")))
+      arch.addConnect(List(List("input_1"),List("pe1/", "input_0")))
+      arch.addConnect(List(List("input_1"),List("pe1/", "input_1")))
+      arch.addConnect(List(List("input_0"),List("pe1/", "input_2")))
+      arch.addConnect(List(List("pe1/","out_0"),List("pe0/", "input_3")))
+      arch.addConnect(List(List("pe0/","out_0"),List("pe1/", "input_3")))
+      arch.addConnect(List(List("pe0/","out_0"),List("output")))
 
-    arch.init()
+      arch.init()
 
-    arch.dumpArchitcture()
+      arch.dumpArchitcture()
 
-    val connectArray = arch.connectArray
+      val connectArray = arch.connectArray
 
 
-    val outArray = ArrayBuffer[List[String]]()
-    val inArray = ArrayBuffer[List[String]]()
-    connectArray.foreach(t => outArray.append(t(0)))
-    connectArray.foreach(t => inArray.append(t(1)))
+      val outArray = ArrayBuffer[List[String]]()
+      val inArray = ArrayBuffer[List[String]]()
+      connectArray.foreach(t => outArray.append(t(0)))
+      connectArray.foreach(t => inArray.append(t(1)))
 
-    val connect = new Connect(outArray, inArray)
-    //val test = connect.getConnect()
+      val connect = new Connect(outArray, inArray)
+      //val test = connect.getConnect()
 
-    connect.dumpConnect()
+      connect.dumpConnect()
 
-    val cp = new HardwareGeneration(arch, connect)
+      val cp = new HardwareGeneration(arch, connect)
 
-    //println(cp.connectMap)
+      //println(cp.connectMap)
 
-    //Verilog generation
-    chisel3.Driver.execute(args, () => new TopModule(cp.archList, cp.connectMap, cp.configList, 32))
+      //Verilog generation
+      chisel3.Driver.execute(args, () => new TopModule(cp.archList, cp.connectMap, cp.configList, 32))
 
-    //Run tester
-    iotesters.Driver.execute(args, () => new TopModule(cp.archList, cp.connectMap, cp.configList, 32)) {
-      c => new TopModulePEUnitTest(c)
+      //Run tester
+      iotesters.Driver.execute(args, () => new TopModule(cp.archList, cp.connectMap, cp.configList, 32)) {
+        c => new TopModule2PEUnitTest(c)
+      }
     }
+
+    def exampleAdres(): Unit ={
+      var arch = new ArchitctureHierarchy()
+      //The order of ports should be same as TopModule
+      arch.addOutPorts(Array("output"))
+      arch.addInPorts(Array("input_0", "input_1"))
+
+      val tile = new TileBlock("tile0", 2, 2, 2, 1)
+
+      arch.addBlock(tile)
+
+
+
+
+      arch.addConnect(List(List("input_0"),List("tile0/", "input_0")))
+      arch.addConnect(List(List("input_1"),List("tile0/", "input_1")))
+      arch.addConnect(List(List("tile0/","out_0"),List("output")))
+
+      arch.init()
+
+      arch.dumpArchitcture()
+
+      val connectArray = arch.connectArray
+
+      println(connectArray)
+
+
+      val outArray = ArrayBuffer[List[String]]()
+      val inArray = ArrayBuffer[List[String]]()
+      connectArray.foreach(t => outArray.append(t(0)))
+      connectArray.foreach(t => inArray.append(t(1)))
+
+      val connect = new Connect(outArray, inArray)
+      //val test = connect.getConnect()
+
+      connect.dumpConnect()
+
+      val cp = new HardwareGeneration(arch, connect)
+
+      //println(cp.connectMap)
+
+      //Verilog generation
+      chisel3.Driver.execute(args, () => new TopModule(cp.archList, cp.connectMap, cp.configList, 32))
+
+      //Run tester
+      iotesters.Driver.execute(args, () => new TopModule(cp.archList, cp.connectMap, cp.configList, 32)) {
+        c => new TopModule2PEUnitTest(c)
+      }
+    }
+
+    //example2PE()
+
+    exampleAdres()
+
+
 
 
 
