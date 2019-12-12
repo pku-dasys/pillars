@@ -11,29 +11,43 @@ import scala.collection.mutable.Queue
 //Since almost every modules has the common 'port' array, we extract
 //the 'port' array and wrap it in the Trait to be extended.
 trait Ports {
-  var portMap = Map[String, Int]()
+  var inPortMap = Map[String, Int]()
+  var outPortMap = Map[String, Int]()
 
   //Initial ports with portMap
   def setInPortMap(args: Array[String]): Map[String, Int] = {
     for (i <- 0 until args.length) {
-      portMap += (args(i) -> i)
+      inPortMap += (args(i) -> i)
     }
-    portMap
+    inPortMap
   }
 
   def setOutPortMap(args: Array[String]): Map[String, Int] = {
     for (i <- 0 until args.length) {
-      portMap += (args(i) -> i)
+      outPortMap += (args(i) -> i)
     }
-    portMap
+    outPortMap
   }
 
-  def getPorts(): Iterable[String] = {
-    portMap.keys
+  def getInPorts(): Iterable[String] = {
+    inPortMap.keys
+  }
+
+  def getOutPorts(): Iterable[String] = {
+    outPortMap.keys
   }
 
   //We can use ** operator to get a port's ID with its name
-  def **(name: String) = portMap(name)
+  def **(name: String) : Int = {
+    if (inPortMap.contains(name)){
+      inPortMap(name)
+    }else if (outPortMap.contains(name)){
+      outPortMap(name)
+    }else{
+      println("No port exception")
+      -1
+    }
+  }
 }
 
 //ModuleInfo is basic information of a modle
@@ -43,6 +57,7 @@ trait ModuleInfo {
   var width = -1
   var name = ""
   var supOps = new ArrayBuffer[String]
+  var params = new ArrayBuffer[Int]
   var configBit = 0
 
   def setModuleID(arg: Int): Unit = {
@@ -65,6 +80,12 @@ trait ModuleInfo {
     arg.foreach(t => supOps.append(t))
   }
 
+  def setParams(arg: List[Int]): Unit = {
+    arg.foreach(t => params.append(t))
+    setConfigBit(arg(arg.length-1))
+  }
+
+
   def setConfigBit(arg: Int): Unit = {
     configBit = arg
   }
@@ -82,11 +103,15 @@ trait ModuleInfo {
   }
 
   def getWidth(): Int = {
-    width
+    params(params.length-2)
   }
 
   def getSupOps(): ArrayBuffer[String] = {
     supOps
+  }
+
+  def getParams(): List[Int] = {
+    params.toList
   }
 
   def getConfigBit(): Int = {
@@ -134,7 +159,7 @@ class MemPort extends MemTrait {
 //############### Currently Unused #################
 
 
-class OpAlu(name: String, width: Int) extends ModuleTrait {
+class OpAlu(name: String, params: List[Int]) extends ModuleTrait {
   //port sequnces outs: 0: out
   //port sequnces inputs: 0: input_a, 1: input_b
   setOutPortMap(Array("out_0"))
@@ -144,41 +169,59 @@ class OpAlu(name: String, width: Int) extends ModuleTrait {
   //Support add, sub, and, or, xor
   setSupOps(List("add", "sub", "and", "or", "xor"))
   //4 bit configuration
-  setConfigBit(4)
+  //setConfigBit(4)
 
-  setWidth(width)
+  //setWidth(width)
+  setParams(params)
   setName(name)
 }
 
-class OpRF1_1_2(name: String, width: Int) extends ModuleTrait {
+class OpRF1_1_2(name: String, params: List[Int]) extends ModuleTrait {
   //port sequnces outs: 0: out
   //port sequnces inputs: 0: input_a, 1: input_b
   setOutPortMap(Array("out_0", "out_1"))
   setInPortMap(Array("input_0"))
   //Module ID 1
   setTypeID(1)
-  //Support 2 registers
-  setSupOps(List("registers(2)"))
-  //4 bit configuration
-  setConfigBit(3)
 
-  setWidth(width)
+  setSupOps(List())
+  //4 bit configuration
+  //setConfigBit(3)
+
+  //setWidth(width)
+  setParams(params)
   setName(name)
 }
 
-class OpMux5(name: String, width: Int) extends ModuleTrait {
+class OpMux5(name: String, params: List[Int]) extends ModuleTrait {
   //port sequnces outs: 0: out
   //port sequnces inputs: 0: input_a, 1: input_b
   setOutPortMap(Array("out_0"))
   setInPortMap(Array("input_0", "input_1", "input_2", "input_3", "input_4"))
   //Module ID 2
   setTypeID(2)
-  //Support 5 to 1 mux
-  setSupOps(List("mux(5)"))
-  //4 bit configuration
-  setConfigBit(3)
 
-  setWidth(width)
+  setSupOps(List())
+  //4 bit configuration
+  //setConfigBit(3)
+
+  //setWidth(width)
+  setParams(params)
+  setName(name)
+}
+
+class OpConst32(name: String, params: List[Int]) extends ModuleTrait {
+  //port sequnces outs: 0: out
+  setOutPortMap(Array("out_0"))
+  //Module ID 3
+  setTypeID(3)
+  //Support 5 to 1 mux
+  setSupOps(List("const"))
+  //4 bit configuration
+  //setConfigBit(32)
+
+  //setWidth(width)
+  setParams(params)
   setName(name)
 }
 
@@ -207,6 +250,7 @@ trait BlockTrait extends ModuleTrait {
   var aluArray = new ArrayBuffer[Any]
   var RFsArray = new ArrayBuffer[Any]
   var MuxsArray = new ArrayBuffer[Any]
+  var ConstsArray = new ArrayBuffer[Any]
   //var PEArray = new ArrayBuffer[Any]
   var modulesArray = new ArrayBuffer[ArrayBuffer[Any]]
   var owningModules = new ArrayBuffer[List[Int]]
@@ -214,6 +258,7 @@ trait BlockTrait extends ModuleTrait {
   modulesArray.append(aluArray)
   modulesArray.append(RFsArray)
   modulesArray.append(MuxsArray)
+  modulesArray.append(ConstsArray)
   val typeNum = modulesArray.size
 
   var hierName = new ArrayBuffer[String]
@@ -293,9 +338,12 @@ trait BlockTrait extends ModuleTrait {
     }
 
     writer.println("\"" + getName() + "\": {")
-    val ports = getPorts()
-    val strPorts = tails(ports.toList, " ")
-    writer.print("\"ports\": \"" + strPorts + "\",\n")
+    val inPorts = getInPorts()
+    val strInPorts = tails(inPorts.toList, " ")
+    writer.print("\"in ports\": \"" + strInPorts + "\",\n")
+    val outPorts = getOutPorts()
+    val strOutPorts = tails(outPorts.toList, " ")
+    writer.print("\"out ports\": \"" + strOutPorts + "\",\n")
     writer.print("\"config bit\": " + getConfigBit() + ",\n")
     var i = 0
     for (blk <- blockMap.values) {
@@ -313,9 +361,12 @@ trait BlockTrait extends ModuleTrait {
       val moduleNum = owningModules(i)(1)
       val m = modulesArray(typeNum)(moduleNum).asInstanceOf[ModuleTrait]
       writer.println("\"" + m.getName() + "\": {")
-      val ports = m.getPorts()
-      val strPorts = tails(ports.toList, " ")
-      writer.print("\"ports\": \"" + strPorts + "\",\n")
+      val inPorts = m.getInPorts()
+      val strInPorts = tails(inPorts.toList, " ")
+      writer.print("\"in ports\": \"" + strInPorts + "\",\n")
+      val outPorts = m.getOutPorts()
+      val strOutPorts = tails(outPorts.toList, " ")
+      writer.print("\"out ports\": \"" + strOutPorts + "\",\n")
       writer.print("\"config bit\": " + m.getConfigBit() + ",\n")
       val ops = m.getSupOps()
       val strOps = tails(ops.toList, " ")
@@ -348,16 +399,16 @@ class PEBlock(name: String) extends BlockTrait{
   setOutPortMap(Array("out"))
   setInPortMap(Array("input_0", "input_1", "input_2", "input_3"))
 
-  val alu0 = new OpAlu("alu0", 32)
+  val alu0 = new OpAlu("alu0", List(32, 4))
   addModule(alu0)
 
-  val mux0 = new OpMux5("mux0", 32)
+  val mux0 = new OpMux5("mux0", List(5, 32, 3))
   addModule(mux0)
 
-  val mux1 = new OpMux5("mux1", 32)
+  val mux1 = new OpMux5("mux1", List(5, 32, 3))
   addModule(mux1)
 
-  val rf0 = new OpRF1_1_2("rf0", 32)
+  val rf0 = new OpRF1_1_2("rf0", List(1, 1, 2, 32, 3))
   addModule(rf0)
 
   connectArray =
@@ -385,17 +436,17 @@ class ArchitctureHierarchy extends BlockTrait {
 
   //Get integer module list.
   //In minimal case, it's [2,1], which means this CGRA contains 2 adder and 1 multiplier.
-  def getModuleList(): List[List[Int]] = {
-    var ret = List[List[Int]]()
+  def getModuleList(): ModuleInfos = {
+    //var ret = List[List[Int]]()
     var moduleNums = List[Int]()
-    var moduleWidths = List[Int]()
+    var moduleParams = List[List[Int]]()
     for (i <- 0 until modulesArray.size) {
       moduleNums = moduleNums :+ modulesArray(i).size
       for (j <- 0 until modulesArray(i).size) {
-        moduleWidths = moduleWidths :+ modulesArray(i)(j).asInstanceOf[ModuleTrait].getWidth()
+        moduleParams = moduleParams :+ modulesArray(i)(j).asInstanceOf[ModuleTrait].getParams()
       }
     }
-    List(moduleNums, moduleWidths)
+    new ModuleInfos(moduleNums, moduleParams)
   }
 
   def getConfigList(): List[List[List[Int]]] = {
