@@ -85,7 +85,6 @@ class Multiplier(w: Int) extends Module {
 }
 
 
-//to be replaced with SRAM
 class RegisterFiles(log2Regs : Int, numIn : Int, numOut:Int, w :Int) extends Module {
   val io = IO(new Bundle {
     //port sequnces: 0:outs, 1:inputs, 2: configuration, 3: configTest for test
@@ -97,7 +96,8 @@ class RegisterFiles(log2Regs : Int, numIn : Int, numOut:Int, w :Int) extends Mod
   val targets = (0 until numIn + numOut).toList.map(t => log2Regs)
   val dispatch = Module(new Dispatch((log2Regs * (numIn + numOut)), targets))
   dispatch.io.configuration := io.configuration
-  val registers = SyncReadMem(Math.pow(2, log2Regs).toInt, UInt(w.W))
+  //val registers = SyncReadMem(Math.pow(2, log2Regs).toInt, UInt(w.W))
+  val registers = Mem(Math.pow(2, log2Regs).toInt, UInt(w.W))
   for (i <- 0 until numIn){
     registers.write(dispatch.io.outs(i), io.inputs(i))
     io.configTest(i) := dispatch.io.outs(i)
@@ -121,7 +121,17 @@ class Multiplexer(inNum : Int, w: Int) extends Module {
   io.outs(0) := muxIn0
 }
 
-//to be update
+class ConstUnit(w :Int) extends Module {
+  val io = IO(new Bundle {
+    val configuration = Input(UInt(w.W))
+    val outs = Output(MixedVec((1 to 1) map { i => UInt(w.W) }))
+  })
+  val const = Mem(1, UInt(w.W))
+  const.write(0.U, io.configuration)
+  io.outs(0) := const.read((0.U))
+}
+
+//unused currently
 class ADRESPE(w: Int) extends Module {
   val io = IO(new Bundle {
     //port sequnces outs: 0: out
@@ -171,7 +181,26 @@ class Dispatch(wIn: Int, targets : List[Int]) extends Module {
 
 }
 
-class TopModule(val moduleInfo: List[List[Int]], val connect: Map[List[Int], List[List[Int]]],
+//configBits is the last param
+class ModuleInfos(moduleNums: List[Int],  params : List[List[Int]]) {
+  def getModuleNums(): List[Int] ={
+    moduleNums
+  }
+  def getParams(num : Int): List[Int] ={
+    params(num)
+  }
+  def getConfigBits(typeID : Int, moduleID :Int) : Int = {
+    var currentNum = 0
+    for (i <- 0 until typeID){
+      currentNum += moduleNums(i)
+    }
+    currentNum += moduleID
+    params(currentNum)(params(currentNum).length-1)
+  }
+}
+
+
+class TopModule(val moduleInfos: ModuleInfos, val connect: Map[List[Int], List[List[Int]]],
                 val configList : List[List[List[Int]]], w: Int) extends Module {
   val io = IO(new Bundle {
     //port sequnces outs: 0: out
@@ -182,19 +211,22 @@ class TopModule(val moduleInfo: List[List[Int]], val connect: Map[List[Int], Lis
     val outs = Output(MixedVec(Seq(UInt(w.W))))
   })
 
-  def getConfigBit (typeID : Int): Int ={
-    val ret = typeID match {
-      case 0 => 4
-      case 1 => 3
-      case 2 => 3
-    }
-    ret
-  }
+  //print("configList", configList)
+
+//  def getConfigBit (typeID : Int): Int ={
+//    val ret = typeID match {
+//      case 0 => 4
+//      case 1 => 3
+//      case 2 => 3
+//      case 3 => 32
+//    }
+//    ret
+//  }
   val input_0 = io.inputs(0)
   val input_1 = io.inputs(1)
   val out = io.outs(0)
 
-  val moduleNums = moduleInfo(0)
+  val moduleNums = moduleInfos.getModuleNums()
   val types = moduleNums.size
   //  println(io.getElements(0))
   var currentNum = 0
@@ -211,33 +243,43 @@ class TopModule(val moduleInfo: List[List[Int]], val connect: Map[List[Int], Lis
 //  currentNum += PENum
 //
   val aluNum = moduleNums(0)
-  val alus = (0 until aluNum).toArray.map(t => Module(new Alu(moduleInfo(1)(t + currentNum))))
+  val alus = (0 until aluNum).toArray.map(t => Module(new Alu(moduleInfos.getParams(t + currentNum)(0))))
   currentNum += aluNum
 
 
 
   val RFNum1_1_2 = moduleNums(1)
   val RFs1_1_2 = (0 until RFNum1_1_2).toArray
-    .map(t => Module(new RegisterFiles(1, 1, 2, moduleInfo(1)(t + currentNum))))
+    .map(t => Module(new RegisterFiles(moduleInfos.getParams(t + currentNum)(0),
+      moduleInfos.getParams(t + currentNum)(1),
+      moduleInfos.getParams(t + currentNum)(2),
+      moduleInfos.getParams(t + currentNum)(3))))
   currentNum += RFNum1_1_2
 
   val MuxNum5 = moduleNums(2)
   val Muxs5 = (0 until MuxNum5).toArray
-    .map(t => Module(new Multiplexer(5, moduleInfo(1)(t + currentNum))))
+    .map(t => Module(new Multiplexer(moduleInfos.getParams(t + currentNum)(0), moduleInfos.getParams(t + currentNum)(1))))
   currentNum += MuxNum5
 
-  val modules = List(alus, RFs1_1_2, Muxs5)
+  val ConstNum32 = moduleNums(3)
+  val Consts32 = (0 until ConstNum32).toArray
+    .map(t => Module(new ConstUnit(moduleInfos.getParams(t + currentNum)(0))))
+  currentNum += ConstNum32
+
+  val modules = List(alus, RFs1_1_2, Muxs5, Consts32)
 
 
   val outPorts = new ArrayBuffer[Array[List[Any]]]
   outPorts.append(alus.map(i => i.io.outs.toList))
   outPorts.append(RFs1_1_2.map(i => i.io.outs.toList))
   outPorts.append(Muxs5.map(i => i.io.outs.toList))
+  outPorts.append(Consts32.map(i => i.io.outs.toList))
 
   val inPorts = new ArrayBuffer[Array[List[Any]]]
   inPorts.append(alus.map(i => i.io.inputs.toList))
   inPorts.append(RFs1_1_2.map(i => i.io.inputs.toList))
   inPorts.append(Muxs5.map(i => i.io.inputs.toList))
+  inPorts.append(Consts32.map(i => List()))
 
 
   println(configList)
@@ -249,11 +291,12 @@ class TopModule(val moduleInfo: List[List[Int]], val connect: Map[List[Int], Lis
     for(moduleList <- region){
       val typeID = moduleList(0)
       val moduleID = moduleList(1)
-      configBits = configBits :+ getConfigBit(typeID)
+      configBits = configBits :+ moduleInfos.getConfigBits(typeID, moduleID)
       val configPort = typeID match {
         case 0 => alus(moduleID).io.configuration
         case 1 => RFs1_1_2(moduleID).io.configuration
         case 2 => Muxs5(moduleID).io.configuration
+        case 3 => Consts32(moduleID).io.configuration
       }
       configPorts = configPorts :+ configPort
     }
@@ -339,8 +382,8 @@ class TopModulePEUnitTest(c: TopModule) extends PeekPokeTester(c) {
   poke(c.io.configuration, 13264467)
   expect(c.io.configTest(0), 1619)
   expect(c.io.configTest(1), 1619)
-  step(1)
-  expect(c.out, 2) //0 or 2 due to SyncReadMem
+//  step(1)
+//  expect(c.out, 2) //0 or 2 due to SyncReadMem
   step(1)
   expect(c.out, 7)
   //000 000 100 0000 011 100 010 0000
@@ -351,8 +394,8 @@ class TopModulePEUnitTest(c: TopModule) extends PeekPokeTester(c) {
   poke(c.io.configuration, 527904)
   expect(c.io.configTest(0), 3616)
   expect(c.io.configTest(1), 64)
-  step(1)
-  expect(c.out, 8)// 1 + 7 due to SyncReadMem
+//  step(1)
+//  expect(c.out, 8)// 1 + 7 due to SyncReadMem
   step(1)
   expect(c.out, 10)
   step(1)
