@@ -13,14 +13,15 @@ object Alu_Op {
   val ALU_AND = 2.U(4.W)
   val ALU_OR = 3.U(4.W)
   val ALU_XOR = 4.U(4.W)
-  val ALU_SLT = 5.U(4.W)
-  val ALU_SLL = 6.U(4.W)
-  val ALU_SLTU = 7.U(4.W)
-  val ALU_SRL = 8.U(4.W)
-  val ALU_SRA = 9.U(4.W)
-  val ALU_COPY_A = 10.U(4.W)
-  val ALU_COPY_B = 11.U(4.W)
-  val ALU_XXX = 15.U(4.W)
+  val ALU_MUL = 5.U(4.W)
+  val ALU_SLT = 6.U(4.W)
+  val ALU_SLL = 7.U(4.W)
+  val ALU_SLTU = 8.U(4.W)
+  val ALU_SRL = 9.U(4.W)
+  val ALU_SRA = 10.U(4.W)
+  val ALU_COPY_A = 11.U(4.W)
+  val ALU_COPY_B = 12.U(4.W)
+
 }
 
 import Alu_Op._
@@ -45,6 +46,7 @@ class Alu(w: Int) extends Module {
     ALU_AND -> (input_a & input_b),
     ALU_OR -> (input_a | input_b),
     ALU_XOR -> (input_a ^ input_b),
+    ALU_MUL -> (input_a * input_b),
     ALU_SLT -> (input_a.asSInt < input_b.asSInt),
     ALU_SLL -> (input_a << shamt),
     ALU_SLTU -> (input_a < input_b),

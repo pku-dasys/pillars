@@ -28,7 +28,7 @@ class OpAlu(name: String, params: List[Int]) extends ModuleTrait {
   //Module ID 0
   setTypeID(0)
   //Support add, sub, and, or, xor
-  setSupOps(List(OpEnum.ADD, OpEnum.SUB, OpEnum.AND, OpEnum.OR, OpEnum.XOR))
+  setSupOps(List(OpEnum.ADD, OpEnum.SUB, OpEnum.AND, OpEnum.OR, OpEnum.XOR, OpEnum.MUL))
   //4 bit configuration
   //setConfigBit(4)
 

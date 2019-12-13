@@ -126,15 +126,25 @@ trait BlockTrait extends ModuleTrait {
     }
 
     for(outPort <- outPorts){
-      mrrg(outPort).ops.append(OpEnum.OUTPUT)
+      val funNode = new NodeMRRG(outPort + ".fun")
+      funNode.ops.append(OpEnum.OUTPUT)
+      mrrg.addNode(funNode)
+      mrrg.addConnect(outPort, List(funNode.getName()))
     }
     for(inPort <- inPorts){
-      mrrg(inPort).ops.append(OpEnum.INPUT)
+      val funNode = new NodeMRRG(inPort + ".fun")
+      funNode.ops.append(OpEnum.INPUT)
+      mrrg.addNode(funNode)
+      mrrg.addConnect(funNode.getName(), List(inPort))
     }
+
     val addName = hierName.map(i => i+".").reverse.reduce(_+_)
     for(oldName <- mrrg.nodeMap.keys){
       mrrg.update(oldName, addName  + oldName)
     }
+
+
+
     val connect = new Connect(connectArray)
     val mapRelation = connect.mapRelation
     var mapRelationMRRG = Map[String, List[String]]()
@@ -153,8 +163,10 @@ trait BlockTrait extends ModuleTrait {
 
     mapRelationMRRG.foreach( connect => mrrg.addConnect(connect._1, connect._2))
 
-    writer.println(mrrg.getSize())
-    for(node <- mrrg.nodes){
+    val noOpSet = mrrg.getNoOpSet()
+    val funSet = mrrg.nodes.toSet&~(noOpSet)
+    writer.println(noOpSet.size)
+    for(node <- noOpSet){
       writer.println("<"+node.getName()+">")
       writer.println(node.fanIn.size)
       for(in <- node.fanIn){
@@ -164,13 +176,26 @@ trait BlockTrait extends ModuleTrait {
       for(out <- node.fanOut){
         writer.println(out.getName())
       }
-      if(node.ops.size > 0){
-        writer.println(node.ops.size)
-        for(op <- node.ops){
-          writer.println(op)
-        }
+    }
+
+    writer.println(funSet.size)
+    for(node <- funSet){
+      writer.println("<"+node.getName()+">")
+      writer.println(node.fanIn.size)
+      for(in <- node.fanIn){
+        writer.println(in.getName())
+      }
+      writer.println(node.fanOut.size)
+      for(out <- node.fanOut){
+        writer.println(out.getName())
+      }
+      writer.println(node.ops.size)
+      for(op <- node.ops){
+        writer.println(op)
       }
     }
+
+
 
     writer.close()
   }

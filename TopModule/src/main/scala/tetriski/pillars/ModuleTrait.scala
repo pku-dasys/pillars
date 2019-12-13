@@ -29,15 +29,15 @@ trait ModuleTrait extends Ports with ModuleBasic {
   def initMRRG() : MRRG = {
 
     for(inPort <- inPorts){
-      val node = new Node(inPort)
+      val node = new NodeMRRG(inPort)
       mrrg.addNode(node)
     }
     for(outPort <- outPorts){
-      val node = new Node(outPort)
+      val node = new NodeMRRG(outPort)
       mrrg.addNode(node)
     }
     for(internalNode <- internalNodes){
-      val node = new Node(internalNode)
+      val node = new NodeMRRG(internalNode)
       if(supOps.size > 0){
         node.ops.appendAll(supOps)
       }
