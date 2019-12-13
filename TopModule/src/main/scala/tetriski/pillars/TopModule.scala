@@ -121,6 +121,22 @@ class Multiplexer(inNum : Int, w: Int) extends Module {
   io.outs(0) := muxIn0
 }
 
+//  object Common {
+//    def constUnitBody(configuration: UInt, outs: MixedVec[UInt]): Unit = {
+//      val const = Mem(1, UInt(w.W))
+//      const.write(0.U, configuration)
+//      outs(0) := const.read((0.U))
+//    }
+//  }
+
+//class ConstUnit(w :Int, foo: (UInt, MixedVec[UInt]) => Unit) extends Module {
+//  val io = IO(new Bundle {
+//    val configuration = Input(UInt(w.W))
+//    val outs = Output(MixedVec((1 to 1) map { i => UInt(w.W) }))
+//  })
+//  foo(io.configuration, io.outs)
+//}
+
 class ConstUnit(w :Int) extends Module {
   val io = IO(new Bundle {
     val configuration = Input(UInt(w.W))

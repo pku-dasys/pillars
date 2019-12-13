@@ -176,8 +176,8 @@ class AdresIOBlock(name: String, numIn : Int, numOut : Int, numNeighbour : Int) 
 class TileBlock(name : String, x : Int, y : Int, numIn : Int, numOut : Int) extends BlockTrait {
   setName(name)
   hierName.append(name)
-  addOutPorts((0 to numOut).map(i => "out_" + i.toString).toArray)
-  addInPorts((0 to numIn).map(i => "input_" + i.toString).toArray)
+  addOutPorts((0 to numOut-1).map(i => "out_" + i.toString).toArray)
+  addInPorts((0 to numIn-1).map(i => "input_" + i.toString).toArray)
   val ioBlock = new AdresIOBlock("ioBlock", numIn, numOut, x)
   addBlock(ioBlock)
 

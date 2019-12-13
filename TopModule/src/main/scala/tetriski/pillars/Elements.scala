@@ -28,7 +28,7 @@ class OpAlu(name: String, params: List[Int]) extends ModuleTrait {
   //Module ID 0
   setTypeID(0)
   //Support add, sub, and, or, xor
-  setSupOps(List("add", "sub", "and", "or", "xor"))
+  setSupOps(List(OpEnum.ADD, OpEnum.SUB, OpEnum.AND, OpEnum.OR, OpEnum.XOR))
   //4 bit configuration
   //setConfigBit(4)
 
@@ -74,8 +74,8 @@ class OpMux(name: String, params: List[Int]) extends ModuleTrait {
 class OpConst(name: String, params: List[Int]) extends ModuleTrait {
   //Module ID 3
   setTypeID(3)
-  //Support 5 to 1 mux
-  setSupOps(List("const"))
+
+  setSupOps(List(OpEnum.CONST))
   //4 bit configuration
   //setConfigBit(32)
 
