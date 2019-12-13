@@ -546,7 +546,7 @@ class AdresIOBlock(name: String, numIn : Int, numOut : Int, numNeighbour : Int) 
     addModule(mux)
     addConnect(List(List(mux.getName(),"out_0"),List("neighbour_out_"+i.toString)))
   }
-  println("IOBlock!!!!",connectArray)
+//  println("IOBlock!!!!",connectArray)
 
 }
 
@@ -602,8 +602,7 @@ class ArchitctureHierarchy extends BlockTrait {
   hierName.append(name)
 
   //Get integer module list.
-  //In minimal case, it's [2,1], which means this CGRA contains 2 adder and 1 multiplier.
-  def getModuleList(): ModuleInfos = {
+  def getPillarsModuleInfo(): PillarsModuleInfo = {
     //var ret = List[List[Int]]()
     var moduleNums = List[Int]()
     var moduleParams = List[List[Int]]()
@@ -613,7 +612,7 @@ class ArchitctureHierarchy extends BlockTrait {
         moduleParams = moduleParams :+ modulesArray(i)(j).asInstanceOf[ModuleTrait].getParams()
       }
     }
-    new ModuleInfos(moduleNums, moduleParams)
+    new PillarsModuleInfo(moduleNums, moduleParams)
   }
 
   def getConfigList(): List[List[List[Int]]] = {
@@ -696,11 +695,11 @@ class Connect(outArray: ArrayBuffer[List[String]], inArray: ArrayBuffer[List[Str
     val dsts = inArray.toSet
     val sources = srcs&~(srcs.&(dsts))
     val sinks = dsts&~(srcs.&(dsts))
-    println(srcs)
-    println(dsts)
-    println(sources)
-    println(sources.contains(List("cgra/","input_1")))
-    println(sources.contains(List("cgra/","input_0")))
+//    println(srcs)
+//    println(dsts)
+//    println(sources)
+//    println(sources.contains(List("cgra/","input_1")))
+//    println(sources.contains(List("cgra/","input_0")))
     for (src <- sources){
       //BFS
       var targets = ArrayBuffer[List[String]]()
@@ -716,8 +715,8 @@ class Connect(outArray: ArrayBuffer[List[String]], inArray: ArrayBuffer[List[Str
       }
       ret += (src -> targets)
     }
-    println(ret(List("cgra/","input_0")))
-    println(ret(List("cgra/","input_1")))
+//    println(ret(List("cgra/","input_0")))
+//    println(ret(List("cgra/","input_1")))
     ret
   }
 
@@ -802,8 +801,8 @@ class HardwareGeneration(arch: BlockTrait, connect: Connect) {
     val encodeSrc = encode(src)
     val encodeDsts = dsts.map(encode).toList
 
-    println("src: ", encodeSrc, src)
-    println("dst: ", encodeDsts, dsts)
+//    println("src: ", encodeSrc, src)
+//    println("dst: ", encodeDsts, dsts)
 
     Map(encodeSrc -> encodeDsts)
   }
@@ -811,7 +810,7 @@ class HardwareGeneration(arch: BlockTrait, connect: Connect) {
   //Return integer representation of connection, which is needed in TopModule
   var connectList = mapRelation.map((x) => getConnectList(x._1, x._2)).foreach((x) => connectMap = connectMap.++(x))
 
-  val archList = arch.asInstanceOf[ArchitctureHierarchy].getModuleList()
+  val pillarsModuleInfo = arch.asInstanceOf[ArchitctureHierarchy].getPillarsModuleInfo()
 
   val configList = arch.asInstanceOf[ArchitctureHierarchy].getConfigList()
 
@@ -864,10 +863,10 @@ object Pillars {
       //println(cp.connectMap)
 
       //Verilog generation
-      chisel3.Driver.execute(args, () => new TopModule(cp.archList, cp.connectMap, cp.configList, 32))
+      chisel3.Driver.execute(args, () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, 32))
 
       //Run tester
-      iotesters.Driver.execute(args, () => new TopModule(cp.archList, cp.connectMap, cp.configList, 32)) {
+      iotesters.Driver.execute(args, () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, 32)) {
         c => new TopModule2PEUnitTest(c)
       }
     }
@@ -895,7 +894,7 @@ object Pillars {
 
       val connectArray = arch.connectArray
 
-      println(connectArray)
+      //println(connectArray)
 
 
       val outArray = ArrayBuffer[List[String]]()
@@ -913,7 +912,7 @@ object Pillars {
       //println(cp.connectMap)
 
       //Verilog generation
-      chisel3.Driver.execute(Array("--no-check-comb-loops"), () => new TopModule(cp.archList, cp.connectMap, cp.configList, 32))
+      chisel3.Driver.execute(Array("--no-check-comb-loops"), () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, 32))
 
       //Run tester
 //      iotesters.Driver.execute(Array("--no-check-comb-loops"), () => new TopModule(cp.archList, cp.connectMap, cp.configList, 32)) {

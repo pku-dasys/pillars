@@ -165,7 +165,6 @@ class ADRESPE(w: Int) extends Module {
 }
 
 //to be update
-//wOut : Upper bound bits of out configuration
 class Dispatch(wIn: Int, targets : List[Int]) extends Module {
   val io = IO(new Bundle {
     val configuration = Input(UInt(wIn.W))
@@ -182,7 +181,7 @@ class Dispatch(wIn: Int, targets : List[Int]) extends Module {
 }
 
 //configBits is the last param
-class ModuleInfos(moduleNums: List[Int],  params : List[List[Int]]) {
+class PillarsModuleInfo(moduleNums: List[Int], params : List[List[Int]]) {
   def getModuleNums(): List[Int] ={
     moduleNums
   }
@@ -200,7 +199,7 @@ class ModuleInfos(moduleNums: List[Int],  params : List[List[Int]]) {
 }
 
 
-class TopModule(val moduleInfos: ModuleInfos, val connect: Map[List[Int], List[List[Int]]],
+class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], List[List[Int]]],
                 val configList : List[List[List[Int]]], w: Int) extends Module {
   val io = IO(new Bundle {
     //port sequnces outs: 0: out
@@ -248,24 +247,24 @@ class TopModule(val moduleInfos: ModuleInfos, val connect: Map[List[Int], List[L
 
 
 
-  val RFNum1_1_2 = moduleNums(1)
-  val RFs = (0 until RFNum1_1_2).toArray
+  val RFNum = moduleNums(1)
+  val RFs = (0 until RFNum).toArray
     .map(t => Module(new RegisterFiles(moduleInfos.getParams(t + currentNum)(0),
       moduleInfos.getParams(t + currentNum)(1),
       moduleInfos.getParams(t + currentNum)(2),
       moduleInfos.getParams(t + currentNum)(3))))
-  currentNum += RFNum1_1_2
+  currentNum += RFNum
 
-  val MuxNum5 = moduleNums(2)
-  val Muxs = (0 until MuxNum5).toArray
+  val MuxNum = moduleNums(2)
+  val Muxs = (0 until MuxNum).toArray
     .map(t => Module(new Multiplexer(moduleInfos.getParams(t + currentNum)(0), moduleInfos.getParams(t + currentNum)(1))))
-  println("2110", moduleInfos.getParams(11 + currentNum))
-  currentNum += MuxNum5
+  //println("2110", moduleInfos.getParams(11 + currentNum))
+  currentNum += MuxNum
 
-  val ConstNum32 = moduleNums(3)
-  val Consts = (0 until ConstNum32).toArray
+  val ConstNum = moduleNums(3)
+  val Consts = (0 until ConstNum).toArray
     .map(t => Module(new ConstUnit(moduleInfos.getParams(t + currentNum)(0))))
-  currentNum += ConstNum32
+  currentNum += ConstNum
 
   val modules = List(alus, RFs, Muxs, Consts)
 
@@ -283,7 +282,7 @@ class TopModule(val moduleInfos: ModuleInfos, val connect: Map[List[Int], List[L
   inPorts.append(Consts.map(i => List()))
 
 
-  println(configList)
+  //println(configList)
   var dispatchs = ArrayBuffer[Dispatch]()
   var regionConfigBits = List[Int]()
   for (region <- configList){
@@ -302,7 +301,7 @@ class TopModule(val moduleInfos: ModuleInfos, val connect: Map[List[Int], List[L
       configPorts = configPorts :+ configPort
     }
     val regionTotalBits = configBits.reduce(_+_)
-    println(configBits)
+    //println(configBits)
     regionConfigBits = regionConfigBits :+ regionTotalBits
     val dispatch = Module(new Dispatch(regionTotalBits, configBits))
     for (i <- 0 until configBits.size){
@@ -318,7 +317,7 @@ class TopModule(val moduleInfos: ModuleInfos, val connect: Map[List[Int], List[L
     dispatchs(i).io.configuration := topDispatch.io.outs(i)
   }
 
-  println(regionConfigBits)
+  //println(regionConfigBits)
   io.configTest(0) := topDispatch.io.outs(0)
   io.configTest(1) := topDispatch.io.outs(1)
 
@@ -335,9 +334,9 @@ class TopModule(val moduleInfos: ModuleInfos, val connect: Map[List[Int], List[L
 //  RFs1_1_2(0).io.configuration := dispatch.io.outs(3)
 
 
-  for (i <- 0 until connect.keys.size) {
-    println(connect.keys.toList(i))
-  }
+//  for (i <- 0 until connect.keys.size) {
+//    println(connect.keys.toList(i))
+//  }
 
 
   for (i <- 0 until connect.keys.size) {
@@ -345,7 +344,7 @@ class TopModule(val moduleInfos: ModuleInfos, val connect: Map[List[Int], List[L
     val dsts = connect(src)
     for (j <- 0 until dsts.size) {
       val dst = dsts(j)
-      println(dst, src)
+      //println(dst, src)
       if (dst(0) == types) {
         io.outs(dst(2)) := outPorts(src(0))(src(1))(src(2)).asInstanceOf[Data]
       } else if (src(0) == types) {
