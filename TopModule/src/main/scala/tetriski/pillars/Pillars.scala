@@ -18,15 +18,17 @@ trait Ports {
 
   //Initial ports with portMap
   def addInPorts(args: Array[String]): Map[String, Int] = {
+    val currentSize = inPortMap.size
     for (i <- 0 until args.length) {
-      inPortMap += (args(i) -> i)
+      inPortMap += (args(i) -> (i + currentSize))
     }
     inPortMap
   }
 
   def addOutPorts(args: Array[String]): Map[String, Int] = {
+    val currentSize = outPortMap.size
     for (i <- 0 until args.length) {
-      outPortMap += (args(i) -> i)
+      outPortMap += (args(i) -> (i + currentSize))
     }
     outPortMap
   }
@@ -203,8 +205,6 @@ class OpMux(name: String, params: List[Int]) extends ModuleTrait {
 }
 
 class OpConst(name: String, params: List[Int]) extends ModuleTrait {
-  //port sequnces outs: 0: out
-  addOutPorts(Array("out_0"))
   //Module ID 3
   setTypeID(3)
   //Support 5 to 1 mux
@@ -699,6 +699,8 @@ class Connect(outArray: ArrayBuffer[List[String]], inArray: ArrayBuffer[List[Str
     println(srcs)
     println(dsts)
     println(sources)
+    println(sources.contains(List("cgra/","input_1")))
+    println(sources.contains(List("cgra/","input_0")))
     for (src <- sources){
       //BFS
       var targets = ArrayBuffer[List[String]]()
@@ -714,6 +716,8 @@ class Connect(outArray: ArrayBuffer[List[String]], inArray: ArrayBuffer[List[Str
       }
       ret += (src -> targets)
     }
+    println(ret(List("cgra/","input_0")))
+    println(ret(List("cgra/","input_1")))
     ret
   }
 
@@ -909,12 +913,12 @@ object Pillars {
       //println(cp.connectMap)
 
       //Verilog generation
-      chisel3.Driver.execute(args, () => new TopModule(cp.archList, cp.connectMap, cp.configList, 32))
+      chisel3.Driver.execute(Array("--no-check-comb-loops"), () => new TopModule(cp.archList, cp.connectMap, cp.configList, 32))
 
       //Run tester
-      iotesters.Driver.execute(args, () => new TopModule(cp.archList, cp.connectMap, cp.configList, 32)) {
-        c => new TopModule2PEUnitTest(c)
-      }
+//      iotesters.Driver.execute(Array("--no-check-comb-loops"), () => new TopModule(cp.archList, cp.connectMap, cp.configList, 32)) {
+//        c => new TopModule2PEUnitTest(c)
+//      }
     }
 
     //example2PE()
