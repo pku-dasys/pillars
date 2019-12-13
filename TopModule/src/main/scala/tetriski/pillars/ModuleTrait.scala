@@ -38,6 +38,9 @@ trait ModuleTrait extends Ports with ModuleBasic {
     }
     for(internalNode <- internalNodes){
       val node = new Node(internalNode)
+      if(supOps.size > 0){
+        node.ops.appendAll(supOps)
+      }
       mrrg.addNode(node)
       for(inPort <- inPorts){
         mrrg(inPort).fanOut.append(mrrg(internalNode))
@@ -50,6 +53,7 @@ trait ModuleTrait extends Ports with ModuleBasic {
     }
     mrrg
   }
+
 }
 
 

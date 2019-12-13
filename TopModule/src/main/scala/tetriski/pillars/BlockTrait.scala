@@ -99,7 +99,7 @@ trait BlockTrait extends ModuleTrait {
 
   def dumpMRRG(): Unit ={
     def updateMRRG(block : BlockTrait): Unit ={
-      val addName = block.hierName.map(i => i+"/").reverse.reduce(_+_)
+      val addName = block.hierName.map(i => i+".").reverse.reduce(_+_)
       for(module <- block.owningModules){
         val typeID = module(0)
         val moduleID = module(1)
@@ -109,19 +109,68 @@ trait BlockTrait extends ModuleTrait {
         }
       }
     }
-    val writer = new PrintWriter(new File( hierName + "_mrrg.txt"))
+    def getStrMRRG(listStr : List[String]) : String= {
+      val mrrgStr = ArrayBuffer[String]()
+      listStr.foreach(str => mrrgStr.append(str.replaceAll("/", ".")))
+      if(!mrrgStr(listStr.size-2).contains(".")){
+        mrrgStr(listStr.size-2) = mrrgStr(listStr.size-2).concat(".")
+      }
+      mrrgStr.reduce(_+_)
+    }
+    val writer = new PrintWriter(new File( hierName.map(str => str + ".").reverse.reduce(_+_) + "mrrg.txt"))
     writer.flush()
+    initMRRG()
     val allBlocks = getAllBlocks()
     for(block <- allBlocks){
       updateMRRG(block)
     }
+
+    for(outPort <- outPorts){
+      mrrg(outPort).ops.append(OpEnum.OUTPUT)
+    }
+    for(inPort <- inPorts){
+      mrrg(inPort).ops.append(OpEnum.INPUT)
+    }
+    val addName = hierName.map(i => i+".").reverse.reduce(_+_)
+    for(oldName <- mrrg.nodeMap.keys){
+      mrrg.update(oldName, addName  + oldName)
+    }
     val connect = new Connect(connectArray)
     val mapRelation = connect.mapRelation
-    for(src <- mapRelation.keys){
-      
+    var mapRelationMRRG = Map[String, List[String]]()
+    for(src <- mapRelation.keys) {
+      val srcMRRG = getStrMRRG(src)
+      val dstMRRG = mapRelation(src).map(str => getStrMRRG(str))
+      mapRelationMRRG = mapRelationMRRG + (srcMRRG -> dstMRRG.toList)
     }
 
-    println(allBlocks)
+    for(modules <- modulesArray){
+      for(module <- modules){
+        val tempMRRG = module.asInstanceOf[ModuleTrait].mrrg
+        mrrg.mergy(tempMRRG)
+      }
+    }
+
+    mapRelationMRRG.foreach( connect => mrrg.addConnect(connect._1, connect._2))
+
+    writer.println(mrrg.getSize())
+    for(node <- mrrg.nodes){
+      writer.println("<"+node.getName()+">")
+      writer.println(node.fanIn.size)
+      for(in <- node.fanIn){
+        writer.println(in.getName())
+      }
+      writer.println(node.fanOut.size)
+      for(out <- node.fanOut){
+        writer.println(out.getName())
+      }
+      if(node.ops.size > 0){
+        writer.println(node.ops.size)
+        for(op <- node.ops){
+          writer.println(op)
+        }
+      }
+    }
 
     writer.close()
   }
@@ -186,7 +235,7 @@ trait BlockTrait extends ModuleTrait {
       writer.print("\"out ports\": \"" + strOutPorts + "\",\n")
       writer.print("\"config bit\": " + m.getConfigBit() + ",\n")
       val ops = m.getSupOps()
-      val strOps = tails(ops.toList, " ")
+      val strOps = tails(ops.toList.map(i => i.toString()), " ")
       writer.print("\"ops\": \"" + strOps + "\"\n")
       if (i < owningModules.size - 1) {
         writer.print("},\n")

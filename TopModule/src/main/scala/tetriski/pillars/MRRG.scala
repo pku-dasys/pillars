@@ -38,4 +38,20 @@ class MRRG {
     nodeMap = nodeMap + (newName -> num)
 
   }
+
+  def mergy(arg : MRRG): Unit ={
+    for(node <- arg.nodes){
+      nodes.append(node)
+      nodeMap = nodeMap + (node.getName() -> (getSize()-1))
+    }
+  }
+
+  def addConnect(source : String, sinks : List[String]): Unit ={
+    val sourceNode = apply(source)
+    for (sink <- sinks){
+      val sinkNode = apply(sink)
+      sourceNode.fanOut.append(sinkNode)
+      sinkNode.fanIn.append(sourceNode)
+    }
+  }
 }

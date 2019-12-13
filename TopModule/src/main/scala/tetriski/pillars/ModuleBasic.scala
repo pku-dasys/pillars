@@ -1,5 +1,7 @@
 package tetriski.pillars
 
+import tetriski.pillars.OpEnum.OpEnum
+
 import scala.collection.mutable.ArrayBuffer
 
 //ModuleBasic is basic information of a module
@@ -8,7 +10,7 @@ trait ModuleBasic {
   var moduleID = -1
   var width = -1
   var name = ""
-  var supOps = new ArrayBuffer[String]
+  var supOps = new ArrayBuffer[OpEnum]
   var params = new ArrayBuffer[Int]
   var configBit = 0
 
@@ -28,7 +30,7 @@ trait ModuleBasic {
     name = arg
   }
 
-  def setSupOps(arg: List[String]): Unit = {
+  def setSupOps(arg: List[OpEnum]): Unit = {
     arg.foreach(t => supOps.append(t))
   }
 
@@ -58,7 +60,7 @@ trait ModuleBasic {
     params(params.length-2)
   }
 
-  def getSupOps(): ArrayBuffer[String] = {
+  def getSupOps(): ArrayBuffer[OpEnum] = {
     supOps
   }
 
