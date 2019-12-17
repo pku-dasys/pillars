@@ -10,7 +10,7 @@ class PEBlock(name: String) extends BlockTrait{
   hierName.append(name)
   isConfigRegion = true
 
-  addOutPorts(Array("out"))
+  addOutPorts(Array("out_0"))
   addInPorts(Array("input_0", "input_1", "input_2", "input_3"))
 
   val alu0 = new OpAlu("alu0", List(32, 4))
@@ -41,6 +41,13 @@ class PEBlock(name: String) extends BlockTrait{
   rf0.addInPorts(Array("input_0"))
   addModule(rf0)
 
+//  val rf0 = new OpRF("rf0", List(1, 1, 1, 32, 3))
+//  //port sequnces outs: 0: out_0, 1: out_1
+//  //port sequnces inputs: 0: input_0
+//  rf0.addOutPorts(Array("out_0"))
+//  rf0.addInPorts(Array("input_0"))
+//  addModule(rf0)
+
   connectArray =
     ArrayBuffer(List(List("input_0"),List("mux0","input_0")),
       List(List("input_0"),List("mux1","input_0")),
@@ -56,6 +63,7 @@ class PEBlock(name: String) extends BlockTrait{
       List(List("mux1","out_0"),List("alu0","input_b")),
       List(List("alu0","out_0"),List("rf0","input_0")),
       List(List("rf0","out_1"),List("out_0")))
+      //List(List("rf0","out_0"),List("out_0")))
 }
 
 class AdresPEBlock(name: String) extends BlockTrait{
@@ -101,10 +109,10 @@ class AdresPEBlock(name: String) extends BlockTrait{
   muxOut.addInPorts(Array("input_0", "input_1"))
   addModule(muxOut)
 
-  val rf0 = new OpRF("rf0", List(1, 1, 2, 32, 3))
-  //port sequnces outs: 0: out_0, 1: out_1
+  val rf0 = new OpRF("rf0", List(1, 1, 1, 32, 2))
+  //port sequnces outs: 0: out_0
   //port sequnces inputs: 0: input_0
-  rf0.addOutPorts(Array("out_0", "out_1"))
+  rf0.addOutPorts(Array("out_0"))
   rf0.addInPorts(Array("input_0"))
   addModule(rf0)
 
@@ -128,11 +136,14 @@ class AdresPEBlock(name: String) extends BlockTrait{
       List(List("const0", "out_0"),List("mux0","input_4")),
       List(List("const0", "out_0"),List("mux1","input_4")),
       List(List("rf0", "out_0"),List("mux0","input_5")),
+      //List(List("alu0", "out_0"),List("mux0","input_5")),
       List(List("mux0","out_0"),List("alu0","input_a")),
       List(List("mux1","out_0"),List("alu0","input_b")),
       List(List("alu0","out_0"),List("rf0","input_0")),
+      //List(List("alu0","out_0"),List("rf0","input_1")),
       List(List("muxBp","out_0"),List("muxOut","input_0")),
-      List(List("rf0","out_1"),List("muxOut","input_1")),
+      List(List("rf0","out_0"),List("muxOut","input_1")),
+      //List(List("alu0","out_0"),List("muxOut","input_1")),
       List(List("muxOut","out_0"),List("out_0")))
 
 }

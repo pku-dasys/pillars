@@ -37,6 +37,8 @@ object Pillars {
 
       arch.init()
 
+      //arch("pe0").dumpMRRG()
+
       arch.dumpArchitcture()
 
       val connectArray = arch.connectArray
@@ -90,18 +92,25 @@ object Pillars {
 
       val cp = new HardwareGeneration(arch, connect)
 
-      //println(cp.connectMap)
+      println(cp.connectMap)
 
       //Verilog generation
       chisel3.Driver.execute(Array("--no-check-comb-loops"), () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, 32))
 
+      arch("tile_0")("pe_0_0").getModule("const0").updateConfigArray(17)
+
+      arch.genConfig("internalNodeinfo.txt")
+
+      val bitStream = arch.getConfigBitStream()
+
+
       //Run tester
-//      iotesters.Driver.execute(Array("--no-check-comb-loops"), () => new TopModule(cp.archList, cp.connectMap, cp.configList, 32)) {
-//        c => new TopModule2PEUnitTest(c)
-//      }
+      iotesters.Driver.execute(Array("--no-check-comb-loops","--backend-name", "firrtl"), () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, 32)) {
+        c => new TopModuleAdresUnitTest(c, bitStream)
+      }
     }
 
-    //example2PE()
+    example2PE()
     exampleAdres()
 
   }
