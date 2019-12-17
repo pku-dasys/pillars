@@ -1,5 +1,6 @@
 package tetriski.pillars
 
+import org.scalacheck.Prop.True
 import tetriski.pillars.OpEnum.OpEnum
 
 import scala.collection.mutable.ArrayBuffer
@@ -13,6 +14,7 @@ trait ModuleBasic {
   var supOps = new ArrayBuffer[OpEnum]
   var params = new ArrayBuffer[Int]
   var configBit = 0
+  var configArray = new ArrayBuffer[Int]
 
   def setModuleID(arg: Int): Unit = {
     moduleID = arg
@@ -42,6 +44,8 @@ trait ModuleBasic {
 
   def setConfigBit(arg: Int): Unit = {
     configBit = arg
+    for (i <- 0 until arg)
+    configArray.append(0)
   }
 
   def getModuleID(): Int = {
