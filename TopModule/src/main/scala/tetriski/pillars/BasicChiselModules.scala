@@ -185,6 +185,23 @@ class Dispatch(wIn: Int, targets : List[Int]) extends Module {
     val configuration = Input(UInt(wIn.W))
     val outs = Output(MixedVec(targets.map{i => UInt(i.W)}))
   })
+  val outt =io.outs(targets.size - 2)
+  var i = 0
+  var offset : Int= 0
+  for (elem <- targets){
+    io.outs(i) := io.configuration(offset + elem - 1, offset)
+    i += 1
+    offset += elem
+  }
+
+}
+
+class DispatchT(wIn: Int, targets : List[Int]) extends Module {
+  val io = IO(new Bundle {
+    val configuration = Input(UInt(wIn.W))
+    val outs = Output(MixedVec(targets.map{i => UInt(i.W)}))
+  })
+  val outt =io.outs(targets.size - 2)
   var i = 0
   var offset : Int= 0
   for (elem <- targets){
