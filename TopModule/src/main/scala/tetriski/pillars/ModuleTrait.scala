@@ -19,7 +19,12 @@ trait ModuleTrait extends Ports with ModuleBasic {
 
   //to be update
   def updateConfig(fanInNum : Int, fanOutNum : Int, internalNum : Int): Unit ={
-    updateConfigArray(fanInNum)
+    if(internalNum > 0 ){
+      //register files
+      updateConfigArray(internalNum << 1 + internalNum)
+    }else{
+      updateConfigArray(fanInNum)
+    }
   }
 
   def updateConfig(opcode : Int): Unit ={

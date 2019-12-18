@@ -49,17 +49,19 @@ class TopModule2PEUnitTest(c: TopModule) extends PeekPokeTester(c) {
 
 class TopModuleAdresUnitTest(c: TopModule, bitstream :BigInt) extends PeekPokeTester(c) {
   //MixedVec don't support c.io.inputs(0) in poke
-  poke(c.input_0, 2)
-  poke(c.input_1, 3)
+//  poke(c.input_0, 2)
+//  poke(c.input_1, 3)
   println(bitstream.toString())
 
   poke(c.io.configuration, bitstream)
+  expect(c.io.configTest(0), 0)
+  expect(c.io.configTest(1), 182341)
 
   for( i <- 0 until 40){
-    println(i.toString)
-    expect(c.io.configTest(0), 0)
-    expect(c.io.configTest(1), 182341)
-    expect(c.out, 35)
+//    println("cycle "+ i.toString)
+    poke(c.input_1, i)
+    if(i > 12)
+    expect(c.out, 5 * (i - 12 + 4))
     step(1)
   }
 }
