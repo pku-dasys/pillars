@@ -64,6 +64,7 @@ class ArchitctureHierarchy extends BlockTrait {
         module.configArray.foreach(i => bitBuffer.append(i))
       }
     }
+    bitBuffer = bitBuffer.reverse
     //bitBuffer.reverse
     var ret : BigInt = 0
     for(i <- 0 until bitBuffer.size){

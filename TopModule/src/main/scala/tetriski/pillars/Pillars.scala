@@ -95,22 +95,31 @@ object Pillars {
       println(cp.connectMap)
 
       //Verilog generation
-      chisel3.Driver.execute(Array("--no-check-comb-loops"), () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, 32))
-
-      arch("tile_0")("pe_0_0").getModule("const0").updateConfigArray(17)
+      chisel3.Driver.execute(Array("--no-check-comb-loops", "-td","td"), () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, 32))
 
       arch.genConfig("internalNodeinfo.txt")
 
+      arch("tile_0")("pe_0_0").getModule("const0").updateConfigArray(5)
+      arch("tile_0")("pe_1_0").getModule("const0").updateConfigArray(4)
+
       val bitStream = arch.getConfigBitStream()
+
+      println(bitStream)
+
+
+//
+//      iotesters.Driver.execute(Array( "--no-check-comb-loops","-tiac", "-tiwv"), () => new DispatchT(191, List(47, 47, 3, 47, 47))) {
+//        c => new DispatchUnitTest(c, bitStream)
+//      }
 
 
       //Run tester
-      iotesters.Driver.execute(Array("--no-check-comb-loops","--backend-name", "firrtl"), () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, 32)) {
+      iotesters.Driver.execute(Array( "--no-check-comb-loops","-tiac", "-tiwv"), () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, 32)) {
         c => new TopModuleAdresUnitTest(c, bitStream)
       }
     }
 
-    example2PE()
+   // example2PE()
     exampleAdres()
 
   }
