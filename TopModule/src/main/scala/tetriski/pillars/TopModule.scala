@@ -24,6 +24,10 @@ class PillarsModuleInfo(moduleNums: List[Int], params : List[List[Int]]) {
     currentNum += moduleID
     params(currentNum)(params(currentNum).length-1)
   }
+
+  def getTotalBits():Int = {
+    params.toArray.map(t => t(t.length-1)).reduce(_+_)
+    }
 }
 
 
@@ -32,8 +36,8 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
   val io = IO(new Bundle {
     //port sequnces outs: 0: out
     //port sequnces inputs: 0: input_a, 1: input_b
-    val configTest = Output(Vec(2, UInt(191.W)))
-    val configuration = Input(UInt(191.W))
+    val configTest = Output(Vec(2, UInt(moduleInfos.getTotalBits().W)))
+    val configuration = Input(UInt(moduleInfos.getTotalBits().W))
     val inputs = Input(MixedVec(Seq(UInt(w.W), UInt(w.W))))
     val outs = Output(MixedVec(Seq(UInt(w.W))))
   })
