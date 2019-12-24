@@ -66,27 +66,27 @@ trait ModuleTrait extends Ports with ModuleBasic {
       val node = new NodeMRRG(outPort)
       mrrg.addNode(node)
     }
-    if(outPorts.size > 1){
-      for(internalNode <- internalNodes){
-        val nodeIn = new NodeMRRG(internalNode+"_in")
-        val nodeOut = new NodeMRRG(internalNode+"_out")
-        nodeIn.fanOut.append(nodeOut)
-        nodeOut.fanIn.append(nodeIn)
-        if(supOps.size > 0){
-          nodeIn.ops.appendAll(supOps)
-        }
-        mrrg.addNode(nodeIn)
-        mrrg.addNode(nodeOut)
-        for(inPort <- inPorts){
-          mrrg(inPort).fanOut.append(mrrg(internalNode+"_in"))
-          mrrg(internalNode+"_in").fanIn.append(mrrg(inPort))
-        }
-        for(outPort <- outPorts){
-          mrrg(internalNode+"_out").fanOut.append(mrrg(outPort))
-          mrrg(outPort).fanIn.append(mrrg(internalNode+"_out"))
-        }
-      }
-    }else{
+//    if(outPorts.size > 1){
+//      for(internalNode <- internalNodes){
+//        val nodeIn = new NodeMRRG(internalNode+"_in")
+//        val nodeOut = new NodeMRRG(internalNode+"_out")
+//        nodeIn.fanOut.append(nodeOut)
+//        nodeOut.fanIn.append(nodeIn)
+//        if(supOps.size > 0){
+//          nodeIn.ops.appendAll(supOps)
+//        }
+//        mrrg.addNode(nodeIn)
+//        mrrg.addNode(nodeOut)
+//        for(inPort <- inPorts){
+//          mrrg(inPort).fanOut.append(mrrg(internalNode+"_in"))
+//          mrrg(internalNode+"_in").fanIn.append(mrrg(inPort))
+//        }
+//        for(outPort <- outPorts){
+//          mrrg(internalNode+"_out").fanOut.append(mrrg(outPort))
+//          mrrg(outPort).fanIn.append(mrrg(internalNode+"_out"))
+//        }
+//      }
+//    }else{
       for(internalNode <- internalNodes){
         val node = new NodeMRRG(internalNode)
         if(supOps.size > 0){
@@ -94,15 +94,13 @@ trait ModuleTrait extends Ports with ModuleBasic {
         }
         mrrg.addNode(node)
         for(inPort <- inPorts){
-          mrrg(inPort).fanOut.append(mrrg(internalNode))
-          mrrg(internalNode).fanIn.append(mrrg(inPort))
+          mrrg.addConnect(inPort, internalNode)
         }
         for(outPort <- outPorts){
-          mrrg(internalNode).fanOut.append(mrrg(outPort))
-          mrrg(outPort).fanIn.append(mrrg(internalNode))
+          mrrg.addConnect(internalNode, outPort)
         }
       }
-    }
+   // }
     mrrg
   }
 
