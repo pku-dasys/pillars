@@ -55,6 +55,13 @@ class MRRG {
     }
   }
 
+  def addConnect(source : String, sink : String): Unit ={
+    val sourceNode = apply(source)
+      val sinkNode = apply(sink)
+      sourceNode.fanOut.append(sinkNode)
+      sinkNode.fanIn.append(sourceNode)
+  }
+
   def getNoOpSet() : Set[NodeMRRG] = {
     var ret = Set[NodeMRRG]()
     for(node <- nodes){
