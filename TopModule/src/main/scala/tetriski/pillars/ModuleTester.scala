@@ -55,13 +55,13 @@ class TopModuleAdresUnitTest(c: TopModule, bitstream :BigInt) extends PeekPokeTe
 
   poke(c.io.configuration, bitstream)
   expect(c.io.configTest(0), 0)
-  expect(c.io.configTest(1), 182341)
+  expect(c.io.configTest(1), 364880)
 
   for( i <- 0 until 40){
 //    println("cycle "+ i.toString)
     poke(c.input_1, i)
     if(i > 12)
-    expect(c.out, 5 * (i - 12 + 4))
+    expect(c.out, 4 * (i - 13 + 5))
     step(1)
   }
 }

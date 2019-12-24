@@ -1,5 +1,7 @@
 package tetriski.pillars
 
+import chisel3.util.log2Up
+
 import scala.collection.mutable.ArrayBuffer
 
 
@@ -21,7 +23,16 @@ trait ModuleTrait extends Ports with ModuleBasic {
   def updateConfig(fanInNum : Int, fanOutNum : Int, internalNum : Int): Unit ={
     if(internalNum > 0 ){
       //register files
-      updateConfigArray(internalNum << 1 + internalNum)
+      val configSize = getConfigBit()
+      val inPortNum = getInPorts().size
+      val outPortNum = getOutPorts().size
+      val internalNodeNum = internalNodes.size
+      val singleConfigSize = log2Up(internalNodeNum)
+      val oldConfig = getBigIntConfig()
+
+      var newConfig = (oldConfig & ~(1 << (singleConfigSize * fanInNum))) | (internalNum << (singleConfigSize * fanInNum))
+      newConfig = (newConfig & ~(1 << (singleConfigSize * (fanOutNum + inPortNum)))) | (internalNum << (singleConfigSize * (fanOutNum + inPortNum)))
+      updateConfigArray(newConfig)
     }else{
       updateConfigArray(fanInNum)
     }
@@ -44,6 +55,16 @@ trait ModuleTrait extends Ports with ModuleBasic {
       configArray.append(bit)
       t = t >> 1
     }
+  }
+
+  def getBigIntConfig() : Int = {
+    var ret : Int = 0
+    val configSize = getConfigBit()
+    for(i <- 0 until configSize){
+      ret = ret << 1
+      ret = ret + configArray.reverse(i)
+    }
+    ret
   }
 
   def addInternalNodes(arg : List[String]): Unit ={
