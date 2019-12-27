@@ -1,7 +1,6 @@
-package tetriski.pillars
+package tetriski.pillars.core
 
-import org.scalacheck.Prop.True
-import tetriski.pillars.OpEnum.OpEnum
+import OpEnum.OpEnum
 
 import scala.collection.mutable.ArrayBuffer
 
