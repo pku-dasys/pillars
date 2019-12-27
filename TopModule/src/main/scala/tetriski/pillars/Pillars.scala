@@ -6,6 +6,10 @@ import scala.collection.mutable.ArrayBuffer
 import java.io.{File, PrintWriter}
 
 import chisel3.util.log2Up
+import tetriski.pillars.archlib.{PEBlock, TileBlock}
+import tetriski.pillars.core.{ArchitctureHierarchy, Connect, HardwareGeneration}
+import tetriski.pillars.hardware.TopModule
+import tetriski.pillars.testers.{TopModule2PEUnitTest, TopModuleAdresUnitTest}
 
 import scala.collection.mutable.Queue
 

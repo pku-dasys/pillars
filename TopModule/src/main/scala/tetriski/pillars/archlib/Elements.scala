@@ -1,4 +1,6 @@
-package tetriski.pillars
+package tetriski.pillars.archlib
+
+import tetriski.pillars.core.{BlockTrait, ModuleTrait, OpEnum}
 
 //############### Currently Unused #################
 //The 'MemUnit'/'MuxAddr'/'MuxData' are the submodules of the 'MemPort',
@@ -37,6 +39,8 @@ class OpAlu(name: String, params: List[Int]) extends ModuleTrait {
   setName(name)
 
   addInternalNodesNum(1)
+
+
 }
 
 class OpRF(name: String, params: List[Int]) extends ModuleTrait {

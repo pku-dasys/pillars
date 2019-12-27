@@ -1,4 +1,4 @@
-package tetriski.pillars
+package tetriski.pillars.core
 
 object OpEnum extends Enumeration {
   type OpEnum = Value

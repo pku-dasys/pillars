@@ -1,9 +1,7 @@
-package tetriski.pillars
+package tetriski.pillars.hardware
 
-import chisel3._
-import chisel3.iotesters.PeekPokeTester
-import chisel3.{Bundle, Input, Module, Output, UInt}
 import chisel3.util._
+import chisel3.{Bundle, Input, Module, Output, UInt, _}
 
 import scala.collection.mutable.ArrayBuffer
 

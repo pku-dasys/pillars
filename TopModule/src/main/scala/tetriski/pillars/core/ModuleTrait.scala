@@ -1,18 +1,7 @@
-package tetriski.pillars
+package tetriski.pillars.core
 
 import chisel3.util.log2Up
-
-import scala.collection.mutable.ArrayBuffer
-
-
-//Important note:
-//Each module should possess this trait, with the help of which
-//we can translate a string representation of a port into a list of integer.
-
-//For example，in our minimal case, ["cgra/b_0:out/b_0_1:out/mul0:out"] can be
-//translated into [1, 0, 0], where 1 (TypeID) means this port belongs to a multiplier
-//and the first 0 (ModuleID) means this multiplier has index 0 in global,
-//while the second 0 (portID) means the taget port is "out".
+//import tetriski.pillars.core.NodeMRRG
 
 trait ModuleTrait extends Ports with ModuleBasic {
   var mrrg = new MRRG()
@@ -126,8 +115,3 @@ trait ModuleTrait extends Ports with ModuleBasic {
   }
 
 }
-
-
-
-
-

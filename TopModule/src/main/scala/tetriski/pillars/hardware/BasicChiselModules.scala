@@ -1,8 +1,7 @@
-package tetriski.pillars
+package tetriski.pillars.hardware
 
-import chisel3._
 import chisel3.util.{MixedVec, MuxLookup, log2Up}
-import chisel3.{Bundle, Input, Mem, Module, Output, UInt, Vec}
+import chisel3.{Bundle, Input, Mem, Module, Output, UInt, Vec, _}
 
 object Alu_Op {
   val ALU_ADD = 0.U(4.W)
@@ -21,7 +20,7 @@ object Alu_Op {
 
 }
 
-import Alu_Op._
+import tetriski.pillars.hardware.Alu_Op._
 
 class Alu(w: Int) extends Module {
   val io = IO(new Bundle {

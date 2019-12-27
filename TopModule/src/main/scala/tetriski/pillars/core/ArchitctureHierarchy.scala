@@ -1,6 +1,8 @@
-package tetriski.pillars
+package tetriski.pillars.core
 
 import java.io.{File, PrintWriter}
+
+import tetriski.pillars.hardware.PillarsModuleInfo
 
 import scala.collection.mutable.ArrayBuffer
 import scala.io.Source

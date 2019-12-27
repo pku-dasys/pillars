@@ -1,6 +1,7 @@
-package tetriski.pillars
+package tetriski.pillars.testers
 
 import chisel3.iotesters.PeekPokeTester
+import tetriski.pillars.hardware.{DispatchT, TopModule}
 
 class TopModule2PEUnitTest(c: TopModule) extends PeekPokeTester(c) {
   //MixedVec don't support c.io.inputs(0) in poke

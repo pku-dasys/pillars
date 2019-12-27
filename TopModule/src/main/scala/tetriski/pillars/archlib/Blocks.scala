@@ -1,6 +1,8 @@
-package tetriski.pillars
+package tetriski.pillars.archlib
 
 import chisel3.util.log2Up
+import tetriski.pillars.core.BlockTrait
+//import tetriski.pillars.archlib.OpConst
 
 import scala.collection.mutable.ArrayBuffer
 

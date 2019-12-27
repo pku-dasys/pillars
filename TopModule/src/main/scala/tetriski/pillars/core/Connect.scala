@@ -1,4 +1,4 @@
-package tetriski.pillars
+package tetriski.pillars.core
 
 import java.io.{File, PrintWriter}
 
