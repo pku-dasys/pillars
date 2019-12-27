@@ -253,7 +253,7 @@ class LoadStoreUnit(in_width: Int, mem_depth : Int, w : Int) extends Module{
 
     val base = Input(UInt(log2Ceil(mem_depth).W))
     val start = Input(Bool())
-    val en = Input(Bool())
+    val enqEn = Input(Bool())
     val idle = Output(Bool())
 
     val inputs = Input(MixedVec( UInt(log2Ceil(mem_depth).W), UInt(w.W)))
@@ -263,7 +263,7 @@ class LoadStoreUnit(in_width: Int, mem_depth : Int, w : Int) extends Module{
   memWrapper.io.base <> io.base
   memWrapper.io.start <> io.start
   memWrapper.io.idle <> io.idle
-  memWrapper.io.en <> io.en
+  memWrapper.io.en <> io.enqEn
   memWrapper.io.in <> io.in
 
   val addr = io.inputs(0)

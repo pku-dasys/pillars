@@ -100,7 +100,7 @@ class LoadStoreUnitTester(c: LoadStoreUnit) extends PeekPokeTester(c) {
   val base = 100
 
   poke(c.io.start, 1)
-  poke(c.io.en, 1)
+  poke(c.io.enqEn, 1)
   poke(c.io.base, base)
   step(1)
 
@@ -123,7 +123,7 @@ class LoadStoreUnitTester(c: LoadStoreUnit) extends PeekPokeTester(c) {
     step(1)
   }
 
-  poke(c.io.en, 0)
+  poke(c.io.enqEn, 0)
 
   // read
   poke(c.io.configuration, 0)
