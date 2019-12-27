@@ -1,7 +1,9 @@
 package tetriski.pillars.hardware
 
-import chisel3.util.{MixedVec, MuxLookup, log2Up}
+import chisel3.util.{EnqIO, MixedVec, MuxLookup, log2Ceil, log2Up}
 import chisel3.{Bundle, Input, Mem, Module, Output, UInt, Vec, _}
+import tetriski.pillars.testers.EnqMemWrapper
+import tetriski.pillars.util.{EnqMem, MemReadIO, MemWriteIO, SimpleDualPortSram}
 
 object Alu_Op {
   val ALU_ADD = 0.U(4.W)
@@ -210,3 +212,81 @@ class DispatchT(wIn: Int, targets : List[Int]) extends Module {
   }
 
 }
+
+
+
+class LoadStoreUnit(in_width: Int, mem_depth : Int, w : Int) extends Module{
+  class LSMemWrapper extends Module {
+    val io = IO(new Bundle {
+      val in = Flipped(EnqIO(UInt(in_width.W)))
+
+      val readMem = Flipped(new MemReadIO(mem_depth, w))
+      val writeMem = Flipped(new MemWriteIO(mem_depth, w))
+
+      val base = Input(UInt(readMem.addr.getWidth.W))
+      val start = Input(Bool())
+      val en = Input(Bool())
+      val idle = Output(Bool())
+    })
+
+    val mem = Module(new SimpleDualPortSram(mem_depth, w))
+    val enq_mem = Module(new EnqMem(mem.io.a, in_width))
+
+    io.readMem <> mem.io.b
+    when(io.en === true.B){
+      enq_mem.io.mem <> mem.io.a
+    }.otherwise{
+      io.writeMem <> mem.io.a
+    }
+
+    enq_mem.io.en <> io.en
+    enq_mem.io.in <> io.in
+
+    enq_mem.io.base <> io.base
+    enq_mem.io.start <> io.start
+    enq_mem.io.idle <> io.idle
+  }
+  val io = IO(new Bundle {
+    //0 for load, 1 for store
+    val configuration = Input(UInt(1.W))
+    val in = Flipped(EnqIO(UInt(in_width.W)))
+
+    val base = Input(UInt(log2Ceil(mem_depth).W))
+    val start = Input(Bool())
+    val en = Input(Bool())
+    val idle = Output(Bool())
+
+    val inputs = Input(MixedVec( UInt(log2Ceil(mem_depth).W), UInt(w.W)))
+    val outs = Output(MixedVec((1 to 1) map { i => UInt(w.W) }))
+  })
+  val memWrapper = Module(new LSMemWrapper)
+  memWrapper.io.base <> io.base
+  memWrapper.io.start <> io.start
+  memWrapper.io.idle <> io.idle
+  memWrapper.io.en <> io.en
+  memWrapper.io.in <> io.in
+
+  val addr = io.inputs(0)
+  val dataIn = io.inputs(1)
+  val out = io.outs(0)
+
+  val readMem =  memWrapper.io.readMem
+  readMem.addr := addr
+  io.outs(0) := readMem.dout
+
+  val writeMem =  memWrapper.io.writeMem
+  writeMem.addr := addr
+  writeMem.din := dataIn
+
+  when(io.configuration === 0.U){
+    readMem.en := true.B
+    writeMem.en := false.B
+    writeMem.we := false.B
+  }.otherwise{
+    readMem.en := false.B
+    writeMem.en := true.B
+    writeMem.we := true.B
+  }
+}
+
+

@@ -1,7 +1,10 @@
 package tetriski.pillars.testers
 
+import chisel3.iotesters
+import chisel3.assert
 import chisel3.iotesters.PeekPokeTester
-import tetriski.pillars.hardware.{DispatchT, TopModule}
+import tetriski.pillars.hardware.{DispatchT, LoadStoreUnit, TopModule}
+import tetriski.pillars.util.SplitOrConcat
 
 class TopModule2PEUnitTest(c: TopModule) extends PeekPokeTester(c) {
   //MixedVec don't support c.io.inputs(0) in poke
@@ -74,4 +77,91 @@ class DispatchUnitTest(c: DispatchT, bitstream :BigInt) extends PeekPokeTester(c
 
   expect(c.outt, 3616)
   step(1)
+}
+
+
+class LoadStoreUnitTester(c: LoadStoreUnit) extends PeekPokeTester(c) {
+  val idata = c.memWrapper.enq_mem.manip.mode match {
+    case SplitOrConcat.Normal =>
+      Array(BigInt("cccccccc",16), BigInt("deadbeef",16), BigInt("cdcdcdcd",16))
+    case SplitOrConcat.Split =>
+      assert(c.memWrapper.enq_mem.manip.factor == 4)
+      Array(BigInt("deadc0de"+"cdcdcdcd"+"deadbeef"+"cccccccc",16)) // little endian
+    case SplitOrConcat.Concat =>
+      assert(c.memWrapper.enq_mem.manip.factor == 4)
+      Array(
+        BigInt("cc",16), BigInt("cc",16), BigInt("cc",16), BigInt("cc",16),
+        BigInt("ef",16), BigInt("be",16), BigInt("ad",16), BigInt("de",16),
+        BigInt("cd",16), BigInt("cd",16), BigInt("cd",16), BigInt("cd",16)
+      ) // little endian
+  }
+  val odata = Array(BigInt("cccccccc",16), BigInt("deadbeef",16), BigInt("cdcdcdcd",16))
+
+  val base = 100
+
+  poke(c.io.start, 1)
+  poke(c.io.en, 1)
+  poke(c.io.base, base)
+  step(1)
+
+  // push
+  for (x <- idata) {
+    poke(c.io.in.valid, 1)
+    poke(c.io.in.bits, x)
+    if (peek(c.io.in.ready) == 0) {
+      while (peek(c.io.in.ready) == 0) {
+        step(1)
+      }
+    } else {
+      step(1)
+    } // exit condition: (c.io.in.ready === true.B) and step()
+  }
+  poke(c.io.in.valid, 0)
+
+  // exec
+  while (peek(c.io.idle) == 0) {
+    step(1)
+  }
+
+  poke(c.io.en, 0)
+
+  // read
+  poke(c.io.configuration, 0)
+  poke(c.addr, base)
+  step(1)
+  expect(c.out, odata(0))
+
+//  poke(c.io.configuration, 0)
+  poke(c.addr, base + 2)
+  step(1)
+  expect(c.out, odata(2))
+
+//  poke(c.io.configuration, 0)
+  poke(c.addr, base + 1)
+  step(1)
+  expect(c.out, odata(1))
+
+  poke(c.addr, 17)
+  step(1)
+  expect(c.out, 0)
+
+  poke(c.io.configuration, 1)
+  poke(c.dataIn, 233)
+  poke(c.addr, 17)
+  step(1)
+  expect(c.out, 0)
+
+  poke(c.io.configuration, 0)
+  poke(c.addr, 17)
+  step(1)
+  expect(c.out, 233)
+}
+
+object LSUTest extends App {
+
+  iotesters.Driver.execute(Array( "-tiwv"), () => new LoadStoreUnit(32, 1024, 32)) { c => new LoadStoreUnitTester(c) }
+}
+
+object LoadStoreUnitVerilog extends App {
+  chisel3.Driver.execute(args, () => new LoadStoreUnit(32*4, 1024, 32))
 }

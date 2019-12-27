@@ -4,6 +4,7 @@ import chisel3._
 import chisel3.util._
 import chisel3.iotesters
 import chisel3.iotesters.{ChiselFlatSpec, Driver, PeekPokeTester}
+import tetriski.pillars.hardware.LoadStoreUnit
 import tetriski.pillars.util._
 
 class SinglePortSramUnitTester(c: SinglePortSram) extends PeekPokeTester(c) {
@@ -362,4 +363,6 @@ object SinglePortSramVerilog extends App {
 object SimpleDualPortSramVerilog extends App {
   chisel3.Driver.execute(args, () => new SimpleDualPortSram(10000, 32))
 }
+
+
 
