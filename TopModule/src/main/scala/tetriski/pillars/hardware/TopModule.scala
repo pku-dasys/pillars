@@ -4,7 +4,7 @@ import chisel3.util._
 import chisel3.{Bundle, Input, Module, Output, UInt, _}
 
 import scala.collection.mutable.ArrayBuffer
-
+import tetriski.pillars.hardware.PillarsConfig._
 
 //configBits is the last param
 class PillarsModuleInfo(moduleNums: List[Int], params : List[List[Int]]) {
@@ -31,7 +31,22 @@ class PillarsModuleInfo(moduleNums: List[Int], params : List[List[Int]]) {
 
 class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], List[List[Int]]],
                 val configList : List[List[List[Int]]], w: Int) extends Module {
+
+
+  val moduleNums = moduleInfos.getModuleNums()
+  val aluNum = moduleNums(0)
+  val RFNum = moduleNums(1)
+  val MuxNum = moduleNums(2)
+  val ConstNum = moduleNums(3)
+  val LSUnitNum = moduleNums(4)
+
   val io = IO(new Bundle {
+    val inLSU = Flipped(EnqIO( UInt(MEM_IN_WIDTH.W)))
+    val baseLSU = Input(Vec(LSUnitNum, UInt(log2Ceil(MEM_DEPTH).W)))
+    val startLSU = Input(Vec(LSUnitNum, Bool()))
+    val enqEnLSU = Input(Vec(LSUnitNum, Bool()))
+    val idleLSU = Output(Vec(LSUnitNum, Bool()))
+
     //port sequnces outs: 0: out
     //port sequnces inputs: 0: input_a, 1: input_b
     val configTest = Output(Vec(2, UInt(moduleInfos.getTotalBits().W)))
@@ -55,7 +70,7 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
   val input_1 = io.inputs(1)
   val out = io.outs(0)
 
-  val moduleNums = moduleInfos.getModuleNums()
+
   val types = moduleNums.size
   //  println(io.getElements(0))
   var currentNum = 0
@@ -71,13 +86,13 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
 //  val PEs = (0 until PENum).toArray.map(t => Module(new ADRESPE(moduleInfo(1)(t + currentNum))))
 //  currentNum += PENum
 //
-  val aluNum = moduleNums(0)
+
   val alus = (0 until aluNum).toArray.map(t => Module(new Alu(moduleInfos.getParams(t + currentNum)(0))))
   currentNum += aluNum
 
 
 
-  val RFNum = moduleNums(1)
+
   val RFs = (0 until RFNum).toArray
     .map(t => Module(new RegisterFiles(moduleInfos.getParams(t + currentNum)(0),
       moduleInfos.getParams(t + currentNum)(1),
@@ -85,18 +100,31 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
       moduleInfos.getParams(t + currentNum)(3))))
   currentNum += RFNum
 
-  val MuxNum = moduleNums(2)
+
   val Muxs = (0 until MuxNum).toArray
     .map(t => Module(new Multiplexer(moduleInfos.getParams(t + currentNum)(0), moduleInfos.getParams(t + currentNum)(1))))
   //println("2110", moduleInfos.getParams(11 + currentNum))
   currentNum += MuxNum
 
-  val ConstNum = moduleNums(3)
+
   val Consts = (0 until ConstNum).toArray
     .map(t => Module(new ConstUnit(moduleInfos.getParams(t + currentNum)(0))))
   currentNum += ConstNum
 
-  val modules = List(alus, RFs, Muxs, Consts)
+
+  val LSUs = (0 until LSUnitNum).toArray
+    .map(t => Module(new LoadStoreUnit(moduleInfos.getParams(t + currentNum)(0))))
+  for(i <- 0 until LSUnitNum){
+    LSUs(i).io.base <> io.baseLSU(i)
+    LSUs(i).io.start <> io.startLSU(i)
+    LSUs(i).io.idle <> io.idleLSU(i)
+    LSUs(i).io.enqEn <> io.enqEnLSU(i)
+    LSUs(i).io.in <> io.inLSU
+  }
+
+  currentNum += LSUnitNum
+
+  val modules = List(alus, RFs, Muxs, Consts, LSUs)
 
 
   val outPorts = new ArrayBuffer[Array[List[Any]]]
@@ -104,12 +132,14 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
   outPorts.append(RFs.map(i => i.io.outs.toList))
   outPorts.append(Muxs.map(i => i.io.outs.toList))
   outPorts.append(Consts.map(i => i.io.outs.toList))
+  outPorts.append(LSUs.map(i => i.io.outs.toList))
 
   val inPorts = new ArrayBuffer[Array[List[Any]]]
   inPorts.append(alus.map(i => i.io.inputs.toList))
   inPorts.append(RFs.map(i => i.io.inputs.toList))
   inPorts.append(Muxs.map(i => i.io.inputs.toList))
   inPorts.append(Consts.map(i => List()))
+  inPorts.append(LSUs.map(i => i.io.inputs.toList))
 
 
   //println(configList)
@@ -127,6 +157,7 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
         case 1 => RFs(moduleID).io.configuration
         case 2 => Muxs(moduleID).io.configuration
         case 3 => Consts(moduleID).io.configuration
+        case 4 => LSUs(moduleID).io.configuration
       }
       configPorts = configPorts :+ configPort
     }

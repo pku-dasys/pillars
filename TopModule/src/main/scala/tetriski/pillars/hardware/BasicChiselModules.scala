@@ -5,24 +5,8 @@ import chisel3.{Bundle, Input, Mem, Module, Output, UInt, Vec, _}
 import tetriski.pillars.testers.EnqMemWrapper
 import tetriski.pillars.util.{EnqMem, MemReadIO, MemWriteIO, SimpleDualPortSram}
 
-object Alu_Op {
-  val ALU_ADD = 0.U(4.W)
-  val ALU_SUB = 1.U(4.W)
-  val ALU_AND = 2.U(4.W)
-  val ALU_OR = 3.U(4.W)
-  val ALU_XOR = 4.U(4.W)
-  val ALU_MUL = 5.U(4.W)
-  val ALU_SLT = 6.U(4.W)
-  val ALU_SLL = 7.U(4.W)
-  val ALU_SLTU = 8.U(4.W)
-  val ALU_SRL = 9.U(4.W)
-  val ALU_SRA = 10.U(4.W)
-  val ALU_COPY_A = 11.U(4.W)
-  val ALU_COPY_B = 12.U(4.W)
 
-}
-
-import tetriski.pillars.hardware.Alu_Op._
+import tetriski.pillars.hardware.PillarsConfig._
 
 class Alu(w: Int) extends Module {
   val io = IO(new Bundle {
@@ -116,6 +100,9 @@ class Multiplexer(inNum : Int, w: Int) extends Module {
     val inputs = Input(MixedVec((1 to inNum) map { i => UInt(w.W) }))
     val outs = Output(MixedVec((1 to 1) map { i => UInt(w.W) }))
   })
+  val input0 = io.inputs(0)
+  val input1 = io.inputs(1)
+  val out = io.outs(0)
   val selectArray = (0 to inNum - 1).map(i => i.U -> io.inputs(i))
   val muxIn0 = MuxLookup(io.configuration, io.inputs(0), selectArray)
   io.outs(0) := muxIn0
@@ -215,13 +202,13 @@ class DispatchT(wIn: Int, targets : List[Int]) extends Module {
 
 
 
-class LoadStoreUnit(in_width: Int, mem_depth : Int, w : Int) extends Module{
+class LoadStoreUnit(w : Int) extends Module{
   class LSMemWrapper extends Module {
     val io = IO(new Bundle {
-      val in = Flipped(EnqIO(UInt(in_width.W)))
+      val in = Flipped(EnqIO(UInt(MEM_IN_WIDTH.W)))
 
-      val readMem = Flipped(new MemReadIO(mem_depth, w))
-      val writeMem = Flipped(new MemWriteIO(mem_depth, w))
+      val readMem = Flipped(new MemReadIO(MEM_DEPTH, w))
+      val writeMem = Flipped(new MemWriteIO(MEM_DEPTH, w))
 
       val base = Input(UInt(readMem.addr.getWidth.W))
       val start = Input(Bool())
@@ -229,8 +216,8 @@ class LoadStoreUnit(in_width: Int, mem_depth : Int, w : Int) extends Module{
       val idle = Output(Bool())
     })
 
-    val mem = Module(new SimpleDualPortSram(mem_depth, w))
-    val enq_mem = Module(new EnqMem(mem.io.a, in_width))
+    val mem = Module(new SimpleDualPortSram(MEM_DEPTH, w))
+    val enq_mem = Module(new EnqMem(mem.io.a, MEM_IN_WIDTH))
 
     io.readMem <> mem.io.b
     when(io.en === true.B){
@@ -249,14 +236,14 @@ class LoadStoreUnit(in_width: Int, mem_depth : Int, w : Int) extends Module{
   val io = IO(new Bundle {
     //0 for load, 1 for store
     val configuration = Input(UInt(1.W))
-    val in = Flipped(EnqIO(UInt(in_width.W)))
 
-    val base = Input(UInt(log2Ceil(mem_depth).W))
+    val in = Flipped(EnqIO(UInt(MEM_IN_WIDTH.W)))
+    val base = Input(UInt(log2Ceil(MEM_DEPTH).W))
     val start = Input(Bool())
     val enqEn = Input(Bool())
     val idle = Output(Bool())
 
-    val inputs = Input(MixedVec( UInt(log2Ceil(mem_depth).W), UInt(w.W)))
+    val inputs = Input(MixedVec( UInt(log2Ceil(MEM_DEPTH).W), UInt(w.W)))
     val outs = Output(MixedVec((1 to 1) map { i => UInt(w.W) }))
   })
   val memWrapper = Module(new LSMemWrapper)

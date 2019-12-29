@@ -2,29 +2,6 @@ package tetriski.pillars.archlib
 
 import tetriski.pillars.core.{BlockTrait, ModuleTrait, OpEnum}
 
-//############### Currently Unused #################
-//The 'MemUnit'/'MuxAddr'/'MuxData' are the submodules of the 'MemPort',
-//we abstract them and put them in the MemTrait.
-trait MemTrait extends ModuleTrait {
-  val memUnit = new MemUnit
-  val muxAddr = new MuxAddr
-  val muxData = new MuxData
-}
-
-class MemUnit extends ModuleTrait {
-}
-
-class MuxAddr extends ModuleTrait {
-}
-
-class MuxData extends ModuleTrait {
-}
-
-class MemPort extends MemTrait {
-}
-
-//############### Currently Unused #################
-
 
 class OpAlu(name: String, params: List[Int]) extends ModuleTrait {
   //Module ID 0
@@ -80,6 +57,21 @@ class OpConst(name: String, params: List[Int]) extends ModuleTrait {
   setTypeID(3)
 
   setSupOps(List(OpEnum.CONST))
+  //4 bit configuration
+  //setConfigBit(32)
+
+  //setWidth(width)
+  setParams(params)
+  setName(name)
+
+  addInternalNodesNum(1)
+}
+
+class OpLSU(name: String, params: List[Int]) extends ModuleTrait {
+  //Module ID 4
+  setTypeID(4)
+
+  setSupOps(List(OpEnum.LOAD, OpEnum.STORE))
   //4 bit configuration
   //setConfigBit(32)
 
