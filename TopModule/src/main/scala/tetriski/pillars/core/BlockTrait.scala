@@ -23,6 +23,7 @@ trait BlockTrait extends ModuleTrait {
   var RFsArray = new ArrayBuffer[Any]
   var MuxsArray = new ArrayBuffer[Any]
   var ConstsArray = new ArrayBuffer[Any]
+  var LSUsArray = new ArrayBuffer[Any]
   //var PEArray = new ArrayBuffer[Any]
   var modulesArray = new ArrayBuffer[ArrayBuffer[Any]]
   var owningModules = new ArrayBuffer[List[Int]]
@@ -31,6 +32,7 @@ trait BlockTrait extends ModuleTrait {
   modulesArray.append(RFsArray)
   modulesArray.append(MuxsArray)
   modulesArray.append(ConstsArray)
+  modulesArray.append(LSUsArray)
   val typeNum = modulesArray.size
 
   var hierName = new ArrayBuffer[String]
@@ -76,6 +78,10 @@ trait BlockTrait extends ModuleTrait {
 
   def addConnect(arg : List[List[String]]): Unit ={
     connectArray.append(arg)
+  }
+
+  def addConnect(src : List[String], dst : List[String]) : Unit ={
+    addConnect(List(src, dst))
   }
 
   def updateConnect(): ArrayBuffer[List[List[String]]] ={

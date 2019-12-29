@@ -3,7 +3,7 @@ package tetriski.pillars.testers
 import chisel3.iotesters
 import chisel3.assert
 import chisel3.iotesters.PeekPokeTester
-import tetriski.pillars.hardware.{DispatchT, LoadStoreUnit, TopModule}
+import tetriski.pillars.hardware.{DispatchT, LoadStoreUnit, Multiplexer, TopModule}
 import tetriski.pillars.util.SplitOrConcat
 
 class TopModule2PEUnitTest(c: TopModule) extends PeekPokeTester(c) {
@@ -159,9 +159,30 @@ class LoadStoreUnitTester(c: LoadStoreUnit) extends PeekPokeTester(c) {
 
 object LSUTest extends App {
 
-  iotesters.Driver.execute(Array( "-tiwv"), () => new LoadStoreUnit(32, 1024, 32)) { c => new LoadStoreUnitTester(c) }
+  iotesters.Driver.execute(Array( "-tiwv"), () => new LoadStoreUnit(32)) { c => new LoadStoreUnitTester(c) }
 }
 
 object LoadStoreUnitVerilog extends App {
-  chisel3.Driver.execute(args, () => new LoadStoreUnit(32*4, 1024, 32))
+  chisel3.Driver.execute(args, () => new LoadStoreUnit(32))
+}
+
+
+class MultiplexerUnitTester(c: Multiplexer) extends PeekPokeTester(c) {
+  //MixedVec don't support c.io.inputs(0) in poke
+  //  poke(c.input_0, 2)
+  //  poke(c.input_1, 3)
+
+  poke(c.io.configuration, 1)
+
+  for( i <- 0 until 40){
+    //    println("cycle "+ i.toString)
+    poke(c.input0, i)
+    poke(c.input1, i+1)
+    expect(c.out, i+1)
+    step(1)
+  }
+}
+
+object MuxTest extends App {
+  iotesters.Driver.execute(Array( "-tiwv"), () => new Multiplexer(2, 32)) { c => new MultiplexerUnitTester(c) }
 }
