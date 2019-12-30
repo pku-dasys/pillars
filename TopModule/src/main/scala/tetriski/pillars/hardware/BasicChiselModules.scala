@@ -81,13 +81,20 @@ class RegisterFiles(log2Regs : Int, numIn : Int, numOut:Int, w :Int) extends Mod
   val dispatch = Module(new Dispatch((log2Regs * (numIn + numOut)), targets))
   dispatch.io.configuration := io.configuration
   //val registers = SyncReadMem(Math.pow(2, log2Regs).toInt, UInt(w.W))
-  val registers = Mem(Math.pow(2, log2Regs).toInt, UInt(w.W))
+  //val registers = Mem(Math.pow(2, log2Regs).toInt, UInt(w.W))
+
+  val regs = RegInit(VecInit(Seq.fill(Math.pow(2, log2Regs).toInt)(0.U(32.W))))
+
+
+
   for (i <- 0 until numIn){
-    registers.write(dispatch.io.outs(i), io.inputs(i))
+    //registers.write(dispatch.io.outs(i), io.inputs(i))
+    regs(dispatch.io.outs(i)) := io.inputs(i)
     io.configTest(i) := dispatch.io.outs(i)
   }
   for (i <- 0 until numOut){
-    io.outs(i) := registers.read(dispatch.io.outs(i + numIn))
+    //io.outs(i) := registers.read(dispatch.io.outs(i + numIn))
+    io.outs(i) := regs(dispatch.io.outs(i + numIn))
     io.configTest(i + numIn) := dispatch.io.outs(i + numIn)
   }
 
@@ -218,6 +225,9 @@ class LoadStoreUnit(w : Int) extends Module{
 
     val mem = Module(new SimpleDualPortSram(MEM_DEPTH, w))
     val enq_mem = Module(new EnqMem(mem.io.a, MEM_IN_WIDTH))
+
+    mem.clock := clock
+    enq_mem.clock := clock
 
     io.readMem <> mem.io.b
     when(io.en === true.B){

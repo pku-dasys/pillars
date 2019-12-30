@@ -4,6 +4,7 @@ import chisel3.iotesters
 import chisel3.assert
 import chisel3.iotesters.PeekPokeTester
 import tetriski.pillars.hardware.{DispatchT, LoadStoreUnit, Multiplexer, TopModule}
+import tetriski.pillars.testers.LoadStoreUnitVerilog.args
 import tetriski.pillars.util.SplitOrConcat
 
 class TopModule2PEUnitTest(c: TopModule) extends PeekPokeTester(c) {
@@ -59,14 +60,80 @@ class TopModuleAdresUnitTest(c: TopModule, bitstream :BigInt) extends PeekPokeTe
 
   poke(c.io.configuration, bitstream)
   expect(c.io.configTest(0), 0)
-  expect(c.io.configTest(1), 365904)
+  expect(c.io.configTest(1), 364629)
 
   for( i <- 0 until 40){
 //    println("cycle "+ i.toString)
-    poke(c.input_1, i)
-    if(i > 15)
-    expect(c.out, 4 * (i - 15 + 5))
+    poke(c.input_0, i)
+    if(i > 11)
+    expect(c.out, 5 * (i - 11 + 4))
     step(1)
+  }
+}
+
+class TopModuleLSUAdresUnitTest(c: TopModule, bitstream :BigInt) extends PeekPokeTester(c) {
+  //MixedVec don't support c.io.inputs(0) in poke
+  //  poke(c.input_0, 2)
+  //  poke(c.input_1, 3)
+  println(bitstream.toString())
+
+  val inData = (64 to 128).toArray
+//  val inData = Array(BigInt("64",10), BigInt("69",10), BigInt("77",10))
+
+//  val idata = c.LSUs(0).memWrapper.enq_mem.manip.mode match {
+//    case SplitOrConcat.Normal =>
+//      Array(BigInt("123",10), BigInt("345",10), BigInt("567",10))
+//    case SplitOrConcat.Split =>
+//      assert(c.LSUs(0).memWrapper.enq_mem.manip.factor == 4)
+//      Array(BigInt("123"+"345"+"557"+"789",16)) // little endian
+//    case SplitOrConcat.Concat =>
+//      assert(c.LSUs(0).memWrapper.enq_mem.manip.factor == 4)
+//      Array(
+//        BigInt("cc",16), BigInt("cc",16), BigInt("cc",16), BigInt("cc",16),
+//        BigInt("ef",16), BigInt("be",16), BigInt("ad",16), BigInt("de",16),
+//        BigInt("cd",16), BigInt("cd",16), BigInt("cd",16), BigInt("cd",16)
+//      ) // little endian
+//  }
+
+  val base = 0
+
+  poke(c.io.startLSU(0), 1)
+  poke(c.io.enqEnLSU(0), 1)
+  poke(c.io.baseLSU(0), base)
+  step(1)
+
+  // push
+  for (x <- inData) {
+    poke(c.io.inLSU.valid, 1)
+    poke(c.io.inLSU.bits, x)
+    if (peek(c.io.inLSU.ready) == 0) {
+      while (peek(c.io.inLSU.ready) == 0) {
+        step(1)
+      }
+    } else {
+      step(1)
+    } // exit condition: (c.io.in.ready === true.B) and step()
+  }
+  poke(c.io.inLSU.valid, 0)
+
+  // exec
+  while (peek(c.io.idleLSU(0)) == 0) {
+    step(1)
+  }
+
+  poke(c.io.enqEnLSU(0), 0)
+
+  poke(c.io.configuration, bitstream)
+  expect(c.io.configTest(0), 0)
+  expect(c.io.configTest(1), 200325)
+
+  step(31)
+  for( i <- 0 until 32){
+    //    println("cycle "+ i.toString)
+    //poke(c.input_1, i)
+    //if(i % 5 == 0)
+    expect(c.out, 64 + 2 * i)
+    step(7)
   }
 }
 
@@ -159,7 +226,7 @@ class LoadStoreUnitTester(c: LoadStoreUnit) extends PeekPokeTester(c) {
 
 object LSUTest extends App {
 
-  iotesters.Driver.execute(Array( "-tiwv"), () => new LoadStoreUnit(32)) { c => new LoadStoreUnitTester(c) }
+  iotesters.Driver.execute(Array( "--help", "-tiwv"), () => new LoadStoreUnit(32)) { c => new LoadStoreUnitTester(c) }
 }
 
 object LoadStoreUnitVerilog extends App {
@@ -184,5 +251,6 @@ class MultiplexerUnitTester(c: Multiplexer) extends PeekPokeTester(c) {
 }
 
 object MuxTest extends App {
-  iotesters.Driver.execute(Array( "-tiwv"), () => new Multiplexer(2, 32)) { c => new MultiplexerUnitTester(c) }
+  chisel3.Driver.execute(args, () => new Multiplexer(6, 32))
+  iotesters.Driver.execute(Array( "--help","-tiwv"), () => new Multiplexer(6, 32)) { c => new MultiplexerUnitTester(c) }
 }

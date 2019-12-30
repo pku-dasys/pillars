@@ -42,6 +42,7 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
 
   val io = IO(new Bundle {
     val inLSU = Flipped(EnqIO( UInt(MEM_IN_WIDTH.W)))
+    val inLSU1 = Flipped(EnqIO( UInt(MEM_IN_WIDTH.W)))
     val baseLSU = Input(Vec(LSUnitNum, UInt(log2Ceil(MEM_DEPTH).W)))
     val startLSU = Input(Vec(LSUnitNum, Bool()))
     val enqEnLSU = Input(Vec(LSUnitNum, Bool()))
@@ -119,8 +120,15 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
     LSUs(i).io.start <> io.startLSU(i)
     LSUs(i).io.idle <> io.idleLSU(i)
     LSUs(i).io.enqEn <> io.enqEnLSU(i)
-    LSUs(i).io.in <> io.inLSU
   }
+  if(LSUnitNum > 0){
+    LSUs(0).io.in <> io.inLSU
+    LSUs(1).io.in <> io.inLSU1
+  }else{
+    io.inLSU.ready := false.B
+    io.inLSU1.ready := false.B
+  }
+
 
   currentNum += LSUnitNum
 
