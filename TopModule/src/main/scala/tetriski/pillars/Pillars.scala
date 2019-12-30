@@ -9,7 +9,7 @@ import chisel3.util.log2Up
 import tetriski.pillars.archlib.{PEBlock, TileBlock, TileLSUBlock}
 import tetriski.pillars.core.{ArchitctureHierarchy, Connect, HardwareGeneration}
 import tetriski.pillars.hardware.TopModule
-import tetriski.pillars.testers.{TopModule2PEUnitTest, TopModuleAdresUnitTest}
+import tetriski.pillars.testers.{TopModule2PEUnitTest, TopModuleAdresUnitTest, TopModuleLSUAdresUnitTest}
 
 import scala.collection.mutable.Queue
 
@@ -159,10 +159,10 @@ object Pillars {
       //Verilog generation
       chisel3.Driver.execute(Array("--no-check-comb-loops", "-td","td"), () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, 32))
 
-      arch.genConfig("internalNodeinfo.txt")
+      arch.genConfig("internalNodeinfo_lsu.txt")
 
-      arch("tile_0")("pe_0_0").getModule("const0").updateConfigArray(5)
-      arch("tile_0")("pe_1_0").getModule("const0").updateConfigArray(4)
+      arch("tile_0")("pe_0_0").getModule("const0").updateConfigArray(1)
+      arch("tile_0")("pe_0_1").getModule("const0").updateConfigArray(1)
 
       val bitStream = arch.getConfigBitStream()
 
@@ -177,12 +177,12 @@ object Pillars {
 
       //Run tester
       iotesters.Driver.execute(Array( "--no-check-comb-loops","-tiac", "-tiwv"), () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, 32)) {
-        c => new TopModuleAdresUnitTest(c, bitStream)
+        c => new TopModuleLSUAdresUnitTest(c, bitStream)
       }
     }
 
-//    example2PE()
-//    exampleAdres()
+    example2PE()
+    exampleAdres()
     exampleLSUAdres()
 
   }

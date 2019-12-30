@@ -179,7 +179,7 @@ class AdresPE5InBlock(name: String) extends BlockTrait{
   mux1.addInPorts(Array("input_0", "input_1", "input_2", "input_3", "input_4", "input_5"))
   addModule(mux1)
 
-  val muxBp = new OpMux("muxBp", List(5, 32, 2))
+  val muxBp = new OpMux("muxBp", List(5, 32, 3))
   //port sequnces outs: 0: out
   //port sequnces inputs: 0: input_0, 1: input_1, 2: input_2, 3: input_3, 4: input_4
   muxBp.addOutPorts(Array("out_0"))

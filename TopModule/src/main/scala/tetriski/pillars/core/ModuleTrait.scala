@@ -9,7 +9,7 @@ trait ModuleTrait extends Ports with ModuleBasic {
 
 
   //to be update
-  def updateConfig(fanInNum : Int, fanOutNum : Int, internalNum : Int): Unit ={
+  def updateConfig(fanInNums : List[Int], fanOutNums : List[Int], internalNum : Int): Unit ={
     if(internalNum > 0 ){
       //register files
       val configSize = getConfigBit()
@@ -18,12 +18,16 @@ trait ModuleTrait extends Ports with ModuleBasic {
       val internalNodeNum = internalNodes.size
       val singleConfigSize = log2Up(internalNodeNum)
       val oldConfig = getBigIntConfig()
-
-      var newConfig = (oldConfig & ~(1 << (singleConfigSize * fanInNum))) | (internalNum << (singleConfigSize * fanInNum))
-      newConfig = (newConfig & ~(1 << (singleConfigSize * (fanOutNum + inPortNum)))) | (internalNum << (singleConfigSize * (fanOutNum + inPortNum)))
+      var newConfig = oldConfig
+      for(fanInNum <- fanInNums){
+        newConfig = (newConfig & ~(1 << (singleConfigSize * fanInNum))) | (internalNum << (singleConfigSize * fanInNum))
+      }
+      for(fanOutNum <- fanOutNums){
+        newConfig = (newConfig & ~(1 << (singleConfigSize * (fanOutNum + inPortNum)))) | (internalNum << (singleConfigSize * (fanOutNum + inPortNum)))
+      }
       updateConfigArray(newConfig)
     }else{
-      updateConfigArray(fanInNum)
+      updateConfigArray(fanInNums(0))
     }
   }
 
