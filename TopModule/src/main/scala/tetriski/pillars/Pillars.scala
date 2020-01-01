@@ -118,7 +118,7 @@ object Pillars {
 
 
       //Run tester
-      iotesters.Driver.execute(Array( "--no-check-comb-loops","-tiac", "-tiwv"), () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, 32)) {
+      iotesters.Driver.execute(Array( "--no-check-comb-loops","-tgvo", "on", "-fiac", "-tbn" ,"firrtl"), () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, 32)) {
         c => new TopModuleAdresUnitTest(c, bitStream)
       }
     }
@@ -176,13 +176,14 @@ object Pillars {
 
 
       //Run tester
-      iotesters.Driver.execute(Array( "--no-check-comb-loops","-tiac", "-tiwv"), () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, 32)) {
-        c => new TopModuleLSUAdresUnitTest(c, bitStream)
+//      iotesters.Driver.execute(Array( "--no-check-comb-loops","-tiac", "-tiwv"), () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, 32)) {
+      iotesters.Driver.execute(Array( "--no-check-comb-loops","-tgvo", "on", "-fiac", "-tbn" ,"ivl"), () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, 32)) {
+         c => new TopModuleLSUAdresUnitTest(c, bitStream)
       }
     }
 
-    example2PE()
-    exampleAdres()
+//    example2PE()
+//    exampleAdres()
     exampleLSUAdres()
 
   }
