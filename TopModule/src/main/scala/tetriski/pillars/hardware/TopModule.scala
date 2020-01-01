@@ -48,6 +48,8 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
     val enqEnLSU = Input(Vec(LSUnitNum, Bool()))
     val idleLSU = Output(Vec(LSUnitNum, Bool()))
 
+    val en = Input(Bool())
+
     //port sequnces outs: 0: out
     //port sequnces inputs: 0: input_a, 1: input_b
     val configTest = Output(Vec(2, UInt(moduleInfos.getTotalBits().W)))
@@ -55,6 +57,8 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
     val inputs = Input(MixedVec(Seq(UInt(w.W), UInt(w.W))))
     val outs = Output(MixedVec(Seq(UInt(w.W))))
   })
+
+
 
   //print("configList", configList)
 
@@ -89,6 +93,9 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
 //
 
   val alus = (0 until aluNum).toArray.map(t => Module(new Alu(moduleInfos.getParams(t + currentNum)(0))))
+  for(alu <- alus){
+    alu.io.en <> io.en
+  }
   currentNum += aluNum
 
 
@@ -99,22 +106,34 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
       moduleInfos.getParams(t + currentNum)(1),
       moduleInfos.getParams(t + currentNum)(2),
       moduleInfos.getParams(t + currentNum)(3))))
+  for(rf <- RFs){
+    rf.io.en <> io.en
+  }
   currentNum += RFNum
 
 
   val Muxs = (0 until MuxNum).toArray
     .map(t => Module(new Multiplexer(moduleInfos.getParams(t + currentNum)(0), moduleInfos.getParams(t + currentNum)(1))))
   //println("2110", moduleInfos.getParams(11 + currentNum))
+  for(mux <- Muxs){
+    mux.io.en <> io.en
+  }
   currentNum += MuxNum
 
 
   val Consts = (0 until ConstNum).toArray
     .map(t => Module(new ConstUnit(moduleInfos.getParams(t + currentNum)(0))))
+  for(const <- Consts){
+    const.io.en <> io.en
+  }
   currentNum += ConstNum
 
 
   val LSUs = (0 until LSUnitNum).toArray
     .map(t => Module(new LoadStoreUnit(moduleInfos.getParams(t + currentNum)(0))))
+  for(lsu <- LSUs){
+    lsu.io.en <> io.en
+  }
   for(i <- 0 until LSUnitNum){
     LSUs(i).io.base <> io.baseLSU(i)
     LSUs(i).io.start <> io.startLSU(i)
@@ -128,8 +147,6 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
     io.inLSU.ready := false.B
     io.inLSU1.ready := false.B
   }
-
-
   currentNum += LSUnitNum
 
   val modules = List(alus, RFs, Muxs, Consts, LSUs)
@@ -173,6 +190,7 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
     //println(configBits)
     regionConfigBits = regionConfigBits :+ regionTotalBits
     val dispatch = Module(new Dispatch(regionTotalBits, configBits))
+    dispatch.io.en <> io.en
     for (i <- 0 until configBits.size){
       configPorts(i) := dispatch.io.outs(i)
     }
@@ -181,7 +199,8 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
   }
   val totalBits = regionConfigBits.reduce(_+_)
   val topDispatch = Module(new Dispatch(totalBits, regionConfigBits))
-  println(totalBits, regionConfigBits)
+  topDispatch.io.en <> io.en
+  //println(totalBits, regionConfigBits)
   topDispatch.io.configuration := io.configuration
   for (i <- 0 until dispatchs.size){
     dispatchs(i).io.configuration := topDispatch.io.outs(i)

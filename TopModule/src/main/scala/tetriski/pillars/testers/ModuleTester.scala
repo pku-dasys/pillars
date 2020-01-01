@@ -11,6 +11,7 @@ class TopModule2PEUnitTest(c: TopModule) extends PeekPokeTester(c) {
   //MixedVec don't support c.io.inputs(0) in poke
   poke(c.input_0, 2)
   poke(c.input_1, 3)
+  poke(c.io.en, 1)
   //010 001 001 0001 010 001 001 0000// PE1(13) PE013)
   //PE0: 010 001 110 0000 //  mux0(3) mux1(3) register(3)(rf(1) -> out1(output), rf(1) -> out0(to self), input -> rf(0)) alu(4)
   //PE1: 010 001 110 0001
@@ -57,6 +58,7 @@ class TopModuleAdresUnitTest(c: TopModule, bitstream :BigInt) extends PeekPokeTe
 //  poke(c.input_0, 2)
 //  poke(c.input_1, 3)
   println(bitstream.toString())
+  poke(c.io.en, 1)
 
   poke(c.io.configuration, bitstream)
   expect(c.io.configTest(0), 0)
@@ -65,8 +67,8 @@ class TopModuleAdresUnitTest(c: TopModule, bitstream :BigInt) extends PeekPokeTe
   for( i <- 0 until 40){
 //    println("cycle "+ i.toString)
     poke(c.input_0, i)
-    if(i > 11)
-    expect(c.out, 5 * (i - 11 + 4))
+    if(i > 2)
+    expect(c.out, 5 * (i - 2 + 4))
     step(1)
   }
 }
@@ -77,8 +79,9 @@ class TopModuleLSUAdresUnitTest(c: TopModule, bitstream :BigInt) extends PeekPok
   //  poke(c.input_1, 3)
   println(bitstream.toString())
 
-  val inData = (64 to 128).toArray
-//  val inData = Array(BigInt("64",10), BigInt("69",10), BigInt("77",10))
+  val inData = (1 to 256).toArray
+  poke(c.io.en, 0)
+  //val inData = Array(BigInt("64",10), BigInt("69",10), BigInt("77",10))
 
 //  val idata = c.LSUs(0).memWrapper.enq_mem.manip.mode match {
 //    case SplitOrConcat.Normal =>
@@ -99,12 +102,14 @@ class TopModuleLSUAdresUnitTest(c: TopModule, bitstream :BigInt) extends PeekPok
 
   poke(c.io.startLSU(0), 1)
   poke(c.io.enqEnLSU(0), 1)
+  poke(c.io.inLSU.valid, 0)
   poke(c.io.baseLSU(0), base)
   step(1)
 
   // push
   for (x <- inData) {
     poke(c.io.inLSU.valid, 1)
+    expect(c.io.inLSU.valid, 1)
     poke(c.io.inLSU.bits, x)
     if (peek(c.io.inLSU.ready) == 0) {
       while (peek(c.io.inLSU.ready) == 0) {
@@ -123,7 +128,10 @@ class TopModuleLSUAdresUnitTest(c: TopModule, bitstream :BigInt) extends PeekPok
 
   poke(c.io.enqEnLSU(0), 0)
 
+
+  poke(c.io.en, 1)
   poke(c.io.configuration, bitstream)
+
   expect(c.io.configTest(0), 0)
   expect(c.io.configTest(1), 200325)
 
@@ -148,6 +156,7 @@ class DispatchUnitTest(c: DispatchT, bitstream :BigInt) extends PeekPokeTester(c
 
 
 class LoadStoreUnitTester(c: LoadStoreUnit) extends PeekPokeTester(c) {
+  poke(c.io.en, 0)
   val idata = c.memWrapper.enq_mem.manip.mode match {
     case SplitOrConcat.Normal =>
       Array(BigInt("cccccccc",16), BigInt("deadbeef",16), BigInt("cdcdcdcd",16))
@@ -191,6 +200,7 @@ class LoadStoreUnitTester(c: LoadStoreUnit) extends PeekPokeTester(c) {
   }
 
   poke(c.io.enqEn, 0)
+  poke(c.io.en, 1)
 
   // read
   poke(c.io.configuration, 0)
@@ -226,7 +236,7 @@ class LoadStoreUnitTester(c: LoadStoreUnit) extends PeekPokeTester(c) {
 
 object LSUTest extends App {
 
-  iotesters.Driver.execute(Array( "--help", "-tiwv"), () => new LoadStoreUnit(32)) { c => new LoadStoreUnitTester(c) }
+  iotesters.Driver.execute(Array( "--help", "-tgvo", "on", "-fiac", "-tbn" ,"firrtl"), () => new LoadStoreUnit(32)) { c => new LoadStoreUnitTester(c) }
 }
 
 object LoadStoreUnitVerilog extends App {
