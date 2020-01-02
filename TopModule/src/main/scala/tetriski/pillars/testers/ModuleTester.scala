@@ -102,24 +102,24 @@ class TopModuleLSUAdresUnitTest(c: TopModule, bitstream :BigInt) extends PeekPok
 
   poke(c.io.startLSU(0), 1)
   poke(c.io.enqEnLSU(0), 1)
-  poke(c.io.inLSU.valid, 0)
+  poke(c.io.inLSU(0).valid, 0)
   poke(c.io.baseLSU(0), base)
   step(1)
 
   // push
   for (x <- inData) {
-    poke(c.io.inLSU.valid, 1)
-    expect(c.io.inLSU.valid, 1)
-    poke(c.io.inLSU.bits, x)
-    if (peek(c.io.inLSU.ready) == 0) {
-      while (peek(c.io.inLSU.ready) == 0) {
+    poke(c.io.inLSU(0).valid, 1)
+    expect(c.io.inLSU(0).valid, 1)
+    poke(c.io.inLSU(0).bits, x)
+    if (peek(c.io.inLSU(0).ready) == 0) {
+      while (peek(c.io.inLSU(0).ready) == 0) {
         step(1)
       }
     } else {
       step(1)
     } // exit condition: (c.io.in.ready === true.B) and step()
   }
-  poke(c.io.inLSU.valid, 0)
+  poke(c.io.inLSU(0).valid, 0)
 
   // exec
   while (peek(c.io.idleLSU(0)) == 0) {
