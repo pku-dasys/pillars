@@ -325,10 +325,10 @@ class LoadStoreUnit(w : Int) extends Module{
     }
     io.outs(0) := readMem.dout
   }.otherwise{
-    readMem.en := true.B
+    readMem.en := false.B
     writeMem.en := false.B
     writeMem.we := false.B
-    readMem.addr := 100.U
+    readMem.addr := DontCare
     writeMem.addr := DontCare
     writeMem.din := DontCare
       for(out <- io.outs){

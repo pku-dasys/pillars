@@ -207,7 +207,7 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
   }
 
   //println(regionConfigBits)
-  println(configList(1))
+//  println(configList(1))
   io.configTest(0) := topDispatch.io.outs(0)
   io.configTest(1) := topDispatch.io.outs(1)
 

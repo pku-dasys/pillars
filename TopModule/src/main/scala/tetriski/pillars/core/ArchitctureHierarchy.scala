@@ -136,6 +136,6 @@ class ArchitctureHierarchy extends BlockTrait {
       }
     }
 
-    println(infoArray)
+//    println(infoArray)
   }
 }
