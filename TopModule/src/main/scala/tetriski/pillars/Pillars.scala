@@ -60,7 +60,7 @@ object Pillars {
       chisel3.Driver.execute(args, () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, 32))
 
       //Run tester
-      iotesters.Driver.execute(args, () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, 32)) {
+      iotesters.Driver.execute(Array("-tgvo", "on"), () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, 32)) {
         c => new TopModule2PEUnitTest(c)
       }
     }
@@ -96,10 +96,10 @@ object Pillars {
 
       val cp = new HardwareGeneration(arch, connect)
 
-      println(cp.connectMap)
+//      println(cp.connectMap)
 
       //Verilog generation
-      chisel3.Driver.execute(Array("--no-check-comb-loops", "-td","td"), () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, 32))
+      chisel3.Driver.execute(Array("--no-check-comb-loops", "-td","ADRESv0"), () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, 32))
 
       arch.genConfig("internalNodeinfo.txt")
 
@@ -108,7 +108,7 @@ object Pillars {
 
       val bitStream = arch.getConfigBitStream()
 
-      println(bitStream)
+//      println(bitStream)
 
 
 //
@@ -157,12 +157,12 @@ object Pillars {
       println(cp.connectMap)
 
       //Verilog generation
-      chisel3.Driver.execute(Array("--no-check-comb-loops", "-td","td"), () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, 32))
+      chisel3.Driver.execute(Array("--no-check-comb-loops", "-td","ADRESv1"), () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, 32))
 
       arch.genConfig("internalNodeinfo_lsu.txt")
 
-      arch("tile_0")("pe_0_0").getModule("const0").updateConfigArray(1)
-      arch("tile_0")("pe_0_1").getModule("const0").updateConfigArray(1)
+      arch("tile_0")("pe_1_0").getModule("const0").updateConfigArray(1)
+      arch("tile_0")("pe_1_1").getModule("const0").updateConfigArray(1)
 
       val bitStream = arch.getConfigBitStream()
 
@@ -177,13 +177,13 @@ object Pillars {
 
       //Run tester
 //      iotesters.Driver.execute(Array( "--no-check-comb-loops","-tiac", "-tiwv"), () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, 32)) {
-      iotesters.Driver.execute(Array( "--no-check-comb-loops","-tgvo", "on", "-fiac", "-tbn" ,"ivl"), () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, 32)) {
+      iotesters.Driver.execute(Array( "--no-check-comb-loops","-tgvo", "on", "-tbn" ,"verilator"), () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, 32)) {
          c => new TopModuleLSUAdresUnitTest(c, bitStream)
       }
     }
 
-//    example2PE()
-//    exampleAdres()
+    example2PE()
+    exampleAdres()
     exampleLSUAdres()
 
   }

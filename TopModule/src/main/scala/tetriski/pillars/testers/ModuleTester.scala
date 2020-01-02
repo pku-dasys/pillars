@@ -79,7 +79,7 @@ class TopModuleLSUAdresUnitTest(c: TopModule, bitstream :BigInt) extends PeekPok
   //  poke(c.input_1, 3)
   println(bitstream.toString())
 
-  val inData = (1 to 256).toArray
+  val inData = (1 to 128).toArray
   poke(c.io.en, 0)
   //val inData = Array(BigInt("64",10), BigInt("69",10), BigInt("77",10))
 
@@ -132,16 +132,19 @@ class TopModuleLSUAdresUnitTest(c: TopModule, bitstream :BigInt) extends PeekPok
   poke(c.io.en, 1)
   poke(c.io.configuration, bitstream)
 
-  expect(c.io.configTest(0), 0)
-  expect(c.io.configTest(1), 200325)
+//  expect(c.io.configTest(0), 0)
+//  expect(c.io.configTest(1), 200325)
 
-  step(31)
-  for( i <- 0 until 32){
+  step(3)
+  var ref = 2
+  for( i <- 1 until 128){
     //    println("cycle "+ i.toString)
     //poke(c.input_1, i)
     //if(i % 5 == 0)
-    expect(c.out, 64 + 2 * i)
-    step(7)
+    expect(c.out, ref)
+    ref = ref + i
+//    println(peek(c.out).toString())
+    step(1)
   }
 }
 
@@ -236,7 +239,7 @@ class LoadStoreUnitTester(c: LoadStoreUnit) extends PeekPokeTester(c) {
 
 object LSUTest extends App {
 
-  iotesters.Driver.execute(Array( "--help", "-tgvo", "on", "-fiac", "-tbn" ,"firrtl"), () => new LoadStoreUnit(32)) { c => new LoadStoreUnitTester(c) }
+  iotesters.Driver.execute(Array( "-tgvo", "on", "-fiac"), () => new LoadStoreUnit(32)) { c => new LoadStoreUnitTester(c) }
 }
 
 object LoadStoreUnitVerilog extends App {
