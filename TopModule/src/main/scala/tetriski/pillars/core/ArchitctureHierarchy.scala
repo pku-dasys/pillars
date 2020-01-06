@@ -124,14 +124,25 @@ class ArchitctureHierarchy extends BlockTrait {
         val opcode = infoArray(offset + 2).toInt
         module.updateConfig(opcode)
        // println(opcode)
-      }else{
+      }
+      else{
         val fanInNums = second.split(" ").toList.map(i => i.toInt)
         //val fanInNum = second(second.size-1).toString.toInt
         val fanOutNode = infoArray(offset + 2)
         val fanOutNums = fanOutNode.split(" ").toList.map(i => i.toInt)
-        val internalNode = moduleName(moduleName.size - 1)
-        val internalNum = internalNode(internalNode.size-1).toString.toInt
-        module.updateConfig(fanInNums, fanOutNums, internalNum)
+        val internalNodeName = moduleName(moduleName.size - 1)
+        var internalNum = 0
+        var isDecisive = false
+        for(i <- 0 until module.internalNodes.size){
+          val iN = module.internalNodes(i)
+          if(iN == internalNodeName){
+            internalNum = i
+            isDecisive = true
+          }
+        }
+        if(isDecisive){
+          module.updateConfig(fanInNums, fanOutNums, internalNum)
+        }
         module.configArray
       }
     }

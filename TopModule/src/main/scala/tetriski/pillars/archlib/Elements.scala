@@ -15,7 +15,9 @@ class OpAlu(name: String, params: List[Int]) extends ModuleTrait {
   setParams(params)
   setName(name)
 
-  addInternalNodesNum(1)
+  //addInternalNodesNum(1)
+ // support passby
+  addInternalNodesNum(2)
 
 
 }
