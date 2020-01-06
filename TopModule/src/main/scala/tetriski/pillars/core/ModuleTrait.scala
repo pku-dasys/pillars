@@ -1,6 +1,7 @@
 package tetriski.pillars.core
 
 import chisel3.util.log2Up
+//import tetriski.pillars.hardware.PillarsConfig._
 //import tetriski.pillars.core.NodeMRRG
 
 trait ModuleTrait extends Ports with ModuleBasic {
@@ -11,21 +12,32 @@ trait ModuleTrait extends Ports with ModuleBasic {
   //to be update
   def updateConfig(fanInNums : List[Int], fanOutNums : List[Int], internalNum : Int): Unit ={
     if(internalNum > 0 ){
-      //register files
-      val configSize = getConfigBit()
-      val inPortNum = getInPorts().size
-      val outPortNum = getOutPorts().size
-      val internalNodeNum = internalNodes.size
-      val singleConfigSize = log2Up(internalNodeNum)
-      val oldConfig = getBigIntConfig()
-      var newConfig = oldConfig
-      for(fanInNum <- fanInNums){
-        newConfig = (newConfig & ~(1 << (singleConfigSize * fanInNum))) | (internalNum << (singleConfigSize * fanInNum))
+      if(supOps.size > 0){
+        //alu passby
+        //ALU_COPY_A = 11.U(4.W)
+        //ALU_COPY_B = 12.U(4.W)
+        val newConfig = fanInNums(0) match {
+          case 0 => 11
+          case 1 => 12
+        }
+        updateConfigArray(newConfig)
+      }else{
+        //register files
+        val configSize = getConfigBit()
+        val inPortNum = getInPorts().size
+        val outPortNum = getOutPorts().size
+        val internalNodeNum = internalNodes.size
+        val singleConfigSize = log2Up(internalNodeNum)
+        val oldConfig = getBigIntConfig()
+        var newConfig = oldConfig
+        for(fanInNum <- fanInNums){
+          newConfig = (newConfig & ~(1 << (singleConfigSize * fanInNum))) | (internalNum << (singleConfigSize * fanInNum))
+        }
+        for(fanOutNum <- fanOutNums){
+          newConfig = (newConfig & ~(1 << (singleConfigSize * (fanOutNum + inPortNum)))) | (internalNum << (singleConfigSize * (fanOutNum + inPortNum)))
+        }
+        updateConfigArray(newConfig)
       }
-      for(fanOutNum <- fanOutNums){
-        newConfig = (newConfig & ~(1 << (singleConfigSize * (fanOutNum + inPortNum)))) | (internalNum << (singleConfigSize * (fanOutNum + inPortNum)))
-      }
-      updateConfigArray(newConfig)
     }else{
       updateConfigArray(fanInNums(0))
     }
@@ -101,19 +113,36 @@ trait ModuleTrait extends Ports with ModuleBasic {
 //        }
 //      }
 //    }else{
-      for(internalNode <- internalNodes){
+      for(i <- 0 until internalNodes.size){
+        val internalNode = internalNodes(i)
         val node = new NodeMRRG(internalNode)
-        if(supOps.size > 0){
+        //only the first internalNode can contain ops
+        if(supOps.size > 0 && i == 0){
           node.ops.appendAll(supOps)
         }
         mrrg.addNode(node)
-        for(inPort <- inPorts){
-          mrrg.addConnect(inPort, internalNode)
+        //ALU passby
+        if(supOps.size>0 && internalNodes.size > 1){
+          val nodeOut = new NodeMRRG(internalNode + "_out")
+          mrrg.addNode(nodeOut)
+          mrrg.addConnect(internalNode, internalNode + "_out")
         }
+      }
+
+    for(internalNode <- internalNodes){
+      for(inPort <- inPorts){
+        mrrg.addConnect(inPort, internalNode)
+      }
+      if(supOps.size > 0 && internalNodes.size > 1){
+        for(outPort <- outPorts){
+          mrrg.addConnect(internalNode + "_out", outPort)
+        }
+      }else{
         for(outPort <- outPorts){
           mrrg.addConnect(internalNode, outPort)
         }
       }
+    }
    // }
     mrrg
   }
