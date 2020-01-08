@@ -7,7 +7,7 @@ import java.io.{File, PrintWriter}
 
 import chisel3.util.log2Up
 import tetriski.pillars.archlib.{PEBlock, TileBlock, TileLSUBlock}
-import tetriski.pillars.core.{ArchitctureHierarchy, Connect, HardwareGeneration}
+import tetriski.pillars.core.{ArchitctureHierarchy, Connect, HardwareGeneration, ModuleTrait}
 import tetriski.pillars.hardware.TopModule
 import tetriski.pillars.testers.{TopModule2PEUnitTest, TopModuleAdresUnitTest, TopModuleLSUAdresUnitTest}
 
@@ -60,7 +60,7 @@ object Pillars {
       chisel3.Driver.execute(args, () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, 32))
 
       //Run tester
-      iotesters.Driver.execute(Array("-tgvo", "on"), () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, 32)) {
+      iotesters.Driver.execute(Array("-tgvo", "on", "-tbn" ,"verilator"), () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, 32)) {
         c => new TopModule2PEUnitTest(c)
       }
     }
@@ -154,7 +154,7 @@ object Pillars {
 
       val cp = new HardwareGeneration(arch, connect)
 
-      println(cp.connectMap)
+//      println(cp.connectMap)
 
       //Verilog generation
       chisel3.Driver.execute(Array("--no-check-comb-loops", "-td","ADRESv1"), () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, 32))
@@ -168,6 +168,11 @@ object Pillars {
 
       println(bitStream)
 
+      arch("tile_0")("pe_0_1").getModule("alu0").setWaitCycle(1)
+      arch("tile_0")("pe_0_0").getModule("alu0").setWaitCycle(3)
+
+      val waitCycles = arch.aluArray.map(alu => alu.asInstanceOf[ModuleTrait].getWaitCycle()).toList
+
 
       //
       //      iotesters.Driver.execute(Array( "--no-check-comb-loops","-tiac", "-tiwv"), () => new DispatchT(191, List(47, 47, 3, 47, 47))) {
@@ -178,12 +183,12 @@ object Pillars {
       //Run tester
 //      iotesters.Driver.execute(Array( "--no-check-comb-loops","-tiac", "-tiwv"), () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, 32)) {
       iotesters.Driver.execute(Array( "--no-check-comb-loops","-tgvo", "on", "-tbn" ,"verilator"), () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, 32)) {
-         c => new TopModuleLSUAdresUnitTest(c, bitStream)
+         c => new TopModuleLSUAdresUnitTest(c, bitStream, waitCycles)
       }
     }
 
-    example2PE()
-    exampleAdres()
+//    example2PE()
+//    exampleAdres()
     exampleLSUAdres()
 
   }

@@ -73,11 +73,11 @@ class TopModuleAdresUnitTest(c: TopModule, bitstream :BigInt) extends PeekPokeTe
   }
 }
 
-class TopModuleLSUAdresUnitTest(c: TopModule, bitstream :BigInt) extends PeekPokeTester(c) {
+class TopModuleLSUAdresUnitTest(c : TopModule, bitstream : BigInt, waitCycles : List[Int]) extends PeekPokeTester(c) {
   //MixedVec don't support c.io.inputs(0) in poke
   //  poke(c.input_0, 2)
   //  poke(c.input_1, 3)
-  println(bitstream.toString())
+  println(waitCycles.toString)
 
   val inData = (1 to 128).toArray
   poke(c.io.en, 0)
@@ -132,11 +132,15 @@ class TopModuleLSUAdresUnitTest(c: TopModule, bitstream :BigInt) extends PeekPok
   poke(c.io.en, 1)
   poke(c.io.configuration, bitstream)
 
+  for(i <- 0 until waitCycles.size){
+    poke(c.io.aluSchedule(i), waitCycles(i))
+  }
+
 //  expect(c.io.configTest(0), 0)
 //  expect(c.io.configTest(1), 200325)
 
   step(3)
-  var ref = 2
+  var ref = 0
   for( i <- 1 until 128){
     //    println("cycle "+ i.toString)
     //poke(c.input_1, i)
