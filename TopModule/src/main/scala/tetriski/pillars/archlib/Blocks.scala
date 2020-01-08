@@ -1,7 +1,7 @@
 package tetriski.pillars.archlib
 
 import chisel3.util.log2Up
-import tetriski.pillars.core.BlockTrait
+import tetriski.pillars.core.{BlockTrait, OpEnum, OpcodeTranslator}
 //import tetriski.pillars.archlib.OpConst
 
 import scala.collection.mutable.ArrayBuffer
@@ -15,7 +15,9 @@ class PEBlock(name: String) extends BlockTrait{
   addOutPorts(Array("out_0"))
   addInPorts(Array("input_0", "input_1", "input_2", "input_3"))
 
-  val alu0 = new OpAlu("alu0", List(32, 4))
+  val aluOpList = List(OpEnum.ADD, OpEnum.SUB, OpEnum.AND, OpEnum.OR, OpEnum.XOR, OpEnum.MUL)
+  val supBypass = false
+  val alu0 = new OpAlu("alu0", aluOpList, supBypass, List(32, 4))
   //port sequnces outs: 0: out
   //port sequnces inputs: 0: input_a, 1: input_b
   alu0.addOutPorts(Array("out_0"))
@@ -76,7 +78,9 @@ class AdresPEBlock(name: String) extends BlockTrait{
   addOutPorts(Array("out"))
   addInPorts(Array("input_w", "input_e", "input_n", "input_s"))
 
-  val alu0 = new OpAlu("alu0", List(32, 4))
+  val aluOpList = List(OpEnum.ADD, OpEnum.SUB, OpEnum.AND, OpEnum.OR, OpEnum.XOR, OpEnum.MUL)
+  val supBypass = false
+  val alu0 = new OpAlu("alu0", aluOpList, supBypass, List(32, 4))
   //port sequnces outs: 0: out
   //port sequnces inputs: 0: input_a, 1: input_b
   alu0.addOutPorts(Array("out_0"))
@@ -158,7 +162,10 @@ class AdresPE5InBlock(name: String) extends BlockTrait{
   addOutPorts(Array("out"))
   addInPorts(Array("input_w", "input_e", "input_n", "input_s", "input_lsu"))
 
-  val alu0 = new OpAlu("alu0", List(32, 4))
+//  val aluOpList = List(OpEnum.ADD, OpEnum.SUB, OpEnum.AND, OpEnum.OR, OpEnum.XOR, OpEnum.MUL)
+  val aluOpList = List(OpEnum.ADD, OpEnum.MUL)
+  val supBypass = true
+  val alu0 = new OpAlu("alu0", aluOpList, supBypass, List(32, 4))
   //port sequnces outs: 0: out
   //port sequnces inputs: 0: input_a, 1: input_b
   alu0.addOutPorts(Array("out_0"))

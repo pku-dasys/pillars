@@ -77,7 +77,7 @@ class TopModuleLSUAdresUnitTest(c : TopModule, bitstream : BigInt, waitCycles : 
   //MixedVec don't support c.io.inputs(0) in poke
   //  poke(c.input_0, 2)
   //  poke(c.input_1, 3)
-  println(waitCycles.toString)
+//  println(waitCycles.toString)
 
   val inData = (1 to 128).toArray
   poke(c.io.en, 0)
@@ -139,15 +139,15 @@ class TopModuleLSUAdresUnitTest(c : TopModule, bitstream : BigInt, waitCycles : 
 //  expect(c.io.configTest(0), 0)
 //  expect(c.io.configTest(1), 200325)
 
-  step(3)
+  step(4)
   var ref = 0
   for( i <- 1 until 128){
     //    println("cycle "+ i.toString)
     //poke(c.input_1, i)
     //if(i % 5 == 0)
-    expect(c.out, ref)
     ref = ref + i
-//    println(peek(c.out).toString())
+    expect(c.out, ref)
+//    println(ref.toString + " " + peek(c.out).toString())
     step(1)
   }
 }

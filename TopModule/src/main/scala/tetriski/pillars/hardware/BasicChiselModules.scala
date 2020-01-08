@@ -6,6 +6,8 @@ import tetriski.pillars.testers.EnqMemWrapper
 import tetriski.pillars.util.{EnqMem, MemReadIO, MemWriteIO, SimpleDualPortSram}
 import tetriski.pillars.hardware.PillarsConfig._
 
+import scala.collection.mutable.ArrayBuffer
+
 class ScheduleController extends Module {
   val io = IO(new Bundle {
     val en = Input(Bool())
@@ -33,7 +35,7 @@ class ScheduleController extends Module {
   }
 }
 
-class Alu(w: Int) extends Module {
+class Alu(funSelect: Int, w: Int) extends Module {
   val io = IO(new Bundle {
     val en = Input(Bool())
     //port sequnces outs: 0: out
@@ -43,26 +45,55 @@ class Alu(w: Int) extends Module {
     val outs = Output(MixedVec(Seq(UInt(w.W))))
   })
 
+  def getFunSeq(shamt : UInt) : Seq[(UInt, UInt)] ={
+    val funSeq = new ArrayBuffer[(UInt, UInt)]()
+//    val funSelect = 0
+
+    for (i <- 0 until ALU_FUN_NUM){
+      if((funSelect & (1 << i))> 0){
+        i match {
+          case 0 => funSeq.append(ALU_ADD -> (input_a + input_b))
+          case 1 => funSeq.append(ALU_SUB -> (input_a - input_b))
+          case 2 => funSeq.append(ALU_AND -> (input_a & input_b))
+          case 3 => funSeq.append(ALU_OR -> (input_a | input_b))
+          case 4 => funSeq.append(ALU_XOR -> (input_a ^ input_b))
+          case 5 => funSeq.append(ALU_MUL -> (input_a * input_b))
+          case 6 => funSeq.append(ALU_SLT -> (input_a.asSInt < input_b.asSInt))
+          case 7 => funSeq.append(ALU_SLL -> (input_a << shamt).asUInt())
+          case 8 => funSeq.append(ALU_SLTU -> (input_a < input_b))
+          case 9 => funSeq.append(ALU_SRL -> (input_a >> shamt).asUInt())
+          case 10 => funSeq.append(ALU_SRA -> (input_a.asSInt >> shamt).asUInt)
+          case 11 => funSeq.append(ALU_COPY_A -> input_a)
+          case 12 => funSeq.append(ALU_COPY_B -> input_b)
+        }
+      }
+    }
+    funSeq.toSeq
+  }
+
   val input_a = io.inputs(0)
   val input_b = io.inputs(1)
   val out = io.outs(0)
   val shamt = input_b(4, 0).asUInt
 
+  val funSeq = getFunSeq(shamt)
+
   when(io.en){
-    out := MuxLookup(io.configuration, input_b, Seq(
-      ALU_ADD -> (input_a + input_b),
-      ALU_SUB -> (input_a - input_b),
-      ALU_AND -> (input_a & input_b),
-      ALU_OR -> (input_a | input_b),
-      ALU_XOR -> (input_a ^ input_b),
-      ALU_MUL -> (input_a * input_b),
-      ALU_SLT -> (input_a.asSInt < input_b.asSInt),
-      ALU_SLL -> (input_a << shamt),
-      ALU_SLTU -> (input_a < input_b),
-      ALU_SRL -> (input_a >> shamt),
-      ALU_SRA -> (input_a.asSInt >> shamt).asUInt,
-      ALU_COPY_A -> input_a,
-      ALU_COPY_B -> input_b))
+    out := MuxLookup(io.configuration, input_b, funSeq)
+//    out := MuxLookup(io.configuration, input_b, Seq(
+//      ALU_ADD -> (input_a + input_b),
+//      ALU_SUB -> (input_a - input_b),
+//      ALU_AND -> (input_a & input_b),
+//      ALU_OR -> (input_a | input_b),
+//      ALU_XOR -> (input_a ^ input_b),
+//      ALU_MUL -> (input_a * input_b),
+//      ALU_SLT -> (input_a.asSInt < input_b.asSInt),
+//      ALU_SLL -> (input_a << shamt),
+//      ALU_SLTU -> (input_a < input_b),
+//      ALU_SRL -> (input_a >> shamt),
+//      ALU_SRA -> (input_a.asSInt >> shamt).asUInt,
+//      ALU_COPY_A -> input_a,
+//      ALU_COPY_B -> input_b))
   }.otherwise{
     for(out <- io.outs){
       out := 0.U
@@ -214,7 +245,7 @@ class ADRESPE(w: Int) extends Module {
   val out = io.outs(0)
 
   val rf = Module(new RegisterFiles(1, 1, 2, 32))
-  val alu = Module(new Alu(32))
+  val alu = Module(new Alu(0, 32))
   val targets = List(3, 3, 4, 3)
   val dispatch = Module(new Dispatch(13,  targets))
   dispatch.io.configuration := io.configuration

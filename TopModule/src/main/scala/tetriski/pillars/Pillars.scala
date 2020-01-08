@@ -187,8 +187,8 @@ object Pillars {
       }
     }
 
-//    example2PE()
-//    exampleAdres()
+    example2PE()
+    exampleAdres()
     exampleLSUAdres()
 
   }

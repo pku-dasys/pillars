@@ -20,4 +20,6 @@ object PillarsConfig {
   val ALU_SRA = 10.U(4.W)
   val ALU_COPY_A = 11.U(4.W)
   val ALU_COPY_B = 12.U(4.W)
+
+  val ALU_FUN_NUM = 13
 }
