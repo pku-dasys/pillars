@@ -1,23 +1,31 @@
 package tetriski.pillars.archlib
 
-import tetriski.pillars.core.{BlockTrait, ModuleTrait, OpEnum}
+import tetriski.pillars.core.OpEnum.OpEnum
+import tetriski.pillars.core.{BlockTrait, ModuleTrait, OpEnum, OpcodeTranslator}
 
 
-class OpAlu(name: String, params: List[Int]) extends ModuleTrait {
+class OpAlu(name: String, aluOpList: List[OpEnum], supBypass: Boolean, params: List[Int]) extends ModuleTrait {
   //Module ID 0
   setTypeID(0)
-  //Support add, sub, and, or, xor
-  setSupOps(List(OpEnum.ADD, OpEnum.SUB, OpEnum.AND, OpEnum.OR, OpEnum.XOR, OpEnum.MUL))
+  //Default
+  setSupOps(aluOpList)
+//  setSupOps(List(OpEnum.ADD, OpEnum.SUB, OpEnum.AND, OpEnum.OR, OpEnum.XOR, OpEnum.MUL))
   //4 bit configuration
   //setConfigBit(4)
+  val aluFunSelect = OpcodeTranslator.getAluFunSelect(aluOpList, supBypass)
 
   //setWidth(width)
-  setParams(params)
+  setParams(aluFunSelect +: params)
   setName(name)
 
   //addInternalNodesNum(1)
  // support passby
-  addInternalNodesNum(2)
+  if(supBypass){
+    addInternalNodesNum(2)
+  }else{
+    addInternalNodesNum(1)
+  }
+
 
 
 }

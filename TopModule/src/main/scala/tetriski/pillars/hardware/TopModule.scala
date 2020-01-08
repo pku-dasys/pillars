@@ -92,7 +92,7 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
 //  currentNum += PENum
 //
 
-  val alus = (0 until aluNum).toArray.map(t => Module(new Alu(moduleInfos.getParams(t + currentNum)(0))))
+  val alus = (0 until aluNum).toArray.map(t => Module(new Alu(moduleInfos.getParams(t + currentNum)(0), moduleInfos.getParams(t + currentNum)(1))))
   val aluScheduleControllers = (0 until aluNum).toArray.map(t => Module(new ScheduleController))
   for(i <- 0 until aluNum){
     val alu = alus(i)

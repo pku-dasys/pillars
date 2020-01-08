@@ -46,7 +46,7 @@ trait ModuleTrait extends Ports with ModuleBasic {
   def updateConfig(opcode : Int): Unit ={
     for (i <- 0 until supOps.size){
       if(supOps(i).toString.toInt == opcode){
-        updateConfigArray(i)
+        updateConfigArray(OpcodeTranslator.getModuleOpcode(supOps(i)))
       }
     }
   }

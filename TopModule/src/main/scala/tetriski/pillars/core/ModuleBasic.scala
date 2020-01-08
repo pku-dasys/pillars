@@ -33,6 +33,7 @@ trait ModuleBasic {
   }
 
   def setSupOps(arg: List[OpEnum]): Unit = {
+    supOps.clear()
     arg.foreach(t => supOps.append(t))
   }
 
