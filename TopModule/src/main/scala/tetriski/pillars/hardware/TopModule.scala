@@ -48,6 +48,7 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
     val idleLSU = Output(Vec(LSUnitNum, Bool()))
 
     val en = Input(Bool())
+    val aluSchedule = Input(Vec(aluNum, UInt(LOG_SCHEDULE_SIZE)))
 
     //port sequnces outs: 0: out
     //port sequnces inputs: 0: input_a, 1: input_b
@@ -92,8 +93,13 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
 //
 
   val alus = (0 until aluNum).toArray.map(t => Module(new Alu(moduleInfos.getParams(t + currentNum)(0))))
-  for(alu <- alus){
-    alu.io.en <> io.en
+  val aluScheduleControllers = (0 until aluNum).toArray.map(t => Module(new ScheduleController))
+  for(i <- 0 until aluNum){
+    val alu = alus(i)
+    val aluScheduleController = aluScheduleControllers(i)
+    aluScheduleController.io.en <> io.en
+    aluScheduleController.io.waitCycle <> io.aluSchedule(i)
+    alu.io.en <> aluScheduleController.io.valid
   }
   currentNum += aluNum
 

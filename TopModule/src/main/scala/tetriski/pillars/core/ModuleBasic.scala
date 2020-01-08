@@ -14,6 +14,7 @@ trait ModuleBasic {
   var params = new ArrayBuffer[Int]
   var configBit = 0
   var configArray = new ArrayBuffer[Int]
+  var waitCycle = 0
 
   def setModuleID(arg: Int): Unit = {
     moduleID = arg
@@ -47,6 +48,10 @@ trait ModuleBasic {
     configArray.append(0)
   }
 
+  def setWaitCycle(arg: Int): Unit ={
+    waitCycle = arg
+  }
+
   def getModuleID(): Int = {
     moduleID
   }
@@ -73,6 +78,10 @@ trait ModuleBasic {
 
   def getConfigBit(): Int = {
     configBit
+  }
+
+  def getWaitCycle(): Int = {
+    waitCycle
   }
 
 

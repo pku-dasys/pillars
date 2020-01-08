@@ -1,12 +1,37 @@
 package tetriski.pillars.hardware
 
-import chisel3.util.{EnqIO, MixedVec, MuxLookup, log2Ceil, log2Up}
+import chisel3.util.{EnqIO, Enum, MixedVec, MuxLookup, log2Ceil, log2Up}
 import chisel3.{Bundle, Input, Mem, Module, Output, UInt, Vec, _}
 import tetriski.pillars.testers.EnqMemWrapper
 import tetriski.pillars.util.{EnqMem, MemReadIO, MemWriteIO, SimpleDualPortSram}
-
-
 import tetriski.pillars.hardware.PillarsConfig._
+
+class ScheduleController extends Module {
+  val io = IO(new Bundle {
+    val en = Input(Bool())
+    val waitCycle = Input(UInt(LOG_SCHEDULE_SIZE))
+    val valid = Output(Bool())
+  })
+
+  val s_wait :: s_valid :: Nil = Enum(2)
+  val state = RegInit(s_wait)
+  val cycleReg = Reg(UInt(LOG_SCHEDULE_SIZE))
+
+  io.valid := (cycleReg === io.waitCycle) && io.en
+
+  when(io.en){
+    when(state === s_wait){
+      when(cycleReg === io.waitCycle){
+        state := s_valid
+      }.otherwise{
+        cycleReg := cycleReg + 1.U
+      }
+    }
+  }.otherwise{
+    state := s_wait
+    cycleReg := 0.U
+  }
+}
 
 class Alu(w: Int) extends Module {
   val io = IO(new Bundle {
