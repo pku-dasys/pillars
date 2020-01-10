@@ -132,7 +132,7 @@ class Alu(funSelect: Int, w: Int) extends Module {
 //}
 
 
-class RegisterFiles(log2Regs : Int, numIn : Int, numOut:Int, w :Int) extends Module {
+class RegisterFiles(log2Regs : Int, numIn : Int, numOut : Int, w :Int) extends Module {
   val io = IO(new Bundle {
     val en = Input(Bool())
     //port sequnces: 0:outs, 1:inputs, 2: configuration, 3: configTest for test
@@ -269,7 +269,7 @@ class Dispatch(wIn: Int, targets : List[Int]) extends Module {
     val configuration = Input(UInt(wIn.W))
     val outs = Output(MixedVec(targets.map{i => UInt(i.W)}))
   })
-  val outt =io.outs(targets.size - 2)
+//  val outt =io.outs(targets.size - 2)
   var i = 0
   var offset : Int= 0
   when(io.en){
