@@ -152,6 +152,86 @@ class TopModuleLSUAdresUnitTest(c : TopModule, bitstream : BigInt, waitCycles : 
   }
 }
 
+class TopModuleCompleteAdresUnitTest(c : TopModule, bitstream : BigInt, waitCycles : List[Int]) extends PeekPokeTester(c) {
+  //MixedVec don't support c.io.inputs(0) in poke
+  //  poke(c.input_0, 2)
+  //  poke(c.input_1, 3)
+  //  println(waitCycles.toString)
+
+  val inData = (1 to 128).toArray
+  poke(c.io.en, 0)
+  //val inData = Array(BigInt("64",10), BigInt("69",10), BigInt("77",10))
+
+  //  val idata = c.LSUs(0).memWrapper.enq_mem.manip.mode match {
+  //    case SplitOrConcat.Normal =>
+  //      Array(BigInt("123",10), BigInt("345",10), BigInt("567",10))
+  //    case SplitOrConcat.Split =>
+  //      assert(c.LSUs(0).memWrapper.enq_mem.manip.factor == 4)
+  //      Array(BigInt("123"+"345"+"557"+"789",16)) // little endian
+  //    case SplitOrConcat.Concat =>
+  //      assert(c.LSUs(0).memWrapper.enq_mem.manip.factor == 4)
+  //      Array(
+  //        BigInt("cc",16), BigInt("cc",16), BigInt("cc",16), BigInt("cc",16),
+  //        BigInt("ef",16), BigInt("be",16), BigInt("ad",16), BigInt("de",16),
+  //        BigInt("cd",16), BigInt("cd",16), BigInt("cd",16), BigInt("cd",16)
+  //      ) // little endian
+  //  }
+
+  val base = 0
+
+  poke(c.io.startLSU(1), 1)
+  poke(c.io.enqEnLSU(1), 1)
+  poke(c.io.inLSU(1).valid, 0)
+  poke(c.io.baseLSU(1), base)
+  step(1)
+
+  // push
+  for (x <- inData) {
+    poke(c.io.inLSU(1).valid, 1)
+    expect(c.io.inLSU(1).valid, 1)
+    poke(c.io.inLSU(1).bits, x)
+    if (peek(c.io.inLSU(1).ready) == 0) {
+      while (peek(c.io.inLSU(1).ready) == 0) {
+        step(1)
+      }
+    } else {
+      step(1)
+    } // exit condition: (c.io.in.ready === true.B) and step()
+  }
+  poke(c.io.inLSU(1).valid, 0)
+
+  // exec
+  while (peek(c.io.idleLSU(1)) == 0) {
+    step(1)
+  }
+
+  poke(c.io.enqEnLSU(1), 0)
+
+
+  poke(c.io.en, 1)
+  poke(c.io.configuration, bitstream)
+
+  for(i <- 0 until waitCycles.size){
+    poke(c.io.aluSchedule(i), waitCycles(i))
+  }
+
+  //  expect(c.io.configTest(0), 0)
+  //  expect(c.io.configTest(1), 200325)
+
+  step(4)
+  var ref = 0
+  for( i <- 1 until 128){
+    //    println("cycle "+ i.toString)
+    //poke(c.input_1, i)
+    //if(i % 5 == 0)
+    ref = ref + i
+    expect(c.out, ref)
+    //    println(ref.toString + " " + peek(c.out).toString())
+    step(1)
+  }
+}
+
+
 class DispatchUnitTest(c: DispatchT, bitstream :BigInt) extends PeekPokeTester(c) {
   //MixedVec don't support c.io.inputs(0) in poke
   poke(c.io.configuration, bitstream)
