@@ -101,10 +101,10 @@ object Pillars {
       //Verilog generation
       chisel3.Driver.execute(Array("--no-check-comb-loops", "-td","ADRESv0"), () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, 32))
 
-      arch.genConfig("internalNodeinfo.txt")
+      arch.genConfig("internalNodeinfo_simple.txt")
 
       arch("tile_0")("pe_0_0").getModule("const0").updateConfigArray(4)
-      arch("tile_0")("pe_1_0").getModule("const0").updateConfigArray(5)
+      arch("tile_0")("pe_0_1").getModule("const0").updateConfigArray(5)
 
       val bitStream = arch.getConfigBitStream()
 
@@ -161,14 +161,14 @@ object Pillars {
 
       arch.genConfig("internalNodeinfo_lsu.txt")
 
-      arch("tile_0")("pe_1_0").getModule("const0").updateConfigArray(1)
+      arch("tile_0")("pe_0_1").getModule("const0").updateConfigArray(1)
       arch("tile_0")("pe_1_1").getModule("const0").updateConfigArray(1)
 
       val bitStream = arch.getConfigBitStream()
 
       println(bitStream)
 
-      arch("tile_0")("pe_0_1").getModule("alu0").setWaitCycle(1)
+      arch("tile_0")("pe_1_1").getModule("alu0").setWaitCycle(1)
       arch("tile_0")("pe_0_0").getModule("alu0").setWaitCycle(3)
 
       val waitCycles = arch.aluArray.map(alu => alu.asInstanceOf[ModuleTrait].getWaitCycle()).toList
@@ -233,7 +233,7 @@ object Pillars {
       println(bitStream)
 
       arch("tile_0")("pe_0_0").getModule("alu0").setWaitCycle(1)
-      arch("tile_0")("pe_0_1").getModule("alu0").setWaitCycle(3)
+      arch("tile_0")("pe_1_0").getModule("alu0").setWaitCycle(3)
 
       val waitCycles = arch.aluArray.map(alu => alu.asInstanceOf[ModuleTrait].getWaitCycle()).toList
 
@@ -251,9 +251,9 @@ object Pillars {
       }
     }
 
-//    example2PE()
-//    exampleAdres()
-//    exampleLSUAdres()
+    example2PE()
+    exampleAdres()
+    exampleLSUAdres()
     exampleCompleteAdres()
 
   }

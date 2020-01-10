@@ -66,7 +66,7 @@ class TopModuleAdresUnitTest(c: TopModule, bitstream :BigInt) extends PeekPokeTe
 
   for( i <- 0 until 40){
 //    println("cycle "+ i.toString)
-    poke(c.input_0, i)
+    poke(c.input_1, i)
     if(i > 2)
     expect(c.out, 5 * (i - 2 + 4))
     step(1)
