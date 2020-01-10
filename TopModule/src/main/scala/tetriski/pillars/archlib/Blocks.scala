@@ -451,7 +451,7 @@ class TileBlock(name : String, x : Int, y : Int, numIn : Int, numOut : Int) exte
   var peMap = Map[Int, AdresPEBlock]()
   for (i <- 0 until x){
     for (j <- 0 until y){
-      val pe = new AdresPEBlock("pe_"+i.toString+"_"+j.toString)
+      val pe = new AdresPEBlock("pe_"+j.toString+"_"+i.toString)
       peMap = peMap + ((i + j * x) -> pe)
       addBlock(pe)
     }
@@ -498,7 +498,7 @@ class TileLSUBlock(name : String, x : Int, y : Int, numIn : Int, numOut : Int) e
   var peMap = Map[Int, AdresPE5InBlock]()
   for (i <- 0 until x){
     for (j <- 0 until y){
-      val pe = new AdresPE5InBlock("pe_"+i.toString+"_"+j.toString)
+      val pe = new AdresPE5InBlock("pe_"+j.toString+"_"+i.toString)
       peMap = peMap + ((i + j * x) -> pe)
       addBlock(pe)
     }
@@ -563,11 +563,11 @@ class TileCompleteBlock(name : String, x : Int, y : Int, numIn : Int, numOut : I
   for (i <- 0 until x){
     for (j <- 0 until y){
       if(j  == 0){
-        val pe = new AdresVLIWPE5InBlock("pe_"+i.toString+"_"+j.toString)
+        val pe = new AdresVLIWPE5InBlock("pe_"+j.toString+"_"+i.toString)
         peMap = peMap + ((i + j * x) -> pe)
         addBlock(pe)
       }else{
-        val pe = new AdresPE5InBlock("pe_"+i.toString+"_"+j.toString)
+        val pe = new AdresPE5InBlock("pe_"+j.toString+"_"+i.toString)
         peMap = peMap + ((i + j * x) -> pe)
         addBlock(pe)
       }
