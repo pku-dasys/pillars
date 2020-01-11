@@ -193,7 +193,7 @@ object Pillars {
       arch.addOutPorts(Array("output"))
       arch.addInPorts(Array("input_0", "input_1"))
 
-      val tile = new TileCompleteBlock("tile_0", 2, 2, 2, 1)
+      val tile = new TileCompleteBlock("tile_0", 4, 4, 2, 1)
 
       arch.addBlock(tile)
 
@@ -225,15 +225,15 @@ object Pillars {
 
       arch.genConfig("internalNodeinfo_complete.txt")
 
-      arch("tile_0")("pe_0_0").getModule("const0").updateConfigArray(1)
-      arch("tile_0")("pe_1_1").getModule("const0").updateConfigArray(1)
+      arch("tile_0")("pe_0_3").getModule("const0").updateConfigArray(1)
+      arch("tile_0")("pe_0_2").getModule("const0").updateConfigArray(1)
 
       val bitStream = arch.getConfigBitStream()
 
       println(bitStream)
 
-      arch("tile_0")("pe_0_0").getModule("alu0").setWaitCycle(1)
-      arch("tile_0")("pe_1_0").getModule("alu0").setWaitCycle(3)
+//      arch("tile_0")("pe_0_2").getModule("alu0").setWaitCycle(1)
+      arch("tile_0")("pe_0_0").getModule("alu0").setWaitCycle(3)
 
       val waitCycles = arch.aluArray.map(alu => alu.asInstanceOf[ModuleTrait].getWaitCycle()).toList
 

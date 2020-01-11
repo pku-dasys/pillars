@@ -158,7 +158,7 @@ class TopModuleCompleteAdresUnitTest(c : TopModule, bitstream : BigInt, waitCycl
   //  poke(c.input_1, 3)
   //  println(waitCycles.toString)
 
-  val inData = (1 to 128).toArray
+  val inData = (10 to 100).toArray
   poke(c.io.en, 0)
   //val inData = Array(BigInt("64",10), BigInt("69",10), BigInt("77",10))
 
@@ -179,33 +179,33 @@ class TopModuleCompleteAdresUnitTest(c : TopModule, bitstream : BigInt, waitCycl
 
   val base = 0
 
-  poke(c.io.startLSU(1), 1)
-  poke(c.io.enqEnLSU(1), 1)
-  poke(c.io.inLSU(1).valid, 0)
-  poke(c.io.baseLSU(1), base)
+  poke(c.io.startLSU(0), 1)
+  poke(c.io.enqEnLSU(0), 1)
+  poke(c.io.inLSU(0).valid, 0)
+  poke(c.io.baseLSU(0), base)
   step(1)
 
   // push
   for (x <- inData) {
-    poke(c.io.inLSU(1).valid, 1)
-    expect(c.io.inLSU(1).valid, 1)
-    poke(c.io.inLSU(1).bits, x)
-    if (peek(c.io.inLSU(1).ready) == 0) {
-      while (peek(c.io.inLSU(1).ready) == 0) {
+    poke(c.io.inLSU(0).valid, 1)
+    expect(c.io.inLSU(0).valid, 1)
+    poke(c.io.inLSU(0).bits, x)
+    if (peek(c.io.inLSU(0).ready) == 0) {
+      while (peek(c.io.inLSU(0).ready) == 0) {
         step(1)
       }
     } else {
       step(1)
     } // exit condition: (c.io.in.ready === true.B) and step()
   }
-  poke(c.io.inLSU(1).valid, 0)
+  poke(c.io.inLSU(0).valid, 0)
 
   // exec
-  while (peek(c.io.idleLSU(1)) == 0) {
+  while (peek(c.io.idleLSU(0)) == 0) {
     step(1)
   }
 
-  poke(c.io.enqEnLSU(1), 0)
+  poke(c.io.enqEnLSU(0), 0)
 
 
   poke(c.io.en, 1)
@@ -220,13 +220,13 @@ class TopModuleCompleteAdresUnitTest(c : TopModule, bitstream : BigInt, waitCycl
 
   step(4)
   var ref = 0
-  for( i <- 1 until 128){
+  for( i <- 10 until 100){
     //    println("cycle "+ i.toString)
     //poke(c.input_1, i)
     //if(i % 5 == 0)
     ref = ref + i
     expect(c.out, ref)
-    //    println(ref.toString + " " + peek(c.out).toString())
+//    println(ref.toString + " " + peek(c.out).toString())
     step(1)
   }
 }
