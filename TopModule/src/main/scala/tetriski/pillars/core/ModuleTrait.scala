@@ -23,18 +23,27 @@ trait ModuleTrait extends Ports with ModuleBasic {
         updateConfigArray(newConfig)
       }else{
         //register files
-        val configSize = getConfigBit()
+//        val configSize = getConfigBit()
         val inPortNum = getInPorts().size
-        val outPortNum = getOutPorts().size
+//        val outPortNum = getOutPorts().size
+        val internalNumBigInt : BigInt = internalNum
         val internalNodeNum = internalNodes.size
         val singleConfigSize = log2Up(internalNodeNum)
         val oldConfig = getBigIntConfig()
-        var newConfig = oldConfig
+        var newConfig : BigInt = oldConfig
         for(fanInNum <- fanInNums){
-          newConfig = (newConfig & ~(1 << (singleConfigSize * fanInNum))) | (internalNum << (singleConfigSize * fanInNum))
+          val singleConfigMask : BigInt = ((1<< singleConfigSize)-1)
+          val mask : BigInt = ~(singleConfigMask << (singleConfigSize * (fanInNum)))
+          val clearConfig = newConfig & mask
+          val replaceConfig : BigInt = internalNumBigInt  << (singleConfigSize * fanInNum)
+          newConfig =  clearConfig | replaceConfig
         }
         for(fanOutNum <- fanOutNums){
-          newConfig = (newConfig & ~(1 << (singleConfigSize * (fanOutNum + inPortNum)))) | (internalNum << (singleConfigSize * (fanOutNum + inPortNum)))
+          val singleConfigMask : BigInt = ((1<< singleConfigSize)-1)
+          val mask : BigInt = ~(singleConfigMask << (singleConfigSize * (fanOutNum + inPortNum)))
+          val clearConfig = newConfig & mask
+          val replaceConfig : BigInt = internalNumBigInt << (singleConfigSize * (fanOutNum + inPortNum))
+          newConfig = clearConfig | replaceConfig
         }
         updateConfigArray(newConfig)
       }
@@ -58,6 +67,17 @@ trait ModuleTrait extends Ports with ModuleBasic {
     for(i <- 0 until configSize){
       val bit = t & 1
       configArray.append(bit)
+      t = t >> 1
+    }
+  }
+
+  def updateConfigArray(newConfig : BigInt): Unit ={
+    configArray.clear()
+    var t = newConfig
+    val configSize = getConfigBit()
+    for(i <- 0 until configSize){
+      val bit = t & 1
+      configArray.append(bit.toInt)
       t = t >> 1
     }
   }
@@ -121,21 +141,30 @@ trait ModuleTrait extends Ports with ModuleBasic {
           node.ops.appendAll(supOps)
         }
         mrrg.addNode(node)
-        //ALU passby
+        //ALU byPass
         if(supOps.size>0 && internalNodes.size > 1){
-          val nodeOut = new NodeMRRG(internalNode + "_out")
+          var nodeName = "funcOut"
+          if(i > 0){
+            nodeName = "byPassOut"
+          }
+          val nodeOut = new NodeMRRG(nodeName)
           mrrg.addNode(nodeOut)
-          mrrg.addConnect(internalNode, internalNode + "_out")
+          mrrg.addConnect(internalNode, nodeName)
         }
       }
 
-    for(internalNode <- internalNodes){
+    for(i <- 0 until internalNodes.size){
+      val internalNode = internalNodes(i)
       for(inPort <- inPorts){
         mrrg.addConnect(inPort, internalNode)
       }
       if(supOps.size > 0 && internalNodes.size > 1){
         for(outPort <- outPorts){
-          mrrg.addConnect(internalNode + "_out", outPort)
+          var nodeName = "funcOut"
+          if(i > 0){
+            nodeName = "byPassOut"
+          }
+          mrrg.addConnect(nodeName, outPort)
         }
       }else{
         for(outPort <- outPorts){
