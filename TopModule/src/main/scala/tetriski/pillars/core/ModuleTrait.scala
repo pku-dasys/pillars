@@ -1,6 +1,8 @@
 package tetriski.pillars.core
 
 import chisel3.util.log2Up
+
+import scala.collection.mutable.ArrayBuffer
 //import tetriski.pillars.hardware.PillarsConfig._
 //import tetriski.pillars.core.NodeMRRG
 
@@ -11,7 +13,7 @@ trait ModuleTrait extends Ports with ModuleBasic {
 
   //to be update
   def updateConfig(fanInNums : List[Int], fanOutNums : List[Int], internalNum : Int): Unit ={
-    if(internalNum > 0 ){
+    if(internalNodes.size > 1 ){
       if(supOps.size > 0){
         //alu passby
         //ALU_COPY_A = 11.U(4.W)
@@ -31,15 +33,42 @@ trait ModuleTrait extends Ports with ModuleBasic {
         val singleConfigSize = log2Up(internalNodeNum)
         val oldConfig = getBigIntConfig()
         var newConfig : BigInt = oldConfig
+        val singleConfigMask : BigInt = ((1<< singleConfigSize)-1)
         for(fanInNum <- fanInNums){
-          val singleConfigMask : BigInt = ((1<< singleConfigSize)-1)
+          // guarantee a single register does not have two inputs
+          val currentInputConfigArray = new ArrayBuffer[BigInt]()
+
+          for(i <- 0 until inPortNum){
+            val tempMask : BigInt = singleConfigMask << (singleConfigSize * i)
+            val singleConfig = (newConfig & tempMask) >> (singleConfigSize * i)
+            currentInputConfigArray.append(singleConfig)
+          }
+          var configSet = Set[BigInt]()
+          for(i <- 0 until internalNodeNum){
+            configSet = configSet + i
+          }
+          val unusedConfigArray = (configSet &~ currentInputConfigArray.toSet).toArray
+          val unusedConfig = unusedConfigArray(0)
+          if(currentInputConfigArray.contains(fanInNum)){
+            for(i <- 0 until inPortNum){
+              val inputConfig = currentInputConfigArray(i)
+              if(inputConfig == internalNumBigInt){
+                val tempMask : BigInt = ~(singleConfigMask << (singleConfigSize * i))
+                val clearConfig = newConfig & tempMask
+                val replaceConfig : BigInt = unusedConfig  << (singleConfigSize * i)
+                newConfig =  clearConfig | replaceConfig
+              }
+            }
+          }
+
+
           val mask : BigInt = ~(singleConfigMask << (singleConfigSize * (fanInNum)))
           val clearConfig = newConfig & mask
           val replaceConfig : BigInt = internalNumBigInt  << (singleConfigSize * fanInNum)
           newConfig =  clearConfig | replaceConfig
         }
         for(fanOutNum <- fanOutNums){
-          val singleConfigMask : BigInt = ((1<< singleConfigSize)-1)
+//          val singleConfigMask : BigInt = ((1<< singleConfigSize)-1)
           val mask : BigInt = ~(singleConfigMask << (singleConfigSize * (fanOutNum + inPortNum)))
           val clearConfig = newConfig & mask
           val replaceConfig : BigInt = internalNumBigInt << (singleConfigSize * (fanOutNum + inPortNum))
@@ -48,6 +77,7 @@ trait ModuleTrait extends Ports with ModuleBasic {
         updateConfigArray(newConfig)
       }
     }else{
+      //mux
       updateConfigArray(fanInNums(0))
     }
   }

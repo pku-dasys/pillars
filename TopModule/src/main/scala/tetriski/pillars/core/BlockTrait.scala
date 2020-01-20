@@ -103,8 +103,8 @@ trait BlockTrait extends ModuleTrait {
     connectArray
   }
 
-  def dumpMRRG(): Unit ={
-    def updateMRRG(block : BlockTrait): Unit ={
+  def dumpMRRG(II: Int): Unit ={
+    def updateMRRG(block: BlockTrait): Unit ={
       val addName = block.hierName.map(i => i+".").reverse.reduce(_+_)
       for(module <- block.owningModules){
         val typeID = module(0)
@@ -115,7 +115,7 @@ trait BlockTrait extends ModuleTrait {
         }
       }
     }
-    def getStrMRRG(listStr : List[String]) : String= {
+    def getStrMRRG(listStr: List[String]) : String= {
       val mrrgStr = ArrayBuffer[String]()
       listStr.foreach(str => mrrgStr.append(str.replaceAll("/", ".")))
       if(!mrrgStr(listStr.size-2).contains(".")){
@@ -123,87 +123,89 @@ trait BlockTrait extends ModuleTrait {
       }
       mrrgStr.reduce(_+_)
     }
+    def dumpAsTXT(writer: PrintWriter, oriMRRG: MRRG, II: Int): Unit ={
+      writer.flush()
+      val noOpSet = oriMRRG.getNoOpSet()
+      val funSet = oriMRRG.nodes.toSet&~(noOpSet)
+      writer.println(noOpSet.size)
+      for(node <- noOpSet){
+        writer.println("<"+node.getName()+">")
+        writer.println(node.fanIn.size)
+        for(in <- node.fanIn){
+          writer.println(in.getName())
+        }
+        writer.println(node.fanOut.size)
+        for(out <- node.fanOut){
+          writer.println(out.getName())
+        }
+      }
+
+      writer.println(funSet.size)
+      for(node <- funSet){
+        writer.println("<"+node.getName()+">")
+        writer.println(node.fanIn.size)
+        for(in <- node.fanIn){
+          writer.println(in.getName())
+        }
+        writer.println(node.fanOut.size)
+        for(out <- node.fanOut){
+          writer.println(out.getName())
+        }
+        writer.println(node.ops.size)
+        for(op <- node.ops){
+          writer.println(op)
+        }
+      }
+      writer.close()
+    }
+    def initialization(): Unit ={
+      initMRRG()
+      val allBlocks = getAllBlocks()
+      for(block <- allBlocks){
+        updateMRRG(block)
+      }
+
+      for(outPort <- outPorts){
+        val funNode = new NodeMRRG(outPort + ".fun")
+        funNode.ops.append(OpEnum.OUTPUT)
+        mrrg.addNode(funNode)
+        mrrg.addConnect(outPort, List(funNode.getName()))
+      }
+      for(inPort <- inPorts){
+        val funNode = new NodeMRRG(inPort + ".fun")
+        funNode.ops.append(OpEnum.INPUT)
+        mrrg.addNode(funNode)
+        mrrg.addConnect(funNode.getName(), List(inPort))
+      }
+
+      val addName = hierName.map(i => i+".").reverse.reduce(_+_)
+      for(oldName <- mrrg.nodeMap.keys){
+        mrrg.update(oldName, addName  + oldName)
+      }
+
+      val connect = new Connect(connectArray)
+      val mapRelation = connect.mapRelation
+      var mapRelationMRRG = Map[String, List[String]]()
+      for(src <- mapRelation.keys) {
+        val srcMRRG = getStrMRRG(src)
+        val dstMRRG = mapRelation(src).map(str => getStrMRRG(str))
+        mapRelationMRRG = mapRelationMRRG + (srcMRRG -> dstMRRG.toList)
+      }
+
+      for(modules <- modulesArray){
+        for(module <- modules){
+          val tempMRRG = module.asInstanceOf[ModuleTrait].mrrg
+          mrrg.mergy(tempMRRG)
+        }
+      }
+
+      mapRelationMRRG.foreach( connect => mrrg.addConnect(connect._1, connect._2))
+    }
+
+    initialization()
+
     val writer = new PrintWriter(new File( hierName.map(str => str + ".").reverse.reduce(_+_) + "mrrg.txt"))
-    writer.flush()
-    initMRRG()
-    val allBlocks = getAllBlocks()
-    for(block <- allBlocks){
-      updateMRRG(block)
-    }
-
-    for(outPort <- outPorts){
-      val funNode = new NodeMRRG(outPort + ".fun")
-      funNode.ops.append(OpEnum.OUTPUT)
-      mrrg.addNode(funNode)
-      mrrg.addConnect(outPort, List(funNode.getName()))
-    }
-    for(inPort <- inPorts){
-      val funNode = new NodeMRRG(inPort + ".fun")
-      funNode.ops.append(OpEnum.INPUT)
-      mrrg.addNode(funNode)
-      mrrg.addConnect(funNode.getName(), List(inPort))
-    }
-
-    val addName = hierName.map(i => i+".").reverse.reduce(_+_)
-    for(oldName <- mrrg.nodeMap.keys){
-      mrrg.update(oldName, addName  + oldName)
-    }
-
-
-
-    val connect = new Connect(connectArray)
-    val mapRelation = connect.mapRelation
-    var mapRelationMRRG = Map[String, List[String]]()
-    for(src <- mapRelation.keys) {
-      val srcMRRG = getStrMRRG(src)
-      val dstMRRG = mapRelation(src).map(str => getStrMRRG(str))
-      mapRelationMRRG = mapRelationMRRG + (srcMRRG -> dstMRRG.toList)
-    }
-
-    for(modules <- modulesArray){
-      for(module <- modules){
-        val tempMRRG = module.asInstanceOf[ModuleTrait].mrrg
-        mrrg.mergy(tempMRRG)
-      }
-    }
-
-    mapRelationMRRG.foreach( connect => mrrg.addConnect(connect._1, connect._2))
-
-    val noOpSet = mrrg.getNoOpSet()
-    val funSet = mrrg.nodes.toSet&~(noOpSet)
-    writer.println(noOpSet.size)
-    for(node <- noOpSet){
-      writer.println("<"+node.getName()+">")
-      writer.println(node.fanIn.size)
-      for(in <- node.fanIn){
-        writer.println(in.getName())
-      }
-      writer.println(node.fanOut.size)
-      for(out <- node.fanOut){
-        writer.println(out.getName())
-      }
-    }
-
-    writer.println(funSet.size)
-    for(node <- funSet){
-      writer.println("<"+node.getName()+">")
-      writer.println(node.fanIn.size)
-      for(in <- node.fanIn){
-        writer.println(in.getName())
-      }
-      writer.println(node.fanOut.size)
-      for(out <- node.fanOut){
-        writer.println(out.getName())
-      }
-      writer.println(node.ops.size)
-      for(op <- node.ops){
-        writer.println(op)
-      }
-    }
-
-
-
-    writer.close()
+    dumpAsTXT(writer, mrrg, II)
   }
 
   def getAllSubBlocks() : ArrayBuffer[BlockTrait] = {
