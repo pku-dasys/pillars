@@ -190,17 +190,23 @@ object Pillars {
     def exampleCompleteAdres(): Unit ={
       var arch = new ArchitctureHierarchy()
       //The order of ports should be same as TopModule
-      arch.addOutPorts(Array("output"))
-      arch.addInPorts(Array("input_0", "input_1"))
+      arch.addOutPorts(Array("out_0", "out_1", "out_2", "out_3"))
+      arch.addInPorts(Array("input_0", "input_1", "input_2", "input_3"))
 
-      val tile = new TileCompleteBlock("tile_0", 4, 4, 2, 1)
+      val tile = new TileCompleteBlock("tile_0", 4, 4, 4, 4)
 
       arch.addBlock(tile)
 
-
       arch.addConnect(List(List("input_0"),List("tile_0/", "input_0")))
       arch.addConnect(List(List("input_1"),List("tile_0/", "input_1")))
-      arch.addConnect(List(List("tile_0/","out_0"),List("output")))
+      arch.addConnect(List(List("input_2"),List("tile_0/", "input_2")))
+      arch.addConnect(List(List("input_3"),List("tile_0/", "input_3")))
+
+      arch.addConnect(List(List("tile_0/","out_0"),List("out_0")))
+      arch.addConnect(List(List("tile_0/","out_1"),List("out_1")))
+      arch.addConnect(List(List("tile_0/","out_2"),List("out_2")))
+      arch.addConnect(List(List("tile_0/","out_3"),List("out_3")))
+
 
       arch.init()
 

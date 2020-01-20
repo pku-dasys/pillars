@@ -24,7 +24,7 @@ class ArchitctureHierarchy extends BlockTrait {
         moduleParams = moduleParams :+ modulesArray(i)(j).asInstanceOf[ModuleTrait].getParams()
       }
     }
-    new PillarsModuleInfo(moduleNums, moduleParams)
+    new PillarsModuleInfo(moduleNums, moduleParams, inPorts.size, outPorts.size)
   }
 
   def getConfigList(): List[List[List[Int]]] = {
