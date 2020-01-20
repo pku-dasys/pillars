@@ -7,7 +7,7 @@ import scala.collection.mutable.ArrayBuffer
 import tetriski.pillars.hardware.PillarsConfig._
 
 //configBits is the last param
-class PillarsModuleInfo(moduleNums: List[Int], params : List[List[Int]]) {
+class PillarsModuleInfo(moduleNums: List[Int], params : List[List[Int]], inPortNum : Int, outPortNum : Int) {
   def getModuleNums(): List[Int] ={
     moduleNums
   }
@@ -26,6 +26,14 @@ class PillarsModuleInfo(moduleNums: List[Int], params : List[List[Int]]) {
   def getTotalBits():Int = {
     params.toArray.map(t => t(t.length-1)).reduce(_+_)
     }
+
+  def getInPortNum : Int = {
+    inPortNum
+  }
+
+  def getOutPortNum : Int = {
+    outPortNum
+  }
 }
 
 
@@ -54,8 +62,11 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
     //port sequnces inputs: 0: input_a, 1: input_b
     val configTest = Output(Vec(2, UInt(moduleInfos.getTotalBits().W)))
     val configuration = Input(UInt(moduleInfos.getTotalBits().W))
-    val inputs = Input(MixedVec(Seq(UInt(w.W), UInt(w.W))))
-    val outs = Output(MixedVec(Seq(UInt(w.W))))
+//    val inputs = Input(MixedVec(Seq(UInt(w.W), UInt(w.W))))
+//    val outs = Output(MixedVec(Seq(UInt(w.W))))
+
+    val inputs = Input(MixedVec((1 to moduleInfos.getInPortNum) map { i => UInt(w.W) }))
+    val outs = Output(MixedVec((1 to moduleInfos.getOutPortNum) map { i => UInt(w.W) }))
   })
 
 
