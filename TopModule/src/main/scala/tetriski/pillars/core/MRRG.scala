@@ -3,15 +3,20 @@ package tetriski.pillars.core
 import OpEnum.OpEnum
 
 import scala.collection.mutable.ArrayBuffer
+import MRRGMode._
 
 class NodeMRRG(var name : String) {
   var fanIn = ArrayBuffer[NodeMRRG]()
   var fanOut = ArrayBuffer[NodeMRRG]()
   var ops = ArrayBuffer[OpEnum]()
+  var mode = NORMAL_MODE
 
   def getName() : String = name
   def setName(newName : String): Unit = {
     name = newName
+  }
+  def setMode(newMode : Int): Unit ={
+    mode = newMode
   }
 }
 
@@ -71,4 +76,10 @@ class MRRG {
     }
     ret
   }
+}
+
+object MRRGMode{
+  val NORMAL_MODE = 0
+  val REG_MODE = 1
+  val MEM_MODE = 2
 }
