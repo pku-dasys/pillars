@@ -218,7 +218,7 @@ class TopModuleCompleteAdresUnitTest(c : TopModule, bitstream : BigInt, waitCycl
   //  expect(c.io.configTest(0), 0)
   //  expect(c.io.configTest(1), 200325)
 
-  step(4)
+  step(3)
   var ref = 0
   for( i <- 10 until 100){
     //    println("cycle "+ i.toString)

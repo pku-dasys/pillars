@@ -229,10 +229,9 @@ object Pillars {
       //Verilog generation
       chisel3.Driver.execute(Array("--no-check-comb-loops", "-td","ADRESv2"), () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, 32))
 
-      //arch.genConfig("internalNodeinfo_complete.txt")
-      arch.genConfig("internalNodeinfo.txt", 1)
+      arch.genConfig("internalNodeinfo_complete.txt", 1)
 
-      arch("tile_0")("pe_0_2").getModule("const0").updateConfigArray(1)
+      arch("tile_0")("pe_0_3").getModule("const0").updateConfigArray(1)
       arch("tile_0")("pe_0_0").getModule("const0").updateConfigArray(1)
 
       val bitStream = arch.getConfigBitStream()
@@ -240,7 +239,7 @@ object Pillars {
       println(bitStream)
 
 //      arch("tile_0")("pe_0_2").getModule("alu0").setWaitCycle(1)
-      arch("tile_0")("pe_0_1").getModule("alu0").setWaitCycle(3)
+      arch("tile_0")("pe_0_1").getModule("alu0").setWaitCycle(2)
 
       val waitCycles = arch.aluArray.map(alu => alu.asInstanceOf[ModuleTrait].getWaitCycle()).toList
 
@@ -252,10 +251,10 @@ object Pillars {
 
 
       //Run tester
-      //      iotesters.Driver.execute(Array( "--no-check-comb-loops","-tiac", "-tiwv"), () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, 32)) {
-//      iotesters.Driver.execute(Array( "--no-check-comb-loops","-tgvo", "on", "-tbn" ,"verilator"), () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, 32)) {
-//        c => new TopModuleCompleteAdresUnitTest(c, bitStream, waitCycles)
-//      }
+            //iotesters.Driver.execute(Array( "--no-check-comb-loops","-tiac", "-tiwv"), () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, 32)) {
+      iotesters.Driver.execute(Array( "--no-check-comb-loops","-tgvo", "on", "-tbn" ,"verilator"), () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, 32)) {
+        c => new TopModuleCompleteAdresUnitTest(c, bitStream, waitCycles)
+      }
     }
 
 //    example2PE()
