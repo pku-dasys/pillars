@@ -101,7 +101,7 @@ object Pillars {
       //Verilog generation
       chisel3.Driver.execute(Array("--no-check-comb-loops", "-td","ADRESv0"), () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, 32))
 
-      arch.genConfig("internalNodeinfo_simple.txt")
+      arch.genConfig("internalNodeinfo_simple.txt", 1)
 
       arch("tile_0")("pe_0_0").getModule("const0").updateConfigArray(4)
       arch("tile_0")("pe_0_1").getModule("const0").updateConfigArray(5)
@@ -159,7 +159,7 @@ object Pillars {
       //Verilog generation
       chisel3.Driver.execute(Array("--no-check-comb-loops", "-td","ADRESv1"), () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, 32))
 
-      arch.genConfig("internalNodeinfo_lsu.txt")
+      arch.genConfig("internalNodeinfo_lsu.txt", 1)
 
       arch("tile_0")("pe_0_1").getModule("const0").updateConfigArray(1)
       arch("tile_0")("pe_1_1").getModule("const0").updateConfigArray(1)
@@ -210,7 +210,7 @@ object Pillars {
 
       arch.init()
 
-      arch.blockMap("tile_0").dumpMRRG(2)
+      arch.blockMap("tile_0").dumpMRRG(1)
 
       arch.dumpArchitcture()
 
@@ -229,7 +229,8 @@ object Pillars {
       //Verilog generation
       chisel3.Driver.execute(Array("--no-check-comb-loops", "-td","ADRESv2"), () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, 32))
 
-      arch.genConfig("internalNodeinfo_complete.txt")
+      //arch.genConfig("internalNodeinfo_complete.txt")
+      arch.genConfig("internalNodeinfo.txt", 1)
 
       arch("tile_0")("pe_0_2").getModule("const0").updateConfigArray(1)
       arch("tile_0")("pe_0_0").getModule("const0").updateConfigArray(1)
@@ -252,14 +253,14 @@ object Pillars {
 
       //Run tester
       //      iotesters.Driver.execute(Array( "--no-check-comb-loops","-tiac", "-tiwv"), () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, 32)) {
-      iotesters.Driver.execute(Array( "--no-check-comb-loops","-tgvo", "on", "-tbn" ,"verilator"), () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, 32)) {
-        c => new TopModuleCompleteAdresUnitTest(c, bitStream, waitCycles)
-      }
+//      iotesters.Driver.execute(Array( "--no-check-comb-loops","-tgvo", "on", "-tbn" ,"verilator"), () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, 32)) {
+//        c => new TopModuleCompleteAdresUnitTest(c, bitStream, waitCycles)
+//      }
     }
 
-    example2PE()
-    exampleAdres()
-    exampleLSUAdres()
+//    example2PE()
+//    exampleAdres()
+//    exampleLSUAdres()
     exampleCompleteAdres()
 
   }

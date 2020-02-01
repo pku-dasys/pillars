@@ -3,13 +3,18 @@ package tetriski.pillars.core
 import chisel3.util.log2Up
 
 import scala.collection.mutable.ArrayBuffer
+import MRRGMode._
 //import tetriski.pillars.hardware.PillarsConfig._
 //import tetriski.pillars.core.NodeMRRG
 
 trait ModuleTrait extends Ports with ModuleBasic {
   var mrrg = new MRRG()
+  var mode = NORMAL_MODE
   var internalNodes = List[String]()
 
+  def setMRRGMode(newMode : Int): Unit ={
+    mode = newMode
+  }
 
   //to be update
   def updateConfig(fanInNums : List[Int], fanOutNums : List[Int], internalNum : Int): Unit ={
@@ -166,6 +171,7 @@ trait ModuleTrait extends Ports with ModuleBasic {
       for(i <- 0 until internalNodes.size){
         val internalNode = internalNodes(i)
         val node = new NodeMRRG(internalNode)
+        node.setMode(mode)
         //only the first internalNode can contain ops
         if(supOps.size > 0 && i == 0){
           node.ops.appendAll(supOps)
@@ -198,7 +204,8 @@ trait ModuleTrait extends Ports with ModuleBasic {
         }
       }else{
         for(outPort <- outPorts){
-          mrrg.addConnect(internalNode, outPort)
+          mrrg.addUndeterminedConnect(internalNode, outPort)
+          //mrrg.addConnect(internalNode, outPort)
         }
       }
     }

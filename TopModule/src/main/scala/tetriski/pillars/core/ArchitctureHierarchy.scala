@@ -100,20 +100,36 @@ class ArchitctureHierarchy extends BlockTrait {
     writer.close()
   }
 
-  def genConfig(filename :String): Unit ={
-    val infos = Source.fromFile(filename).getLines()
-    val infoArray = ArrayBuffer[String]()
+  def genConfig(filename: String, II: Int): Unit ={
+    val infos = Source.fromFile(filename).getLines().toArray
+    val infoArrays = new ArrayBuffer[ArrayBuffer[String]]()
+    for(i <- 0 until II){
+      val temp = new ArrayBuffer[String]()
+      infoArrays.append(temp)
+    }
 
-    for(info <- infos){
-      infoArray.append(info)
+    val pattern = "[0-9]+:".r
+
+//    for(info <- infos){
+//      infoArray.append(info)
+//    }
+
+    for(i <- 0 until (infos.size/3)){
+      val targetStr = infos(i*3)
+      val tempStr = (pattern findFirstIn targetStr).toArray
+      val tempII = tempStr(0).replace(":","").toInt
+      for(j <-0 until 3){
+        infoArrays(tempII).append(infos(i * 3 + j))
+      }
     }
 
 //    val routeConfigGroup = ArrayBuffer[List[String]]()
 //    val funConfigGroup = Map[ModuleTrait, Int]
-
+    for(infoArray <- infoArrays)
     for(i <- 0 until infoArray.size/3){
       val offset = i * 3
-      val moduleName = infoArray(offset).substring(1, infoArray(offset).size-1).split("\\.", 0)
+     // val moduleName = infoArray(offset).substring(1, infoArray(offset).size-1).split("\\.", 0)
+      val moduleName = infoArray(offset).replaceAll("([0-9]+:)|<|>","").split("\\.", 0)
       var temp = this.asInstanceOf[BlockTrait]
       for(j <- 1 until moduleName.size - 2){
         temp = temp(moduleName(j))
