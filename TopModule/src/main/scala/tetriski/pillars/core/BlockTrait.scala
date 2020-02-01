@@ -2,6 +2,8 @@ package tetriski.pillars.core
 
 import java.io.{File, PrintWriter}
 
+import firrtl.annotations.Target.NamedException
+import MRRGMode._
 import scala.collection.mutable.ArrayBuffer
 
 trait BlockTrait extends ModuleTrait {
@@ -123,10 +125,10 @@ trait BlockTrait extends ModuleTrait {
       }
       mrrgStr.reduce(_+_)
     }
-    def dumpAsTXT(writer: PrintWriter, oriMRRG: MRRG, II: Int): Unit ={
+    def dumpAsTXT(writer: PrintWriter, targetMRRG: MRRG): Unit ={
       writer.flush()
-      val noOpSet = oriMRRG.getNoOpSet()
-      val funSet = oriMRRG.nodes.toSet&~(noOpSet)
+      val noOpSet = targetMRRG.getNoOpSet()
+      val funSet = targetMRRG.nodes.toSet&~(noOpSet)
       writer.println(noOpSet.size)
       for(node <- noOpSet){
         writer.println("<"+node.getName()+">")
@@ -201,11 +203,52 @@ trait BlockTrait extends ModuleTrait {
 
       mapRelationMRRG.foreach( connect => mrrg.addConnect(connect._1, connect._2))
     }
+    def graphUnroll(oriMRRG: MRRG, II: Int): MRRG ={
+      def incModII(i: Int): Int = {
+        (i + 1) % II
+      }
+      var targetMRRG = new MRRG()
+      for(i <- 0 until II){
+        var tempMRRG = oriMRRG.clone()
+        for(node <- tempMRRG.nodeMap){
+          val name = node._1
+          tempMRRG.update(name, i.toString + ":" + name)
+        }
+        targetMRRG.mergy(tempMRRG)
+      }
+      var regSourceSet = Set[String]()
+      for(undeterminedConnect <- oriMRRG.undeterminedConnects){
+        val source = undeterminedConnect(0).getName()
+        val sink = undeterminedConnect(1).getName()
+        if(II == 1){
+          targetMRRG.addConnect("0:" + source, "0:" + sink)
+        }else{
+          val sourceNode = undeterminedConnect(0)
+          for(i <- 0 until II){
+            if(sourceNode.mode == MEM_MODE){
+              targetMRRG.addConnect(i.toString + ":" + source, incModII(i).toString + ":" + sink)
+            }else if(sourceNode.mode == NORMAL_MODE){
+              targetMRRG.addConnect(i.toString + ":" + source, i.toString + ":" + sink)
+            }else if(sourceNode.mode == REG_MODE){
+              targetMRRG.addConnect(i.toString + ":" + source, i.toString + ":" + sink)
+              regSourceSet = regSourceSet + source
+            }
+          }
+        }
+      }
+      for(source <- regSourceSet){
+        for(i <- 0 until II) {
+          targetMRRG.addConnect(i.toString + ":" + source, incModII(i).toString + ":" + source)
+        }
+      }
+      targetMRRG
+    }
 
     initialization()
+    val targetMRRG = graphUnroll(mrrg, II)
 
     val writer = new PrintWriter(new File( hierName.map(str => str + ".").reverse.reduce(_+_) + "mrrg.txt"))
-    dumpAsTXT(writer, mrrg, II)
+    dumpAsTXT(writer, targetMRRG)
   }
 
   def getAllSubBlocks() : ArrayBuffer[BlockTrait] = {

@@ -2,6 +2,7 @@ package tetriski.pillars.archlib
 
 import tetriski.pillars.core.OpEnum.OpEnum
 import tetriski.pillars.core.{BlockTrait, ModuleTrait, OpEnum, OpcodeTranslator}
+import tetriski.pillars.core.MRRGMode._
 
 
 class OpAlu(name: String, aluOpList: List[OpEnum], supBypass: Boolean, params: List[Int]) extends ModuleTrait {
@@ -44,6 +45,7 @@ class OpRF(name: String, params: List[Int]) extends ModuleTrait {
   setName(name)
 
   addInternalNodesNum(Math.pow(2, params(0)).toInt)
+  setMRRGMode(REG_MODE)
 }
 
 class OpMux(name: String, params: List[Int]) extends ModuleTrait {
@@ -90,6 +92,7 @@ class OpLSU(name: String, params: List[Int]) extends ModuleTrait {
   setName(name)
 
   addInternalNodesNum(1)
+  setMRRGMode(MEM_MODE)
 }
 
 
