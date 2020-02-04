@@ -56,7 +56,8 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
     val idleLSU = Output(Vec(LSUnitNum, Bool()))
 
     val en = Input(Bool())
-    val aluSchedule = Input(Vec(aluNum, UInt(LOG_SCHEDULE_SIZE)))
+    val aluSchedule = Input(Vec(aluNum * II_UPPER_BOUND, UInt(LOG_SCHEDULE_SIZE)))
+    val II = Input(UInt(LOG_II_UPPER_BOUND.W))
 
     //port sequnces outs: 0: out
     //port sequnces inputs: 0: input_a, 1: input_b
@@ -104,12 +105,15 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
 //
 
   val alus = (0 until aluNum).toArray.map(t => Module(new Alu(moduleInfos.getParams(t + currentNum)(0), moduleInfos.getParams(t + currentNum)(1))))
-  val aluScheduleControllers = (0 until aluNum).toArray.map(t => Module(new ScheduleController))
+  val aluScheduleControllers = (0 until aluNum).toArray.map(t => Module(new MultiIIScheduleController))
   for(i <- 0 until aluNum){
     val alu = alus(i)
     val aluScheduleController = aluScheduleControllers(i)
     aluScheduleController.io.en <> io.en
-    aluScheduleController.io.waitCycle <> io.aluSchedule(i)
+    aluScheduleController.io.II <> io.II
+    for(j <- 0 until II_UPPER_BOUND){
+      aluScheduleController.io.waitCycles(j) <> io.aluSchedule(i * II_UPPER_BOUND + j)
+    }
     alu.io.en <> aluScheduleController.io.valid
   }
   currentNum += aluNum
@@ -177,6 +181,13 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
   inPorts.append(LSUs.map(i => i.io.inputs.toList))
 
 
+
+
+  val configController = Module(new ConfigController(moduleInfos.getTotalBits()))
+  configController.io.en <> io.en
+  configController.io.II <> io.II
+  configController.io.inConfig <> io.configuration
+
   //println(configList)
   var dispatchs = ArrayBuffer[Dispatch]()
   var regionConfigBits = List[Int]()
@@ -211,7 +222,8 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
   val topDispatch = Module(new Dispatch(totalBits, regionConfigBits))
   topDispatch.io.en <> io.en
   //println(totalBits, regionConfigBits)
-  topDispatch.io.configuration := io.configuration
+//  topDispatch.io.configuration := io.configuration
+  topDispatch.io.configuration := configController.io.outConfig
   for (i <- 0 until dispatchs.size){
     dispatchs(i).io.configuration := topDispatch.io.outs(i)
   }
