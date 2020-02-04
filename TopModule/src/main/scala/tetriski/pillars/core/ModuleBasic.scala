@@ -3,6 +3,7 @@ package tetriski.pillars.core
 import OpEnum.OpEnum
 
 import scala.collection.mutable.ArrayBuffer
+import tetriski.pillars.hardware.PillarsConfig._
 
 //ModuleBasic is basic information of a module
 trait ModuleBasic {
@@ -14,7 +15,7 @@ trait ModuleBasic {
   var params = new ArrayBuffer[Int]
   var configBit = 0
   var configArray = new ArrayBuffer[Int]
-  var waitCycle = 0
+  var waitCycles = new Array[Int](II_UPPER_BOUND)
 
   def setModuleID(arg: Int): Unit = {
     moduleID = arg
@@ -49,8 +50,8 @@ trait ModuleBasic {
     configArray.append(0)
   }
 
-  def setWaitCycle(arg: Int): Unit ={
-    waitCycle = arg
+  def setWaitCycle(waitCycle: Int, II: Int): Unit ={
+    waitCycles(II) = waitCycle
   }
 
   def getModuleID(): Int = {
@@ -81,8 +82,8 @@ trait ModuleBasic {
     configBit
   }
 
-  def getWaitCycle(): Int = {
-    waitCycle
+  def getWaitCycles(): Array[Int] = {
+    waitCycles
   }
 
 

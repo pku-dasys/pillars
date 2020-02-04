@@ -8,6 +8,44 @@ import tetriski.pillars.hardware.PillarsConfig._
 
 import scala.collection.mutable.ArrayBuffer
 
+class ConfigController(configWidth : Int) extends Module {
+  val io = IO(new Bundle {
+    val en = Input(Bool())
+    val II = Input(UInt(LOG_II_UPPER_BOUND.W))
+    val inConfig = Input(UInt(configWidth.W))
+    val outConfig = Output(UInt(configWidth.W))
+  })
+
+  val s_read_write :: s_read_only :: Nil = Enum(2)
+  val state = RegInit(s_read_write)
+  val cycleReg = Reg(UInt(LOG_II_UPPER_BOUND.W))
+
+  val configRegs = RegInit(VecInit(Seq.fill(II_UPPER_BOUND)(0.U(configWidth.W))))
+
+    io.outConfig := configRegs(cycleReg)
+
+  when(io.en){
+    when(state === s_read_write){
+      configRegs(cycleReg) := io.inConfig
+      when(cycleReg === io.II){
+        state := s_read_only
+        cycleReg := 0.U
+      }.otherwise{
+        cycleReg := cycleReg + 1.U
+      }
+    }.otherwise{
+      when(cycleReg === io.II - 1.U){
+        cycleReg := 0.U
+      }.otherwise{
+        cycleReg := cycleReg + 1.U
+      }
+    }
+  }.otherwise{
+    state := s_read_write
+    cycleReg := 0.U
+  }
+}
+
 class ScheduleController extends Module {
   val io = IO(new Bundle {
     val en = Input(Bool())
@@ -33,6 +71,36 @@ class ScheduleController extends Module {
     state := s_wait
     cycleReg := 0.U
   }
+}
+
+class MultiIIScheduleController extends Module {
+  val io = IO(new Bundle {
+    val en = Input(Bool())
+    val waitCycles = Input(Vec(II_UPPER_BOUND, UInt(LOG_SCHEDULE_SIZE)))
+    val II = Input(UInt(LOG_II_UPPER_BOUND.W))
+    val valid = Output(Bool())
+  })
+  val scheduleControllers = (0 until II_UPPER_BOUND).toArray.map(t => Module(new ScheduleController))
+  val validRegs = RegInit(VecInit(Seq.fill(II_UPPER_BOUND)(false.B)))
+  val cycleReg = RegInit((II_UPPER_BOUND-1).U(LOG_II_UPPER_BOUND.W))
+
+  for(i <- 0 until II_UPPER_BOUND){
+    val scheduleController = scheduleControllers(i)
+    scheduleController.io.en := io.en
+    scheduleController.io.waitCycle := io.waitCycles(i)
+    validRegs(i) := scheduleController.io.valid
+  }
+
+  io.valid := validRegs(cycleReg)
+
+  when(io.en === true.B){
+    when(cycleReg === io.II - 1.U){
+      cycleReg := 0.U
+    }.otherwise{
+      cycleReg := cycleReg + 1.U
+    }
+  }
+
 }
 
 class Alu(funSelect: Int, w: Int) extends Module {
@@ -215,11 +283,13 @@ class ConstUnit(w :Int) extends Module {
     val configuration = Input(UInt(w.W))
     val outs = Output(MixedVec((1 to 1) map { i => UInt(w.W) }))
   })
-  val const = Mem(1, UInt(w.W))
-  const.write(0.U, io.configuration)
+//  val const = Mem(1, UInt(w.W))
+//  const.write(0.U, io.configuration)
+
 
   when(io.en){
-    io.outs(0) := const.read((0.U))
+    //io.outs(0) := const.read((0.U))
+    io.outs(0) := io.configuration
   }.otherwise{
     for(out <- io.outs){
       out := 0.U
