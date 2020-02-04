@@ -7,7 +7,7 @@ import java.io.{File, PrintWriter}
 
 import chisel3.util.log2Up
 import tetriski.pillars.archlib.{PEBlock, TileBlock, TileCompleteBlock, TileLSUBlock}
-import tetriski.pillars.core.{ArchitctureHierarchy, Connect, HardwareGeneration, ModuleTrait}
+import tetriski.pillars.core.{ArchitctureHierarchy, Connect, HardwareGeneration, ModuleTrait, ConstInfo}
 import tetriski.pillars.hardware.TopModule
 import tetriski.pillars.testers.{TopModule2PEUnitTest, TopModuleAdresUnitTest, TopModuleCompleteAdresUnitTest, TopModuleLSUAdresUnitTest}
 
@@ -210,7 +210,7 @@ object Pillars {
 
       arch.init()
 
-      arch.blockMap("tile_0").dumpMRRG(1)
+      arch.blockMap("tile_0").dumpMRRG(2)
 
       arch.dumpArchitcture()
 
@@ -229,10 +229,20 @@ object Pillars {
       //Verilog generation
       chisel3.Driver.execute(Array("--no-check-comb-loops", "-td","ADRESv2"), () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, 32))
 
-      arch.genConfig("internalNodeinfo_complete.txt", 1)
 
-      arch("tile_0")("pe_0_3").getModule("const0").updateConfigArray(1)
-      arch("tile_0")("pe_0_0").getModule("const0").updateConfigArray(1)
+      var constMapArray = Map[Int, Int]()
+
+      val constInfo = new ConstInfo(2)
+      constInfo.addConst(arch("tile_0")("pe_2_3").getModule("const0").getModuleID(), 1, 1)
+      constInfo.addConst(arch("tile_0")("pe_1_1").getModule("const0").getModuleID(), 1, 1)
+
+//      arch.genConfig("internalNodeinfo_complete.txt", 1)
+      val bitStreams = arch.genConfig("internalNodeinfo.txt", 2, constInfo)
+
+//      arch("tile_0")("pe_0_3").getModule("const0").updateConfigArray(1)
+//      arch("tile_0")("pe_0_0").getModule("const0").updateConfigArray(1)
+
+
 
       val bitStream = arch.getConfigBitStream()
 
