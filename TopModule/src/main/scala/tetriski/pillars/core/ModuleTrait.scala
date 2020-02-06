@@ -4,6 +4,7 @@ import chisel3.util.log2Up
 
 import scala.collection.mutable.ArrayBuffer
 import MRRGMode._
+import util.control.Breaks._
 //import tetriski.pillars.hardware.PillarsConfig._
 //import tetriski.pillars.core.NodeMRRG
 
@@ -11,6 +12,7 @@ trait ModuleTrait extends Ports with ModuleBasic {
   var mrrg = new MRRG()
   var mode = NORMAL_MODE
   var internalNodes = List[String]()
+  var bannedINodeSet = Set[BigInt]()
 
   def setMRRGMode(newMode : Int): Unit ={
     mode = newMode
@@ -28,58 +30,72 @@ trait ModuleTrait extends Ports with ModuleBasic {
           case 1 => 12
         }
         updateConfigArray(newConfig)
-      }else{
+      }else {
         //register files
-//        val configSize = getConfigBit()
+        //        val configSize = getConfigBit()
         val inPortNum = getInPorts().size
-//        val outPortNum = getOutPorts().size
-        val internalNumBigInt : BigInt = internalNum
+        val outPortNum = getOutPorts().size
+        val internalNumBigInt: BigInt = internalNum
         val internalNodeNum = internalNodes.size
         val singleConfigSize = log2Up(internalNodeNum)
         val oldConfig = getBigIntConfig()
-        var newConfig : BigInt = oldConfig
-        val singleConfigMask : BigInt = ((1<< singleConfigSize)-1)
-        for(fanInNum <- fanInNums){
-          // guarantee a single register does not have two inputs
-          val currentInputConfigArray = new ArrayBuffer[BigInt]()
+        var newConfig: BigInt = oldConfig
+        val singleConfigMask: BigInt = ((1 << singleConfigSize) - 1)
+        for (fanInNum <- fanInNums) {
+          breakable {
+            if (fanInNum >= inPortNum) {
+              bannedINodeSet = bannedINodeSet + internalNumBigInt
+              break
+            }
 
-          for(i <- 0 until inPortNum){
-            val tempMask : BigInt = singleConfigMask << (singleConfigSize * i)
-            val singleConfig = (newConfig & tempMask) >> (singleConfigSize * i)
-            currentInputConfigArray.append(singleConfig)
-          }
-          var configSet = Set[BigInt]()
-          for(i <- 0 until internalNodeNum){
-            configSet = configSet + i
-          }
-          val unusedConfigArray = (configSet &~ currentInputConfigArray.toSet).toArray
-          val unusedConfig = unusedConfigArray(0)
-          if(currentInputConfigArray.contains(fanInNum)){
-            for(i <- 0 until inPortNum){
-              val inputConfig = currentInputConfigArray(i)
-              if(inputConfig == internalNumBigInt){
-                val tempMask : BigInt = ~(singleConfigMask << (singleConfigSize * i))
-                val clearConfig = newConfig & tempMask
-                val replaceConfig : BigInt = unusedConfig  << (singleConfigSize * i)
-                newConfig =  clearConfig | replaceConfig
+            // guarantee a single register does not have two inputs
+            val currentInputConfigArray = new ArrayBuffer[BigInt]()
+
+            for (i <- 0 until inPortNum) {
+              val tempMask: BigInt = singleConfigMask << (singleConfigSize * i)
+              val singleConfig = (newConfig & tempMask) >> (singleConfigSize * i)
+              currentInputConfigArray.append(singleConfig)
+            }
+            var configSet = Set[BigInt]()
+            for (i <- 0 until internalNodeNum) {
+              configSet = configSet + i
+            }
+            //val unusedConfigArray = (configSet &~ currentInputConfigArray.toSet).toArray
+            val unusedConfigArray = (configSet &~ bannedINodeSet).toArray
+            val unusedConfig = unusedConfigArray(0)
+            if (currentInputConfigArray.contains(fanInNum)) {
+              for (i <- 0 until inPortNum) {
+                val inputConfig = currentInputConfigArray(i)
+                if (inputConfig == internalNumBigInt) {
+                  val tempMask: BigInt = ~(singleConfigMask << (singleConfigSize * i))
+                  val clearConfig = newConfig & tempMask
+                  val replaceConfig: BigInt = unusedConfig << (singleConfigSize * i)
+                  newConfig = clearConfig | replaceConfig
+                }
               }
             }
+            bannedINodeSet = bannedINodeSet + internalNumBigInt
+
+            val mask: BigInt = ~(singleConfigMask << (singleConfigSize * (fanInNum)))
+            val clearConfig = newConfig & mask
+            val replaceConfig: BigInt = internalNumBigInt << (singleConfigSize * fanInNum)
+            newConfig = clearConfig | replaceConfig
           }
-
-
-          val mask : BigInt = ~(singleConfigMask << (singleConfigSize * (fanInNum)))
-          val clearConfig = newConfig & mask
-          val replaceConfig : BigInt = internalNumBigInt  << (singleConfigSize * fanInNum)
-          newConfig =  clearConfig | replaceConfig
         }
-        for(fanOutNum <- fanOutNums){
-//          val singleConfigMask : BigInt = ((1<< singleConfigSize)-1)
-          val mask : BigInt = ~(singleConfigMask << (singleConfigSize * (fanOutNum + inPortNum)))
-          val clearConfig = newConfig & mask
-          val replaceConfig : BigInt = internalNumBigInt << (singleConfigSize * (fanOutNum + inPortNum))
-          newConfig = clearConfig | replaceConfig
+        for (fanOutNum <- fanOutNums) {
+          breakable {
+            if (fanOutNum >= outPortNum) {
+              break
+            }
+            //          val singleConfigMask : BigInt = ((1<< singleConfigSize)-1)
+            val mask: BigInt = ~(singleConfigMask << (singleConfigSize * (fanOutNum + inPortNum)))
+            val clearConfig = newConfig & mask
+            val replaceConfig: BigInt = internalNumBigInt << (singleConfigSize * (fanOutNum + inPortNum))
+            newConfig = clearConfig | replaceConfig
+          }
         }
-        updateConfigArray(newConfig)
+          updateConfigArray(newConfig)
+
       }
     }else{
       //mux
@@ -192,7 +208,7 @@ trait ModuleTrait extends Ports with ModuleBasic {
     for(i <- 0 until internalNodes.size){
       val internalNode = internalNodes(i)
       for(inPort <- inPorts){
-        mrrg.addConnect(inPort, internalNode)
+        mrrg.addUndeterminedInConnect(inPort, internalNode)
       }
       if(supOps.size > 0 && internalNodes.size > 1){
         for(outPort <- outPorts){
@@ -204,7 +220,7 @@ trait ModuleTrait extends Ports with ModuleBasic {
         }
       }else{
         for(outPort <- outPorts){
-          mrrg.addUndeterminedConnect(internalNode, outPort)
+          mrrg.addUndeterminedOutConnect(internalNode, outPort)
           //mrrg.addConnect(internalNode, outPort)
         }
       }
