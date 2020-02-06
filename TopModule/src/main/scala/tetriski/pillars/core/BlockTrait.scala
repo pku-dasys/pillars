@@ -217,13 +217,31 @@ trait BlockTrait extends ModuleTrait {
         targetMRRG.mergy(tempMRRG)
       }
       var regSourceSet = Set[String]()
-      for(undeterminedConnect <- oriMRRG.undeterminedConnects){
-        val source = undeterminedConnect(0).getName()
-        val sink = undeterminedConnect(1).getName()
+
+      for(undeterminedInConnect <- oriMRRG.undeterminedInConnects){
+        val source = undeterminedInConnect(0).getName()
+        val sink = undeterminedInConnect(1).getName()
         if(II == 1){
           targetMRRG.addConnect("0:" + source, "0:" + sink)
         }else{
-          val sourceNode = undeterminedConnect(0)
+          val sinkNode = undeterminedInConnect(1)
+          for(i <- 0 until II){
+            if(sinkNode.mode == REG_MODE){
+              targetMRRG.addConnect(i.toString + ":" + source, incModII(i).toString + ":" + sink)
+            }else {
+              targetMRRG.addConnect(i.toString + ":" + source, i.toString + ":" + sink)
+            }
+          }
+        }
+      }
+
+      for(undeterminedOutConnect <- oriMRRG.undeterminedOutConnects){
+        val source = undeterminedOutConnect(0).getName()
+        val sink = undeterminedOutConnect(1).getName()
+        if(II == 1){
+          targetMRRG.addConnect("0:" + source, "0:" + sink)
+        }else{
+          val sourceNode = undeterminedOutConnect(0)
           for(i <- 0 until II){
             if(sourceNode.mode == MEM_MODE){
               targetMRRG.addConnect(i.toString + ":" + source, incModII(i).toString + ":" + sink)
@@ -236,6 +254,9 @@ trait BlockTrait extends ModuleTrait {
           }
         }
       }
+
+
+
       for(source <- regSourceSet){
         for(i <- 0 until II) {
           targetMRRG.addConnect(i.toString + ":" + source, incModII(i).toString + ":" + source)

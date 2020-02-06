@@ -105,6 +105,7 @@ class ArchitctureHierarchy extends BlockTrait {
     for(moduleArray <- modulesArray){
       for(module <- moduleArray){
         module.asInstanceOf[ModuleTrait].updateConfigArray(0)
+        module.asInstanceOf[ModuleTrait].bannedINodeSet = Set[BigInt]()
       }
     }
   }

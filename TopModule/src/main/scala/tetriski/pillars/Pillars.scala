@@ -193,7 +193,7 @@ object Pillars {
       arch.addOutPorts(Array("out_0", "out_1", "out_2", "out_3"))
       arch.addInPorts(Array("input_0", "input_1", "input_2", "input_3"))
 
-      val tile = new TileCompleteBlock("tile_0", 2, 2, 4, 4)
+      val tile = new TileCompleteBlock("tile_0", 4, 4, 4, 4)
 
       arch.addBlock(tile)
 
@@ -210,7 +210,9 @@ object Pillars {
 
       arch.init()
 
-      arch.blockMap("tile_0").dumpMRRG(2)
+      val targetII = 3
+
+      arch.blockMap("tile_0").dumpMRRG(targetII)
 
       arch.dumpArchitcture()
 
@@ -229,12 +231,12 @@ object Pillars {
       //Verilog generation
       chisel3.Driver.execute(Array("--no-check-comb-loops", "-td","ADRESv2"), () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, 32))
 
-      val constInfo = new ConstInfo(2)
+      val constInfo = new ConstInfo(targetII)
+      constInfo.addConst(arch("tile_0")("pe_3_0").getModule("const0").getModuleID(), 2, 1)
       constInfo.addConst(arch("tile_0")("pe_0_1").getModule("const0").getModuleID(), 0, 1)
-      constInfo.addConst(arch("tile_0")("pe_1_1").getModule("const0").getModuleID(), 0, 1)
 
 //      arch.genConfig("internalNodeinfo_complete.txt", 1)
-      val bitStreams = arch.genConfig("internalNodeinfo_complete.txt", 2, constInfo)
+      val bitStreams = arch.genConfig("internalNodeinfo_complete.txt", targetII, constInfo)
 
 //      arch("tile_0")("pe_0_3").getModule("const0").updateConfigArray(1)
 //      arch("tile_0")("pe_0_0").getModule("const0").updateConfigArray(1)
@@ -246,7 +248,7 @@ object Pillars {
 //      println(bitStream)
 
 //      arch("tile_0")("pe_0_2").getModule("alu0").setWaitCycle(1)
-      arch("tile_0")("pe_0_1").getModule("alu0").setWaitCycle(4, 1)
+      arch("tile_0")("pe_2_3").getModule("alu0").setWaitCycle(4, 2)
 
       val waitCycles = arch.aluArray.map(alu => alu.asInstanceOf[ModuleTrait].getWaitCycles().toList).reduce(_++_)
 

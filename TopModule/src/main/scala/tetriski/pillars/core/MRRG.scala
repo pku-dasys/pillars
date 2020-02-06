@@ -35,12 +35,14 @@ class NodeMRRG(var name : String) extends Cloneable {
 class MRRG extends Cloneable {
   var nodes = ArrayBuffer[NodeMRRG]()
   var nodeMap = Map[String, Int]()
-  var undeterminedConnects = List[List[NodeMRRG]]()
+  var undeterminedOutConnects = List[List[NodeMRRG]]()
+  var undeterminedInConnects = List[List[NodeMRRG]]()
 
   override def clone = {
     val clone = super.clone.asInstanceOf[MRRG]
     clone.nodes = ArrayBuffer[NodeMRRG]()
-    clone.undeterminedConnects = List[List[NodeMRRG]]()
+    clone.undeterminedOutConnects = List[List[NodeMRRG]]()
+    clone.undeterminedInConnects = List[List[NodeMRRG]]()
     for(node <- nodes){
       clone.nodes.append(node.clone)
     }
@@ -51,10 +53,15 @@ class MRRG extends Cloneable {
         clone.addConnect(sourceName, sinkName)
       }
     }
-    for(undeterminedConnect <- undeterminedConnects){
+    for(undeterminedConnect <- undeterminedOutConnects){
       val sourceName = undeterminedConnect(0).getName()
       val sinkName = undeterminedConnect(1).getName()
-      clone.addUndeterminedConnect(sourceName, sinkName)
+      clone.addUndeterminedOutConnect(sourceName, sinkName)
+    }
+    for(undeterminedConnect <- undeterminedInConnects){
+      val sourceName = undeterminedConnect(0).getName()
+      val sinkName = undeterminedConnect(1).getName()
+      clone.addUndeterminedInConnect(sourceName, sinkName)
     }
     clone
   }
@@ -84,7 +91,8 @@ class MRRG extends Cloneable {
       nodes.append(node)
       nodeMap = nodeMap + (node.getName() -> (getSize()-1))
     }
-    undeterminedConnects = undeterminedConnects ::: arg.undeterminedConnects
+    undeterminedOutConnects = undeterminedOutConnects ::: arg.undeterminedOutConnects
+    undeterminedInConnects = undeterminedInConnects ::: arg.undeterminedInConnects
   }
 
   def addConnect(source : String, sinks : List[String]): Unit ={
@@ -103,8 +111,12 @@ class MRRG extends Cloneable {
       sinkNode.fanIn.append(sourceNode)
   }
 
-  def addUndeterminedConnect(source : String, sink : String): Unit ={
-    undeterminedConnects = undeterminedConnects :+ List(apply(source), apply(sink))
+  def addUndeterminedOutConnect(source : String, sink : String): Unit ={
+    undeterminedOutConnects = undeterminedOutConnects :+ List(apply(source), apply(sink))
+  }
+
+  def addUndeterminedInConnect(source : String, sink : String): Unit ={
+    undeterminedInConnects = undeterminedInConnects :+ List(apply(source), apply(sink))
   }
 
   def getNoOpSet() : Set[NodeMRRG] = {
