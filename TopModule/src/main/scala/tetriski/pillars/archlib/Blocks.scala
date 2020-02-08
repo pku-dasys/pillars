@@ -147,8 +147,8 @@ class AdresPEBlock(name: String) extends BlockTrait{
       List(List("mux1","out_0"),List("alu0","input_b")),
       List(List("alu0","out_0"),List("rf0","input_0")),
       //List(List("alu0","out_0"),List("rf0","input_1")),
-      List(List("muxBp","out_0"),List("muxOut","input_0")),
-      List(List("rf0","out_1"),List("muxOut","input_1")),
+      List(List("muxBp","out_0"),List("muxOut","input_1")),
+      List(List("rf0","out_1"),List("muxOut","input_0")),
       //List(List("alu0","out_0"),List("muxOut","input_1")),
       List(List("muxOut","out_0"),List("out_0")))
 
@@ -235,8 +235,8 @@ class AdresPE5InBlock(name: String) extends BlockTrait{
       List(List("mux1","out_0"),List("alu0","input_b")),
       List(List("alu0","out_0"),List("rf0","input_0")),
       //List(List("alu0","out_0"),List("rf0","input_1")),
-      List(List("muxBp","out_0"),List("muxOut","input_0")),
-      List(List("rf0","out_1"),List("muxOut","input_1")),
+      List(List("muxBp","out_0"),List("muxOut","input_1")),
+      List(List("rf0","out_1"),List("muxOut","input_0")),
       //List(List("alu0","out_0"),List("muxOut","input_1")),
       List(List("muxOut","out_0"),List("out_0")))
 
@@ -320,8 +320,8 @@ class AdresVLIWPE5InBlock(name: String) extends BlockTrait{
       List(List("mux1","out_0"),List("alu0","input_b")),
       List(List("alu0","out_0"),List("rf_out")),
       //List(List("alu0","out_0"),List("rf0","input_1")),
-      List(List("muxBp","out_0"),List("muxOut","input_0")),
-      List(List("input_rf_muxOut"),List("muxOut","input_1")),
+      List(List("muxBp","out_0"),List("muxOut","input_1")),
+      List(List("input_rf_muxOut"),List("muxOut","input_0")),
       //List(List("alu0","out_0"),List("muxOut","input_1")),
       List(List("muxOut","out_0"),List("out_0")))
 

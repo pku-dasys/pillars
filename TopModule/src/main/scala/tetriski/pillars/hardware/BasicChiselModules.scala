@@ -22,7 +22,13 @@ class ConfigController(configWidth : Int) extends Module {
 
   val configRegs = RegInit(VecInit(Seq.fill(II_UPPER_BOUND)(0.U(configWidth.W))))
 
+  //io.outConfig := configRegs(cycleReg - 1.U(LOG_II_UPPER_BOUND.W))
+
+  when(state === s_read_write){
+    io.outConfig := io.inConfig
+  }.otherwise{
     io.outConfig := configRegs(cycleReg)
+  }
 
   when(io.en){
     when(state === s_read_write){
