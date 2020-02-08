@@ -101,12 +101,14 @@ object Pillars {
       //Verilog generation
       chisel3.Driver.execute(Array("--no-check-comb-loops", "-td","ADRESv0"), () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, 32))
 
-      arch.genConfig("internalNodeinfo_simple.txt", 1)
+      val constInfo = new ConstInfo(1)
+      constInfo.addConst(arch("tile_0")("pe_0_0").getModule("const0").getModuleID(), 0, 4)
+      constInfo.addConst(arch("tile_0")("pe_1_0").getModule("const0").getModuleID(), 0, 5)
 
-      arch("tile_0")("pe_0_0").getModule("const0").updateConfigArray(4)
-      arch("tile_0")("pe_0_1").getModule("const0").updateConfigArray(5)
+      val bitStreams = arch.genConfig("internalNodeinfo_simple.txt", 1, constInfo)
 
-      val bitStream = arch.getConfigBitStream()
+
+      val bitStream = bitStreams(0)
 
 //      println(bitStream)
 
@@ -159,12 +161,13 @@ object Pillars {
       //Verilog generation
       chisel3.Driver.execute(Array("--no-check-comb-loops", "-td","ADRESv1"), () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, 32))
 
-      arch.genConfig("internalNodeinfo_lsu.txt", 1)
+      val constInfo = new ConstInfo(1)
+      constInfo.addConst(arch("tile_0")("pe_0_1").getModule("const0").getModuleID(), 0, 1)
+      constInfo.addConst(arch("tile_0")("pe_1_1").getModule("const0").getModuleID(), 0, 1)
 
-      arch("tile_0")("pe_0_1").getModule("const0").updateConfigArray(1)
-      arch("tile_0")("pe_1_1").getModule("const0").updateConfigArray(1)
+      val bitStreams = arch.genConfig("internalNodeinfo_lsu.txt", 1, constInfo)
 
-      val bitStream = arch.getConfigBitStream()
+      val bitStream = bitStreams(0)
 
       println(bitStream)
 
@@ -232,8 +235,8 @@ object Pillars {
       chisel3.Driver.execute(Array("--no-check-comb-loops", "-td","ADRESv2"), () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, 32))
 
       val constInfo = new ConstInfo(targetII)
-      constInfo.addConst(arch("tile_0")("pe_3_0").getModule("const0").getModuleID(), 2, 1)
-      constInfo.addConst(arch("tile_0")("pe_0_1").getModule("const0").getModuleID(), 0, 1)
+      constInfo.addConst(arch("tile_0")("pe_1_0").getModule("const0").getModuleID(), 1, 1)
+      constInfo.addConst(arch("tile_0")("pe_0_2").getModule("const0").getModuleID(), 1, 1)
 
 //      arch.genConfig("internalNodeinfo_complete.txt", 1)
       val bitStreams = arch.genConfig("internalNodeinfo_complete.txt", targetII, constInfo)
@@ -248,7 +251,7 @@ object Pillars {
 //      println(bitStream)
 
 //      arch("tile_0")("pe_0_2").getModule("alu0").setWaitCycle(1)
-      arch("tile_0")("pe_2_3").getModule("alu0").setWaitCycle(4, 2)
+      arch("tile_0")("pe_1_1").getModule("alu0").setWaitCycle(4, 0)
 
       val waitCycles = arch.aluArray.map(alu => alu.asInstanceOf[ModuleTrait].getWaitCycles().toList).reduce(_++_)
 
@@ -261,14 +264,14 @@ object Pillars {
 
       //Run tester
             //iotesters.Driver.execute(Array( "--no-check-comb-loops","-tiac", "-tiwv"), () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, 32)) {
-      iotesters.Driver.execute(Array( "--no-check-comb-loops","-tgvo", "on", "-tbn" ,"verilator"), () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, 32)) {
+      iotesters.Driver.execute(Array("--no-check-comb-loops","-tgvo", "on", "-tbn" ,"verilator"), () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, 32)) {
         c => new TopModuleCompleteAdresUnitTest(c, bitStreams, waitCycles)
       }
     }
 
-//    example2PE()
-//    exampleAdres()
-//    exampleLSUAdres()
+    example2PE()
+    exampleAdres()
+    exampleLSUAdres()
     exampleCompleteAdres()
 
   }

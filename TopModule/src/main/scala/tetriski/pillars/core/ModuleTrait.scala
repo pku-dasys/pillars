@@ -43,6 +43,9 @@ trait ModuleTrait extends Ports with ModuleBasic {
         val singleConfigMask: BigInt = ((1 << singleConfigSize) - 1)
         for (fanInNum <- fanInNums) {
           breakable {
+            if(fanInNum == -1){
+              break
+            }
             if (fanInNum >= inPortNum) {
               bannedINodeSet = bannedINodeSet + internalNumBigInt
               break
@@ -84,6 +87,9 @@ trait ModuleTrait extends Ports with ModuleBasic {
         }
         for (fanOutNum <- fanOutNums) {
           breakable {
+            if(fanOutNum == -1){
+              break
+            }
             if (fanOutNum >= outPortNum) {
               break
             }

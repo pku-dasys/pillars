@@ -4,6 +4,7 @@ import java.io.{File, PrintWriter}
 
 import tetriski.pillars.archlib.OpConst
 import tetriski.pillars.hardware.PillarsModuleInfo
+import tetriski.pillars.core.MRRGMode._
 
 import scala.collection.mutable.ArrayBuffer
 import scala.io.Source
@@ -114,9 +115,12 @@ class ArchitctureHierarchy extends BlockTrait {
     val retBitstreams = new ArrayBuffer[BigInt]()
     val infos = Source.fromFile(filename).getLines().toArray
     val infoArrays = new ArrayBuffer[ArrayBuffer[String]]()
+    val reconfigModuleArrays = new ArrayBuffer[ArrayBuffer[ModuleTrait]]()
     for(i <- 0 until II){
-      val temp = new ArrayBuffer[String]()
-      infoArrays.append(temp)
+      val tempIA = new ArrayBuffer[String]()
+      infoArrays.append(tempIA)
+      val tempMA = new ArrayBuffer[ModuleTrait]()
+      reconfigModuleArrays.append(tempMA)
     }
 
     val pattern = "[0-9]+:".r
@@ -129,8 +133,32 @@ class ArchitctureHierarchy extends BlockTrait {
       val targetStr = infos(i*3)
       val tempStr = (pattern findFirstIn targetStr).toArray
       val tempII = tempStr(0).replace(":","").toInt
-      for(j <-0 until 3){
-        infoArrays(tempII).append(infos(i * 3 + j))
+
+      val moduleName = infos(i*3).replaceAll("([0-9]+:)|<|>", "").split("\\.", 0)
+      var temp = this.asInstanceOf[BlockTrait]
+      for (j <- 1 until moduleName.size - 2) {
+        temp = temp(moduleName(j))
+      }
+      val module = temp.getModule(moduleName(moduleName.size - 2))
+      reconfigModuleArrays(tempII).append(module)
+
+      val mode = module.mode
+      if(mode == REG_MODE){
+        infoArrays(tempII).append(moduleName(moduleName.size - 1))
+        infoArrays(tempII).append("-1")
+        infoArrays(tempII).append(infos(i * 3 + 2))
+
+        val preII = (tempII - 1 + II) % II
+
+        infoArrays(preII).append(moduleName(moduleName.size - 1))
+        reconfigModuleArrays(preII).append(module)
+        infoArrays(preII).append(infos(i * 3 + 1))
+        infoArrays(preII).append("-1")
+      }else{
+        infoArrays(tempII).append(moduleName(moduleName.size - 1))
+        for(j <-1 until 3){
+          infoArrays(tempII).append(infos(i * 3 + j))
+        }
       }
     }
 
@@ -142,12 +170,14 @@ class ArchitctureHierarchy extends BlockTrait {
       for (i <- 0 until infoArray.size / 3) {
         val offset = i * 3
         // val moduleName = infoArray(offset).substring(1, infoArray(offset).size-1).split("\\.", 0)
-        val moduleName = infoArray(offset).replaceAll("([0-9]+:)|<|>", "").split("\\.", 0)
-        var temp = this.asInstanceOf[BlockTrait]
-        for (j <- 1 until moduleName.size - 2) {
-          temp = temp(moduleName(j))
-        }
-        val module = temp.getModule(moduleName(moduleName.size - 2))
+//        val moduleName = infoArray(offset).replaceAll("([0-9]+:)|<|>", "").split("\\.", 0)
+//        var temp = this.asInstanceOf[BlockTrait]
+//        for (j <- 1 until moduleName.size - 2) {
+//          temp = temp(moduleName(j))
+//        }
+//        val module = temp.getModule(moduleName(moduleName.size - 2))
+
+        val module = reconfigModuleArrays(ii)(i)
         val second = infoArray(offset + 1)
         if (second == "SELECTED_OP") {
           val opcode = infoArray(offset + 2).toInt
@@ -159,7 +189,8 @@ class ArchitctureHierarchy extends BlockTrait {
           //val fanInNum = second(second.size-1).toString.toInt
           val fanOutNode = infoArray(offset + 2)
           val fanOutNums = fanOutNode.split(" ").toList.map(i => i.toInt)
-          val internalNodeName = moduleName(moduleName.size - 1)
+//          val moduleName = module.getName()
+          val internalNodeName = infoArray(offset)
           var internalNum = 0
           var isDecisive = false
           for (i <- 0 until module.internalNodes.size) {

@@ -12,13 +12,19 @@ class TopModule2PEUnitTest(c: TopModule) extends PeekPokeTester(c) {
   poke(c.input_0, 2)
   poke(c.input_1, 3)
   poke(c.io.en, 1)
-  //010 001 001 0001 010 001 001 0000// PE1(13) PE013)
+
+  //because input data is poked on the falling edge, we should wait a cycle
+  poke(c.io.II, 4)
+  step(1)
+
+  //010 001 001 0001 010 001 001 0000// PE1(13) PE0(13)
   //PE0: 010 001 110 0000 //  mux0(3) mux1(3) register(3)(rf(1) -> out1(output), rf(1) -> out0(to self), input -> rf(0)) alu(4)
   //PE1: 010 001 110 0001
   //0100011100000
   //save (a+b) in pe0.rf(0), to next cycle //5
   //save (b-a) in pe1.rf(0), to next cycle //1
   poke(c.io.configuration, 18622688)
+
   expect(c.out, 0)
   expect(c.io.configTest(0), 2272)
   expect(c.io.configTest(1), 2273)
@@ -59,6 +65,7 @@ class TopModuleAdresUnitTest(c: TopModule, bitstream :BigInt) extends PeekPokeTe
 //  poke(c.input_1, 3)
   println(bitstream.toString())
   poke(c.io.en, 1)
+  poke(c.io.II, 1)
 
   poke(c.io.configuration, bitstream)
 //  expect(c.io.configTest(0), 0)
@@ -69,6 +76,7 @@ class TopModuleAdresUnitTest(c: TopModule, bitstream :BigInt) extends PeekPokeTe
     poke(c.input_1, i)
     if(i > 2)
     expect(c.out, 5 * (i - 2 + 4))
+//    println((5 * (i - 2 + 4)).toString + " " + peek(c.out).toString())
     step(1)
   }
 }
@@ -81,6 +89,7 @@ class TopModuleLSUAdresUnitTest(c : TopModule, bitstream : BigInt, waitCycles : 
 
   val inData = (1 to 128).toArray
   poke(c.io.en, 0)
+  poke(c.io.II, 1)
   //val inData = Array(BigInt("64",10), BigInt("69",10), BigInt("77",10))
 
 //  val idata = c.LSUs(0).memWrapper.enq_mem.manip.mode match {
@@ -139,7 +148,7 @@ class TopModuleLSUAdresUnitTest(c : TopModule, bitstream : BigInt, waitCycles : 
 //  expect(c.io.configTest(0), 0)
 //  expect(c.io.configTest(1), 200325)
 
-  step(4)
+  step(5)
   var ref = 0
   for( i <- 1 until 128){
     //    println("cycle "+ i.toString)
@@ -210,11 +219,12 @@ class TopModuleCompleteAdresUnitTest(c : TopModule, bitstreams : Array[BigInt], 
 
   poke(c.io.en, 1)
   poke(c.io.II, 3)
-  poke(c.io.configuration, bitstreams(0))
 
   for(i <- 0 until waitCycles.size){
     poke(c.io.aluSchedule(i), waitCycles(i))
   }
+
+  poke(c.io.configuration, bitstreams(0))
 
   step(1)
   poke(c.io.configuration, bitstreams(1))
@@ -222,18 +232,15 @@ class TopModuleCompleteAdresUnitTest(c : TopModule, bitstreams : Array[BigInt], 
   step(1)
   poke(c.io.configuration, bitstreams(2))
 
-  //  expect(c.io.configTest(0), 0)
-  //  expect(c.io.configTest(1), 200325)
-
-  step(6)
+  step(7)
   var ref = 0
   for( i <- 10 until 100){
     //    println("cycle "+ i.toString)
     //poke(c.input_1, i)
     //if(i % 5 == 0)\
     ref = ref + i
-    expect(c.out, ref)
-    println(ref.toString + " " + peek(c.out).toString())
+    expect(c.io.outs(3), ref)
+//    println(ref.toString + " " + peek(c.io.outs(3)).toString())
     step(3)
   }
 }
