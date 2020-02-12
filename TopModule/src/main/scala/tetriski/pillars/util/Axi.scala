@@ -349,7 +349,7 @@ class AxiAddressIO(gen: UInt) extends DecoupledIO(gen) with AxiIdentifier with T
   }
 
   // slave mode
-  def getLen() = (len + 1.U((Axi4Config.len.width+1).W))
+  def getLen() = (len + 1.U((Axi4Config.len.width + 1).W))
   def getSize() = (1.U << size)
 
   override def cloneType: this.type = new AxiAddressIO(gen).asInstanceOf[this.type]
