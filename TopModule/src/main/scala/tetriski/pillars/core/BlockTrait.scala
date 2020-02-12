@@ -92,8 +92,8 @@ trait BlockTrait extends ModuleTrait {
     for (i <- 0 until connectArray.size){
       val src = connectArray(i)(0)
       val dst = connectArray(i)(1)
-      val resSrc = nameList.map( str => str+"/") ::: src
-      val resDst = nameList.map( str => str+"/") ::: dst
+      val resSrc = nameList.map( str => str + "/") ::: src
+      val resDst = nameList.map( str => str + "/") ::: dst
       resArray.append(List(resSrc, resDst).asInstanceOf[List[List[String]]])
     }
     connectArray = resArray

@@ -64,9 +64,10 @@ trait ModuleTrait extends Ports with ModuleBasic {
               configSet = configSet + i
             }
             //val unusedConfigArray = (configSet &~ currentInputConfigArray.toSet).toArray
+            bannedINodeSet = bannedINodeSet + internalNumBigInt
             val unusedConfigArray = (configSet &~ bannedINodeSet).toArray
             val unusedConfig = unusedConfigArray(0)
-            if (currentInputConfigArray.contains(fanInNum)) {
+            if (currentInputConfigArray.contains(internalNumBigInt)) {
               for (i <- 0 until inPortNum) {
                 val inputConfig = currentInputConfigArray(i)
                 if (inputConfig == internalNumBigInt) {
@@ -77,7 +78,7 @@ trait ModuleTrait extends Ports with ModuleBasic {
                 }
               }
             }
-            bannedINodeSet = bannedINodeSet + internalNumBigInt
+
 
             val mask: BigInt = ~(singleConfigMask << (singleConfigSize * (fanInNum)))
             val clearConfig = newConfig & mask
@@ -139,8 +140,8 @@ trait ModuleTrait extends Ports with ModuleBasic {
     }
   }
 
-  def getBigIntConfig() : Int = {
-    var ret : Int = 0
+  def getBigIntConfig() : BigInt = {
+    var ret : BigInt = 0
     val configSize = getConfigBit()
     for(i <- 0 until configSize){
       ret = ret << 1
