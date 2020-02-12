@@ -161,7 +161,8 @@ class TopModuleLSUAdresUnitTest(c : TopModule, bitstream : BigInt, waitCycles : 
   }
 }
 
-class TopModuleCompleteAdresUnitTest(c : TopModule, bitstreams : Array[BigInt], waitCycles : List[Int]) extends PeekPokeTester(c) {
+class TopModuleCompleteAdresUnitTest(c : TopModule, bitstreams : Array[BigInt], waitCycles : List[Int])
+  extends PeekPokeTester(c) {
 
   def enqData(numInLSU: Int, inData: Array[Int]): Unit ={
     poke(c.io.startLSU(numInLSU), 1)
@@ -265,7 +266,7 @@ class LoadStoreUnitTester(c: LoadStoreUnit) extends PeekPokeTester(c) {
       Array(BigInt("cccccccc",16), BigInt("deadbeef",16), BigInt("cdcdcdcd",16))
     case SplitOrConcat.Split =>
       assert(c.memWrapper.enq_mem.manip.factor == 4)
-      Array(BigInt("deadc0de"+"cdcdcdcd"+"deadbeef"+"cccccccc",16)) // little endian
+      Array(BigInt("deadc0de" + "cdcdcdcd" + "deadbeef" + "cccccccc",16)) // little endian
     case SplitOrConcat.Concat =>
       assert(c.memWrapper.enq_mem.manip.factor == 4)
       Array(
@@ -338,8 +339,8 @@ class LoadStoreUnitTester(c: LoadStoreUnit) extends PeekPokeTester(c) {
 }
 
 object LSUTest extends App {
-
-  iotesters.Driver.execute(Array( "-tgvo", "on", "-fiac"), () => new LoadStoreUnit(32)) { c => new LoadStoreUnitTester(c) }
+  iotesters.Driver.execute(Array( "-tgvo", "on", "-fiac"),
+    () => new LoadStoreUnit(32)) { c => new LoadStoreUnitTester(c) }
 }
 
 object LoadStoreUnitVerilog extends App {
@@ -357,8 +358,8 @@ class MultiplexerUnitTester(c: Multiplexer) extends PeekPokeTester(c) {
   for( i <- 0 until 40){
     //    println("cycle "+ i.toString)
     poke(c.input0, i)
-    poke(c.input1, i+1)
-    expect(c.out, i+1)
+    poke(c.input1, i + 1)
+    expect(c.out, i + 1)
     step(1)
   }
 }
