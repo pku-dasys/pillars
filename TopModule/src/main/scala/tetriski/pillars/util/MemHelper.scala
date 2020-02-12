@@ -10,7 +10,7 @@ object SplitOrConcat extends Enumeration {
 
   def apply(dest_width: Int, src_width: Int) = new {
 
-    val mode = min(+1, max(-1, src_width - dest_width)) match {
+    val mode = min( +1, max( -1, src_width - dest_width)) match {
       case 1 => Split
       case 0 => Normal
       case -1 => Concat

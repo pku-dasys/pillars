@@ -22,7 +22,7 @@ class ArchitctureHierarchy extends BlockTrait {
     var moduleParams = List[List[Int]]()
     for (i <- 0 until modulesArray.size) {
       moduleNums = moduleNums :+ modulesArray(i).size
-      for (j <- 0 until modulesArray(i).size) {
+      for (j <- modulesArray(i).indices) {
         moduleParams = moduleParams :+ modulesArray(i)(j).asInstanceOf[ModuleTrait].getParams()
       }
     }
@@ -91,7 +91,7 @@ class ArchitctureHierarchy extends BlockTrait {
   }
 
   //Save hierarchy information as modules.json
-  def dumpArchitcture() = {
+  def dumpArchitcture(): Unit = {
     val writer = new PrintWriter(new File("modules.json"))
     writer.flush()
 

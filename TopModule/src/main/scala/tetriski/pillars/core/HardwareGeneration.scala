@@ -13,7 +13,7 @@ class HardwareGeneration(arch: BlockTrait, connect: Connect) {
     def encode(strs: List[String]): List[Int] = {
       var ret = List[Int]()
       if (strs.size == 2) {
-        return List(arch.typeNum, 0, arch ** strs(1))
+        return List(arch.typeNum, 0, arch.getPortID(strs(1)))
       }
 
       var temp = arch
@@ -22,7 +22,7 @@ class HardwareGeneration(arch: BlockTrait, connect: Connect) {
           temp = temp(strs(i).substring(0, strs(i).size - 1))
         } else if (i == strs.size - 2) {
           var target = temp.getModule(strs(i))
-          return List(target.getTypeID(), target.getModuleID(), target ** strs(strs.size - 1))
+          return List(target.getTypeID(), target.getModuleID(), target.getPortID(strs(strs.size - 1)))
         }
 
       }

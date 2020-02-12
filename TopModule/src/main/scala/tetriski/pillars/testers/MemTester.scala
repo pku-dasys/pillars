@@ -135,7 +135,7 @@ class EnqMemUnitTester(c: EnqMemWrapper) extends PeekPokeTester(c) {
       Array(BigInt("cccccccc",16), BigInt("deadbeef",16), BigInt("cdcdcdcd",16))
     case SplitOrConcat.Split =>
       assert(c.enq_mem.manip.factor == 4)
-      Array(BigInt("deadc0de"+"cdcdcdcd"+"deadbeef"+"cccccccc",16)) // little endian
+      Array(BigInt("deadc0de" + "cdcdcdcd" + "deadbeef" + "cccccccc",16)) // little endian
     case SplitOrConcat.Concat =>
       assert(c.enq_mem.manip.factor == 4)
       Array(
@@ -260,7 +260,7 @@ class EnqAddrDeqMemUnitTester(c: EnqAddrDeqMemWrapper) extends PeekPokeTester(c)
     if(peek(c.io.odata.valid) == 1) {
       expect(c.io.odata.bits, data(j))
       //println(s"pull data($j)")
-      j = j +1
+      j = j + 1
     }
     step(1)
     poke(c.io.odata.ready, 0)
@@ -304,7 +304,7 @@ class DeqMemUnitTester(c: DeqMemWrapper) extends PeekPokeTester(c) {
       ) // little endian
     case SplitOrConcat.Concat =>
       assert(c.deq_mem.manip.factor == 4)
-      Array(BigInt("deadc0de"+"cdcdcdcd"+"deadbeef"+"cccccccc",16)) // little endian
+      Array(BigInt("deadc0de" + "cdcdcdcd" + "deadbeef" + "cccccccc",16)) // little endian
   }
 
   val base = 1023
@@ -313,7 +313,7 @@ class DeqMemUnitTester(c: DeqMemWrapper) extends PeekPokeTester(c) {
   for (i <- 0 until idata.length) {
     poke(c.io.mem.en, 1)
     poke(c.io.mem.we, 1)
-    poke(c.io.mem.addr, base+i)
+    poke(c.io.mem.addr, base + i)
     poke(c.io.mem.din, idata(i))
     step(1)
   }
@@ -351,7 +351,9 @@ object MemTest extends App {
   iotesters.Driver.execute(args, () => new EnqMemWrapper(128, 32, 10000)) { c => new EnqMemUnitTester(c) }
   iotesters.Driver.execute(args, () => new EnqMemWrapper(8, 32, 10000)) { c => new EnqMemUnitTester(c) }
 
-  iotesters.Driver.execute(args, () => new EnqAddrDeqMemWrapper(new MemReadIO(10000, 32))) { c => new EnqAddrDeqMemUnitTester(c) }
+  iotesters.Driver.execute(args, () =>
+    new EnqAddrDeqMemWrapper(new MemReadIO(10000, 32))) { c => new EnqAddrDeqMemUnitTester(c) }
+
   iotesters.Driver.execute(args, () => new DeqMemWrapper(32, 32, 10000)) { c => new DeqMemUnitTester(c) }
   iotesters.Driver.execute(args, () => new DeqMemWrapper(8, 32, 10000)) { c => new DeqMemUnitTester(c) }
   iotesters.Driver.execute(args, () => new DeqMemWrapper(128, 32, 10000)) { c => new DeqMemUnitTester(c) }

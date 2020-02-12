@@ -19,7 +19,7 @@ class NodeMRRG(var name : String) extends Cloneable {
     mode = newMode
   }
 
-  override def clone = {
+  override def clone: NodeMRRG = {
     val clone = super.clone.asInstanceOf[NodeMRRG]
     clone.fanIn = ArrayBuffer[NodeMRRG]()
     clone.fanOut = ArrayBuffer[NodeMRRG]()
@@ -38,7 +38,7 @@ class MRRG extends Cloneable {
   var undeterminedOutConnects = List[List[NodeMRRG]]()
   var undeterminedInConnects = List[List[NodeMRRG]]()
 
-  override def clone = {
+  override def clone: MRRG = {
     val clone = super.clone.asInstanceOf[MRRG]
     clone.nodes = ArrayBuffer[NodeMRRG]()
     clone.undeterminedOutConnects = List[List[NodeMRRG]]()
@@ -74,7 +74,7 @@ class MRRG extends Cloneable {
     nodeMap = nodeMap + (node.getName() -> (getSize()-1))
   }
 
-  def apply(name : String) = nodes(nodeMap(name))
+  def apply(name : String):NodeMRRG = nodes(nodeMap(name))
 
   def update(oldName : String, newName : String): Unit ={
     val num = nodeMap(oldName)

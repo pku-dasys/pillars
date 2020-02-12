@@ -155,7 +155,7 @@ trait ModuleTrait extends Ports with ModuleBasic {
 
   def addInternalNodesNum(num : Int): Unit ={
     val size = internalNodes.length
-    val newNodes = (0 to num-1).map(i => "internalNode_"+(i + size).toString).toList
+    val newNodes = (0 to num-1).map(i => "internalNode_" + (i + size).toString).toList
     addInternalNodes(newNodes)
   }
 

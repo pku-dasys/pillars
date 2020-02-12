@@ -162,10 +162,36 @@ class TopModuleLSUAdresUnitTest(c : TopModule, bitstream : BigInt, waitCycles : 
 }
 
 class TopModuleCompleteAdresUnitTest(c : TopModule, bitstreams : Array[BigInt], waitCycles : List[Int]) extends PeekPokeTester(c) {
-  //MixedVec don't support c.io.inputs(0) in poke
-  //  poke(c.input_0, 2)
-  //  poke(c.input_1, 3)
-  //  println(waitCycles.toString)
+
+  def enqData(numInLSU: Int, inData: Array[Int]): Unit ={
+    poke(c.io.startLSU(numInLSU), 1)
+    poke(c.io.enqEnLSU(numInLSU), 1)
+    poke(c.io.inLSU(numInLSU).valid, 0)
+    poke(c.io.baseLSU(numInLSU), base)
+    step(1)
+
+    // push
+    for (x <- inData) {
+      poke(c.io.inLSU(numInLSU).valid, 1)
+      expect(c.io.inLSU(numInLSU).valid, 1)
+      poke(c.io.inLSU(numInLSU).bits, x)
+      if (peek(c.io.inLSU(numInLSU).ready) == 0) {
+        while (peek(c.io.inLSU(numInLSU).ready) == 0) {
+          step(1)
+        }
+      } else {
+        step(1)
+      } // exit condition: (c.io.in.ready === true.B) and step()
+    }
+    poke(c.io.inLSU(numInLSU).valid, 0)
+
+    // exec
+    while (peek(c.io.idleLSU(numInLSU)) == 0) {
+      step(1)
+    }
+
+    poke(c.io.enqEnLSU(numInLSU), 0)
+  }
 
   val inData = (10 to 100).toArray
   poke(c.io.en, 0)
@@ -188,34 +214,10 @@ class TopModuleCompleteAdresUnitTest(c : TopModule, bitstreams : Array[BigInt], 
 
   val base = 0
 
-  poke(c.io.startLSU(3), 1)
-  poke(c.io.enqEnLSU(3), 1)
-  poke(c.io.inLSU(3).valid, 0)
-  poke(c.io.baseLSU(3), base)
-  step(1)
+  val numInLSU = 3
 
-  // push
-  for (x <- inData) {
-    poke(c.io.inLSU(3).valid, 1)
-    expect(c.io.inLSU(3).valid, 1)
-    poke(c.io.inLSU(3).bits, x)
-    if (peek(c.io.inLSU(3).ready) == 0) {
-      while (peek(c.io.inLSU(3).ready) == 0) {
-        step(1)
-      }
-    } else {
-      step(1)
-    } // exit condition: (c.io.in.ready === true.B) and step()
-  }
-  poke(c.io.inLSU(3).valid, 0)
 
-  // exec
-  while (peek(c.io.idleLSU(3)) == 0) {
-    step(1)
-  }
-
-  poke(c.io.enqEnLSU(3), 0)
-
+  enqData(numInLSU, inData)
 
   poke(c.io.en, 1)
   poke(c.io.II, 3)

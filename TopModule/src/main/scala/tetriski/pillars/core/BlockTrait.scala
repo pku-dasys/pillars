@@ -180,7 +180,7 @@ trait BlockTrait extends ModuleTrait {
         mrrg.addConnect(funNode.getName(), List(inPort))
       }
 
-      val addName = hierName.map(i => i+".").reverse.reduce(_+_)
+      val addName = hierName.map(i => i + ".").reverse.reduce(_ + _)
       for(oldName <- mrrg.nodeMap.keys){
         mrrg.update(oldName, addName  + oldName)
       }
@@ -268,7 +268,7 @@ trait BlockTrait extends ModuleTrait {
     initialization()
     val targetMRRG = graphUnroll(mrrg, II)
 
-    val writer = new PrintWriter(new File( hierName.map(str => str + ".").reverse.reduce(_+_) + "mrrg.txt"))
+    val writer = new PrintWriter(new File(hierName.map(str => str + ".").reverse.reduce(_ + _) + "mrrg.txt"))
     dumpAsTXT(writer, targetMRRG)
   }
 
