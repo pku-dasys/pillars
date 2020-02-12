@@ -207,7 +207,7 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
       }
       configPorts = configPorts :+ configPort
     }
-    val regionTotalBits = configBits.reduce(_+_)
+    val regionTotalBits = configBits.sum
     //println(configBits)
     regionConfigBits = regionConfigBits :+ regionTotalBits
     val dispatch = Module(new Dispatch(regionTotalBits, configBits))
@@ -218,7 +218,7 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
     //io.configTest(0) := alus
     dispatchs.append(dispatch)
   }
-  val totalBits = regionConfigBits.reduce(_+_)
+  val totalBits = regionConfigBits.sum
   val topDispatch = Module(new Dispatch(totalBits, regionConfigBits))
   topDispatch.io.en <> io.en
   //println(totalBits, regionConfigBits)

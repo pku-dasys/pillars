@@ -2,23 +2,19 @@ package tetriski.pillars
 
 import chisel3.iotesters
 
-import scala.collection.mutable.ArrayBuffer
-import java.io.{File, PrintWriter}
-
-import chisel3.util.log2Up
 import tetriski.pillars.archlib.{PEBlock, TileBlock, TileCompleteBlock, TileLSUBlock}
 import tetriski.pillars.core.{ArchitctureHierarchy, Connect, HardwareGeneration, ModuleTrait, ConstInfo}
 import tetriski.pillars.hardware.TopModule
-import tetriski.pillars.testers.{TopModule2PEUnitTest, TopModuleAdresUnitTest, TopModuleCompleteAdresUnitTest, TopModuleLSUAdresUnitTest}
+import tetriski.pillars.testers.{TopModule2PEUnitTest, TopModuleAdresUnitTest,
+  TopModuleCompleteAdresUnitTest, TopModuleLSUAdresUnitTest}
 
-import scala.collection.mutable.Queue
 
 
 object Pillars {
   def main(args: Array[String]): Unit = {
 
     def example2PE(): Unit ={
-      var arch = new ArchitctureHierarchy()
+      val arch = new ArchitctureHierarchy()
       //The order of ports should be same as TopModule
       arch.addOutPorts(Array("output"))
       arch.addInPorts(Array("input_0", "input_1"))
@@ -55,18 +51,20 @@ object Pillars {
       val cp = new HardwareGeneration(arch, connect)
 
       //println(cp.connectMap)
+      val dataWidth = 32
 
       //Verilog generation
-      chisel3.Driver.execute(args, () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, 32))
+      chisel3.Driver.execute(args, () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, dataWidth))
 
       //Run tester
-      iotesters.Driver.execute(Array("-tgvo", "on", "-tbn" ,"verilator"), () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, 32)) {
+      iotesters.Driver.execute(Array("-tgvo", "on", "-tbn" ,"verilator"),
+        () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, dataWidth)) {
         c => new TopModule2PEUnitTest(c)
       }
     }
 
     def exampleAdres(): Unit ={
-      var arch = new ArchitctureHierarchy()
+      val arch = new ArchitctureHierarchy()
       //The order of ports should be same as TopModule
       arch.addOutPorts(Array("output"))
       arch.addInPorts(Array("input_0", "input_1"))
@@ -98,8 +96,11 @@ object Pillars {
 
 //      println(cp.connectMap)
 
+      val dataWidth = 32
+
       //Verilog generation
-      chisel3.Driver.execute(Array("--no-check-comb-loops", "-td","ADRESv0"), () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, 32))
+      chisel3.Driver.execute(Array("--no-check-comb-loops", "-td","ADRESv0"),
+        () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, dataWidth))
 
       val constInfo = new ConstInfo(1)
       constInfo.addConst(arch("tile_0")("pe_0_0").getModule("const0").getModuleID(), 0, 4)
@@ -114,19 +115,21 @@ object Pillars {
 
 
 //
-//      iotesters.Driver.execute(Array( "--no-check-comb-loops","-tiac", "-tiwv"), () => new DispatchT(191, List(47, 47, 3, 47, 47))) {
+//      iotesters.Driver.execute(Array( "--no-check-comb-loops","-tiac", "-tiwv"),
+      //      () => new DispatchT(191, List(47, 47, 3, 47, 47))) {
 //        c => new DispatchUnitTest(c, bitStream)
 //      }
 
 
       //Run tester
-      iotesters.Driver.execute(Array( "--no-check-comb-loops","-tgvo", "on", "-tbn" ,"verilator"), () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, 32)) {
+      iotesters.Driver.execute(Array( "--no-check-comb-loops","-tgvo", "on", "-tbn" ,"verilator"),
+        () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, dataWidth)) {
         c => new TopModuleAdresUnitTest(c, bitStream)
       }
     }
 
     def exampleLSUAdres(): Unit ={
-      var arch = new ArchitctureHierarchy()
+      val arch = new ArchitctureHierarchy()
       //The order of ports should be same as TopModule
       arch.addOutPorts(Array("output"))
       arch.addInPorts(Array("input_0", "input_1"))
@@ -158,8 +161,11 @@ object Pillars {
 
 //      println(cp.connectMap)
 
+      val dataWidth = 32
+
       //Verilog generation
-      chisel3.Driver.execute(Array("--no-check-comb-loops", "-td","ADRESv1"), () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, 32))
+      chisel3.Driver.execute(Array("--no-check-comb-loops", "-td","ADRESv1"),
+        () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, dataWidth))
 
       val constInfo = new ConstInfo(1)
       constInfo.addConst(arch("tile_0")("pe_0_1").getModule("const0").getModuleID(), 0, 1)
@@ -178,14 +184,17 @@ object Pillars {
 
 
       //
-      //      iotesters.Driver.execute(Array( "--no-check-comb-loops","-tiac", "-tiwv"), () => new DispatchT(191, List(47, 47, 3, 47, 47))) {
+      //      iotesters.Driver.execute(Array( "--no-check-comb-loops","-tiac", "-tiwv"),
+      //      () => new DispatchT(191, List(47, 47, 3, 47, 47))) {
       //        c => new DispatchUnitTest(c, bitStream)
       //      }
 
 
       //Run tester
-//      iotesters.Driver.execute(Array( "--no-check-comb-loops","-tiac", "-tiwv"), () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, 32)) {
-      iotesters.Driver.execute(Array( "--no-check-comb-loops","-tgvo", "on", "-tbn" ,"verilator"), () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, 32)) {
+//      iotesters.Driver.execute(Array( "--no-check-comb-loops","-tiac", "-tiwv"),
+      //      () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, 32)) {
+      iotesters.Driver.execute(Array( "--no-check-comb-loops","-tgvo", "on", "-tbn" ,"verilator"),
+        () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, dataWidth)) {
          c => new TopModuleLSUAdresUnitTest(c, bitStream, waitCycles)
       }
     }
@@ -231,8 +240,11 @@ object Pillars {
 
       //      println(cp.connectMap)
 
+      val dataWidth = 32
+
       //Verilog generation
-      chisel3.Driver.execute(Array("--no-check-comb-loops", "-td","ADRESv2"), () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, 32))
+      chisel3.Driver.execute(Array("--no-check-comb-loops", "-td","ADRESv2"),
+        () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, dataWidth))
 
       val constInfo = new ConstInfo(targetII)
       constInfo.addConst(arch("tile_0")("pe_1_0").getModule("const0").getModuleID(), 1, 1)
@@ -257,21 +269,24 @@ object Pillars {
 
 
       //
-      //      iotesters.Driver.execute(Array( "--no-check-comb-loops","-tiac", "-tiwv"), () => new DispatchT(191, List(47, 47, 3, 47, 47))) {
+      //      iotesters.Driver.execute(Array( "--no-check-comb-loops","-tiac", "-tiwv"),
+      //      () => new DispatchT(191, List(47, 47, 3, 47, 47))) {
       //        c => new DispatchUnitTest(c, bitStream)
       //      }
 
 
       //Run tester
-            //iotesters.Driver.execute(Array( "--no-check-comb-loops","-tiac", "-tiwv"), () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, 32)) {
-      iotesters.Driver.execute(Array("--no-check-comb-loops","-tgvo", "on", "-tbn" ,"verilator"), () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, 32)) {
+            //iotesters.Driver.execute(Array( "--no-check-comb-loops","-tiac", "-tiwv"),
+      // () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, 32)) {
+      iotesters.Driver.execute(Array("--no-check-comb-loops","-tgvo", "on", "-tbn" ,"verilator"),
+        () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, dataWidth)) {
         c => new TopModuleCompleteAdresUnitTest(c, bitStreams, waitCycles)
       }
     }
 
-    example2PE()
-    exampleAdres()
-    exampleLSUAdres()
+//    example2PE()
+//    exampleAdres()
+//    exampleLSUAdres()
     exampleCompleteAdres()
 
   }

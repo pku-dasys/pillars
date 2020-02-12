@@ -38,8 +38,8 @@ trait Ports {
     outPorts
   }
 
-  //We can use ** operator to get a port's ID with its name
-  def **(name: String) : Int = {
+  //We can use getPortID to get a port's ID with its name
+  def getPortID(name: String) : Int = {
     if (inPortMap.contains(name)){
       inPortMap(name)
     }else if (outPortMap.contains(name)){

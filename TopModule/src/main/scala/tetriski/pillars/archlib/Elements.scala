@@ -44,7 +44,7 @@ class OpRF(name: String, params: List[Int]) extends ModuleTrait {
   setParams(params)
   setName(name)
 
-  addInternalNodesNum(Math.pow(2, params(0)).toInt)
+  addInternalNodesNum(Math.pow(2, params.head).toInt)
   setMRRGMode(REG_MODE)
 }
 

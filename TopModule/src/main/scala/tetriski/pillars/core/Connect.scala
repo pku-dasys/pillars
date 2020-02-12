@@ -4,7 +4,8 @@ import java.io.{File, PrintWriter}
 
 import scala.collection.mutable.{ArrayBuffer, Queue}
 
-//This class is obtained from GenerateConnection and records the connection information of the two blocks mentioned above.
+//This class is obtained from GenerateConnection and records the
+// connection information of the two blocks mentioned above.
 //The outArray and inArray individually contains the ports which have the intrinsic mapping sequences.
 class Connect(connectArray: ArrayBuffer[List[List[String]]]) {
 
@@ -66,7 +67,7 @@ class Connect(connectArray: ArrayBuffer[List[List[String]]]) {
   }
 
   //Save connection information as connect.json
-  def dumpConnect() = {
+  def dumpConnect(): Unit = {
     val writer = new PrintWriter(new File("connect.json"))
 
     writer.flush()
@@ -77,12 +78,22 @@ class Connect(connectArray: ArrayBuffer[List[List[String]]]) {
         for (i <- 0 until port.size) {
           var str = port(i)
           var label = ""
-          if (ii % 2 != 0) label = "/"
-          else label = ":"
-          if (str(str.size - 1) == '/') writer.print(str)
+          if (ii % 2 != 0) {
+            label = "/"
+          }
           else {
-            if (i != port.size - 1) writer.print(str + label)
-            else writer.print(str)
+            label = ":"
+          }
+          if (str(str.size - 1) == '/') {
+            writer.print(str)
+          }
+          else {
+            if (i != port.size - 1) {
+              writer.print(str + label)
+            }
+            else {
+              writer.print(str)
+            }
             ii += 1
           }
         }
@@ -94,11 +105,19 @@ class Connect(connectArray: ArrayBuffer[List[List[String]]]) {
       for (i <- 0 until dsts.size) {
         writer.print("\"")
         printPort(dsts(i))
-        if (i != dsts.size - 1) writer.print("\",\n")
-        else writer.print("\"")
+        if (i != dsts.size - 1) {
+          writer.print("\",\n")
+        }
+        else {
+          writer.print("\"")
+        }
       }
-      if (comma) writer.print("],\n")
-      else writer.print("]\n")
+      if (comma) {
+        writer.print("],\n")
+      }
+      else {
+        writer.print("]\n")
+      }
     }
 
     writer.print("{")
