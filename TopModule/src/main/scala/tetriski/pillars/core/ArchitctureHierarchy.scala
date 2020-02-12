@@ -2,7 +2,7 @@ package tetriski.pillars.core
 
 import java.io.{File, PrintWriter}
 
-import tetriski.pillars.archlib.OpConst
+import tetriski.pillars.archlib.{OpAlu, OpConst}
 import tetriski.pillars.hardware.PillarsModuleInfo
 import tetriski.pillars.core.MRRGMode._
 
@@ -48,8 +48,9 @@ class ArchitctureHierarchy extends BlockTrait {
       for (i <- 0 until configRegion.modulesArray.size) {
         for (j <- 0 until configRegion.modulesArray(i).size) {
           val module = configRegion.modulesArray(i)(j).asInstanceOf[ModuleTrait]
-          if(module.getConfigBit()>0)
+          if(module.getConfigBit()>0) {
             moduleList = moduleList :+ List(module.getTypeID(), module.getModuleID())
+          }
         }
       }
       ret = ret :+ moduleList
@@ -102,6 +103,12 @@ class ArchitctureHierarchy extends BlockTrait {
     writer.close()
   }
 
+  def resetWaitCycles(): Unit ={
+    for(alu <- aluArray){
+      alu.asInstanceOf[OpAlu].resetWaitCycle()
+    }
+  }
+
   def resetConfigs(): Unit ={
     for(moduleArray <- modulesArray){
       for(module <- moduleArray){
@@ -142,22 +149,28 @@ class ArchitctureHierarchy extends BlockTrait {
       val module = temp.getModule(moduleName(moduleName.size - 2))
       reconfigModuleArrays(tempII).append(module)
 
-      val mode = module.mode
-      if(mode == REG_MODE){
+      if(II == 1){
         infoArrays(tempII).append(moduleName(moduleName.size - 1))
-        infoArrays(tempII).append("-1")
+        infoArrays(tempII).append(infos(i * 3 + 1))
         infoArrays(tempII).append(infos(i * 3 + 2))
-
-        val preII = (tempII - 1 + II) % II
-
-        infoArrays(preII).append(moduleName(moduleName.size - 1))
-        reconfigModuleArrays(preII).append(module)
-        infoArrays(preII).append(infos(i * 3 + 1))
-        infoArrays(preII).append("-1")
       }else{
-        infoArrays(tempII).append(moduleName(moduleName.size - 1))
-        for(j <-1 until 3){
-          infoArrays(tempII).append(infos(i * 3 + j))
+        val mode = module.mode
+        if(mode == REG_MODE){
+          infoArrays(tempII).append(moduleName(moduleName.size - 1))
+          infoArrays(tempII).append("-1")
+          infoArrays(tempII).append(infos(i * 3 + 2))
+
+          val preII = (tempII - 1 + II) % II
+
+          infoArrays(preII).append(moduleName(moduleName.size - 1))
+          reconfigModuleArrays(preII).append(module)
+          infoArrays(preII).append(infos(i * 3 + 1))
+          infoArrays(preII).append("-1")
+        }else{
+          infoArrays(tempII).append(moduleName(moduleName.size - 1))
+          for(j <-1 until 3){
+            infoArrays(tempII).append(infos(i * 3 + j))
+          }
         }
       }
     }

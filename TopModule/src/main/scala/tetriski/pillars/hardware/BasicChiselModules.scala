@@ -1,9 +1,10 @@
 package tetriski.pillars.hardware
 
-import chisel3.util._
-import chisel3.{Bundle, Input, Module, Output, UInt, Vec, _}
-import tetriski.pillars.hardware.PillarsConfig._
+import chisel3.util.{EnqIO, Enum, MixedVec, MuxLookup, log2Ceil, log2Up}
+import chisel3.{Bundle, Input, Mem, Module, Output, UInt, Vec, _}
+import tetriski.pillars.testers.EnqMemWrapper
 import tetriski.pillars.util.{EnqMem, MemReadIO, MemWriteIO, SimpleDualPortSram}
+import tetriski.pillars.hardware.PillarsConfig._
 
 import scala.collection.mutable.ArrayBuffer
 

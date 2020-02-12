@@ -54,6 +54,12 @@ trait ModuleBasic {
     waitCycles(II) = waitCycle
   }
 
+  def resetWaitCycle(): Unit ={
+    for(i <- 0 until II_UPPER_BOUND){
+      waitCycles(i) = 0
+    }
+  }
+
   def getModuleID(): Int = {
     moduleID
   }
