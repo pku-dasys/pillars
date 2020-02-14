@@ -1,9 +1,9 @@
 package tetriski.pillars.hardware
 
-import chisel3.util.{EnqIO, Enum, MixedVec, MuxLookup, log2Ceil, log2Up}
+import chisel3.util.{DeqIO, EnqIO, Enum, MixedVec, MuxLookup, is, log2Ceil, log2Up, switch}
 import chisel3.{Bundle, Input, Mem, Module, Output, UInt, Vec, _}
 import tetriski.pillars.testers.EnqMemWrapper
-import tetriski.pillars.util.{EnqMem, MemReadIO, MemWriteIO, SimpleDualPortSram}
+import tetriski.pillars.util.{DeqMem, EnqMem, MemReadIO, MemWriteIO, SimpleDualPortSram}
 import tetriski.pillars.hardware.PillarsConfig._
 
 import scala.collection.mutable.ArrayBuffer
@@ -377,6 +377,7 @@ class DispatchT(wIn: Int, targets : List[Int]) extends Module {
 
 }
 
+
 class LSMemWrapper(w : Int) extends Module {
   val io = IO(new Bundle {
     val in = Flipped(EnqIO(UInt(MEM_IN_WIDTH.W)))
@@ -384,31 +385,100 @@ class LSMemWrapper(w : Int) extends Module {
     val readMem = Flipped(new MemReadIO(MEM_DEPTH, w))
     val writeMem = Flipped(new MemWriteIO(MEM_DEPTH, w))
 
-    val base = Input(UInt(readMem.addr.getWidth.W))
+    val base = Input(UInt(writeMem.addr.getWidth.W))
+    val len = Input(UInt(writeMem.addr.getWidth.W))
+    val out = Flipped(DeqIO(UInt(MEM_OUT_WIDTH.W)))
+
     val start = Input(Bool())
-    val en = Input(Bool())
+    val enqEn = Input(Bool())
+    val deqEn = Input(Bool())
     val idle = Output(Bool())
   })
 
+  val s_noop :: s_write_only :: s_work :: s_read_only :: Nil = Enum(4)
+  val state = RegInit(s_noop)
+
   val mem = Module(new SimpleDualPortSram(MEM_DEPTH, w))
   val enq_mem = Module(new EnqMem(mem.io.a, MEM_IN_WIDTH))
+  val deq_mem = Module(new DeqMem(mem.io.b, MEM_OUT_WIDTH))
+
+  when(state === s_noop){
+    when(io.enqEn === true.B){
+      state := s_write_only
+      enq_mem.io.mem <> mem.io.a
+    }.otherwise{
+      io.writeMem <> mem.io.a
+    }
+    io.readMem <> mem.io.b
+    deq_mem.io.mem.dout <> DontCare
+    enq_mem.io.idle <> io.idle
+  }.elsewhen(state === s_write_only) {
+    when(io.enqEn === false.B){
+      state := s_work
+      io.writeMem <> mem.io.a
+    }.otherwise{
+      enq_mem.io.mem <> mem.io.a
+    }
+    io.readMem <> mem.io.b
+    deq_mem.io.mem.dout <> DontCare
+    enq_mem.io.idle <> io.idle
+  }.elsewhen(state === s_work){
+    when(io.deqEn === true.B){
+      state := s_read_only
+      deq_mem.io.mem <> mem.io.b
+      io.readMem.dout <> DontCare
+    }.otherwise{
+      io.readMem <> mem.io.b
+      deq_mem.io.mem.dout <> DontCare
+    }
+    io.writeMem <> mem.io.a
+    deq_mem.io.idle <> io.idle
+  }.otherwise{
+    when(io.deqEn === false.B){
+      state := s_noop
+      io.readMem <> mem.io.b
+      deq_mem.io.mem.dout <> DontCare
+    }.otherwise{
+      deq_mem.io.mem <> mem.io.b
+      io.readMem.dout <> DontCare
+    }
+    io.writeMem <> mem.io.a
+    deq_mem.io.idle <> io.idle
+  }
+
+
+//  deq_mem.io.mem <> mem.io.b
+//  deq_mem.io.out <> io.out
+//  deq_mem.io.len <> io.len
+
+
+//  deq_mem.io.en := true.B
 
   mem.clock := clock
   enq_mem.clock := clock
 
-  io.readMem <> mem.io.b
-  when(io.en === true.B){
-    enq_mem.io.mem <> mem.io.a
-  }.otherwise{
-    io.writeMem <> mem.io.a
-  }
-
-  enq_mem.io.en <> io.en
-  enq_mem.io.in <> io.in
-
+  deq_mem.io.base <> io.base
+  deq_mem.io.start <> io.start
   enq_mem.io.base <> io.base
   enq_mem.io.start <> io.start
-  enq_mem.io.idle <> io.idle
+
+//  io.readMem <> mem.io.b
+//  when(io.enqEn === true.B){
+//    enq_mem.io.mem <> mem.io.a
+//  }.otherwise{
+//    io.writeMem <> mem.io.a
+//  }
+
+  enq_mem.io.en <> io.enqEn
+  enq_mem.io.in <> io.in
+
+  deq_mem.io.en <> io.deqEn
+  deq_mem.io.len <> io.len
+  deq_mem.io.out <> io.out
+
+//  enq_mem.io.base <> io.base
+//  enq_mem.io.start <> io.start
+//  enq_mem.io.idle <> io.idle
 }
 
 class LoadStoreUnit(w : Int) extends Module{
@@ -417,10 +487,14 @@ class LoadStoreUnit(w : Int) extends Module{
     val configuration = Input(UInt(1.W))
     val en = Input(Bool())
 
-    val in = Flipped(EnqIO(UInt(MEM_IN_WIDTH.W)))
+    val streamIn = Flipped(EnqIO(UInt(MEM_IN_WIDTH.W)))
+    val len = Input(UInt(log2Ceil(MEM_DEPTH).W))
+    val streamOut = Flipped(DeqIO(UInt(MEM_OUT_WIDTH.W)))
     val base = Input(UInt(log2Ceil(MEM_DEPTH).W))
+
     val start = Input(Bool())
     val enqEn = Input(Bool())
+    val deqEn = Input(Bool())
     val idle = Output(Bool())
 
     val inputs = Input(MixedVec( UInt(log2Ceil(MEM_DEPTH).W), UInt(w.W)))
@@ -430,8 +504,11 @@ class LoadStoreUnit(w : Int) extends Module{
   memWrapper.io.base <> io.base
   memWrapper.io.start <> io.start
   memWrapper.io.idle <> io.idle
-  memWrapper.io.en <> io.enqEn
-  memWrapper.io.in <> io.in
+  memWrapper.io.enqEn <> io.enqEn
+  memWrapper.io.deqEn <> io.deqEn
+  memWrapper.io.len <> io.len
+  memWrapper.io.in <> io.streamIn
+  memWrapper.io.out <> io.streamOut
 
   val addr = io.inputs(0)
   val dataIn = io.inputs(1)
