@@ -49,10 +49,14 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
   val LSUnitNum = moduleNums(4)
 
   val io = IO(new Bundle {
-    val inLSU = MixedVec((0 until LSUnitNum).map(p => Flipped(EnqIO( UInt(MEM_IN_WIDTH.W)))))
+    val streamInLSU = MixedVec((0 until LSUnitNum).map(p => Flipped(EnqIO( UInt(MEM_IN_WIDTH.W)))))
+    val streamOutLSU = MixedVec((0 until LSUnitNum).map(p => Flipped(DeqIO(UInt(MEM_OUT_WIDTH.W)))))
     val baseLSU = Input(Vec(LSUnitNum, UInt(log2Ceil(MEM_DEPTH).W)))
+    val lenLSU = Input(Vec(LSUnitNum, UInt(log2Ceil(MEM_DEPTH).W)))
+
     val startLSU = Input(Vec(LSUnitNum, Bool()))
     val enqEnLSU = Input(Vec(LSUnitNum, Bool()))
+    val deqEnLSU = Input(Vec(LSUnitNum, Bool()))
     val idleLSU = Output(Vec(LSUnitNum, Bool()))
 
     val en = Input(Bool())
@@ -104,7 +108,8 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
 //  currentNum += PENum
 //
 
-  val alus = (0 until aluNum).toArray.map(t => Module(new Alu(moduleInfos.getParams(t + currentNum)(0), moduleInfos.getParams(t + currentNum)(1))))
+  val alus = (0 until aluNum).toArray.map(t => Module(new Alu(moduleInfos.getParams(t + currentNum)(0),
+    moduleInfos.getParams(t + currentNum)(1))))
   val aluScheduleControllers = (0 until aluNum).toArray.map(t => Module(new MultiIIScheduleController))
   for(i <- 0 until aluNum){
     val alu = alus(i)
@@ -156,10 +161,13 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
   }
   for(i <- 0 until LSUnitNum){
     LSUs(i).io.base <> io.baseLSU(i)
+    LSUs(i).io.len <> io.lenLSU(i)
     LSUs(i).io.start <> io.startLSU(i)
     LSUs(i).io.idle <> io.idleLSU(i)
     LSUs(i).io.enqEn <> io.enqEnLSU(i)
-    LSUs(i).io.in <> io.inLSU(i)
+    LSUs(i).io.deqEn <> io.deqEnLSU(i)
+    LSUs(i).io.streamIn <> io.streamInLSU(i)
+    LSUs(i).io.streamOut <> io.streamOutLSU(i)
   }
   currentNum += LSUnitNum
 

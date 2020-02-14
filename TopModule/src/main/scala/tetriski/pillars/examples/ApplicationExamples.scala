@@ -145,7 +145,6 @@ object ApplicationExamples {
     //********     II = 3     ********
   }
 
-
   def testSum(constInfo: ConstInfo, waitCycles: List[Int], fileName: String, inDatas: Map[List[Int], Array[Int]],
               testII: Int, outputCycle: Int, outPortRefs: Map[Int, Array[Int]]): Unit ={
 

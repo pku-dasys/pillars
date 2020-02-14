@@ -7,6 +7,7 @@ object PillarsConfig {
 
   val MEM_DEPTH = 256
   val MEM_IN_WIDTH = 32
+  val MEM_OUT_WIDTH = 32
 
   val LOG_SCHEDULE_SIZE = 5.W
 

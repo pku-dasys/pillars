@@ -111,24 +111,24 @@ class TopModuleLSUAdresUnitTest(c : TopModule, bitstream : BigInt, waitCycles : 
 
   poke(c.io.startLSU(0), 1)
   poke(c.io.enqEnLSU(0), 1)
-  poke(c.io.inLSU(0).valid, 0)
+  poke(c.io.streamInLSU(0).valid, 0)
   poke(c.io.baseLSU(0), base)
   step(1)
 
   // push
   for (x <- inData) {
-    poke(c.io.inLSU(0).valid, 1)
-    expect(c.io.inLSU(0).valid, 1)
-    poke(c.io.inLSU(0).bits, x)
-    if (peek(c.io.inLSU(0).ready) == 0) {
-      while (peek(c.io.inLSU(0).ready) == 0) {
+    poke(c.io.streamInLSU(0).valid, 1)
+    expect(c.io.streamInLSU(0).valid, 1)
+    poke(c.io.streamInLSU(0).bits, x)
+    if (peek(c.io.streamInLSU(0).ready) == 0) {
+      while (peek(c.io.streamInLSU(0).ready) == 0) {
         step(1)
       }
     } else {
       step(1)
     } // exit condition: (c.io.in.ready === true.B) and step()
   }
-  poke(c.io.inLSU(0).valid, 0)
+  poke(c.io.streamInLSU(0).valid, 0)
 
   // exec
   while (peek(c.io.idleLSU(0)) == 0) {
@@ -167,24 +167,24 @@ class TopModuleCompleteAdresUnitTest(c : TopModule, bitstreams : Array[BigInt], 
   def enqData(numInLSU: Int, inData: Array[Int]): Unit ={
     poke(c.io.startLSU(numInLSU), 1)
     poke(c.io.enqEnLSU(numInLSU), 1)
-    poke(c.io.inLSU(numInLSU).valid, 0)
+    poke(c.io.streamInLSU(numInLSU).valid, 0)
     poke(c.io.baseLSU(numInLSU), base)
     step(1)
 
     // push
     for (x <- inData) {
-      poke(c.io.inLSU(numInLSU).valid, 1)
-      expect(c.io.inLSU(numInLSU).valid, 1)
-      poke(c.io.inLSU(numInLSU).bits, x)
-      if (peek(c.io.inLSU(numInLSU).ready) == 0) {
-        while (peek(c.io.inLSU(numInLSU).ready) == 0) {
+      poke(c.io.streamInLSU(numInLSU).valid, 1)
+      expect(c.io.streamInLSU(numInLSU).valid, 1)
+      poke(c.io.streamInLSU(numInLSU).bits, x)
+      if (peek(c.io.streamInLSU(numInLSU).ready) == 0) {
+        while (peek(c.io.streamInLSU(numInLSU).ready) == 0) {
           step(1)
         }
       } else {
         step(1)
       } // exit condition: (c.io.in.ready === true.B) and step()
     }
-    poke(c.io.inLSU(numInLSU).valid, 0)
+    poke(c.io.streamInLSU(numInLSU).valid, 0)
 
     // exec
     while (peek(c.io.idleLSU(numInLSU)) == 0) {
@@ -286,17 +286,17 @@ class LoadStoreUnitTester(c: LoadStoreUnit) extends PeekPokeTester(c) {
 
   // push
   for (x <- idata) {
-    poke(c.io.in.valid, 1)
-    poke(c.io.in.bits, x)
-    if (peek(c.io.in.ready) == 0) {
-      while (peek(c.io.in.ready) == 0) {
+    poke(c.io.streamIn.valid, 1)
+    poke(c.io.streamIn.bits, x)
+    if (peek(c.io.streamIn.ready) == 0) {
+      while (peek(c.io.streamIn.ready) == 0) {
         step(1)
       }
     } else {
       step(1)
     } // exit condition: (c.io.in.ready === true.B) and step()
   }
-  poke(c.io.in.valid, 0)
+  poke(c.io.streamIn.valid, 0)
 
   // exec
   while (peek(c.io.idle) == 0) {

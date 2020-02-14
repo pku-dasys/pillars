@@ -45,24 +45,24 @@ class ApplicationTester(c: TopModule) extends PeekPokeTester(c) {
   def enqData(numInLSU: Int, inData: Array[Int], base: Int): Unit ={
     poke(c.io.startLSU(numInLSU), 1)
     poke(c.io.enqEnLSU(numInLSU), 1)
-    poke(c.io.inLSU(numInLSU).valid, 0)
+    poke(c.io.streamInLSU(numInLSU).valid, 0)
     poke(c.io.baseLSU(numInLSU), base)
     step(1)
 
     // push
     for (x <- inData) {
-      poke(c.io.inLSU(numInLSU).valid, 1)
-      expect(c.io.inLSU(numInLSU).valid, 1)
-      poke(c.io.inLSU(numInLSU).bits, x)
-      if (peek(c.io.inLSU(numInLSU).ready) == 0) {
-        while (peek(c.io.inLSU(numInLSU).ready) == 0) {
+      poke(c.io.streamInLSU(numInLSU).valid, 1)
+      expect(c.io.streamInLSU(numInLSU).valid, 1)
+      poke(c.io.streamInLSU(numInLSU).bits, x)
+      if (peek(c.io.streamInLSU(numInLSU).ready) == 0) {
+        while (peek(c.io.streamInLSU(numInLSU).ready) == 0) {
           step(1)
         }
       } else {
         step(1)
       } // exit condition: (c.io.in.ready === true.B) and step()
     }
-    poke(c.io.inLSU(numInLSU).valid, 0)
+    poke(c.io.streamInLSU(numInLSU).valid, 0)
 
     // exec
     while (peek(c.io.idleLSU(numInLSU)) == 0) {
@@ -70,6 +70,30 @@ class ApplicationTester(c: TopModule) extends PeekPokeTester(c) {
     }
 
     poke(c.io.enqEnLSU(numInLSU), 0)
+  }
+  def deqData(numInLSU: Int, refArray: Array[Int], base: Int): Unit ={
+    // exec
+    poke(c.io.startLSU(numInLSU), 1)
+    poke(c.io.baseLSU(numInLSU), base)
+    poke(c.io.lenLSU(numInLSU), refArray.length)
+    poke(c.io.deqEnLSU(numInLSU), 1)
+    step(1)
+    poke(c.io.startLSU(numInLSU), 0)
+
+    for (i <- 0 until refArray.length) {
+      poke(c.io.streamOutLSU(numInLSU).ready, 1)
+      if (peek(c.io.streamOutLSU(numInLSU).valid) == 0) {
+        while (peek(c.io.streamOutLSU(numInLSU).valid) == 0) {
+          poke(c.io.streamOutLSU(numInLSU).ready, 1)
+          step(1)
+        }
+      }
+      expect(c.io.streamOutLSU(numInLSU).bits,  asUnsignedInt(refArray(i)))
+//      println(asUnsignedInt(refArray(i)).toString + " " + peek(c.io.streamOutLSU(numInLSU).bits).toString())
+      step(1)
+    }
+
+    poke(c.io.deqEnLSU(numInLSU), 0)
   }
 }
 
@@ -113,6 +137,14 @@ class SumTester(c: TopModule, appTestHelper: AppTestHelper)
 //      println(asUnsignedInt(i).toString + " " + peek(c.io.outs(ref._1)).toString())
       step(testII)
     }
+  }
+
+  //stream deq test
+  for(inDataItem <- appTestHelper.inDataMap){
+    val numInLSU = inDataItem._1(0)
+    val base = inDataItem._1(1)
+    val refArray = inDataItem._2
+    deqData(numInLSU, refArray, base)
   }
 
 }
