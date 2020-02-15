@@ -176,7 +176,7 @@ object HardwareExamples {
     arch("tile_0")("pe_1_1").getModule("alu0").setWaitCycle(1, 0)
     arch("tile_0")("pe_0_0").getModule("alu0").setWaitCycle(3, 0)
 
-    val waitCycles = arch.aluArray.map(alu => alu.asInstanceOf[ModuleTrait].getWaitCycles().toList).reduce(_++_)
+    val schedules = arch.getSchedules()
 
 
     //
@@ -191,7 +191,7 @@ object HardwareExamples {
     //      () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, 32)) {
     iotesters.Driver.execute(Array( "--no-check-comb-loops","-tgvo", "on", "-tbn" ,"verilator"),
       () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, dataWidth)) {
-      c => new TopModuleLSUAdresUnitTest(c, bitStream, waitCycles)
+      c => new TopModuleLSUAdresUnitTest(c, bitStream, schedules)
     }
   }
 
@@ -261,7 +261,7 @@ object HardwareExamples {
     //      arch("tile_0")("pe_0_2").getModule("alu0").setWaitCycle(1)
     arch("tile_0")("pe_1_1").getModule("alu0").setWaitCycle(4, 0)
 
-    val waitCycles = arch.aluArray.map(alu => alu.asInstanceOf[ModuleTrait].getWaitCycles().toList).reduce(_++_)
+    val schedules = arch.getSchedules()
 
 
     //
@@ -276,7 +276,7 @@ object HardwareExamples {
     // () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, 32)) {
     iotesters.Driver.execute(Array("--no-check-comb-loops","-tgvo", "on", "-tbn" ,"verilator"),
       () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, dataWidth)) {
-      c => new TopModuleCompleteAdresUnitTest(c, bitStreams, waitCycles)
+      c => new TopModuleCompleteAdresUnitTest(c, bitStreams, schedules)
     }
   }
 }

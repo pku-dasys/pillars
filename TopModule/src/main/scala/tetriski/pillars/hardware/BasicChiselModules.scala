@@ -1,6 +1,7 @@
 package tetriski.pillars.hardware
 
-import chisel3.util.{DeqIO, EnqIO, Enum, MixedVec, MuxLookup, is, log2Ceil, log2Up, switch}
+import chisel3.iotesters.PeekPokeTester
+import chisel3.util.{DeqIO, EnqIO, Enum, MixedVec, MuxLookup, ShiftRegister, is, log2Ceil, log2Up, switch}
 import chisel3.{Bundle, Input, Mem, Module, Output, UInt, Vec, _}
 import tetriski.pillars.testers.EnqMemWrapper
 import tetriski.pillars.util.{DeqMem, EnqMem, MemReadIO, MemWriteIO, SimpleDualPortSram}
@@ -8,7 +9,50 @@ import tetriski.pillars.hardware.PillarsConfig._
 
 import scala.collection.mutable.ArrayBuffer
 
-class ConfigController(configWidth : Int) extends Module {
+class RegNextN(w: Int) extends Module {
+  val io = IO(new Bundle {
+    val latency = Input(UInt((LOG_SCHEDULE_SIZE).W))
+    val input = Input(UInt(w.W))
+    val out = Output(UInt(w.W))
+  })
+  val regArray = RegInit(VecInit(Seq.fill(LOG_SCHEDULE_SIZE - 1)(0.U(w.W))))
+  regArray(0) := io.input
+  for(i <- 1 until LOG_SCHEDULE_SIZE - 1){
+    regArray(i) := regArray(i - 1)
+  }
+  when(io.latency > 0.U){
+    io.out := regArray(io.latency - 1.U)
+  }.otherwise{
+    io.out := io.input
+  }
+}
+
+class SyncScheduleController(w: Int) extends Module {
+  val io = IO(new Bundle {
+    val skewing = Input(UInt((LOG_SCHEDULE_SIZE + 1).W))
+    val input0 = Input(UInt(w.W))
+    val input1 = Input(UInt(w.W))
+    val skewedInput0 = Output(UInt(w.W))
+    val skewedInput1 = Output(UInt(w.W))
+  })
+
+  val regNextN = Module(new RegNextN(w))
+  val latency = io.skewing(LOG_SCHEDULE_SIZE - 1, 0)
+  val signal = io.skewing(LOG_SCHEDULE_SIZE, LOG_SCHEDULE_SIZE)
+  regNextN.io.latency := latency
+
+  when(signal === 1.U){
+    regNextN.io.input := io.input0
+    io.skewedInput0 := regNextN.io.out
+    io.skewedInput1 := io.input1
+  }.otherwise{
+    regNextN.io.input := io.input1
+    io.skewedInput1 := regNextN.io.out
+    io.skewedInput0 := io.input0
+  }
+}
+
+class ConfigController(configWidth: Int) extends Module {
   val io = IO(new Bundle {
     val en = Input(Bool())
     val II = Input(UInt(LOG_II_UPPER_BOUND.W))
@@ -55,13 +99,13 @@ class ConfigController(configWidth : Int) extends Module {
 class ScheduleController extends Module {
   val io = IO(new Bundle {
     val en = Input(Bool())
-    val waitCycle = Input(UInt(LOG_SCHEDULE_SIZE))
+    val waitCycle = Input(UInt(LOG_SCHEDULE_SIZE.W))
     val valid = Output(Bool())
   })
 
   val s_wait :: s_valid :: Nil = Enum(2)
   val state = RegInit(s_wait)
-  val cycleReg = Reg(UInt(LOG_SCHEDULE_SIZE))
+  val cycleReg = Reg(UInt(LOG_SCHEDULE_SIZE.W))
 
   io.valid := (cycleReg === io.waitCycle) && io.en
 
@@ -82,9 +126,10 @@ class ScheduleController extends Module {
 class MultiIIScheduleController extends Module {
   val io = IO(new Bundle {
     val en = Input(Bool())
-    val waitCycles = Input(Vec(II_UPPER_BOUND, UInt(LOG_SCHEDULE_SIZE)))
+    val schedules = Input(Vec(II_UPPER_BOUND, UInt((LOG_SCHEDULE_SIZE + LOG_SCHEDULE_SIZE + 1).W)))
     val II = Input(UInt(LOG_II_UPPER_BOUND.W))
     val valid = Output(Bool())
+    val skewing = Output(UInt((LOG_SCHEDULE_SIZE + 1).W))
   })
   val scheduleControllers = (0 until II_UPPER_BOUND).toArray.map(t => Module(new ScheduleController))
   val validRegs = RegInit(VecInit(Seq.fill(II_UPPER_BOUND)(false.B)))
@@ -93,11 +138,12 @@ class MultiIIScheduleController extends Module {
   for(i <- 0 until II_UPPER_BOUND){
     val scheduleController = scheduleControllers(i)
     scheduleController.io.en := io.en
-    scheduleController.io.waitCycle := io.waitCycles(i)
+    scheduleController.io.waitCycle := io.schedules(i)(LOG_SCHEDULE_SIZE - 1, 0)
     validRegs(i) := scheduleController.io.valid
   }
 
   io.valid := validRegs(cycleReg)
+  io.skewing := io.schedules(cycleReg)(LOG_SCHEDULE_SIZE + LOG_SCHEDULE_SIZE, LOG_SCHEDULE_SIZE)
 
   when(io.en === true.B){
     when(cycleReg === io.II - 1.U){
@@ -112,6 +158,7 @@ class MultiIIScheduleController extends Module {
 class Alu(funSelect: Int, w: Int) extends Module {
   val io = IO(new Bundle {
     val en = Input(Bool())
+    val skewing = Input(UInt((LOG_SCHEDULE_SIZE + 1).W))
     //port sequnces outs: 0: out
     //port sequnces inputs: 0: input_a, 1: input_b
     val configuration = Input(UInt(4.W))
@@ -145,8 +192,14 @@ class Alu(funSelect: Int, w: Int) extends Module {
     funSeq.toSeq
   }
 
-  val input_a = io.inputs(0)
-  val input_b = io.inputs(1)
+  val syncScheduleController = Module(new SyncScheduleController(w))
+  syncScheduleController.io.input0 := io.inputs(0)
+  syncScheduleController.io.input1 := io.inputs(1)
+
+  syncScheduleController.io.skewing := io.skewing
+
+  val input_a = syncScheduleController.io.skewedInput0
+  val input_b = syncScheduleController.io.skewedInput1
   val out = io.outs(0)
   val shamt = input_b(4, 0).asUInt
 
@@ -380,6 +433,8 @@ class DispatchT(wIn: Int, targets : List[Int]) extends Module {
 
 class LSMemWrapper(w : Int) extends Module {
   val io = IO(new Bundle {
+    val workEn = Input(Bool())
+
     val in = Flipped(EnqIO(UInt(MEM_IN_WIDTH.W)))
 
     val readMem = Flipped(new MemReadIO(MEM_DEPTH, w))
@@ -403,11 +458,16 @@ class LSMemWrapper(w : Int) extends Module {
   val deq_mem = Module(new DeqMem(mem.io.b, MEM_OUT_WIDTH))
 
   when(state === s_noop){
-    when(io.enqEn === true.B){
-      state := s_write_only
-      enq_mem.io.mem <> mem.io.a
-    }.otherwise{
+    when(io.workEn === true.B){
+      state := s_work
       io.writeMem <> mem.io.a
+    }.otherwise{
+      when(io.enqEn === true.B){
+        state := s_write_only
+        enq_mem.io.mem <> mem.io.a
+      }.otherwise{
+        io.writeMem <> mem.io.a
+      }
     }
     io.readMem <> mem.io.b
     deq_mem.io.mem.dout <> DontCare
@@ -486,6 +546,7 @@ class LoadStoreUnit(w : Int) extends Module{
     //0 for load, 1 for store
     val configuration = Input(UInt(1.W))
     val en = Input(Bool())
+    val skewing = Input(UInt((LOG_SCHEDULE_SIZE + 1).W))
 
     val streamIn = Flipped(EnqIO(UInt(MEM_IN_WIDTH.W)))
     val len = Input(UInt(log2Ceil(MEM_DEPTH).W))
@@ -509,9 +570,16 @@ class LoadStoreUnit(w : Int) extends Module{
   memWrapper.io.len <> io.len
   memWrapper.io.in <> io.streamIn
   memWrapper.io.out <> io.streamOut
+  memWrapper.io.workEn <> io.en
 
-  val addr = io.inputs(0)
-  val dataIn = io.inputs(1)
+  val syncScheduleController = Module(new SyncScheduleController(w))
+  syncScheduleController.io.input0 := io.inputs(0)
+  syncScheduleController.io.input1 := io.inputs(1)
+
+  syncScheduleController.io.skewing := io.skewing
+
+  val addr = syncScheduleController.io.skewedInput0
+  val dataIn = syncScheduleController.io.skewedInput1
   val out = io.outs(0)
 
   val readMem =  memWrapper.io.readMem

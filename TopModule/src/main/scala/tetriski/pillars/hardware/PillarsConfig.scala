@@ -9,7 +9,7 @@ object PillarsConfig {
   val MEM_IN_WIDTH = 32
   val MEM_OUT_WIDTH = 32
 
-  val LOG_SCHEDULE_SIZE = 5.W
+  val LOG_SCHEDULE_SIZE = 5
 
   val ALU_ADD = 0.U(4.W)
   val ALU_SUB = 1.U(4.W)

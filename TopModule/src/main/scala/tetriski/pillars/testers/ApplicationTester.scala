@@ -3,11 +3,19 @@ package tetriski.pillars.testers
 import chisel3.iotesters.PeekPokeTester
 import tetriski.pillars.hardware.TopModule
 
-class AppTestHelper(bitStreams: Array[BigInt], waitCycles: List[Int],
-                    testII: Int, outputCycle: Int, outPortRefs: Map[Int, Array[Int]]) {
+class AppTestHelper(bitStreams: Array[BigInt], schedules: List[Int],
+                    testII: Int) {
   var inDataMap = Map[List[Int], Array[Int]]()
   var outDataMap = Map[List[Int], Array[Int]]()
+  var outPortRefs = Map[Int, Array[Int]]()
+  var outputCycle = testII + 1
 
+  def setOutputCycle(arg : Int): Unit ={
+    outputCycle = arg
+  }
+  def setOutPortRefs(arg: Map[Int, Array[Int]]): Unit ={
+    outPortRefs = arg
+  }
   def getInData(numLSU: Int, base: Int): Array[Int] ={
     inDataMap(List(numLSU, base))
   }
@@ -23,11 +31,14 @@ class AppTestHelper(bitStreams: Array[BigInt], waitCycles: List[Int],
   def addOutData(numLSU: Int, base: Int, outData: Array[Int]): Unit ={
     outDataMap = outDataMap + (List(numLSU, base) -> outData)
   }
+  def addOutData(outDatas: Map[List[Int], Array[Int]]): Unit ={
+    outDataMap = outDataMap ++ outDatas
+  }
   def getBitStreams(): Array[BigInt] ={
     bitStreams
   }
-  def getWaitCycles(): List[Int] ={
-    waitCycles
+  def getSchedules(): List[Int] ={
+    schedules
   }
   def getTestII(): Int ={
     testII
@@ -112,14 +123,14 @@ class SumTester(c: TopModule, appTestHelper: AppTestHelper)
 
 
   val testII = appTestHelper.getTestII()
-  val waitCycles = appTestHelper.getWaitCycles()
+  val schedules = appTestHelper.getSchedules()
   val bitStreams = appTestHelper.getBitStreams()
 
   poke(c.io.en, 1)
   poke(c.io.II, testII)
 
-  for(i <- 0 until waitCycles.size){
-    poke(c.io.aluSchedule(i), waitCycles(i))
+  for(i <- 0 until schedules.size){
+    poke(c.io.schedules(i), schedules(i))
   }
 
   for(i <- 0 until testII){
@@ -140,10 +151,53 @@ class SumTester(c: TopModule, appTestHelper: AppTestHelper)
   }
 
   //stream deq test
-  for(inDataItem <- appTestHelper.inDataMap){
+  for(inDataItem <- appTestHelper.outDataMap){
     val numInLSU = inDataItem._1(0)
     val base = inDataItem._1(1)
     val refArray = inDataItem._2
+    deqData(numInLSU, refArray, base)
+  }
+
+}
+
+class VaddTester(c: TopModule, appTestHelper: AppTestHelper)
+  extends ApplicationTester(c) {
+
+  poke(c.io.en, 0)
+
+  //input data into LSU
+  for(inDataItem <- appTestHelper.inDataMap){
+    val numInLSU = inDataItem._1(0)
+    val base = inDataItem._1(1)
+    val inData = inDataItem._2
+    enqData(numInLSU, inData, base)
+  }
+
+
+  val testII = appTestHelper.getTestII()
+  val schedules = appTestHelper.getSchedules()
+  val bitStreams = appTestHelper.getBitStreams()
+
+  poke(c.io.en, 1)
+  poke(c.io.II, testII)
+
+  for(i <- 0 until schedules.size){
+    poke(c.io.schedules(i), schedules(i))
+  }
+
+  for(i <- 0 until testII){
+    poke(c.io.configuration, bitStreams(i))
+    step(1)
+  }
+
+  val outputCycle = appTestHelper.getOutputCycle()
+  step(outputCycle - testII)
+
+  //stream deq test
+  for(outDataItem <- appTestHelper.outDataMap){
+    val numInLSU = outDataItem._1(0)
+    val base = outDataItem._1(1)
+    val refArray = outDataItem._2
     deqData(numInLSU, refArray, base)
   }
 

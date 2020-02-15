@@ -3,7 +3,7 @@ package tetriski.pillars.testers
 import chisel3.iotesters
 import chisel3.assert
 import chisel3.iotesters.PeekPokeTester
-import tetriski.pillars.hardware.{DispatchT, LoadStoreUnit, Multiplexer, TopModule}
+import tetriski.pillars.hardware.{DispatchT, LoadStoreUnit, Multiplexer, SyncScheduleController, TopModule}
 import tetriski.pillars.testers.LoadStoreUnitVerilog.args
 import tetriski.pillars.util.SplitOrConcat
 
@@ -81,11 +81,10 @@ class TopModuleAdresUnitTest(c: TopModule, bitstream :BigInt) extends PeekPokeTe
   }
 }
 
-class TopModuleLSUAdresUnitTest(c : TopModule, bitstream : BigInt, waitCycles : List[Int]) extends PeekPokeTester(c) {
+class TopModuleLSUAdresUnitTest(c : TopModule, bitstream : BigInt, schedules : List[Int]) extends PeekPokeTester(c) {
   //MixedVec don't support c.io.inputs(0) in poke
   //  poke(c.input_0, 2)
   //  poke(c.input_1, 3)
-//  println(waitCycles.toString)
 
   val inData = (1 to 128).toArray
   poke(c.io.en, 0)
@@ -141,8 +140,8 @@ class TopModuleLSUAdresUnitTest(c : TopModule, bitstream : BigInt, waitCycles : 
   poke(c.io.en, 1)
   poke(c.io.configuration, bitstream)
 
-  for(i <- 0 until waitCycles.size){
-    poke(c.io.aluSchedule(i), waitCycles(i))
+  for(i <- 0 until schedules.size){
+    poke(c.io.schedules(i), schedules(i))
   }
 
 //  expect(c.io.configTest(0), 0)
@@ -161,7 +160,7 @@ class TopModuleLSUAdresUnitTest(c : TopModule, bitstream : BigInt, waitCycles : 
   }
 }
 
-class TopModuleCompleteAdresUnitTest(c : TopModule, bitstreams : Array[BigInt], waitCycles : List[Int])
+class TopModuleCompleteAdresUnitTest(c : TopModule, bitstreams : Array[BigInt], schedules : List[Int])
   extends PeekPokeTester(c) {
 
   def enqData(numInLSU: Int, inData: Array[Int]): Unit ={
@@ -223,8 +222,8 @@ class TopModuleCompleteAdresUnitTest(c : TopModule, bitstreams : Array[BigInt], 
   poke(c.io.en, 1)
   poke(c.io.II, 3)
 
-  for(i <- 0 until waitCycles.size){
-    poke(c.io.aluSchedule(i), waitCycles(i))
+  for(i <- 0 until schedules.size){
+    poke(c.io.schedules(i), schedules(i))
   }
 
   poke(c.io.configuration, bitstreams(0))
@@ -367,4 +366,22 @@ class MultiplexerUnitTester(c: Multiplexer) extends PeekPokeTester(c) {
 object MuxTest extends App {
   chisel3.Driver.execute(args, () => new Multiplexer(6, 32))
   iotesters.Driver.execute(Array( "--help","-tiwv"), () => new Multiplexer(6, 32)) { c => new MultiplexerUnitTester(c) }
+}
+
+class SyncScheduleControllerTester(c: SyncScheduleController) extends PeekPokeTester(c) {
+  poke(c.io.skewing, 3)
+  poke(c.io.input0, 2)
+  poke(c.io.input1, 3)
+
+  for(i <- 0 until 10){
+    poke(c.io.input0, i)
+    poke(c.io.input1, i + 1)
+    println(peek(c.io.skewedInput0).toString())
+    println(peek(c.io.skewedInput1).toString())
+    step(1)
+  }
+}
+
+object SkewTest extends App {
+  iotesters.Driver.execute(args, () => new SyncScheduleController(32)) { c => new SyncScheduleControllerTester(c) }
 }
