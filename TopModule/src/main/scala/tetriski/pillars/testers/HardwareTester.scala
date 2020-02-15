@@ -3,6 +3,7 @@ package tetriski.pillars.testers
 import chisel3.iotesters
 import chisel3.assert
 import chisel3.iotesters.PeekPokeTester
+import tetriski.pillars.hardware.PillarsConfig.LOG_SCHEDULE_SIZE
 import tetriski.pillars.hardware.{DispatchT, LoadStoreUnit, Multiplexer, SyncScheduleController, TopModule}
 import tetriski.pillars.testers.LoadStoreUnitVerilog.args
 import tetriski.pillars.util.SplitOrConcat
@@ -18,7 +19,8 @@ class TopModule2PEUnitTest(c: TopModule) extends PeekPokeTester(c) {
   step(1)
 
   //010 001 001 0001 010 001 001 0000// PE1(13) PE0(13)
-  //PE0: 010 001 110 0000 //  mux0(3) mux1(3) register(3)(rf(1) -> out1(output), rf(1) -> out0(to self), input -> rf(0)) alu(4)
+  //PE0: 010 001 110 0000 //  mux0(3) mux1(3) register(3)(rf(1) -> out1(output),
+  // rf(1) -> out0(to self), input -> rf(0)) alu(4)
   //PE1: 010 001 110 0001
   //0100011100000
   //save (a+b) in pe0.rf(0), to next cycle //5
@@ -74,8 +76,9 @@ class TopModuleAdresUnitTest(c: TopModule, bitstream :BigInt) extends PeekPokeTe
   for( i <- 0 until 40){
 //    println("cycle "+ i.toString)
     poke(c.input_1, i)
-    if(i > 2)
-    expect(c.out, 5 * (i - 2 + 4))
+    if(i > 2) {
+      expect(c.out, 5 * (i - 2 + 4))
+    }
 //    println((5 * (i - 2 + 4)).toString + " " + peek(c.out).toString())
     step(1)
   }
@@ -140,9 +143,18 @@ class TopModuleLSUAdresUnitTest(c : TopModule, bitstream : BigInt, schedules : L
   poke(c.io.en, 1)
   poke(c.io.configuration, bitstream)
 
-  for(i <- 0 until schedules.size){
-    poke(c.io.schedules(i), schedules(i))
+  var schedulesBigInt: BigInt = 0
+  for(sche <- schedules.reverse){
+    schedulesBigInt = (schedulesBigInt << LOG_SCHEDULE_SIZE * 2 + 1) + sche
   }
+  schedulesBigInt
+
+  poke(c.io.schedules, schedulesBigInt)
+//  for(i <- 0 until schedules.size){
+//    poke(c.io.schedules(i), schedules(i))
+//  }
+
+
 
 //  expect(c.io.configTest(0), 0)
 //  expect(c.io.configTest(1), 200325)
@@ -222,9 +234,13 @@ class TopModuleCompleteAdresUnitTest(c : TopModule, bitstreams : Array[BigInt], 
   poke(c.io.en, 1)
   poke(c.io.II, 3)
 
-  for(i <- 0 until schedules.size){
-    poke(c.io.schedules(i), schedules(i))
+  var schedulesBigInt: BigInt = 0
+  for(sche <- schedules.reverse){
+    schedulesBigInt = (schedulesBigInt << LOG_SCHEDULE_SIZE * 2 + 1) + sche
   }
+  schedulesBigInt
+
+  poke(c.io.schedules, schedulesBigInt)
 
   poke(c.io.configuration, bitstreams(0))
 
