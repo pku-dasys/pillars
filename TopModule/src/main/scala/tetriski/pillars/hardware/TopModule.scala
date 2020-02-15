@@ -60,8 +60,10 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
     val idleLSU = Output(Vec(LSUnitNum, Bool()))
 
     val en = Input(Bool())
-    val schedules = Input(Vec((aluNum + LSUnitNum) * II_UPPER_BOUND,
-      UInt((LOG_SCHEDULE_SIZE + LOG_SCHEDULE_SIZE + 1).W)))
+//    val schedules = Input(Vec((aluNum + LSUnitNum) * II_UPPER_BOUND,
+//      UInt((LOG_SCHEDULE_SIZE + LOG_SCHEDULE_SIZE + 1).W)))
+    val schedules = Input(UInt((((aluNum + LSUnitNum) * II_UPPER_BOUND) *
+      (LOG_SCHEDULE_SIZE + LOG_SCHEDULE_SIZE + 1)).W))
     val II = Input(UInt(LOG_II_UPPER_BOUND.W))
 
     //port sequnces outs: 0: out
@@ -109,6 +111,14 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
 //  currentNum += PENum
 //
 
+  val moduleScheduleBits = (0 until aluNum * II_UPPER_BOUND)
+    .map(i => LOG_SCHEDULE_SIZE * 2 + 1).toList::: (0 until LSUnitNum * II_UPPER_BOUND)
+    .map(i => LOG_SCHEDULE_SIZE * 2 + 1).toList
+  val totalScheduleBits = moduleScheduleBits.reduce(_ + _)
+  val scheduleDispatch = Module(new Dispatch(totalScheduleBits, moduleScheduleBits))
+  scheduleDispatch.io.configuration := io.schedules
+  scheduleDispatch.io.en := io.en
+
   val alus = (0 until aluNum).toArray.map(t => Module(new Alu(moduleInfos.getParams(t + currentNum)(0),
     moduleInfos.getParams(t + currentNum)(1))))
   val aluScheduleControllers = (0 until aluNum).toArray.map(t => Module(new MultiIIScheduleController))
@@ -118,7 +128,7 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
     aluScheduleController.io.en <> io.en
     aluScheduleController.io.II <> io.II
     for(j <- 0 until II_UPPER_BOUND){
-      aluScheduleController.io.schedules(j) <> io.schedules(i * II_UPPER_BOUND + j)
+      aluScheduleController.io.schedules(j) <> scheduleDispatch.io.outs(i * II_UPPER_BOUND + j)
     }
     alu.io.en <> aluScheduleController.io.valid
     alu.io.skewing <> aluScheduleController.io.skewing
@@ -178,7 +188,7 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
     LSUnitScheduleController.io.en <> io.en
     LSUnitScheduleController.io.II <> io.II
     for(j <- 0 until II_UPPER_BOUND){
-      LSUnitScheduleController.io.schedules(j) <> io.schedules((i + aluNum) * II_UPPER_BOUND + j)
+      LSUnitScheduleController.io.schedules(j) <> scheduleDispatch.io.outs((i + aluNum) * II_UPPER_BOUND + j)
     }
     lsu.io.en <> LSUnitScheduleController.io.valid
     lsu.io.skewing <> LSUnitScheduleController.io.skewing

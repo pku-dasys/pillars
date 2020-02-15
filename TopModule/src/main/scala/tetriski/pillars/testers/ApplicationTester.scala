@@ -2,6 +2,7 @@ package tetriski.pillars.testers
 
 import chisel3.iotesters.PeekPokeTester
 import tetriski.pillars.hardware.TopModule
+import tetriski.pillars.hardware.PillarsConfig._
 
 class AppTestHelper(bitStreams: Array[BigInt], schedules: List[Int],
                     testII: Int) {
@@ -39,6 +40,13 @@ class AppTestHelper(bitStreams: Array[BigInt], schedules: List[Int],
   }
   def getSchedules(): List[Int] ={
     schedules
+  }
+  def getSchedulesBigInt(): BigInt ={
+    var ret: BigInt = 0
+    for(sche <- schedules.reverse){
+      ret = (ret << LOG_SCHEDULE_SIZE * 2 + 1) + sche
+    }
+    ret
   }
   def getTestII(): Int ={
     testII
@@ -123,15 +131,17 @@ class SumTester(c: TopModule, appTestHelper: AppTestHelper)
 
 
   val testII = appTestHelper.getTestII()
-  val schedules = appTestHelper.getSchedules()
+  val schedules = appTestHelper.getSchedulesBigInt()
   val bitStreams = appTestHelper.getBitStreams()
 
   poke(c.io.en, 1)
   poke(c.io.II, testII)
 
-  for(i <- 0 until schedules.size){
-    poke(c.io.schedules(i), schedules(i))
-  }
+//  for(i <- 0 until schedules.size){
+//    poke(c.io.schedules(i), schedules(i))
+//  }
+
+  poke(c.io.schedules, schedules)
 
   for(i <- 0 until testII){
     poke(c.io.configuration, bitStreams(i))
@@ -175,15 +185,16 @@ class VaddTester(c: TopModule, appTestHelper: AppTestHelper)
 
 
   val testII = appTestHelper.getTestII()
-  val schedules = appTestHelper.getSchedules()
+  val schedules = appTestHelper.getSchedulesBigInt()
   val bitStreams = appTestHelper.getBitStreams()
 
   poke(c.io.en, 1)
   poke(c.io.II, testII)
 
-  for(i <- 0 until schedules.size){
-    poke(c.io.schedules(i), schedules(i))
-  }
+//  for(i <- 0 until schedules.size){
+//    poke(c.io.schedules(i), schedules(i))
+//  }
+  poke(c.io.schedules, schedules)
 
   for(i <- 0 until testII){
     poke(c.io.configuration, bitStreams(i))
