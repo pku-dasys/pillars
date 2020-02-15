@@ -60,7 +60,8 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
     val idleLSU = Output(Vec(LSUnitNum, Bool()))
 
     val en = Input(Bool())
-    val aluSchedule = Input(Vec(aluNum * II_UPPER_BOUND, UInt(LOG_SCHEDULE_SIZE)))
+    val schedules = Input(Vec((aluNum + LSUnitNum) * II_UPPER_BOUND,
+      UInt((LOG_SCHEDULE_SIZE + LOG_SCHEDULE_SIZE + 1).W)))
     val II = Input(UInt(LOG_II_UPPER_BOUND.W))
 
     //port sequnces outs: 0: out
@@ -117,9 +118,10 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
     aluScheduleController.io.en <> io.en
     aluScheduleController.io.II <> io.II
     for(j <- 0 until II_UPPER_BOUND){
-      aluScheduleController.io.waitCycles(j) <> io.aluSchedule(i * II_UPPER_BOUND + j)
+      aluScheduleController.io.schedules(j) <> io.schedules(i * II_UPPER_BOUND + j)
     }
     alu.io.en <> aluScheduleController.io.valid
+    alu.io.skewing <> aluScheduleController.io.skewing
   }
   currentNum += aluNum
 
@@ -137,8 +139,8 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
   currentNum += RFNum
 
 
-  val Muxs = (0 until MuxNum).toArray
-    .map(t => Module(new Multiplexer(moduleInfos.getParams(t + currentNum)(0), moduleInfos.getParams(t + currentNum)(1))))
+  val Muxs = (0 until MuxNum).toArray.map(t =>
+    Module(new Multiplexer(moduleInfos.getParams(t + currentNum)(0), moduleInfos.getParams(t + currentNum)(1))))
   //println("2110", moduleInfos.getParams(11 + currentNum))
   for(mux <- Muxs){
     mux.io.en <> io.en
@@ -156,18 +158,30 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
 
   val LSUs = (0 until LSUnitNum).toArray
     .map(t => Module(new LoadStoreUnit(moduleInfos.getParams(t + currentNum)(0))))
-  for(lsu <- LSUs){
-    lsu.io.en <> io.en
-  }
+  val LSUnitScheduleControllers = (0 until LSUnitNum).toArray.map(t => Module(new MultiIIScheduleController))
+//  for(lsu <- LSUs){
+//    lsu.io.en <> io.en
+//  }
   for(i <- 0 until LSUnitNum){
-    LSUs(i).io.base <> io.baseLSU(i)
-    LSUs(i).io.len <> io.lenLSU(i)
-    LSUs(i).io.start <> io.startLSU(i)
-    LSUs(i).io.idle <> io.idleLSU(i)
-    LSUs(i).io.enqEn <> io.enqEnLSU(i)
-    LSUs(i).io.deqEn <> io.deqEnLSU(i)
-    LSUs(i).io.streamIn <> io.streamInLSU(i)
-    LSUs(i).io.streamOut <> io.streamOutLSU(i)
+    val lsu = LSUs(i)
+    lsu.io.base <> io.baseLSU(i)
+    lsu.io.len <> io.lenLSU(i)
+    lsu.io.start <> io.startLSU(i)
+    lsu.io.idle <> io.idleLSU(i)
+    lsu.io.enqEn <> io.enqEnLSU(i)
+    lsu.io.deqEn <> io.deqEnLSU(i)
+    lsu.io.streamIn <> io.streamInLSU(i)
+    lsu.io.streamOut <> io.streamOutLSU(i)
+
+
+    val LSUnitScheduleController = LSUnitScheduleControllers(i)
+    LSUnitScheduleController.io.en <> io.en
+    LSUnitScheduleController.io.II <> io.II
+    for(j <- 0 until II_UPPER_BOUND){
+      LSUnitScheduleController.io.schedules(j) <> io.schedules((i + aluNum) * II_UPPER_BOUND + j)
+    }
+    lsu.io.en <> LSUnitScheduleController.io.valid
+    lsu.io.skewing <> LSUnitScheduleController.io.skewing
   }
   currentNum += LSUnitNum
 

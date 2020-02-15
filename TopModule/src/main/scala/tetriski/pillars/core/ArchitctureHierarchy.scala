@@ -103,9 +103,14 @@ class ArchitctureHierarchy extends BlockTrait {
     writer.close()
   }
 
-  def resetWaitCycles(): Unit ={
+  def resetSchedules(): Unit ={
     for(alu <- aluArray){
-      alu.asInstanceOf[OpAlu].resetWaitCycle()
+      alu.asInstanceOf[ModuleTrait].resetWaitCycle()
+      alu.asInstanceOf[ModuleTrait].resetSkew()
+    }
+    for(lsu <- LSUsArray){
+      lsu.asInstanceOf[ModuleTrait].resetWaitCycle()
+      lsu.asInstanceOf[ModuleTrait].resetSkew()
     }
   }
 
@@ -228,5 +233,11 @@ class ArchitctureHierarchy extends BlockTrait {
     }
     retBitstreams.toArray
 //    println(infoArray)
+  }
+
+  def getSchedules(): List[Int] ={
+    var schedules = aluArray.map(alu => alu.asInstanceOf[ModuleTrait].getSchedule().toList).reduce(_++_)
+    schedules = schedules ++ LSUsArray.map(lsu => lsu.asInstanceOf[ModuleTrait].getSchedule().toList).reduce(_++_)
+    schedules
   }
 }

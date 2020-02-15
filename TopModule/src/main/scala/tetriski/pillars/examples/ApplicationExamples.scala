@@ -4,7 +4,7 @@ import chisel3.iotesters
 import tetriski.pillars.archlib.TileCompleteBlock
 import tetriski.pillars.core.{ArchitctureHierarchy, Connect, ConstInfo, HardwareGeneration, ModuleTrait}
 import tetriski.pillars.hardware.TopModule
-import tetriski.pillars.testers.{AppTestHelper, SumTester}
+import tetriski.pillars.testers.{AppTestHelper, SumTester, VaddTester}
 
 object ApplicationExamples {
 
@@ -45,6 +45,50 @@ object ApplicationExamples {
 
   val dataWidth = 32
 
+  def exampleVadd(): Unit ={
+    //********     II = 1     ********
+    var outputCycle = 110
+    var testII = 1
+    var constInfo = new ConstInfo(testII)
+    constInfo.addConst(arch("tile_0")("pe_3_0").getModule("const0").getModuleID(), 0, 1)
+    constInfo.addConst(arch("tile_0")("pe_3_3").getModule("const0").getModuleID(), 0, 1)
+    constInfo.addConst(arch("tile_0")("pe_1_0").getModule("const0").getModuleID(), 0, 1)
+    constInfo.addConst(arch("tile_0")("pe_2_0").getModule("const0").getModuleID(), 0, 1)
+
+    var fileName = "app_mapping_results/vadd_ii1.txt"
+
+    arch.resetSchedules()
+    arch("tile_0")("pe_2_2").getModule("alu0").setSkew(2, 0)
+    arch("tile_0")("lsu_3").getModule("loadStoreUnit").setSkew(-3, 0)
+    var schedules = arch.getSchedules()
+
+    var inData0 = (50 to 150).toArray
+    var inData1 = (100 to 200).toArray
+
+    var numLSU0 = 0
+    var numLSU1 = 1
+    var outNumLSU = 3
+    var base = 0
+    var inDatas = Map(
+      List(numLSU0, base) -> inData0,
+      List(numLSU1, base) -> inData1)
+
+//    var outPortNum = 2
+    var refList = List[Int]()
+    var ref = 0
+    for(i <- 0 until inData0.size){
+      ref = inData0(i) + inData1(i)
+      refList = refList :+ ref
+    }
+
+    var refOutDatas = Map(List(outNumLSU, base) -> refList.toArray)
+
+//    var outPortRefs = Map(outPortNum -> refList.toArray)
+
+    testVadd(constInfo, schedules, fileName, inDatas, refOutDatas, testII, outputCycle)
+    //********     II = 1     ********
+  }
+
   def exampleSum(): Unit ={
 
     //********     II = 1     ********
@@ -56,9 +100,9 @@ object ApplicationExamples {
 
     var fileName = "app_mapping_results/sum_ii1.txt"
 
-    arch.resetWaitCycles()
+    arch.resetSchedules()
     arch("tile_0")("pe_0_0").getModule("alu0").setWaitCycle(2, 0)
-    var waitCycles = arch.aluArray.map(alu => alu.asInstanceOf[ModuleTrait].getWaitCycles().toList).reduce(_++_)
+    var schedules = arch.getSchedules()
 
     var inData = (0 to 100).map(i => scala.util.Random.nextInt()).toArray
 
@@ -76,7 +120,7 @@ object ApplicationExamples {
 
     var outPortRefs = Map(outPortNum -> refList.toArray)
 
-    testSum(constInfo, waitCycles, fileName, inDatas, testII, outputCycle, outPortRefs)
+    testSum(constInfo, schedules, fileName, inDatas, testII, outputCycle, outPortRefs)
     //********     II = 1     ********
 
     //********     II = 2     ********
@@ -88,9 +132,10 @@ object ApplicationExamples {
 
     fileName = "app_mapping_results/sum_ii2.txt"
 
-    arch.resetWaitCycles()
+    arch.resetSchedules()
     arch("tile_0")("pe_1_0").getModule("alu0").setWaitCycle(5, 1)
-    waitCycles = arch.aluArray.map(alu => alu.asInstanceOf[ModuleTrait].getWaitCycles().toList).reduce(_++_)
+//    println(arch("tile_0")("pe_1_0").getModule("alu0").getSchedule())
+    schedules = arch.getSchedules()
 
     inData = (0 to 100).map(i => scala.util.Random.nextInt()).toArray
 
@@ -108,7 +153,7 @@ object ApplicationExamples {
 
     outPortRefs = Map(outPortNum -> refList.toArray)
 
-    testSum(constInfo, waitCycles, fileName, inDatas, testII, outputCycle, outPortRefs)
+    testSum(constInfo, schedules, fileName, inDatas, testII, outputCycle, outPortRefs)
     //********     II = 2     ********
 
 
@@ -121,9 +166,9 @@ object ApplicationExamples {
 
     fileName = "app_mapping_results/sum_ii3.txt"
 
-    arch.resetWaitCycles()
+    arch.resetSchedules()
     arch("tile_0")("pe_1_1").getModule("alu0").setWaitCycle(6, 0)
-    waitCycles = arch.aluArray.map(alu => alu.asInstanceOf[ModuleTrait].getWaitCycles().toList).reduce(_++_)
+    schedules = arch.getSchedules()
 
     inData = (0 to 100).map(i => scala.util.Random.nextInt()).toArray
 
@@ -141,23 +186,41 @@ object ApplicationExamples {
 
     outPortRefs = Map(outPortNum -> refList.toArray)
 
-    testSum(constInfo, waitCycles, fileName, inDatas, testII, outputCycle, outPortRefs)
+    testSum(constInfo, schedules, fileName, inDatas, testII, outputCycle, outPortRefs)
     //********     II = 3     ********
   }
 
-  def testSum(constInfo: ConstInfo, waitCycles: List[Int], fileName: String, inDatas: Map[List[Int], Array[Int]],
+  def testSum(constInfo: ConstInfo, schedules: List[Int], fileName: String, inDatas: Map[List[Int], Array[Int]],
               testII: Int, outputCycle: Int, outPortRefs: Map[Int, Array[Int]]): Unit ={
 
     val bitStreams = arch.genConfig(fileName, testII, constInfo)
 
-    val appTestHelper = new AppTestHelper(bitStreams, waitCycles,
-      testII, outputCycle, outPortRefs)
+    val appTestHelper = new AppTestHelper(bitStreams, schedules, testII)
 
     appTestHelper.addInData(inDatas)
+    appTestHelper.setOutPortRefs(outPortRefs)
+    appTestHelper.setOutputCycle(outputCycle)
 
     iotesters.Driver.execute(Array("--no-check-comb-loops","-tgvo", "on", "-tbn" ,"verilator"),
       () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, dataWidth)) {
       c => new SumTester(c, appTestHelper)
+    }
+  }
+
+  def testVadd(constInfo: ConstInfo, schedules: List[Int], fileName: String, inDatas: Map[List[Int], Array[Int]],
+               refOutDatas: Map[List[Int], Array[Int]], testII: Int, outputCycle: Int): Unit ={
+    val bitStreams = arch.genConfig(fileName, testII, constInfo)
+
+
+    val appTestHelper = new AppTestHelper(bitStreams, schedules, testII)
+
+    appTestHelper.addInData(inDatas)
+    appTestHelper.addOutData(refOutDatas)
+    appTestHelper.setOutputCycle(outputCycle)
+
+    iotesters.Driver.execute(Array("--no-check-comb-loops","-tgvo", "on", "-tbn" ,"verilator"),
+      () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, dataWidth)) {
+      c => new VaddTester(c, appTestHelper)
     }
   }
 }

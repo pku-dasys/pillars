@@ -10,6 +10,7 @@ object Pillars {
     HardwareExamples.exampleCompleteAdres()
 
     ApplicationExamples.exampleSum()
+    ApplicationExamples.exampleVadd()
 
   }
 }

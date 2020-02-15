@@ -16,6 +16,7 @@ trait ModuleBasic {
   var configBit = 0
   var configArray = new ArrayBuffer[Int]
   var waitCycles = new Array[Int](II_UPPER_BOUND)
+  var skews = new Array[Int](II_UPPER_BOUND)
 
   def setModuleID(arg: Int): Unit = {
     moduleID = arg
@@ -54,9 +55,19 @@ trait ModuleBasic {
     waitCycles(II) = waitCycle
   }
 
+  def setSkew(skew: Int, II: Int): Unit ={
+    skews(II) = skew
+  }
+
   def resetWaitCycle(): Unit ={
     for(i <- 0 until II_UPPER_BOUND){
       waitCycles(i) = 0
+    }
+  }
+
+  def resetSkew(): Unit ={
+    for(i <- 0 until II_UPPER_BOUND){
+      skews(i) = 0
     }
   }
 
@@ -90,6 +101,20 @@ trait ModuleBasic {
 
   def getWaitCycles(): Array[Int] = {
     waitCycles
+  }
+
+  def getSchedule(): Array[Int] = {
+    var ret = new Array[Int](II_UPPER_BOUND)
+    for(i <- 0 until II_UPPER_BOUND){
+      var skew = skews(i)
+      if(skew < 0){
+        skew = Math.pow(2, LOG_SCHEDULE_SIZE).toInt - skew
+      }
+      val waitCycle = waitCycles(i)
+      val sche = (skew << LOG_SCHEDULE_SIZE) + waitCycle
+      ret(i) = sche
+    }
+    ret
   }
 
 
