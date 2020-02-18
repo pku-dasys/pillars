@@ -5,6 +5,7 @@ import chisel3.{Bundle, Input, Module, Output, UInt, _}
 
 import scala.collection.mutable.ArrayBuffer
 import tetriski.pillars.hardware.PillarsConfig._
+import tetriski.pillars.testers.AppTestHelper
 
 //configBits is the last param
 class PillarsModuleInfo(moduleNums: List[Int], params : List[List[Int]], inPortNum : Int, outPortNum : Int) {
@@ -24,7 +25,7 @@ class PillarsModuleInfo(moduleNums: List[Int], params : List[List[Int]], inPortN
   }
 
   def getTotalBits():Int = {
-    params.toArray.map(t => t(t.length-1)).reduce(_+_)
+    params.toArray.map(t => t(t.length - 1)).reduce(_ + _)
     }
 
   def getInPortNum : Int = {
@@ -302,4 +303,78 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
 }
 
 
+class TopModuleWrapper(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], List[List[Int]]],
+                       val configList : List[List[List[Int]]], w: Int, appTestHelper: AppTestHelper)
+  extends Module {
 
+  val topModule = Module(new TopModule(moduleInfos, connect, configList, w))
+  val LSUnitNum = topModule.LSUnitNum
+
+  val io = IO(new Bundle {
+    val streamInLSU = MixedVec((0 until LSUnitNum).map(p => Flipped(EnqIO( UInt(MEM_IN_WIDTH.W)))))
+    val streamOutLSU = MixedVec((0 until LSUnitNum).map(p => Flipped(DeqIO(UInt(MEM_OUT_WIDTH.W)))))
+    val baseLSU = Input(Vec(LSUnitNum, UInt(log2Ceil(MEM_DEPTH).W)))
+    val lenLSU = Input(Vec(LSUnitNum, UInt(log2Ceil(MEM_DEPTH).W)))
+
+    val startLSU = Input(Vec(LSUnitNum, Bool()))
+    val enqEnLSU = Input(Vec(LSUnitNum, Bool()))
+    val deqEnLSU = Input(Vec(LSUnitNum, Bool()))
+    val idleLSU = Output(Vec(LSUnitNum, Bool()))
+
+    val en = Input(Bool())
+    val II = Input(UInt(LOG_II_UPPER_BOUND.W))
+
+    val inputs = Input(MixedVec((1 to topModule.moduleInfos.getInPortNum) map { i => UInt(w.W) }))
+    val outs = Output(MixedVec((1 to topModule.moduleInfos.getOutPortNum) map { i => UInt(w.W) }))
+  })
+
+  topModule.io.en <> io.en
+  topModule.io.II <> io.II
+  topModule.io.streamInLSU <> io.streamInLSU
+  topModule.io.streamOutLSU <> io.streamOutLSU
+  topModule.io.baseLSU <> io.baseLSU
+  topModule.io.lenLSU <> io.lenLSU
+
+  topModule.io.startLSU <> io.startLSU
+  topModule.io.enqEnLSU <> io.enqEnLSU
+  topModule.io.deqEnLSU <> io.deqEnLSU
+  topModule.io.idleLSU <> io.idleLSU
+
+  topModule.io.inputs <> io.inputs
+  topModule.io.outs <> io.outs
+
+  val cycleReg = RegInit(0.U(LOG_II_UPPER_BOUND.W))
+
+  val schedules = appTestHelper.getSchedulesBigInt()
+  val bitStreams = appTestHelper.getBitStreams()
+
+  val schedulesInit =schedules.U(topModule.io.schedules.getWidth.W)
+  val bitStreamsInit = bitStreams.map(t => t.U(topModule.io.schedules.getWidth.W))
+
+  val scheduleROM = VecInit(schedulesInit)
+  val bitStreamsROM = VecInit(bitStreamsInit)
+
+  val s_wait :: s_input_config :: s_work :: Nil = Enum(3)
+  val state = RegInit(s_wait)
+
+  topModule.io.schedules := scheduleROM(0)
+  topModule.io.configuration := bitStreamsROM(cycleReg)
+
+  when(state === s_wait){
+    when(io.en === true.B){
+      state := s_input_config
+      cycleReg := cycleReg + 1.U
+    }
+  }.elsewhen(state === s_input_config){
+    when(cycleReg === io.II - 1.U){
+      state := s_work
+    }.otherwise{
+      cycleReg := cycleReg + 1.U
+    }
+  }.otherwise{
+    when(io.en === false.B){
+      state := s_wait
+    }
+  }
+
+  }
