@@ -1,10 +1,10 @@
 package tetriski.pillars.examples
 
-import chisel3.iotesters
+import chisel3.{Module, iotesters}
 import tetriski.pillars.archlib.TileCompleteBlock
 import tetriski.pillars.core.{ArchitctureHierarchy, Connect, ConstInfo, HardwareGeneration, ModuleTrait}
-import tetriski.pillars.hardware.TopModule
-import tetriski.pillars.testers.{AppTestHelper, SumTester, VaddTester}
+import tetriski.pillars.hardware.{TopModule, TopModuleWrapper}
+import tetriski.pillars.testers.{AppTestHelper, SumTester, SumWrapperTester, VaddTester, VaddWrapperTester}
 
 object ApplicationExamples {
 
@@ -29,7 +29,7 @@ object ApplicationExamples {
 
   arch.init()
 
-  val targetII = 1
+  val targetII = 2
 
   arch.blockMap("tile_0").dumpMRRG(targetII)
 
@@ -187,7 +187,31 @@ object ApplicationExamples {
     outPortRefs = Map(outPortNum -> refList.toArray)
 
     testSum(constInfo, schedules, fileName, inDatas, testII, outputCycle, outPortRefs)
+//    testSumWrapper(constInfo, schedules, fileName, inDatas, testII, outputCycle, outPortRefs)
     //********     II = 3     ********
+  }
+
+  def testSumWrapper(constInfo: ConstInfo, schedules: List[Int], fileName: String, inDatas: Map[List[Int], Array[Int]],
+              testII: Int, outputCycle: Int, outPortRefs: Map[Int, Array[Int]]): Unit ={
+
+    val bitStreams = arch.genConfig(fileName, testII, constInfo)
+
+    val appTestHelper = new AppTestHelper(bitStreams, schedules, testII)
+
+    appTestHelper.addInData(inDatas)
+    appTestHelper.setOutPortRefs(outPortRefs)
+    appTestHelper.setOutputCycle(outputCycle)
+
+    //Verilog generation
+    chisel3.Driver.execute(Array("--no-check-comb-loops", "-td","WrapperTest"),
+      () => new TopModuleWrapper(cp.pillarsModuleInfo, cp.connectMap,
+        cp.configList, dataWidth, appTestHelper))
+
+    iotesters.Driver.execute(Array("--no-check-comb-loops","-tgvo", "on", "-tbn" ,"verilator"),
+      () => new TopModuleWrapper(cp.pillarsModuleInfo, cp.connectMap, cp.configList, dataWidth, appTestHelper)) {
+      c => new SumWrapperTester(c, appTestHelper)
+    }
+
   }
 
   def testSum(constInfo: ConstInfo, schedules: List[Int], fileName: String, inDatas: Map[List[Int], Array[Int]],
@@ -200,6 +224,7 @@ object ApplicationExamples {
     appTestHelper.addInData(inDatas)
     appTestHelper.setOutPortRefs(outPortRefs)
     appTestHelper.setOutputCycle(outputCycle)
+
 
     iotesters.Driver.execute(Array("--no-check-comb-loops","-tgvo", "on", "-tbn" ,"verilator"),
       () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, dataWidth)) {

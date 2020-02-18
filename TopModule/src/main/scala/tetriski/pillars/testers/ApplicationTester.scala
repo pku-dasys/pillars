@@ -1,7 +1,9 @@
 package tetriski.pillars.testers
 
+import chisel3.{Bool, Bundle, Flipped, Input, Output, UInt, Vec}
 import chisel3.iotesters.PeekPokeTester
-import tetriski.pillars.hardware.TopModule
+import chisel3.util.{DeqIO, EnqIO, MixedVec, log2Ceil}
+import tetriski.pillars.hardware.{TopModule, TopModuleWrapper}
 import tetriski.pillars.hardware.PillarsConfig._
 
 class AppTestHelper(bitStreams: Array[BigInt], schedules: List[Int],
