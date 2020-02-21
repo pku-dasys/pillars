@@ -47,7 +47,7 @@ object ApplicationExamples {
 
   def exampleVadd(): Unit ={
     //********     II = 1     ********
-    var outputCycle = 110
+    var outputCycle = 220
     var testII = 1
     var constInfo = new ConstInfo(testII)
     constInfo.addConst(arch("tile_0")("pe_3_0").getModule("const0").getModuleID(), 0, 1)
@@ -62,8 +62,8 @@ object ApplicationExamples {
     arch("tile_0")("lsu_3").getModule("loadStoreUnit").setSkew(-3, 0)
     var schedules = arch.getSchedules()
 
-    var inData0 = (50 to 150).toArray
-    var inData1 = (100 to 200).toArray
+    var inData0 = (0 to 100).map(i => scala.util.Random.nextInt()).toArray
+    var inData1 = (0 to 100).map(i => scala.util.Random.nextInt()).toArray
 
     var numLSU0 = 0
     var numLSU1 = 1
@@ -243,9 +243,19 @@ object ApplicationExamples {
     appTestHelper.addOutData(refOutDatas)
     appTestHelper.setOutputCycle(outputCycle)
 
+    //Verilog generation
+    chisel3.Driver.execute(Array("--no-check-comb-loops", "-td","WrapperTest"),
+      () => new TopModuleWrapper(cp.pillarsModuleInfo, cp.connectMap,
+        cp.configList, dataWidth, appTestHelper))
+
     iotesters.Driver.execute(Array("--no-check-comb-loops","-tgvo", "on", "-tbn" ,"verilator"),
-      () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, dataWidth)) {
-      c => new VaddTester(c, appTestHelper)
+      () => new TopModuleWrapper(cp.pillarsModuleInfo, cp.connectMap, cp.configList, dataWidth, appTestHelper)) {
+      c => new VaddWrapperTester(c, appTestHelper)
     }
+
+//    iotesters.Driver.execute(Array("--no-check-comb-loops","-tgvo", "on", "-tbn" ,"verilator"),
+//      () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, dataWidth)) {
+//      c => new VaddTester(c, appTestHelper)
+//    }
   }
 }

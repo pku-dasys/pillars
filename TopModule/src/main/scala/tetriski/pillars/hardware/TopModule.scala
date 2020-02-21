@@ -313,13 +313,15 @@ class TopModuleWrapper(val moduleInfos: PillarsModuleInfo, val connect: Map[List
   val io = IO(new Bundle {
     val streamInLSU = MixedVec((0 until LSUnitNum).map(p => Flipped(EnqIO( UInt(MEM_IN_WIDTH.W)))))
     val streamOutLSU = MixedVec((0 until LSUnitNum).map(p => Flipped(DeqIO(UInt(MEM_OUT_WIDTH.W)))))
-    val baseLSU = Input(Vec(LSUnitNum, UInt(log2Ceil(MEM_DEPTH).W)))
-    val lenLSU = Input(Vec(LSUnitNum, UInt(log2Ceil(MEM_DEPTH).W)))
+    val baseLSU = Input(UInt(log2Ceil(MEM_DEPTH).W))
+    val lenLSU = Input(UInt(log2Ceil(MEM_DEPTH).W))
 
-    val startLSU = Input(Vec(LSUnitNum, Bool()))
-    val enqEnLSU = Input(Vec(LSUnitNum, Bool()))
-    val deqEnLSU = Input(Vec(LSUnitNum, Bool()))
-    val idleLSU = Output(Vec(LSUnitNum, Bool()))
+    val startLSU = Input(Bool())
+    val enqEnLSU = Input(Bool())
+    val deqEnLSU = Input(Bool())
+    val idleLSU = Output(Bool())
+
+    val LSUnitID = Input(UInt(log2Up(LSUnitNum).W))
 
     val en = Input(Bool())
     val II = Input(UInt(LOG_II_UPPER_BOUND.W))
@@ -332,13 +334,24 @@ class TopModuleWrapper(val moduleInfos: PillarsModuleInfo, val connect: Map[List
   topModule.io.II <> io.II
   topModule.io.streamInLSU <> io.streamInLSU
   topModule.io.streamOutLSU <> io.streamOutLSU
-  topModule.io.baseLSU <> io.baseLSU
-  topModule.io.lenLSU <> io.lenLSU
 
-  topModule.io.startLSU <> io.startLSU
-  topModule.io.enqEnLSU <> io.enqEnLSU
-  topModule.io.deqEnLSU <> io.deqEnLSU
-  topModule.io.idleLSU <> io.idleLSU
+  for(i <- 0 until LSUnitNum){
+    when(i.U === io.LSUnitID){
+      topModule.io.baseLSU(i.U) <> io.baseLSU
+      topModule.io.lenLSU(i.U) <> io.lenLSU
+      topModule.io.startLSU(i.U) <> io.startLSU
+      topModule.io.enqEnLSU(i.U) <> io.enqEnLSU
+      topModule.io.deqEnLSU(i.U) <> io.deqEnLSU
+    }.otherwise{
+      topModule.io.baseLSU(i.U) <> DontCare
+      topModule.io.lenLSU(i.U) <> DontCare
+      topModule.io.startLSU(i.U) <> DontCare
+      topModule.io.enqEnLSU(i.U) <> DontCare
+      topModule.io.deqEnLSU(i.U) <> DontCare
+    }
+  }
+  topModule.io.idleLSU(io.LSUnitID) <> io.idleLSU
+
 
   topModule.io.inputs <> io.inputs
   topModule.io.outs <> io.outs

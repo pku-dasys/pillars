@@ -248,10 +248,13 @@ class AdresVLIWPE5InBlock(name: String) extends BlockTrait{
   isConfigRegion = true
 
   addOutPorts(Array("out", "rf_out"))
-  addInPorts(Array("input_w", "input_e", "input_n", "input_s", "input_lsu", "input_rf_mux0", "input_rf_muxOut", "input_IO"))
+  addInPorts(Array("input_w", "input_e", "input_n", "input_s", "input_lsu",
+    "input_rf_mux0", "input_rf_muxOut", "input_IO"))
 
-  val aluOpList = List(OpEnum.ADD, OpEnum.SUB, OpEnum.AND, OpEnum.OR, OpEnum.XOR, OpEnum.MUL)
+  val aluOpList = List(OpEnum.ADD, OpEnum.SUB, OpEnum.AND, OpEnum.OR, OpEnum.XOR,
+    OpEnum.MUL, OpEnum.DIV, OpEnum.SHLL, OpEnum.SHRA, OpEnum.SHRL)
 //  val aluOpList = List(OpEnum.ADD, OpEnum.MUL)
+
   val supBypass = true
   val alu0 = new OpAlu("alu0", aluOpList, supBypass, List(32, 4))
   //port sequnces outs: 0: out
