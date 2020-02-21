@@ -166,7 +166,7 @@ class Alu(funSelect: Int, w: Int) extends Module {
     val outs = Output(MixedVec(Seq(UInt(w.W))))
   })
 
-  def getFunSeq(shamt : UInt) : Seq[(UInt, UInt)] ={
+  def getFunSeq(shamt : UInt = null) : Seq[(UInt, UInt)] ={
     val funSeq = new ArrayBuffer[(UInt, UInt)]()
 //    val funSelect = 0
 
@@ -180,12 +180,15 @@ class Alu(funSelect: Int, w: Int) extends Module {
           case 4 => funSeq.append(ALU_XOR -> (input_a ^ input_b))
           case 5 => funSeq.append(ALU_MUL -> (input_a * input_b))
           case 6 => funSeq.append(ALU_SLT -> (input_a.asSInt < input_b.asSInt))
-          case 7 => funSeq.append(ALU_SLL -> (input_a << shamt).asUInt())
+          case 7 => funSeq.append(ALU_SHLL -> (input_a << shamt).asUInt())
+//          case 7 => funSeq.append(ALU_SHLL -> (input_a << input_b).asUInt())
           case 8 => funSeq.append(ALU_SLTU -> (input_a < input_b))
-          case 9 => funSeq.append(ALU_SRL -> (input_a >> shamt).asUInt())
-          case 10 => funSeq.append(ALU_SRA -> (input_a.asSInt >> shamt).asUInt)
-          case 11 => funSeq.append(ALU_COPY_A -> input_a)
-          case 12 => funSeq.append(ALU_COPY_B -> input_b)
+          case 9 => funSeq.append(ALU_SHRL -> (input_a >> shamt).asUInt())
+//          case 9 => funSeq.append(ALU_SHRL -> (input_a >> input_b).asUInt())
+          case 10 => funSeq.append(ALU_SHRA -> (input_a.asSInt >> shamt).asUInt)
+          case 11 => funSeq.append(ALU_DIV -> input_a / input_b)
+          case 12 => funSeq.append(ALU_COPY_A -> input_a)
+          case 13 => funSeq.append(ALU_COPY_B -> input_b)
         }
       }
     }
@@ -201,7 +204,7 @@ class Alu(funSelect: Int, w: Int) extends Module {
   val input_a = syncScheduleController.io.skewedInput0
   val input_b = syncScheduleController.io.skewedInput1
   val out = io.outs(0)
-  val shamt = input_b(4, 0).asUInt
+  val shamt = input_b(log2Up(w), 0).asUInt
 
   val funSeq = getFunSeq(shamt)
 

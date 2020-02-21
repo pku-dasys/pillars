@@ -19,7 +19,7 @@ object OpEnum extends Enumeration {
   val AND = Value("12")
   val OR = Value("13")
   val XOR = Value("14")
-  val SHL = Value("15")
+  val SHLL = Value("15")
   val SHRA = Value("16")
   val SHRL = Value("17")
   val LOAD = Value("18")
@@ -29,7 +29,7 @@ object OpEnum extends Enumeration {
   val SHR = Value("22")
   val SLT = Value("23")
   val SLTU = Value("24")
-  val SHLL = Value("25")
+  val SHLA = Value("25")
 
 }
 
@@ -38,8 +38,8 @@ object OpEnum extends Enumeration {
       var ret = 0
       opEnums.foreach(op => ret = ret | (1 << getModuleOpcode(op)))
       if(supBypass){
-        ret = ret | (1 << 11)
         ret = ret | (1 << 12)
+        ret = ret | (1 << 13)
       }
       ret
     }
@@ -58,6 +58,7 @@ object OpEnum extends Enumeration {
         case OpEnum.SLTU => 8
         case OpEnum.SHRL => 9
         case OpEnum.SHRA => 10
+        case OpEnum.DIV => 11
 
           //LSU
         case OpEnum.LOAD => 0

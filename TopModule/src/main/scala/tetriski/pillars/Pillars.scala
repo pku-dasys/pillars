@@ -8,9 +8,9 @@ object Pillars {
 //    HardwareExamples.exampleAdres()
 //    HardwareExamples.exampleLSUAdres()
 //    HardwareExamples.exampleCompleteAdres()
-//
-    ApplicationExamples.exampleSum()
-//    ApplicationExamples.exampleVadd()
+
+//    ApplicationExamples.exampleSum()
+    ApplicationExamples.exampleVadd()
 
   }
 }

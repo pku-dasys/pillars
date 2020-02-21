@@ -23,11 +23,11 @@ trait ModuleTrait extends Ports with ModuleBasic {
     if(internalNodes.size > 1 ){
       if(supOps.size > 0){
         //alu passby
-        //ALU_COPY_A = 11.U(4.W)
-        //ALU_COPY_B = 12.U(4.W)
+        //ALU_COPY_A = 12.U(4.W)
+        //ALU_COPY_B = 13.U(4.W)
         val newConfig = fanInNums(0) match {
-          case 0 => 11
-          case 1 => 12
+          case 0 => 12
+          case 1 => 13
         }
         updateConfigArray(newConfig)
       }else {

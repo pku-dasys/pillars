@@ -6,10 +6,11 @@ import tetriski.pillars.hardware.TopModuleWrapper
 class ApplicationWrapperTester(c: TopModuleWrapper) extends PeekPokeTester(c) {
   def asUnsignedInt(signedInt: Int): BigInt = (BigInt(signedInt >>> 1) << 1) + (signedInt & 1)
   def enqData(numInLSU: Int, inData: Array[Int], base: Int): Unit ={
-    poke(c.io.startLSU(numInLSU), 1)
-    poke(c.io.enqEnLSU(numInLSU), 1)
+    poke(c.io.startLSU, 1)
+    poke(c.io.enqEnLSU, 1)
     poke(c.io.streamInLSU(numInLSU).valid, 0)
-    poke(c.io.baseLSU(numInLSU), base)
+    poke(c.io.baseLSU, base)
+    poke(c.io.LSUnitID, numInLSU)
     step(1)
 
     // push
@@ -28,20 +29,21 @@ class ApplicationWrapperTester(c: TopModuleWrapper) extends PeekPokeTester(c) {
     poke(c.io.streamInLSU(numInLSU).valid, 0)
 
     // exec
-    while (peek(c.io.idleLSU(numInLSU)) == 0) {
+    while (peek(c.io.idleLSU) == 0) {
       step(1)
     }
 
-    poke(c.io.enqEnLSU(numInLSU), 0)
+    poke(c.io.enqEnLSU, 0)
   }
   def deqData(numInLSU: Int, refArray: Array[Int], base: Int): Unit ={
     // exec
-    poke(c.io.startLSU(numInLSU), 1)
-    poke(c.io.baseLSU(numInLSU), base)
-    poke(c.io.lenLSU(numInLSU), refArray.length)
-    poke(c.io.deqEnLSU(numInLSU), 1)
+    poke(c.io.startLSU, 1)
+    poke(c.io.baseLSU, base)
+    poke(c.io.lenLSU, refArray.length)
+    poke(c.io.deqEnLSU, 1)
+    poke(c.io.LSUnitID, numInLSU)
     step(1)
-    poke(c.io.startLSU(numInLSU), 0)
+    poke(c.io.startLSU, 0)
 
     for (i <- 0 until refArray.length) {
       poke(c.io.streamOutLSU(numInLSU).ready, 1)
@@ -52,11 +54,11 @@ class ApplicationWrapperTester(c: TopModuleWrapper) extends PeekPokeTester(c) {
         }
       }
       expect(c.io.streamOutLSU(numInLSU).bits,  asUnsignedInt(refArray(i)))
-      //      println(asUnsignedInt(refArray(i)).toString + " " + peek(c.io.streamOutLSU(numInLSU).bits).toString())
+//      println(asUnsignedInt(refArray(i)).toString + " " + peek(c.io.streamOutLSU(numInLSU).bits).toString())
       step(1)
     }
 
-    poke(c.io.deqEnLSU(numInLSU), 0)
+    poke(c.io.deqEnLSU, 0)
   }
 }
 

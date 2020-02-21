@@ -18,12 +18,14 @@ object PillarsConfig {
   val ALU_XOR = 4.U(4.W)
   val ALU_MUL = 5.U(4.W)
   val ALU_SLT = 6.U(4.W)
-  val ALU_SLL = 7.U(4.W)
+  val ALU_SHLL = 7.U(4.W)
   val ALU_SLTU = 8.U(4.W)
-  val ALU_SRL = 9.U(4.W)
-  val ALU_SRA = 10.U(4.W)
-  val ALU_COPY_A = 11.U(4.W)
-  val ALU_COPY_B = 12.U(4.W)
+  val ALU_SHRL = 9.U(4.W)
+  val ALU_SHRA = 10.U(4.W)
+  val ALU_DIV = 11.U(4.W)
+  val ALU_COPY_A = 12.U(4.W)
+  val ALU_COPY_B = 13.U(4.W)
 
-  val ALU_FUN_NUM = 13
+
+  val ALU_FUN_NUM = 14
 }
