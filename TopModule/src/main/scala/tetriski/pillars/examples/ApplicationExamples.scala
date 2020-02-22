@@ -13,7 +13,7 @@ object ApplicationExamples {
   arch.addOutPorts(Array("out_0", "out_1", "out_2", "out_3"))
   arch.addInPorts(Array("input_0", "input_1", "input_2", "input_3"))
 
-  val tile = new TileCompleteBlock("tile_0", 4, 4, 4, 4)
+  val tile = new TileCompleteBlock("tile_0", 4, 4, 4, 4, useMuxBypass = true)
 
   arch.addBlock(tile)
 
@@ -29,7 +29,7 @@ object ApplicationExamples {
 
   arch.init()
 
-  val targetII = 2
+  val targetII = 1
 
   arch.blockMap("tile_0").dumpMRRG(targetII)
 
@@ -54,20 +54,35 @@ object ApplicationExamples {
     constInfo.addConst(arch("tile_0")("pe_3_3").getModule("const0").getModuleID(), 0, 1)
     constInfo.addConst(arch("tile_0")("pe_1_0").getModule("const0").getModuleID(), 0, 1)
     constInfo.addConst(arch("tile_0")("pe_2_0").getModule("const0").getModuleID(), 0, 1)
-
     var fileName = "app_mapping_results/vadd_ii1.txt"
 
+//    constInfo.addConst(arch("tile_0")("pe_0_2").getModule("const0").getModuleID(), 0, 1)
+//    constInfo.addConst(arch("tile_0")("pe_0_3").getModule("const0").getModuleID(), 0, 1)
+//    constInfo.addConst(arch("tile_0")("pe_3_1").getModule("const0").getModuleID(), 0, 1)
+//    constInfo.addConst(arch("tile_0")("pe_1_3").getModule("const0").getModuleID(), 0, 1)
+//    var fileName = "noMuxOut.txt"
+
     arch.resetSchedules()
-    arch("tile_0")("pe_2_2").getModule("alu0").setSkew(2, 0)
-    arch("tile_0")("lsu_3").getModule("loadStoreUnit").setSkew(-3, 0)
+//    arch("tile_0")("pe_2_2").getModule("alu0").setSkew(2, 0)
+//    arch("tile_0")("lsu_3").getModule("loadStoreUnit").setSkew(-3, 0)
+
+    arch("tile_0")("lsu_2").getModule("loadStoreUnit").setSkew(1, 0)
     var schedules = arch.getSchedules()
 
     var inData0 = (0 to 100).map(i => scala.util.Random.nextInt()).toArray
     var inData1 = (0 to 100).map(i => scala.util.Random.nextInt()).toArray
 
+//    var inData0 = (0 to 100).toArray
+//    var inData1 = (50 to 150).toArray
+
     var numLSU0 = 0
     var numLSU1 = 1
     var outNumLSU = 3
+
+//    var numLSU0 = 0
+//    var numLSU1 = 3
+//    var outNumLSU = 2
+
     var base = 0
     var inDatas = Map(
       List(numLSU0, base) -> inData0,
