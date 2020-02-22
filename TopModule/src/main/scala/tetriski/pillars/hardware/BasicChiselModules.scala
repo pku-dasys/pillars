@@ -15,9 +15,9 @@ class RegNextN(w: Int) extends Module {
     val input = Input(UInt(w.W))
     val out = Output(UInt(w.W))
   })
-  val regArray = RegInit(VecInit(Seq.fill(LOG_SCHEDULE_SIZE - 1)(0.U(w.W))))
+  val regArray = RegInit(VecInit(Seq.fill((1 << LOG_SCHEDULE_SIZE) - 1)(0.U(w.W))))
   regArray(0) := io.input
-  for(i <- 1 until LOG_SCHEDULE_SIZE - 1){
+  for(i <- 1 until (1 << LOG_SCHEDULE_SIZE) - 1){
     regArray(i) := regArray(i - 1)
   }
   when(io.latency > 0.U){

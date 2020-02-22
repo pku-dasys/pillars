@@ -63,10 +63,10 @@ object ApplicationExamples {
 //    var fileName = "noMuxOut.txt"
 
     arch.resetSchedules()
-//    arch("tile_0")("pe_2_2").getModule("alu0").setSkew(2, 0)
-//    arch("tile_0")("lsu_3").getModule("loadStoreUnit").setSkew(-3, 0)
+    arch("tile_0")("pe_2_2").getModule("alu0").setSkew(2, 0)
+    arch("tile_0")("lsu_3").getModule("loadStoreUnit").setSkew(-3, 0)
 
-    arch("tile_0")("lsu_2").getModule("loadStoreUnit").setSkew(1, 0)
+//    arch("tile_0")("lsu_2").getModule("loadStoreUnit").setSkew(1, 0)
     var schedules = arch.getSchedules()
 
     var inData0 = (0 to 100).map(i => scala.util.Random.nextInt()).toArray
