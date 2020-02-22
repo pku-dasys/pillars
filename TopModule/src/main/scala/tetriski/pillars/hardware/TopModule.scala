@@ -311,8 +311,8 @@ class TopModuleWrapper(val moduleInfos: PillarsModuleInfo, val connect: Map[List
   val LSUnitNum = topModule.LSUnitNum
 
   val io = IO(new Bundle {
-    val streamInLSU = MixedVec((0 until LSUnitNum).map(p => Flipped(EnqIO( UInt(MEM_IN_WIDTH.W)))))
-    val streamOutLSU = MixedVec((0 until LSUnitNum).map(p => Flipped(DeqIO(UInt(MEM_OUT_WIDTH.W)))))
+    val streamInLSU = Flipped(EnqIO( UInt(MEM_IN_WIDTH.W)))
+    val streamOutLSU = Flipped(DeqIO(UInt(MEM_OUT_WIDTH.W)))
     val baseLSU = Input(UInt(log2Ceil(MEM_DEPTH).W))
     val lenLSU = Input(UInt(log2Ceil(MEM_DEPTH).W))
 
@@ -332,26 +332,40 @@ class TopModuleWrapper(val moduleInfos: PillarsModuleInfo, val connect: Map[List
 
   topModule.io.en <> io.en
   topModule.io.II <> io.II
-  topModule.io.streamInLSU <> io.streamInLSU
-  topModule.io.streamOutLSU <> io.streamOutLSU
 
-  for(i <- 0 until LSUnitNum){
-    when(i.U === io.LSUnitID){
-      topModule.io.baseLSU(i.U) <> io.baseLSU
-      topModule.io.lenLSU(i.U) <> io.lenLSU
-      topModule.io.startLSU(i.U) <> io.startLSU
-      topModule.io.enqEnLSU(i.U) <> io.enqEnLSU
-      topModule.io.deqEnLSU(i.U) <> io.deqEnLSU
-    }.otherwise{
-      topModule.io.baseLSU(i.U) <> DontCare
-      topModule.io.lenLSU(i.U) <> DontCare
-      topModule.io.startLSU(i.U) <> DontCare
-      topModule.io.enqEnLSU(i.U) <> DontCare
-      topModule.io.deqEnLSU(i.U) <> DontCare
+  def connectLSU(i: Int): Unit  ={
+    topModule.io.baseLSU(i.U) <> io.baseLSU
+    topModule.io.lenLSU(i.U) <> io.lenLSU
+    topModule.io.startLSU(i.U) <> io.startLSU
+    topModule.io.enqEnLSU(i.U) <> io.enqEnLSU
+    topModule.io.deqEnLSU(i.U) <> io.deqEnLSU
+    topModule.io.streamOutLSU(i) <> io.streamOutLSU
+    topModule.io.streamInLSU(i) <> io.streamInLSU
+    for(j <- 0 until LSUnitNum){
+      if(j != i){
+        topModule.io.baseLSU(j.U) <> DontCare
+        topModule.io.lenLSU(j.U) <> DontCare
+        topModule.io.startLSU(j.U) <> DontCare
+        topModule.io.enqEnLSU(j.U) <> DontCare
+        topModule.io.deqEnLSU(j.U) <> DontCare
+        topModule.io.streamOutLSU(j) <> DontCare
+        topModule.io.streamInLSU(j).valid := false.B
+        topModule.io.streamInLSU(j).bits := 0.U
+      }
     }
   }
-  topModule.io.idleLSU(io.LSUnitID) <> io.idleLSU
 
+  when(io.LSUnitID === 0.U){
+    connectLSU(0)
+  }.elsewhen(io.LSUnitID === 1.U){
+    connectLSU(1)
+  }.elsewhen(io.LSUnitID === 2.U){
+    connectLSU(2)
+  }.otherwise{
+    connectLSU(3)
+  }
+
+  topModule.io.idleLSU(io.LSUnitID) <> io.idleLSU
 
   topModule.io.inputs <> io.inputs
   topModule.io.outs <> io.outs

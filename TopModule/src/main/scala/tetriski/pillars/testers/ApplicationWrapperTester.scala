@@ -8,25 +8,25 @@ class ApplicationWrapperTester(c: TopModuleWrapper) extends PeekPokeTester(c) {
   def enqData(numInLSU: Int, inData: Array[Int], base: Int): Unit ={
     poke(c.io.startLSU, 1)
     poke(c.io.enqEnLSU, 1)
-    poke(c.io.streamInLSU(numInLSU).valid, 0)
+    poke(c.io.streamInLSU.valid, 0)
     poke(c.io.baseLSU, base)
     poke(c.io.LSUnitID, numInLSU)
     step(1)
 
     // push
     for (x <- inData) {
-      poke(c.io.streamInLSU(numInLSU).valid, 1)
-      expect(c.io.streamInLSU(numInLSU).valid, 1)
-      poke(c.io.streamInLSU(numInLSU).bits, x)
-      if (peek(c.io.streamInLSU(numInLSU).ready) == 0) {
-        while (peek(c.io.streamInLSU(numInLSU).ready) == 0) {
+      poke(c.io.streamInLSU.valid, 1)
+      expect(c.io.streamInLSU.valid, 1)
+      poke(c.io.streamInLSU.bits, x)
+      if (peek(c.io.streamInLSU.ready) == 0) {
+        while (peek(c.io.streamInLSU.ready) == 0) {
           step(1)
         }
       } else {
         step(1)
       } // exit condition: (c.io.in.ready === true.B) and step()
     }
-    poke(c.io.streamInLSU(numInLSU).valid, 0)
+    poke(c.io.streamInLSU.valid, 0)
 
     // exec
     while (peek(c.io.idleLSU) == 0) {
@@ -46,15 +46,15 @@ class ApplicationWrapperTester(c: TopModuleWrapper) extends PeekPokeTester(c) {
     poke(c.io.startLSU, 0)
 
     for (i <- 0 until refArray.length) {
-      poke(c.io.streamOutLSU(numInLSU).ready, 1)
-      if (peek(c.io.streamOutLSU(numInLSU).valid) == 0) {
-        while (peek(c.io.streamOutLSU(numInLSU).valid) == 0) {
-          poke(c.io.streamOutLSU(numInLSU).ready, 1)
+      poke(c.io.streamOutLSU.ready, 1)
+      if (peek(c.io.streamOutLSU.valid) == 0) {
+        while (peek(c.io.streamOutLSU.valid) == 0) {
+          poke(c.io.streamOutLSU.ready, 1)
           step(1)
         }
       }
-      expect(c.io.streamOutLSU(numInLSU).bits,  asUnsignedInt(refArray(i)))
-//      println(asUnsignedInt(refArray(i)).toString + " " + peek(c.io.streamOutLSU(numInLSU).bits).toString())
+      expect(c.io.streamOutLSU.bits,  asUnsignedInt(refArray(i)))
+//      println(asUnsignedInt(refArray(i)).toString + " " + peek(c.io.streamOutLSU.bits).toString())
       step(1)
     }
 
