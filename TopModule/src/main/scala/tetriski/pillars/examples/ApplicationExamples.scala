@@ -1,10 +1,10 @@
 package tetriski.pillars.examples
 
-import chisel3.{Module, iotesters}
+import chisel3.iotesters
 import tetriski.pillars.archlib.TileCompleteBlock
-import tetriski.pillars.core.{ArchitctureHierarchy, Connect, ConstInfo, HardwareGeneration, ModuleTrait}
+import tetriski.pillars.core._
 import tetriski.pillars.hardware.{TopModule, TopModuleWrapper}
-import tetriski.pillars.testers.{AppTestHelper, SumTester, SumWrapperTester, VaddTester, VaddWrapperTester}
+import tetriski.pillars.testers._
 
 object ApplicationExamples {
 
@@ -17,23 +17,17 @@ object ApplicationExamples {
 
   arch.addBlock(tile)
 
-  arch.addConnect(List(List("input_0"),List("tile_0/", "input_0")))
-  arch.addConnect(List(List("input_1"),List("tile_0/", "input_1")))
-  arch.addConnect(List(List("input_2"),List("tile_0/", "input_2")))
-  arch.addConnect(List(List("input_3"),List("tile_0/", "input_3")))
+  arch.addConnect(List(List("input_0"), List("tile_0/", "input_0")))
+  arch.addConnect(List(List("input_1"), List("tile_0/", "input_1")))
+  arch.addConnect(List(List("input_2"), List("tile_0/", "input_2")))
+  arch.addConnect(List(List("input_3"), List("tile_0/", "input_3")))
 
-  arch.addConnect(List(List("tile_0/","out_0"),List("out_0")))
-  arch.addConnect(List(List("tile_0/","out_1"),List("out_1")))
-  arch.addConnect(List(List("tile_0/","out_2"),List("out_2")))
-  arch.addConnect(List(List("tile_0/","out_3"),List("out_3")))
+  arch.addConnect(List(List("tile_0/", "out_0"), List("out_0")))
+  arch.addConnect(List(List("tile_0/", "out_1"), List("out_1")))
+  arch.addConnect(List(List("tile_0/", "out_2"), List("out_2")))
+  arch.addConnect(List(List("tile_0/", "out_3"), List("out_3")))
 
   arch.init()
-
-  val targetII = 1
-
-  arch.blockMap("tile_0").dumpMRRG(targetII)
-
-  arch.dumpArchitcture()
 
   val connectArray = arch.connectArray
 
@@ -45,232 +39,315 @@ object ApplicationExamples {
 
   val dataWidth = 32
 
-  def exampleVadd(): Unit ={
-    //********     II = 1     ********
-    var outputCycle = 220
-    var testII = 1
-    var constInfo = new ConstInfo(testII)
-    constInfo.addConst(arch("tile_0")("pe_3_0").getModule("const0").getModuleID(), 0, 1)
-    constInfo.addConst(arch("tile_0")("pe_3_3").getModule("const0").getModuleID(), 0, 1)
-    constInfo.addConst(arch("tile_0")("pe_1_0").getModule("const0").getModuleID(), 0, 1)
-    constInfo.addConst(arch("tile_0")("pe_2_0").getModule("const0").getModuleID(), 0, 1)
-    var fileName = "app_mapping_results/vadd_ii1.txt"
+  val verificationHelper = new VerificationHelper(arch)
 
-//    constInfo.addConst(arch("tile_0")("pe_0_2").getModule("const0").getModuleID(), 0, 1)
-//    constInfo.addConst(arch("tile_0")("pe_0_3").getModule("const0").getModuleID(), 0, 1)
-//    constInfo.addConst(arch("tile_0")("pe_3_1").getModule("const0").getModuleID(), 0, 1)
-//    constInfo.addConst(arch("tile_0")("pe_1_3").getModule("const0").getModuleID(), 0, 1)
-//    var fileName = "noMuxOut.txt"
+  def dumpArch(targetII: Int, filename: String = null): Unit = {
+    arch.blockMap("tile_0").dumpMRRG(targetII, filename)
+    arch.dumpArchitcture()
+  }
 
-    arch.resetSchedules()
-    arch("tile_0")("pe_2_2").getModule("alu0").setSkew(2, 0)
-    arch("tile_0")("lsu_3").getModule("loadStoreUnit").setSkew(-3, 0)
-
-//    arch("tile_0")("lsu_2").getModule("loadStoreUnit").setSkew(1, 0)
-    var schedules = arch.getSchedules()
-
-    var inData0 = (0 to 100).map(i => scala.util.Random.nextInt()).toArray
-    var inData1 = (0 to 100).map(i => scala.util.Random.nextInt()).toArray
-
-//    var inData0 = (0 to 100).toArray
-//    var inData1 = (50 to 150).toArray
-
-    var numLSU0 = 0
-    var numLSU1 = 1
-    var outNumLSU = 3
-
-//    var numLSU0 = 0
-//    var numLSU1 = 3
-//    var outNumLSU = 2
-
-    var base = 0
-    var inDatas = Map(
-      List(numLSU0, base) -> inData0,
-      List(numLSU1, base) -> inData1)
-
-//    var outPortNum = 2
-    var refList = List[Int]()
+  def exampleVadd(): Unit = {
+    val dataSize = 50
+    val inData0 = (0 until dataSize).map(i => scala.util.Random.nextInt()).toArray
+    val inData1 = (0 until dataSize).map(i => scala.util.Random.nextInt()).toArray
+    //    var inData0 = (50 until dataSize + 50).toArray
+    //    var inData1 = (100 until dataSize + 100).toArray
+    var outDataRefArray = Array[Int]()
     var ref = 0
-    for(i <- 0 until inData0.size){
+    for (i <- 0 until inData0.size) {
       ref = inData0(i) + inData1(i)
-      refList = refList :+ ref
+      outDataRefArray = outDataRefArray :+ ref
+    }
+    val inDataArrays = Array(inData0, inData1)
+    val outDataArrays = Array(outDataRefArray)
+
+    def testVadd(resultFilename: String, infoFilename: String, testII: Int, constVals: Array[Int],
+                 addrArray: Array[Int], throughput: Int, outputCycle: Int, useWrapper: Boolean = false): Unit = {
+      verificationHelper.init(resultFilename)
+      verificationHelper.setConst(constVals, testII)
+      val constInfo = verificationHelper.getConstInfo()
+      val schedules = verificationHelper.getSchedules()
+      val dataWithAddr = verificationHelper.getDataWithAddr(dataSize = dataSize,
+        inDataArrays = inDataArrays, outDataArrays = outDataArrays)
+
+      val inDatas = dataWithAddr(0).asInstanceOf[Map[List[Int], Array[Int]]]
+      val refLSUOutDatas = dataWithAddr(1).asInstanceOf[Map[List[Int], Array[Int]]]
+
+      val bitStreams = arch.genConfig(infoFilename, testII, constInfo)
+
+      val appTestHelper = new AppTestHelper(bitStreams, schedules, testII)
+
+      appTestHelper.addInData(inDatas)
+      appTestHelper.addOutData(refLSUOutDatas)
+      appTestHelper.setOutputCycle(outputCycle)
+
+      if (useWrapper) {
+        //Verilog generation
+        chisel3.Driver.execute(Array("--no-check-comb-loops", "-td", "WrapperTest"),
+          () => new TopModuleWrapper(cp.pillarsModuleInfo, cp.connectMap,
+            cp.configList, dataWidth, appTestHelper))
+
+        iotesters.Driver.execute(Array("--no-check-comb-loops", "-tgvo", "on", "-tbn", "verilator"),
+          () => new TopModuleWrapper(cp.pillarsModuleInfo, cp.connectMap, cp.configList, dataWidth, appTestHelper)) {
+          c => new VaddWrapperTester(c, appTestHelper)
+        }
+      } else {
+        iotesters.Driver.execute(Array("--no-check-comb-loops", "-tgvo", "on", "-tbn", "verilator"),
+          () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, dataWidth)) {
+          c => new VaddTester(c, appTestHelper)
+        }
+      }
     }
 
-    var refOutDatas = Map(List(outNumLSU, base) -> refList.toArray)
-
-//    var outPortRefs = Map(outPortNum -> refList.toArray)
-
-    testVadd(constInfo, schedules, fileName, inDatas, refOutDatas, testII, outputCycle)
     //********     II = 1     ********
-  }
-
-  def exampleSum(): Unit ={
-
-    //********     II = 1     ********
-    var outputCycle = 4
     var testII = 1
-    var constInfo = new ConstInfo(testII)
-    constInfo.addConst(arch("tile_0")("pe_0_1").getModule("const0").getModuleID(), 0, 1)
-    constInfo.addConst(arch("tile_0")("pe_0_2").getModule("const0").getModuleID(), 0, 1)
+    var outputCycle = dataSize * (testII + 2)
 
-    var fileName = "app_mapping_results/sum_ii1.txt"
+    var infoFilename = "app_mapping_results/vadd/ii1_i.txt"
+    var resultFilename = "app_mapping_results/vadd/ii1_r.txt"
 
-    arch.resetSchedules()
-    arch("tile_0")("pe_0_0").getModule("alu0").setWaitCycle(2, 0)
-    var schedules = arch.getSchedules()
+    var a_base, b_base, c_base = 0
+    var constVals = Array(a_base, b_base, c_base, 1)
+    var addrVals = Array(a_base, b_base, c_base)
+    var throughput = 1
 
-    var inData = (0 to 100).map(i => scala.util.Random.nextInt()).toArray
-
-    var numLSU = 0
-    var base = 0
-    var inDatas = Map(List(numLSU, base) -> inData)
-
-    var outPortNum = 2
-    var refList = List[Int]()
-    var ref = 0
-    for(data <- inData){
-      ref = ref + data
-      refList = refList :+ ref
-    }
-
-    var outPortRefs = Map(outPortNum -> refList.toArray)
-
-    testSum(constInfo, schedules, fileName, inDatas, testII, outputCycle, outPortRefs)
+    //testVadd(resultFilename, infoFilename, testII, constVals, addrVals, throughput, outputCycle, useWrapper = true)
+    testVadd(resultFilename, infoFilename, testII, constVals, addrVals, throughput, outputCycle)
     //********     II = 1     ********
 
     //********     II = 2     ********
-    outputCycle = 8
     testII = 2
-    constInfo = new ConstInfo(testII)
-    constInfo.addConst(arch("tile_0")("pe_1_2").getModule("const0").getModuleID(), 0, 1)
-    constInfo.addConst(arch("tile_0")("pe_0_2").getModule("const0").getModuleID(), 1, 1)
+    outputCycle = dataSize * (testII + 2)
 
-    fileName = "app_mapping_results/sum_ii2.txt"
+    infoFilename = "app_mapping_results/vadd/ii2_i.txt"
+    resultFilename = "app_mapping_results/vadd/ii2_r.txt"
 
-    arch.resetSchedules()
-    arch("tile_0")("pe_1_0").getModule("alu0").setWaitCycle(5, 1)
-//    println(arch("tile_0")("pe_1_0").getModule("alu0").getSchedule())
-    schedules = arch.getSchedules()
+    a_base = 0
+    b_base = 0
+    c_base = dataSize
+    constVals = Array(a_base, b_base, c_base, 1)
+    addrVals = Array(a_base, b_base, c_base)
+    throughput = 1
 
-    inData = (0 to 100).map(i => scala.util.Random.nextInt()).toArray
-
-    numLSU = 1
-    base = 0
-    inDatas = Map(List(numLSU, base) -> inData)
-
-    outPortNum = 0
-    refList = List[Int]()
-    ref = 0
-    for(data <- inData){
-      ref = ref + data
-      refList = refList :+ ref
-    }
-
-    outPortRefs = Map(outPortNum -> refList.toArray)
-
-    testSum(constInfo, schedules, fileName, inDatas, testII, outputCycle, outPortRefs)
+    testVadd(resultFilename, infoFilename, testII, constVals, addrVals, throughput, outputCycle)
     //********     II = 2     ********
 
-
     //********     II = 3     ********
-    outputCycle = 9
     testII = 3
-    constInfo = new ConstInfo(testII)
-    constInfo.addConst(arch("tile_0")("pe_1_0").getModule("const0").getModuleID(), 1, 1)
-    constInfo.addConst(arch("tile_0")("pe_0_2").getModule("const0").getModuleID(), 1, 1)
+    outputCycle = dataSize * (testII + 2)
 
-    fileName = "app_mapping_results/sum_ii3.txt"
+    infoFilename = "app_mapping_results/vadd/ii3_i.txt"
+    resultFilename = "app_mapping_results/vadd/ii3_r.txt"
 
-    arch.resetSchedules()
-    arch("tile_0")("pe_1_1").getModule("alu0").setWaitCycle(6, 0)
-    schedules = arch.getSchedules()
+    a_base = 0
+    b_base = 0
+    c_base = dataSize
+    constVals = Array(a_base, b_base, c_base, 1)
+    addrVals = Array(a_base, b_base, c_base)
+    throughput = 1
 
-    inData = (0 to 100).map(i => scala.util.Random.nextInt()).toArray
-
-    numLSU = 3
-    base = 0
-    inDatas = Map(List(numLSU, base) -> inData)
-
-    outPortNum = 3
-    refList = List[Int]()
-    ref = 0
-    for(data <- inData){
-      ref = ref + data
-      refList = refList :+ ref
-    }
-
-    outPortRefs = Map(outPortNum -> refList.toArray)
-
-    testSum(constInfo, schedules, fileName, inDatas, testII, outputCycle, outPortRefs)
-//    testSumWrapper(constInfo, schedules, fileName, inDatas, testII, outputCycle, outPortRefs)
+    testVadd(resultFilename, infoFilename, testII, constVals, addrVals, throughput, outputCycle)
     //********     II = 3     ********
   }
 
-  def testSumWrapper(constInfo: ConstInfo, schedules: List[Int], fileName: String, inDatas: Map[List[Int], Array[Int]],
-              testII: Int, outputCycle: Int, outPortRefs: Map[Int, Array[Int]]): Unit ={
+  def exampleSum(): Unit = {
 
-    val bitStreams = arch.genConfig(fileName, testII, constInfo)
+    val dataSize = 50
+    val inData = (0 until dataSize).map(i => scala.util.Random.nextInt()).toArray
+    //    var inData = (0 until dataSize).toArray
 
-    val appTestHelper = new AppTestHelper(bitStreams, schedules, testII)
+    var outPortRefArray = Array[Int]()
+    var outPortRef = 0
+    for (data <- inData) {
+      outPortRef = outPortRef + data
+      outPortRefArray = outPortRefArray :+ outPortRef
+    }
+    val inDataArrays = Array(inData)
+    val outPortRefArrays = Array(outPortRefArray)
 
-    appTestHelper.addInData(inDatas)
-    appTestHelper.setOutPortRefs(outPortRefs)
-    appTestHelper.setOutputCycle(outputCycle)
+    def testSum(resultFilename: String, infoFilename: String, testII: Int, constVals: Array[Int],
+                addrArray: Array[Int], throughput: Int, useWrapper: Boolean = false): Unit = {
 
-    //Verilog generation
-    chisel3.Driver.execute(Array("--no-check-comb-loops", "-td","WrapperTest"),
-      () => new TopModuleWrapper(cp.pillarsModuleInfo, cp.connectMap,
-        cp.configList, dataWidth, appTestHelper))
+      verificationHelper.init(resultFilename)
+      val outputCycle = verificationHelper.getOutputCycle()
+      verificationHelper.setConst(constVals, testII)
+      val constInfo = verificationHelper.getConstInfo()
+      val schedules = verificationHelper.getSchedules()
+      val dataWithAddr = verificationHelper.getDataWithAddr(addrArray = addrArray,
+        inDataArrays = inDataArrays, refDataArrays = outPortRefArrays)
 
-    iotesters.Driver.execute(Array("--no-check-comb-loops","-tgvo", "on", "-tbn" ,"verilator"),
-      () => new TopModuleWrapper(cp.pillarsModuleInfo, cp.connectMap, cp.configList, dataWidth, appTestHelper)) {
-      c => new SumWrapperTester(c, appTestHelper)
+      val inDatas = dataWithAddr(0).asInstanceOf[Map[List[Int], Array[Int]]]
+      val outPortRefs = dataWithAddr(2).asInstanceOf[Map[Int, Array[Int]]]
+
+      val bitStreams = arch.genConfig(infoFilename, testII, constInfo)
+
+      val appTestHelper = new AppTestHelper(bitStreams, schedules, testII)
+
+      appTestHelper.addInData(inDatas)
+      appTestHelper.setOutPortRefs(outPortRefs)
+      appTestHelper.setOutputCycle(outputCycle)
+
+
+      if (useWrapper) {
+        //Verilog generation
+        chisel3.Driver.execute(Array("--no-check-comb-loops", "-td", "WrapperTest"),
+          () => new TopModuleWrapper(cp.pillarsModuleInfo, cp.connectMap,
+            cp.configList, dataWidth, appTestHelper))
+
+        iotesters.Driver.execute(Array("--no-check-comb-loops", "-tgvo", "on", "-tbn", "verilator"),
+          () => new TopModuleWrapper(cp.pillarsModuleInfo, cp.connectMap, cp.configList, dataWidth, appTestHelper)) {
+          c => new SumWrapperTester(c, appTestHelper)
+        }
+      } else {
+        iotesters.Driver.execute(Array("--no-check-comb-loops", "-tgvo", "on", "-tbn", "verilator"),
+          () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, dataWidth)) {
+          c => new SumTester(c, appTestHelper)
+        }
+      }
     }
 
+    //********     II = 1     ********
+    var testII = 1
+
+    var infoFilename = "app_mapping_results/sum/ii1_i.txt"
+    var resultFilename = "app_mapping_results/sum/ii1_r.txt"
+
+    var a_base = 0
+    var constVals = Array(a_base, 1)
+    var addrVals = Array(a_base)
+    var throughput = 1
+
+    //    testSum(resultFilename, infoFilename, testII, constVals, addrVals, throughput, useWrapper = true)
+    testSum(resultFilename, infoFilename, testII, constVals, addrVals, throughput)
+    //********     II = 1     ********
+
+    //********     II = 2     ********
+    testII = 2
+
+    infoFilename = "app_mapping_results/sum/ii2_i.txt"
+    resultFilename = "app_mapping_results/sum/ii2_r.txt"
+
+    a_base = 0
+    constVals = Array(a_base, 1)
+    addrVals = Array(a_base)
+    throughput = 1
+
+    testSum(resultFilename, infoFilename, testII, constVals, addrVals, throughput)
+    //********     II = 2     ********
+
+    //********     II = 3     ********
+    testII = 3
+
+    infoFilename = "app_mapping_results/sum/ii3_i.txt"
+    resultFilename = "app_mapping_results/sum/ii3_r.txt"
+
+    a_base = 0
+    constVals = Array(a_base, 1)
+    addrVals = Array(a_base)
+    throughput = 1
+
+    testSum(resultFilename, infoFilename, testII, constVals, addrVals, throughput)
+    //********     II = 3     ********
   }
 
-  def testSum(constInfo: ConstInfo, schedules: List[Int], fileName: String, inDatas: Map[List[Int], Array[Int]],
-              testII: Int, outputCycle: Int, outPortRefs: Map[Int, Array[Int]]): Unit ={
+  def exampleAccum(): Unit = {
 
-    val bitStreams = arch.genConfig(fileName, testII, constInfo)
+    val dataSize = 50
+    val inDataA = (0 until dataSize).map(i => scala.util.Random.nextInt()).toArray
+    val inDataB = (0 until dataSize).map(i => scala.util.Random.nextInt()).toArray
+    val inDataC = (0 until dataSize).map(i => scala.util.Random.nextInt()).toArray
 
-    val appTestHelper = new AppTestHelper(bitStreams, schedules, testII)
+    //    var inDataA = (2 until dataSize + 2).toArray
+    //    var inDataB = (2 until dataSize + 2).toArray
+    //    var inDataC = (2 until dataSize + 2).toArray
 
-    appTestHelper.addInData(inDatas)
-    appTestHelper.setOutPortRefs(outPortRefs)
-    appTestHelper.setOutputCycle(outputCycle)
+    var refArray = Array[Int]()
+    var outPortRefArray = Array[Int]()
+    var ref = 0
+    var outPortRef = 0
 
+    for (i <- 0 until inDataA.size - 1) {
+      ref = (inDataA(i) + inDataB(i + 1)) * inDataC(i)
+      refArray = refArray :+ ref
 
-    iotesters.Driver.execute(Array("--no-check-comb-loops","-tgvo", "on", "-tbn" ,"verilator"),
-      () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, dataWidth)) {
-      c => new SumTester(c, appTestHelper)
+      outPortRef = outPortRef + ref
+      outPortRefArray = outPortRefArray :+ outPortRef
     }
-  }
+    val inDataArrays = Array(inDataA, inDataB, inDataC)
+    val outDataRefArrays = Array(refArray)
+    val outPortRefArrays = Array(outPortRefArray)
 
-  def testVadd(constInfo: ConstInfo, schedules: List[Int], fileName: String, inDatas: Map[List[Int], Array[Int]],
-               refOutDatas: Map[List[Int], Array[Int]], testII: Int, outputCycle: Int): Unit ={
-    val bitStreams = arch.genConfig(fileName, testII, constInfo)
+    def testAccum(resultFilename: String, infoFilename: String, testII: Int,
+                  constVals: Array[Int], addrArray: Array[Int], throughput: Int): Unit = {
+
+      verificationHelper.init(resultFilename)
+      val outputCycle = verificationHelper.getOutputCycle()
+      verificationHelper.setConst(constVals, testII)
+      val constInfo = verificationHelper.getConstInfo()
+      val schedules = verificationHelper.getSchedules()
+      val dataWithAddr = verificationHelper.getDataWithAddr(addrArray = addrArray,
+        inDataArrays = inDataArrays, outDataArrays = outDataRefArrays, refDataArrays = outPortRefArrays)
+
+      val inDatas = dataWithAddr(0).asInstanceOf[Map[List[Int], Array[Int]]]
+      val outDatas = dataWithAddr(1).asInstanceOf[Map[List[Int], Array[Int]]]
+      val outPortRefs = dataWithAddr(2).asInstanceOf[Map[Int, Array[Int]]]
+
+      val bitStreams = arch.genConfig(infoFilename, testII, constInfo)
+
+      val appTestHelper = new AppTestHelper(bitStreams, schedules, testII)
+
+      appTestHelper.addInData(inDatas)
+      appTestHelper.addOutData(outDatas)
+      appTestHelper.setOutPortRefs(outPortRefs)
+      appTestHelper.setOutputCycle(outputCycle)
+      appTestHelper.setThroughput(throughput)
 
 
-    val appTestHelper = new AppTestHelper(bitStreams, schedules, testII)
-
-    appTestHelper.addInData(inDatas)
-    appTestHelper.addOutData(refOutDatas)
-    appTestHelper.setOutputCycle(outputCycle)
-
-    //Verilog generation
-    chisel3.Driver.execute(Array("--no-check-comb-loops", "-td","WrapperTest"),
-      () => new TopModuleWrapper(cp.pillarsModuleInfo, cp.connectMap,
-        cp.configList, dataWidth, appTestHelper))
-
-    iotesters.Driver.execute(Array("--no-check-comb-loops","-tgvo", "on", "-tbn" ,"verilator"),
-      () => new TopModuleWrapper(cp.pillarsModuleInfo, cp.connectMap, cp.configList, dataWidth, appTestHelper)) {
-      c => new VaddWrapperTester(c, appTestHelper)
+      iotesters.Driver.execute(Array("--no-check-comb-loops", "-tgvo", "on", "-tbn", "verilator"),
+        () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, dataWidth)) {
+        c => new AccumTester(c, appTestHelper)
+      }
     }
 
-//    iotesters.Driver.execute(Array("--no-check-comb-loops","-tgvo", "on", "-tbn" ,"verilator"),
-//      () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, dataWidth)) {
-//      c => new VaddTester(c, appTestHelper)
-//    }
+    //********     II = 1     ********
+    var testII = 1
+
+    var infoFilename = "app_mapping_results/accum/ii1_i.txt"
+    var resultFilename = "app_mapping_results/accum/ii1_r.txt"
+    var a_base, b_base, c_base = 0
+    var constVals = Array(1, a_base, b_base, 1, c_base)
+    var addrVals = Array(a_base, b_base, c_base, c_base)
+    var throughput = 1
+
+    testAccum(resultFilename, infoFilename, testII, constVals, addrVals, throughput)
+    //********     II = 1     ********
+
+    //********     II = 2     ********
+    testII = 2
+
+    infoFilename = "app_mapping_results/accum/ii2_i.txt"
+    resultFilename = "app_mapping_results/accum/ii2_r.txt"
+    constVals = Array(1, a_base, b_base, 1, c_base)
+    addrVals = Array(a_base, b_base, c_base, c_base)
+    throughput = 2
+
+    testAccum(resultFilename, infoFilename, testII, constVals, addrVals, throughput)
+    //********     II = 2     ********
+
+    //********     II = 3     ********
+    testII = 3
+
+    infoFilename = "app_mapping_results/accum/ii3_i.txt"
+    resultFilename = "app_mapping_results/accum/ii3_r.txt"
+    a_base = 0
+    b_base = dataSize
+    c_base = dataSize * 2
+    constVals = Array(1, a_base, b_base, 1, c_base)
+    addrVals = Array(a_base, b_base, c_base, c_base)
+    throughput = 1
+
+    testAccum(resultFilename, infoFilename, testII, constVals, addrVals, throughput)
+    //********     II = 3     ********
   }
+
 }

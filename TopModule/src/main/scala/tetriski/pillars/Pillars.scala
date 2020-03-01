@@ -4,13 +4,14 @@ import tetriski.pillars.examples.{ApplicationExamples, HardwareExamples}
 object Pillars {
   def main(args: Array[String]): Unit = {
 
-//    HardwareExamples.example2PE()
-//    HardwareExamples.exampleAdres()
-//    HardwareExamples.exampleLSUAdres()
-//    HardwareExamples.exampleCompleteAdres()
+    HardwareExamples.exampleAdres()
+    HardwareExamples.exampleLSUAdres()
+    HardwareExamples.exampleCompleteAdres()
 //
-//    ApplicationExamples.exampleSum()
+//    ApplicationExamples.dumpArch(3, "MRRG/cgra-mrrg-4m4-ii3.txt")
+    ApplicationExamples.exampleSum()
     ApplicationExamples.exampleVadd()
+    ApplicationExamples.exampleAccum()
 
   }
 }

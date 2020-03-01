@@ -60,6 +60,7 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
     val deqEnLSU = Input(Vec(LSUnitNum, Bool()))
     val idleLSU = Output(Vec(LSUnitNum, Bool()))
 
+    val enConfig = Input(Bool())
     val en = Input(Bool())
 //    val schedules = Input(Vec((aluNum + LSUnitNum) * II_UPPER_BOUND,
 //      UInt((LOG_SCHEDULE_SIZE + LOG_SCHEDULE_SIZE + 1).W)))
@@ -217,7 +218,7 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
 
 
   val configController = Module(new ConfigController(moduleInfos.getTotalBits()))
-  configController.io.en <> io.en
+  configController.io.en <> io.enConfig
   configController.io.II <> io.II
   configController.io.inConfig <> io.configuration
 
@@ -386,6 +387,7 @@ class TopModuleWrapper(val moduleInfos: PillarsModuleInfo, val connect: Map[List
 
   topModule.io.schedules := scheduleROM(0)
   topModule.io.configuration := bitStreamsROM(cycleReg)
+  topModule.io.enConfig := true.B
 
   when(state === s_wait){
     when(io.en === true.B){

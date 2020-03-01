@@ -1,0 +1,8 @@
+for (i = 0; i < N; i++) {
+        c[i] = a[i] + b[i];
+    }
+
+const1 a_base
+const4 b_base
+const8 c_base
+const11 1

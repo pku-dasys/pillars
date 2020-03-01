@@ -1,0 +1,8 @@
+for (i = 0; i < N; i++) {
+        sum += a[i];
+    }
+
+const1 a_base
+const6 1
+
+throughput = add5.skew / II + 1

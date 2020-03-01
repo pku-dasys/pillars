@@ -105,7 +105,7 @@ trait BlockTrait extends ModuleTrait {
     connectArray
   }
 
-  def dumpMRRG(II: Int): Unit ={
+  def dumpMRRG(II: Int, filename: String = null): Unit ={
     def updateMRRG(block: BlockTrait): Unit ={
       val addName = block.hierName.map(i => i+".").reverse.reduce(_+_)
       for(module <- block.owningModules){
@@ -268,7 +268,11 @@ trait BlockTrait extends ModuleTrait {
     initialization()
     val targetMRRG = graphUnroll(mrrg, II)
 
-    val writer = new PrintWriter(new File(hierName.map(str => str + ".").reverse.reduce(_ + _) + "mrrg.txt"))
+    var outFilename = filename
+    if(filename == null){
+      outFilename = hierName.map(str => str + ".").reverse.reduce(_ + _) + "mrrg.txt"
+    }
+    val writer = new PrintWriter(new File(outFilename))
     dumpAsTXT(writer, targetMRRG)
   }
 
