@@ -1,0 +1,12 @@
+for (i = 0; i < N - 1; i++) {
+        c[i] *= a[i] + b[i + 1];
+        sum += c[i];
+    }
+
+const1 1
+const3 a_base
+const6 b_base
+const8 1
+const12 c_base
+
+throughput = add0.skew / II + 1

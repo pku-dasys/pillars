@@ -38,7 +38,7 @@ class PEBlock(name: String) extends BlockTrait{
   mux1.addInPorts(Array("input_0", "input_1", "input_2", "input_3", "input_4"))
   addModule(mux1)
 
-  val rf0 = new OpRF("rf0", List(1, 1, 2, 32, 3))
+  val rf0 = new OpRF("rf0", List(1, 1, 2, 32, 3 + 1))
   //port sequnces outs: 0: out_0, 1: out_1
   //port sequnces inputs: 0: input_0
   rf0.addOutPorts(Array("out_0", "out_1"))
@@ -101,7 +101,7 @@ class AdresPEBlock(name: String, useMuxBypass: Boolean) extends BlockTrait{
   mux1.addInPorts(Array("input_0", "input_1", "input_2", "input_3", "input_4"))
   addModule(mux1)
 
-  val rf0 = new OpRF("rf0", List(1, 1, 2, 32, 3))
+  val rf0 = new OpRF("rf0", List(1, 1, 2, 32, 3 + 1))
   //port sequnces outs: 0: out_0
   //port sequnces inputs: 0: input_0
   rf0.addOutPorts(Array("out_0", "out_1"))
@@ -191,7 +191,10 @@ class AdresPE5InBlock(name: String, useMuxBypass: Boolean) extends BlockTrait{
   addInPorts(Array("input_w", "input_e", "input_n", "input_s", "input_lsu"))
 
 //  val aluOpList = List(OpEnum.ADD, OpEnum.SUB, OpEnum.AND, OpEnum.OR, OpEnum.XOR, OpEnum.MUL)
+//  val aluOpList = List(OpEnum.ADD, OpEnum.SUB)
   val aluOpList = List(OpEnum.ADD, OpEnum.MUL)
+//  val aluOpList = List(OpEnum.ADD, OpEnum.SUB, OpEnum.AND, OpEnum.OR, OpEnum.XOR,
+//    OpEnum.MUL, OpEnum.DIV, OpEnum.SHLL, OpEnum.SHRA, OpEnum.SHRL)
   val aluSupBypass = true
   val alu0 = new OpAlu("alu0", aluOpList, aluSupBypass, List(32, 4))
   //port sequnces outs: 0: out
@@ -505,7 +508,7 @@ class AdresGlobalRFBlock(name: String, numNeighbour: Int) extends BlockTrait{
 
 
 
-  val global_rf = new OpRF("global_rf", List(log2Reg, inNum, outNum, 32, log2Reg*(inNum + outNum)))
+  val global_rf = new OpRF("global_rf", List(log2Reg, inNum, outNum, 32, log2Reg * (inNum + outNum) + 1))
   //  //port sequnces outs: 0: out_0
   //  //port sequnces inputs: 0: input_0
   global_rf.addOutPorts((0 to (outNum -1)).map(i => "out_" + i.toString).toArray)

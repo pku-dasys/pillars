@@ -4,11 +4,13 @@ import OpEnum.OpEnum
 
 import scala.collection.mutable.ArrayBuffer
 import MRRGMode._
+import tetriski.pillars.Mapping.NodeDFG
 
 class NodeMRRG(var name : String) extends Cloneable {
   var fanIn = ArrayBuffer[NodeMRRG]()
   var fanOut = ArrayBuffer[NodeMRRG]()
   var ops = ArrayBuffer[OpEnum]()
+  var mapnode : NodeDFG = null
   var mode = NORMAL_MODE
 
   def getName() : String = name
@@ -127,6 +129,88 @@ class MRRG extends Cloneable {
       }
     }
     ret
+  }
+
+  def loadtxt(filename : String) : Unit = {
+    import scala.io.Source
+
+    val buffer = Source.fromFile(filename)
+    val file = buffer.getLines().toArray
+
+    var now : Int = 0
+    var rsize : Int = Integer.parseInt(file(now))
+    var i : Int = 0
+
+    for (i <- 0 until rsize) {
+      now += 1
+      var name : String = file(now).substring(1, file(now).length-1)
+      addNode(new NodeMRRG(name))
+      now += 1
+      var faninsize = Integer.parseInt(file(now))
+      now += (faninsize + 1)
+      var fanoutsize = Integer.parseInt(file(now))
+      now += fanoutsize
+    }
+
+    now += 1
+    var fsize : Int = Integer.parseInt(file(now))
+    for(i <- 0 until fsize) {
+      now += 1
+      var name : String = file(now).substring(1, file(now).length-1)
+      addNode(new NodeMRRG(name))
+      now += 1
+      var faninsize = Integer.parseInt(file(now))
+      now += (faninsize + 1)
+      var fanoutsize = Integer.parseInt(file(now))
+      now += (fanoutsize + 1)
+      var opsize = Integer.parseInt(file(now))
+      var j = 0
+      for (j <- 0 until opsize) {
+        now += 1
+        nodes(i + rsize).ops.append(OpEnum(Integer.parseInt(file(now))))
+      }
+    }
+
+    now = 0
+    for(i <- 0 until rsize) {
+      now += 1
+      var name : String = file(now).substring(1, file(now).length-1)
+      now += 1
+      var faninsize = Integer.parseInt(file(now))
+      var j = 0
+      for (j <- 0 until faninsize) {
+        now += 1
+        apply(name).fanIn.append(apply(file(now)))
+      }
+      now += 1
+      var fanoutsize = Integer.parseInt(file(now))
+      for (j <- 0 until fanoutsize) {
+        now += 1
+        apply(name).fanOut.append(apply(file(now)))
+      }
+    }
+
+    now += 1
+    for(i <- 0 until fsize) {
+      now += 1
+      var name : String = file(now).substring(1, file(now).length-1)
+      now += 1
+      var faninsize = Integer.parseInt(file(now))
+      var j = 0
+      for (j <- 0 until faninsize) {
+        now += 1
+        addConnect(file(now), name)
+      }
+      now += 1
+      var fanoutsize = Integer.parseInt(file(now))
+      for (j <- 0 until fanoutsize) {
+        now += 1
+        apply(name).fanOut.append(apply(file(now)))
+      }
+      now += 1
+      var opsize = Integer.parseInt(file(now))
+      now += opsize
+    }
   }
 }
 

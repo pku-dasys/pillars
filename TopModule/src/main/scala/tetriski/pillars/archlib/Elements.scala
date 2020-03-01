@@ -39,6 +39,7 @@ class OpRF(name: String, params: List[Int]) extends ModuleTrait {
   setSupOps(List())
   //4 bit configuration
   //setConfigBit(3)
+  var forbidden = false
 
   //setWidth(width)
   setParams(params)

@@ -9,6 +9,8 @@ import tetriski.pillars.testers.{TopModule2PEUnitTest, TopModuleAdresUnitTest,
 
 object HardwareExamples {
   def example2PE(): Unit ={
+    //Eliminated
+
     val arch = new ArchitctureHierarchy()
     //The order of ports should be same as TopModule
     arch.addOutPorts(Array("output"))
@@ -53,7 +55,7 @@ object HardwareExamples {
       () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, dataWidth))
 
     //Run tester
-    iotesters.Driver.execute(Array("-tgvo", "on", "-tbn" ,"verilator"),
+    iotesters.Driver.execute(Array("-tgvo", "on"),
       () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, dataWidth)) {
       c => new TopModule2PEUnitTest(c)
     }

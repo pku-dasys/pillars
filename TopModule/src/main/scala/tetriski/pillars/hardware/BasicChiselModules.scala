@@ -17,12 +17,12 @@ class RegNextN(w: Int) extends Module {
   })
   val regArray = RegInit(VecInit(Seq.fill((1 << LOG_SCHEDULE_SIZE) - 1)(0.U(w.W))))
   regArray(0) := io.input
-  for(i <- 1 until (1 << LOG_SCHEDULE_SIZE) - 1){
+  for (i <- 1 until (1 << LOG_SCHEDULE_SIZE) - 1) {
     regArray(i) := regArray(i - 1)
   }
-  when(io.latency > 0.U){
+  when(io.latency > 0.U) {
     io.out := regArray(io.latency - 1.U)
-  }.otherwise{
+  }.otherwise {
     io.out := io.input
   }
 }
@@ -41,11 +41,11 @@ class SyncScheduleController(w: Int) extends Module {
   val signal = io.skewing(LOG_SCHEDULE_SIZE, LOG_SCHEDULE_SIZE)
   regNextN.io.latency := latency
 
-  when(signal === 1.U){
+  when(signal === 1.U) {
     regNextN.io.input := io.input0
     io.skewedInput0 := regNextN.io.out
     io.skewedInput1 := io.input1
-  }.otherwise{
+  }.otherwise {
     regNextN.io.input := io.input1
     io.skewedInput1 := regNextN.io.out
     io.skewedInput0 := io.input0
@@ -68,29 +68,29 @@ class ConfigController(configWidth: Int) extends Module {
 
   //io.outConfig := configRegs(cycleReg - 1.U(LOG_II_UPPER_BOUND.W))
 
-  when(state === s_read_write){
-    io.outConfig := io.inConfig
-  }.otherwise{
+  when(state === s_read_write) {
+    io.outConfig := 0.U
+  }.otherwise {
     io.outConfig := configRegs(cycleReg)
   }
 
-  when(io.en){
-    when(state === s_read_write){
+  when(io.en) {
+    when(state === s_read_write) {
       configRegs(cycleReg) := io.inConfig
-      when(cycleReg === io.II){
+      when(cycleReg === io.II) {
         state := s_read_only
         cycleReg := 0.U
-      }.otherwise{
+      }.otherwise {
         cycleReg := cycleReg + 1.U
       }
-    }.otherwise{
-      when(cycleReg === io.II - 1.U){
+    }.otherwise {
+      when(cycleReg === io.II - 1.U) {
         cycleReg := 0.U
-      }.otherwise{
+      }.otherwise {
         cycleReg := cycleReg + 1.U
       }
     }
-  }.otherwise{
+  }.otherwise {
     state := s_read_write
     cycleReg := 0.U
   }
@@ -109,15 +109,15 @@ class ScheduleController extends Module {
 
   io.valid := (cycleReg === io.waitCycle) && io.en
 
-  when(io.en){
-    when(state === s_wait){
-      when(cycleReg === io.waitCycle){
+  when(io.en) {
+    when(state === s_wait) {
+      when(cycleReg === io.waitCycle) {
         state := s_valid
-      }.otherwise{
+      }.otherwise {
         cycleReg := cycleReg + 1.U
       }
     }
-  }.otherwise{
+  }.otherwise {
     state := s_wait
     cycleReg := 0.U
   }
@@ -133,9 +133,9 @@ class MultiIIScheduleController extends Module {
   })
   val scheduleControllers = (0 until II_UPPER_BOUND).toArray.map(t => Module(new ScheduleController))
   val validRegs = RegInit(VecInit(Seq.fill(II_UPPER_BOUND)(false.B)))
-  val cycleReg = RegInit((II_UPPER_BOUND-1).U(LOG_II_UPPER_BOUND.W))
+  val cycleReg = RegInit((II_UPPER_BOUND - 1).U(LOG_II_UPPER_BOUND.W))
 
-  for(i <- 0 until II_UPPER_BOUND){
+  for (i <- 0 until II_UPPER_BOUND) {
     val scheduleController = scheduleControllers(i)
     scheduleController.io.en := io.en
     scheduleController.io.waitCycle := io.schedules(i)(LOG_SCHEDULE_SIZE - 1, 0)
@@ -145,10 +145,10 @@ class MultiIIScheduleController extends Module {
   io.valid := validRegs(cycleReg)
   io.skewing := io.schedules(cycleReg)(LOG_SCHEDULE_SIZE + LOG_SCHEDULE_SIZE, LOG_SCHEDULE_SIZE)
 
-  when(io.en === true.B){
-    when(cycleReg === io.II - 1.U){
+  when(io.en === true.B) {
+    when(cycleReg === io.II - 1.U) {
       cycleReg := 0.U
-    }.otherwise{
+    }.otherwise {
       cycleReg := cycleReg + 1.U
     }
   }
@@ -166,12 +166,12 @@ class Alu(funSelect: Int, w: Int) extends Module {
     val outs = Output(MixedVec(Seq(UInt(w.W))))
   })
 
-  def getFunSeq(shamt : UInt = null) : Seq[(UInt, UInt)] ={
+  def getFunSeq(shamt: UInt = null): Seq[(UInt, UInt)] = {
     val funSeq = new ArrayBuffer[(UInt, UInt)]()
-//    val funSelect = 0
+    //    val funSelect = 0
 
-    for (i <- 0 until ALU_FUN_NUM){
-      if((funSelect & (1 << i))> 0){
+    for (i <- 0 until ALU_FUN_NUM) {
+      if ((funSelect & (1 << i)) > 0) {
         i match {
           case 0 => funSeq.append(ALU_ADD -> (input_a + input_b))
           case 1 => funSeq.append(ALU_SUB -> (input_a - input_b))
@@ -181,10 +181,10 @@ class Alu(funSelect: Int, w: Int) extends Module {
           case 5 => funSeq.append(ALU_MUL -> (input_a * input_b))
           case 6 => funSeq.append(ALU_SLT -> (input_a.asSInt < input_b.asSInt))
           case 7 => funSeq.append(ALU_SHLL -> (input_a << shamt).asUInt())
-//          case 7 => funSeq.append(ALU_SHLL -> (input_a << input_b).asUInt())
+          //          case 7 => funSeq.append(ALU_SHLL -> (input_a << input_b).asUInt())
           case 8 => funSeq.append(ALU_SLTU -> (input_a < input_b))
           case 9 => funSeq.append(ALU_SHRL -> (input_a >> shamt).asUInt())
-//          case 9 => funSeq.append(ALU_SHRL -> (input_a >> input_b).asUInt())
+          //          case 9 => funSeq.append(ALU_SHRL -> (input_a >> input_b).asUInt())
           case 10 => funSeq.append(ALU_SHRA -> (input_a.asSInt >> shamt).asUInt)
           case 11 => funSeq.append(ALU_DIV -> input_a / input_b)
           case 12 => funSeq.append(ALU_COPY_A -> input_a)
@@ -208,24 +208,24 @@ class Alu(funSelect: Int, w: Int) extends Module {
 
   val funSeq = getFunSeq(shamt)
 
-  when(io.en){
+  when(io.en) {
     out := MuxLookup(io.configuration, input_b, funSeq)
-//    out := MuxLookup(io.configuration, input_b, Seq(
-//      ALU_ADD -> (input_a + input_b),
-//      ALU_SUB -> (input_a - input_b),
-//      ALU_AND -> (input_a & input_b),
-//      ALU_OR -> (input_a | input_b),
-//      ALU_XOR -> (input_a ^ input_b),
-//      ALU_MUL -> (input_a * input_b),
-//      ALU_SLT -> (input_a.asSInt < input_b.asSInt),
-//      ALU_SLL -> (input_a << shamt),
-//      ALU_SLTU -> (input_a < input_b),
-//      ALU_SRL -> (input_a >> shamt),
-//      ALU_SRA -> (input_a.asSInt >> shamt).asUInt,
-//      ALU_COPY_A -> input_a,
-//      ALU_COPY_B -> input_b))
-  }.otherwise{
-    for(out <- io.outs){
+    //    out := MuxLookup(io.configuration, input_b, Seq(
+    //      ALU_ADD -> (input_a + input_b),
+    //      ALU_SUB -> (input_a - input_b),
+    //      ALU_AND -> (input_a & input_b),
+    //      ALU_OR -> (input_a | input_b),
+    //      ALU_XOR -> (input_a ^ input_b),
+    //      ALU_MUL -> (input_a * input_b),
+    //      ALU_SLT -> (input_a.asSInt < input_b.asSInt),
+    //      ALU_SLL -> (input_a << shamt),
+    //      ALU_SLTU -> (input_a < input_b),
+    //      ALU_SRL -> (input_a >> shamt),
+    //      ALU_SRA -> (input_a.asSInt >> shamt).asUInt,
+    //      ALU_COPY_A -> input_a,
+    //      ALU_COPY_B -> input_b))
+  }.otherwise {
+    for (out <- io.outs) {
       out := 0.U
     }
   }
@@ -262,45 +262,49 @@ class Alu(funSelect: Int, w: Int) extends Module {
 //}
 
 
-class RegisterFiles(log2Regs : Int, numIn : Int, numOut : Int, w :Int) extends Module {
+class RegisterFiles(log2Regs: Int, numIn: Int, numOut: Int, w: Int) extends Module {
   val io = IO(new Bundle {
     val en = Input(Bool())
     //port sequnces: 0:outs, 1:inputs, 2: configuration, 3: configTest for test
-//    val configTest = Output(Vec(numOut+numIn, UInt(w.W)))
-    val configuration = Input(UInt((log2Regs * (numIn + numOut)).W))
+    //    val configTest = Output(Vec(numOut+numIn, UInt(w.W)))
+    val configuration = Input(UInt((log2Regs * (numIn + numOut) + 1).W))
     val inputs = Input(MixedVec((1 to numIn) map { i => UInt(w.W) }))
     val outs = Output(MixedVec((1 to numOut) map { i => UInt(w.W) }))
   })
   val targets = (0 until numIn + numOut).toList.map(t => log2Regs)
   val dispatch = Module(new Dispatch((log2Regs * (numIn + numOut)), targets))
-  dispatch.io.configuration := io.configuration
+  val configSize = log2Regs * (numIn + numOut)
+  dispatch.io.configuration := io.configuration(configSize - 1, 0)
   dispatch.io.en <> io.en
+  val forbidden = io.configuration(configSize, configSize)
 
   //val registers = SyncReadMem(Math.pow(2, log2Regs).toInt, UInt(w.W))
   //val registers = Mem(Math.pow(2, log2Regs).toInt, UInt(w.W))
 
   val regs = RegInit(VecInit(Seq.fill(Math.pow(2, log2Regs).toInt)(0.U(32.W))))
 
-  when(io.en){
-    for (i <- 0 until numIn){
-      //registers.write(dispatch.io.outs(i), io.inputs(i))
-      regs(dispatch.io.outs(i)) := io.inputs(i)
-//      io.configTest(i) := dispatch.io.outs(i)
+  when(io.en) {
+    when(forbidden === false.B) {
+      for (i <- 0 until numIn) {
+        //registers.write(dispatch.io.outs(i), io.inputs(i))
+        regs(dispatch.io.outs(i)) := io.inputs(i)
+      }
+      //      io.configTest(i) := dispatch.io.outs(i)
     }
-    for (i <- 0 until numOut){
+    for (i <- 0 until numOut) {
       //io.outs(i) := registers.read(dispatch.io.outs(i + numIn))
       io.outs(i) := regs(dispatch.io.outs(i + numIn))
-//      io.configTest(i + numIn) := dispatch.io.outs(i + numIn)
+      //      io.configTest(i + numIn) := dispatch.io.outs(i + numIn)
     }
-  }.otherwise{
-    for(out <- io.outs){
+  }.otherwise {
+    for (out <- io.outs) {
       out := 0.U
     }
   }
 
 }
 
-class Multiplexer(inNum : Int, w: Int) extends Module {
+class Multiplexer(inNum: Int, w: Int) extends Module {
   val io = IO(new Bundle {
     val en = Input(Bool())
 
@@ -313,10 +317,10 @@ class Multiplexer(inNum : Int, w: Int) extends Module {
   val out = io.outs(0)
   val selectArray = (0 to inNum - 1).map(i => i.U -> io.inputs(i))
   val muxIn0 = MuxLookup(io.configuration, io.inputs(0), selectArray)
-  when(io.en){
+  when(io.en) {
     io.outs(0) := muxIn0
-  }.otherwise{
-    for(out <- io.outs){
+  }.otherwise {
+    for (out <- io.outs) {
       out := 0.U
     }
   }
@@ -338,22 +342,22 @@ class Multiplexer(inNum : Int, w: Int) extends Module {
 //  foo(io.configuration, io.outs)
 //}
 
-class ConstUnit(w :Int) extends Module {
+class ConstUnit(w: Int) extends Module {
   val io = IO(new Bundle {
     val en = Input(Bool())
 
     val configuration = Input(UInt(w.W))
     val outs = Output(MixedVec((1 to 1) map { i => UInt(w.W) }))
   })
-//  val const = Mem(1, UInt(w.W))
-//  const.write(0.U, io.configuration)
+  //  val const = Mem(1, UInt(w.W))
+  //  const.write(0.U, io.configuration)
 
 
-  when(io.en){
+  when(io.en) {
     //io.outs(0) := const.read((0.U))
     io.outs(0) := io.configuration
-  }.otherwise{
-    for(out <- io.outs){
+  }.otherwise {
+    for (out <- io.outs) {
       out := 0.U
     }
   }
@@ -379,7 +383,7 @@ class ADRESPE(w: Int) extends Module {
   val rf = Module(new RegisterFiles(1, 1, 2, 32))
   val alu = Module(new Alu(0, 32))
   val targets = List(3, 3, 4, 3)
-  val dispatch = Module(new Dispatch(13,  targets))
+  val dispatch = Module(new Dispatch(13, targets))
   dispatch.io.configuration := io.configuration
   val muxIn0 = MuxLookup(dispatch.io.outs(0), rf.io.outs(0), Array(0.U -> input_0, 1.U -> input_1,
     2.U -> input_2, 3.U -> input_3, 4.U -> rf.io.outs(0)))
@@ -394,38 +398,38 @@ class ADRESPE(w: Int) extends Module {
 }
 
 //to be update
-class Dispatch(wIn: Int, targets : List[Int]) extends Module {
+class Dispatch(wIn: Int, targets: List[Int]) extends Module {
   val io = IO(new Bundle {
     val en = Input(Bool())
 
     val configuration = Input(UInt(wIn.W))
-    val outs = Output(MixedVec(targets.map{i => UInt(i.W)}))
+    val outs = Output(MixedVec(targets.map { i => UInt(i.W) }))
   })
-//  val outt =io.outs(targets.size - 2)
+  //  val outt =io.outs(targets.size - 2)
   var i = 0
-  var offset : Int= 0
-  when(io.en){
-    for (elem <- targets){
+  var offset: Int = 0
+  when(io.en) {
+    for (elem <- targets) {
       io.outs(i) := io.configuration(offset + elem - 1, offset)
       i += 1
       offset += elem
     }
-  }.otherwise{
-    for(out <- io.outs){
+  }.otherwise {
+    for (out <- io.outs) {
       out := 0.U
     }
   }
 }
 
-class DispatchT(wIn: Int, targets : List[Int]) extends Module {
+class DispatchT(wIn: Int, targets: List[Int]) extends Module {
   val io = IO(new Bundle {
     val configuration = Input(UInt(wIn.W))
-    val outs = Output(MixedVec(targets.map{i => UInt(i.W)}))
+    val outs = Output(MixedVec(targets.map { i => UInt(i.W) }))
   })
-  val outt =io.outs(targets.size - 2)
+  val outt = io.outs(targets.size - 2)
   var i = 0
-  var offset : Int= 0
-  for (elem <- targets){
+  var offset: Int = 0
+  for (elem <- targets) {
     io.outs(i) := io.configuration(offset + elem - 1, offset)
     i += 1
     offset += elem
@@ -434,7 +438,7 @@ class DispatchT(wIn: Int, targets : List[Int]) extends Module {
 }
 
 
-class LSMemWrapper(w : Int) extends Module {
+class LSMemWrapper(w: Int) extends Module {
   val io = IO(new Bundle {
     val workEn = Input(Bool())
 
@@ -460,15 +464,15 @@ class LSMemWrapper(w : Int) extends Module {
   val enq_mem = Module(new EnqMem(mem.io.a, MEM_IN_WIDTH))
   val deq_mem = Module(new DeqMem(mem.io.b, MEM_OUT_WIDTH))
 
-  when(state === s_noop){
-    when(io.workEn === true.B){
+  when(state === s_noop) {
+    when(io.workEn === true.B) {
       state := s_work
       io.writeMem <> mem.io.a
-    }.otherwise{
-      when(io.enqEn === true.B){
+    }.otherwise {
+      when(io.enqEn === true.B) {
         state := s_write_only
         enq_mem.io.mem <> mem.io.a
-      }.otherwise{
+      }.otherwise {
         io.writeMem <> mem.io.a
       }
     }
@@ -476,32 +480,32 @@ class LSMemWrapper(w : Int) extends Module {
     deq_mem.io.mem.dout <> DontCare
     enq_mem.io.idle <> io.idle
   }.elsewhen(state === s_write_only) {
-    when(io.enqEn === false.B){
+    when(io.enqEn === false.B) {
       state := s_work
       io.writeMem <> mem.io.a
-    }.otherwise{
+    }.otherwise {
       enq_mem.io.mem <> mem.io.a
     }
     io.readMem <> mem.io.b
     deq_mem.io.mem.dout <> DontCare
     enq_mem.io.idle <> io.idle
-  }.elsewhen(state === s_work){
-    when(io.deqEn === true.B){
+  }.elsewhen(state === s_work) {
+    when(io.deqEn === true.B) {
       state := s_read_only
       deq_mem.io.mem <> mem.io.b
       io.readMem.dout <> DontCare
-    }.otherwise{
+    }.otherwise {
       io.readMem <> mem.io.b
       deq_mem.io.mem.dout <> DontCare
     }
     io.writeMem <> mem.io.a
     deq_mem.io.idle <> io.idle
-  }.otherwise{
-    when(io.deqEn === false.B){
+  }.otherwise {
+    when(io.deqEn === false.B) {
       state := s_noop
       io.readMem <> mem.io.b
       deq_mem.io.mem.dout <> DontCare
-    }.otherwise{
+    }.otherwise {
       deq_mem.io.mem <> mem.io.b
       io.readMem.dout <> DontCare
     }
@@ -510,12 +514,12 @@ class LSMemWrapper(w : Int) extends Module {
   }
 
 
-//  deq_mem.io.mem <> mem.io.b
-//  deq_mem.io.out <> io.out
-//  deq_mem.io.len <> io.len
+  //  deq_mem.io.mem <> mem.io.b
+  //  deq_mem.io.out <> io.out
+  //  deq_mem.io.len <> io.len
 
 
-//  deq_mem.io.en := true.B
+  //  deq_mem.io.en := true.B
 
   mem.clock := clock
   enq_mem.clock := clock
@@ -525,12 +529,12 @@ class LSMemWrapper(w : Int) extends Module {
   enq_mem.io.base <> io.base
   enq_mem.io.start <> io.start
 
-//  io.readMem <> mem.io.b
-//  when(io.enqEn === true.B){
-//    enq_mem.io.mem <> mem.io.a
-//  }.otherwise{
-//    io.writeMem <> mem.io.a
-//  }
+  //  io.readMem <> mem.io.b
+  //  when(io.enqEn === true.B){
+  //    enq_mem.io.mem <> mem.io.a
+  //  }.otherwise{
+  //    io.writeMem <> mem.io.a
+  //  }
 
   enq_mem.io.en <> io.enqEn
   enq_mem.io.in <> io.in
@@ -539,12 +543,12 @@ class LSMemWrapper(w : Int) extends Module {
   deq_mem.io.len <> io.len
   deq_mem.io.out <> io.out
 
-//  enq_mem.io.base <> io.base
-//  enq_mem.io.start <> io.start
-//  enq_mem.io.idle <> io.idle
+  //  enq_mem.io.base <> io.base
+  //  enq_mem.io.start <> io.start
+  //  enq_mem.io.idle <> io.idle
 }
 
-class LoadStoreUnit(w : Int) extends Module{
+class LoadStoreUnit(w: Int) extends Module {
   val io = IO(new Bundle {
     //0 for load, 1 for store
     val configuration = Input(UInt(1.W))
@@ -561,7 +565,7 @@ class LoadStoreUnit(w : Int) extends Module{
     val deqEn = Input(Bool())
     val idle = Output(Bool())
 
-    val inputs = Input(MixedVec( UInt(log2Ceil(MEM_DEPTH).W), UInt(w.W)))
+    val inputs = Input(MixedVec(UInt(log2Ceil(MEM_DEPTH).W), UInt(w.W)))
     val outs = Output(MixedVec((1 to 1) map { i => UInt(w.W) }))
   })
   val memWrapper = Module(new LSMemWrapper(w))
@@ -585,36 +589,35 @@ class LoadStoreUnit(w : Int) extends Module{
   val dataIn = syncScheduleController.io.skewedInput1
   val out = io.outs(0)
 
-  val readMem =  memWrapper.io.readMem
-  val writeMem =  memWrapper.io.writeMem
+  val readMem = memWrapper.io.readMem
+  val writeMem = memWrapper.io.writeMem
 
+  io.outs(0) := readMem.dout
 
-
-  when(io.en){
+  when(io.en) {
     readMem.addr := addr
     writeMem.addr := addr
     writeMem.din := dataIn
-    when(io.configuration === 0.U){
+    when(io.configuration === 0.U) {
       readMem.en := true.B
       writeMem.en := false.B
       writeMem.we := false.B
-    }.otherwise{
+    }.otherwise {
       readMem.en := false.B
       writeMem.en := true.B
       writeMem.we := true.B
     }
-    io.outs(0) := readMem.dout
-  }.otherwise{
+  }.otherwise {
     readMem.en := false.B
     writeMem.en := false.B
     writeMem.we := false.B
     readMem.addr := DontCare
     writeMem.addr := DontCare
     writeMem.din := DontCare
-      for(out <- io.outs){
-        out := 0.U
-      }
-    }
+    //      for(out <- io.outs){
+    //        out := 0.U
+    //      }
+  }
 }
 
 

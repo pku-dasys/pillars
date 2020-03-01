@@ -12,7 +12,14 @@ class AppTestHelper(bitStreams: Array[BigInt], schedules: List[Int],
   var outDataMap = Map[List[Int], Array[Int]]()
   var outPortRefs = Map[Int, Array[Int]]()
   var outputCycle = testII + 1
+  var throughput = 1
 
+  def setThroughput(arg: Int): Unit ={
+    throughput = arg
+  }
+  def getThroughput(): Int ={
+    throughput
+  }
   def setOutputCycle(arg : Int): Unit ={
     outputCycle = arg
   }
@@ -61,7 +68,7 @@ class AppTestHelper(bitStreams: Array[BigInt], schedules: List[Int],
   }
 }
 
-class ApplicationTester(c: TopModule) extends PeekPokeTester(c) {
+class ApplicationTester(c: TopModule, appTestHelper: AppTestHelper) extends PeekPokeTester(c) {
   def asUnsignedInt(signedInt: Int): BigInt = (BigInt(signedInt >>> 1) << 1) + (signedInt & 1)
   def enqData(numInLSU: Int, inData: Array[Int], base: Int): Unit ={
     poke(c.io.startLSU(numInLSU), 1)
@@ -110,108 +117,104 @@ class ApplicationTester(c: TopModule) extends PeekPokeTester(c) {
         }
       }
       expect(c.io.streamOutLSU(numInLSU).bits,  asUnsignedInt(refArray(i)))
-//      println(asUnsignedInt(refArray(i)).toString + " " + peek(c.io.streamOutLSU(numInLSU).bits).toString())
+      println(asUnsignedInt(refArray(i)).toString + " " + peek(c.io.streamOutLSU(numInLSU).bits).toString())
       step(1)
     }
 
     poke(c.io.deqEnLSU(numInLSU), 0)
   }
+  def inputData(): Unit ={
+    //input data into LSU
+    for(inDataItem <- appTestHelper.inDataMap){
+      val numInLSU = inDataItem._1(0)
+      val base = inDataItem._1(1)
+      val inData = inDataItem._2
+      enqData(numInLSU, inData, base)
+    }
+  }
+  def inputConfig(testII: Int): Unit ={
+    val schedules = appTestHelper.getSchedulesBigInt()
+    val bitStreams = appTestHelper.getBitStreams()
+
+    poke(c.io.enConfig, 1)
+    poke(c.io.II, testII)
+    poke(c.io.schedules, schedules)
+
+    for(i <- 0 until testII){
+      poke(c.io.configuration, bitStreams(i))
+      step(1)
+    }
+  }
+  def checkPortOuts(testII: Int): Unit ={
+    val refs = appTestHelper.getOutPortRefs()
+    val throughput = appTestHelper.getThroughput()
+    if(throughput > 1){
+      step((throughput -1) * testII)
+    }
+    for(ref <- refs){
+      for(i <- ref._2){
+        expect(c.io.outs(ref._1), asUnsignedInt(i))
+        println(asUnsignedInt(i).toString + " " + peek(c.io.outs(ref._1)).toString())
+        step(testII * throughput)
+      }
+    }
+  }
+  def checkLSUData(): Unit ={
+    //stream deq test
+    for(inDataItem <- appTestHelper.outDataMap){
+      val numInLSU = inDataItem._1(0)
+      val base = inDataItem._1(1)
+      val refArray = inDataItem._2
+      deqData(numInLSU, refArray, base)
+    }
+  }
 }
 
 class SumTester(c: TopModule, appTestHelper: AppTestHelper)
-  extends ApplicationTester(c) {
-
+  extends ApplicationTester(c, appTestHelper) {
   poke(c.io.en, 0)
-
-  //input data into LSU
-  for(inDataItem <- appTestHelper.inDataMap){
-    val numInLSU = inDataItem._1(0)
-    val base = inDataItem._1(1)
-    val inData = inDataItem._2
-    enqData(numInLSU, inData, base)
-  }
-
-
+  inputData()
   val testII = appTestHelper.getTestII()
-  val schedules = appTestHelper.getSchedulesBigInt()
-  val bitStreams = appTestHelper.getBitStreams()
-
+  inputConfig(testII)
   poke(c.io.en, 1)
-  poke(c.io.II, testII)
-
-//  for(i <- 0 until schedules.size){
-//    poke(c.io.schedules(i), schedules(i))
-//  }
-
-  poke(c.io.schedules, schedules)
-
-  for(i <- 0 until testII){
-    poke(c.io.configuration, bitStreams(i))
-    step(1)
-  }
 
   val outputCycle = appTestHelper.getOutputCycle()
-  step(outputCycle - testII)
+  step(outputCycle)
 
-  val refs = appTestHelper.getOutPortRefs()
-  for(ref <- refs){
-    for(i <- ref._2){
-      expect(c.io.outs(ref._1), asUnsignedInt(i))
-//      println(asUnsignedInt(i).toString + " " + peek(c.io.outs(ref._1)).toString())
-      step(testII)
-    }
-  }
+  checkPortOuts(testII)
+  checkLSUData()
+}
 
-  //stream deq test
-  for(inDataItem <- appTestHelper.outDataMap){
-    val numInLSU = inDataItem._1(0)
-    val base = inDataItem._1(1)
-    val refArray = inDataItem._2
-    deqData(numInLSU, refArray, base)
-  }
+class AccumTester(c: TopModule, appTestHelper: AppTestHelper)
+  extends ApplicationTester(c, appTestHelper) {
+
+  poke(c.io.en, 0)
+  inputData()
+  val testII = appTestHelper.getTestII()
+  inputConfig(testII)
+  poke(c.io.en, 1)
+
+  val outputCycle = appTestHelper.getOutputCycle()
+  step(outputCycle)
+
+  checkPortOuts(testII)
+  checkLSUData()
 
 }
 
 class VaddTester(c: TopModule, appTestHelper: AppTestHelper)
-  extends ApplicationTester(c) {
+  extends ApplicationTester(c, appTestHelper) {
 
   poke(c.io.en, 0)
-
-  //input data into LSU
-  for(inDataItem <- appTestHelper.inDataMap){
-    val numInLSU = inDataItem._1(0)
-    val base = inDataItem._1(1)
-    val inData = inDataItem._2
-    enqData(numInLSU, inData, base)
-  }
-
-
+  inputData()
   val testII = appTestHelper.getTestII()
-  val schedules = appTestHelper.getSchedulesBigInt()
-  val bitStreams = appTestHelper.getBitStreams()
-
+  inputConfig(testII)
   poke(c.io.en, 1)
-  poke(c.io.II, testII)
-
-//  for(i <- 0 until schedules.size){
-//    poke(c.io.schedules(i), schedules(i))
-//  }
-  poke(c.io.schedules, schedules)
-
-  for(i <- 0 until testII){
-    poke(c.io.configuration, bitStreams(i))
-    step(1)
-  }
 
   val outputCycle = appTestHelper.getOutputCycle()
-  step(outputCycle - testII)
+  step(outputCycle)
 
-  //stream deq test
-  for(outDataItem <- appTestHelper.outDataMap){
-    val numInLSU = outDataItem._1(0)
-    val base = outDataItem._1(1)
-    val refArray = outDataItem._2
-    deqData(numInLSU, refArray, base)
-  }
+  checkPortOuts(testII)
+  checkLSUData()
 
 }
