@@ -6,10 +6,12 @@ for (i = 0; i < N; i++) {
 
 
 const1 a_base
-const4 4
+const4 3
 const6 c1_addr
 const9 2
 const11 m_base
 const15 2
 const20 b_base
 const23 1
+
+throughput = add22.skew / II + 1

@@ -55,8 +55,14 @@ object Scheduler {
                 mapNode.input.size + " " + cycle(mrrg.nodeMap(in.name)))
               if (inputnode.name == mapNode.input(0).name) {
                 mapNode.inputLatency(0) = cycle(mrrg.nodeMap(in.name)) + 1
+                if(in.name.contains("load")){
+                  mapNode.inputLatency(0) += 1
+                }
               } else {
                 mapNode.inputLatency(1) = cycle(mrrg.nodeMap(in.name)) + 1
+                if(in.name.contains("load")){
+                  mapNode.inputLatency(1) += 1
+                }
               }
             }
             else {
@@ -193,8 +199,8 @@ object Scheduler {
     var beginCycle = 0
     val pattern = "[0-9]+:".r
 
-    //    val minLatency = dfg.op_nodes.map(op => op.latency).min
-    //    dfg.op_nodes.foreach(op => op.setLatency(op.latency - minLatency))
+    val minLatency = dfg.op_nodes.map(op => op.latency).min
+    dfg.op_nodes.foreach(op => op.setLatency(op.latency - minLatency))
 
     for (j <- 0 until dfg.op_nodes.size) {
       val op = dfg.op_nodes(j)

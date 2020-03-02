@@ -36,7 +36,7 @@ mul13->shra14[operand=0]; //mul->ashr
 shra14->mul18[operand=1]; //ashr->mul
 mul16->mul17[operand=0]; //mul->mul
 mul17->mul18[operand=0]; //mul->mul
-mul18->store21[operand=0]; //mul->store
+mul18->store21[operand=1]; //mul->store
 add22->add0[operand=1]; //add->gep_mul
 add22->add10[operand=1]; //add->gep_mul
 add22->add19[operand=1]; //add->gep_mul
@@ -50,7 +50,7 @@ const11->add10[operand=0]; //gep_const->gep_mul
 add10->load12[operand=0]; //gep_mul->load
 const15->shra14[operand=1]; //const->ashr
 const20->add19[operand=0]; //gep_const->gep_mul
-add19->store21[operand=1]; //gep_mul->store
+add19->store21[operand=0]; //gep_mul->store
 const23->add22[operand=1]; //const->add
 }
 
