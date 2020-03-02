@@ -92,15 +92,54 @@ class ApplicationWrapperTester(c: TopModuleWrapper, appTestHelper: AppTestHelper
       deqData(numInLSU, refArray, base)
     }
   }
+  def inputConfig(): Unit ={
+    //only support II = 1
+    def getSingleBit(bigInt: BigInt, pos: Int): Int ={
+      val mask = (1: BigInt) << pos
+      val bit = (bigInt & mask) >> pos
+      bit.toInt
+    }
+
+    def getTestBit(bigInt: BigInt, pos: Int): BigInt ={
+      var mask = (1: BigInt)
+      for(i <- 0 until pos){
+        mask = mask << 1
+        mask = mask | 1
+      }
+      mask = mask << (c.topModule.io.configuration.getWidth - pos)
+      val bit = (bigInt & mask) >> pos
+      bit
+    }
+    val schedules = appTestHelper.getSchedulesBigInt()
+    val bitStreams = appTestHelper.getBitStreams()
+
+    val size = Math.max(c.topModule.io.configuration.getWidth, c.topModule.io.schedules.getWidth)
+    for(i <- 0 until size){
+      val schedulePos = c.topModule.io.schedules.getWidth - i - 1
+      val configPos = c.topModule.io.configuration.getWidth - i - 1
+      if(schedulePos >= 0){
+        poke(c.io.singleBitSchedule, getSingleBit(schedules, schedulePos))
+      }
+      if(configPos >= 0){
+        poke(c.io.singleBitConfig, getSingleBit(bitStreams(0), configPos))
+      }
+      step(1)
+      println(peek(c.io.test).toString() + " " + peek(c.io.test1).toString() +
+        " " + getTestBit(bitStreams(0), configPos))
+    }
+
+  }
 }
 
 class VaddWrapperTester(c: TopModuleWrapper, appTestHelper: AppTestHelper)
   extends ApplicationWrapperTester(c, appTestHelper) {
 
   poke(c.io.en, 0)
+  inputConfig()
   inputData()
   val testII = appTestHelper.getTestII()
   poke(c.io.II, testII)
+  poke(c.io.enConfig, 1)
   //wait cgra read configuration and schedule
   step(testII)
   poke(c.io.en, 1)
@@ -116,8 +155,10 @@ class SumWrapperTester(c: TopModuleWrapper, appTestHelper: AppTestHelper)
   extends ApplicationWrapperTester(c, appTestHelper) {
 
   poke(c.io.en, 0)
+  inputConfig()
   inputData()
   val testII = appTestHelper.getTestII()
+  poke(c.io.enConfig, 1)
   poke(c.io.II, testII)
   //wait cgra read configuration and schedule
   step(testII)

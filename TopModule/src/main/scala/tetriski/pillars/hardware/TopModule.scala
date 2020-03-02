@@ -305,7 +305,7 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
 
 
 class TopModuleWrapper(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], List[List[Int]]],
-                       val configList : List[List[List[Int]]], w: Int, appTestHelper: AppTestHelper)
+                       val configList : List[List[List[Int]]], w: Int)
   extends Module {
 
   val topModule = Module(new TopModule(moduleInfos, connect, configList, w))
@@ -325,7 +325,14 @@ class TopModuleWrapper(val moduleInfos: PillarsModuleInfo, val connect: Map[List
     val LSUnitID = Input(UInt(log2Up(LSUnitNum).W))
 
     val en = Input(Bool())
+    val enConfig = Input(Bool())
     val II = Input(UInt(LOG_II_UPPER_BOUND.W))
+
+    val singleBitConfig = Input(UInt(1.W))
+    val singleBitSchedule = Input(UInt(1.W))
+
+    val test = Output(UInt(topModule.io.configuration.getWidth.W))
+    val test1 = Output(UInt(topModule.io.configuration.getWidth.W))
 
     val inputs = Input(MixedVec((1 to topModule.moduleInfos.getInPortNum) map { i => UInt(w.W) }))
     val outs = Output(MixedVec((1 to topModule.moduleInfos.getOutPortNum) map { i => UInt(w.W) }))
@@ -373,23 +380,54 @@ class TopModuleWrapper(val moduleInfos: PillarsModuleInfo, val connect: Map[List
 
   val cycleReg = RegInit(0.U(LOG_II_UPPER_BOUND.W))
 
-  val schedules = appTestHelper.getSchedulesBigInt()
-  val bitStreams = appTestHelper.getBitStreams()
+  val maxSize = Math.max(topModule.io.configuration.getWidth, topModule.io.schedules.getWidth)
+  val posSize = log2Up(maxSize)
+  val posReg = RegInit(0.U(posSize.W))
 
-  val schedulesInit =schedules.U(topModule.io.schedules.getWidth.W)
-  val bitStreamsInit = bitStreams.map(t => t.U(topModule.io.schedules.getWidth.W))
+//  val schedules = appTestHelper.getSchedulesBigInt()
+//  val bitStreams = appTestHelper.getBitStreams()
+//
+//  val schedulesInit =schedules.U(topModule.io.schedules.getWidth.W)
+//  val bitStreamsInit = bitStreams.map(t => t.U(topModule.io.schedules.getWidth.W))
+//
+//  val scheduleReg = VecInit(schedulesInit)
+//  val bitStreamsReg = VecInit(bitStreamsInit)
 
-  val scheduleROM = VecInit(schedulesInit)
-  val bitStreamsROM = VecInit(bitStreamsInit)
+  val scheduleSize = topModule.io.schedules.getWidth
+  val configSize = topModule.io.configuration.getWidth
+  val scheduleReg = RegInit(0.U(scheduleSize.W))
+  val bitStreamsReg = RegInit(0.U(configSize.W))
+
+  val tempScheduleReg = RegInit(0.U((1 + scheduleSize).W))
+  val tempBitStreamsReg = RegInit(0.U((1 + configSize).W))
+
+  io.test := tempBitStreamsReg
+  io.test1 := bitStreamsReg
 
   val s_wait :: s_input_config :: s_work :: Nil = Enum(3)
   val state = RegInit(s_wait)
 
-  topModule.io.schedules := scheduleROM(0)
-  topModule.io.configuration := bitStreamsROM(cycleReg)
-  topModule.io.enConfig := true.B
+
+  topModule.io.schedules := scheduleReg
+  topModule.io.configuration := bitStreamsReg
+  topModule.io.enConfig := io.enConfig
 
   when(state === s_wait){
+    when(!(posReg === (maxSize - 1).U)){
+      posReg := posReg + 1.U
+    }
+    when(posReg <= scheduleSize.U){
+      scheduleReg := tempScheduleReg + io.singleBitSchedule
+      when(!(scheduleReg === 0.U)) {
+        tempScheduleReg := scheduleReg << 1.U
+      }
+    }
+    when(posReg <= configSize.U){
+      bitStreamsReg := bitStreamsReg * 2.U + io.singleBitConfig
+      when(!(bitStreamsReg === 0.U)){
+        tempBitStreamsReg := bitStreamsReg << 1.U
+      }
+    }
     when(io.en === true.B){
       state := s_input_config
       cycleReg := cycleReg + 1.U

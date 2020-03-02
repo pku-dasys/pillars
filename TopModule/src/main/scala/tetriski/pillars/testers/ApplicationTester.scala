@@ -197,7 +197,6 @@ class AccumTester(c: TopModule, appTestHelper: AppTestHelper)
   val outputCycle = appTestHelper.getOutputCycle()
   step(outputCycle)
 
-  checkPortOuts(testII)
   checkLSUData()
 
 }
@@ -215,6 +214,22 @@ class VaddTester(c: TopModule, appTestHelper: AppTestHelper)
   step(outputCycle)
 
   checkPortOuts(testII)
+  checkLSUData()
+
+}
+
+class CapTester(c: TopModule, appTestHelper: AppTestHelper)
+  extends ApplicationTester(c, appTestHelper) {
+
+  poke(c.io.en, 0)
+  inputData()
+  val testII = appTestHelper.getTestII()
+  inputConfig(testII)
+  poke(c.io.en, 1)
+
+  val outputCycle = appTestHelper.getOutputCycle()
+  step(outputCycle)
+
   checkLSUData()
 
 }
