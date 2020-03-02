@@ -13,7 +13,10 @@ object ApplicationExamples {
   arch.addOutPorts(Array("out_0", "out_1", "out_2", "out_3"))
   arch.addInPorts(Array("input_0", "input_1", "input_2", "input_3"))
 
-  val tile = new TileCompleteBlock("tile_0", 4, 4, 4, 4, useMuxBypass = true)
+  val dataWidth = 32
+
+  val tile = new TileCompleteBlock("tile_0", 4, 4, 4, 4, dataWidth = dataWidth,
+    useMuxBypass = true, isFullArch = false, isReduceArch = false)
 
   arch.addBlock(tile)
 
@@ -36,8 +39,6 @@ object ApplicationExamples {
   connect.dumpConnect()
 
   val cp = new HardwareGeneration(arch, connect)
-
-  val dataWidth = 32
 
   val verificationHelper = new VerificationHelper(arch)
 
@@ -111,7 +112,7 @@ object ApplicationExamples {
     var addrVals = Array(a_base, b_base, c_base)
     var throughput = 1
 
-    //testVadd(resultFilename, infoFilename, testII, constVals, addrVals, throughput, outputCycle, useWrapper = true)
+//    testVadd(resultFilename, infoFilename, testII, constVals, addrVals, throughput, outputCycle, useWrapper = true)
     testVadd(resultFilename, infoFilename, testII, constVals, addrVals, throughput, outputCycle)
     //********     II = 1     ********
 
@@ -257,9 +258,9 @@ object ApplicationExamples {
     val inDataB = (0 until dataSize).map(i => scala.util.Random.nextInt()).toArray
     val inDataC = (0 until dataSize).map(i => scala.util.Random.nextInt()).toArray
 
-    //    var inDataA = (2 until dataSize + 2).toArray
-    //    var inDataB = (2 until dataSize + 2).toArray
-    //    var inDataC = (2 until dataSize + 2).toArray
+//        var inDataA = (2 until dataSize + 2).toArray
+//        var inDataB = (2 until dataSize + 2).toArray
+//        var inDataC = (2 until dataSize + 2).toArray
 
     var refArray = Array[Int]()
     var outPortRefArray = Array[Int]()

@@ -67,7 +67,8 @@ object HardwareExamples {
     arch.addOutPorts(Array("output"))
     arch.addInPorts(Array("input_0", "input_1"))
 
-    val tile = new TileBlock("tile_0", 2, 2, 2, 1)
+    val dataWidth = 32
+    val tile = new TileBlock("tile_0", 2, 2, 2, 1, dataWidth = dataWidth)
 
     arch.addBlock(tile)
 
@@ -93,8 +94,6 @@ object HardwareExamples {
     val cp = new HardwareGeneration(arch, connect)
 
     //      println(cp.connectMap)
-
-    val dataWidth = 32
 
     //Verilog generation
     chisel3.Driver.execute(Array("--no-check-comb-loops", "-td","ADRESv0"),
@@ -132,7 +131,8 @@ object HardwareExamples {
     arch.addOutPorts(Array("output"))
     arch.addInPorts(Array("input_0", "input_1"))
 
-    val tile = new TileLSUBlock("tile_0", 2, 2, 2, 1)
+    val dataWidth = 32
+    val tile = new TileLSUBlock("tile_0", 2, 2, 2, 1, dataWidth = dataWidth)
 
     arch.addBlock(tile)
 
@@ -158,8 +158,6 @@ object HardwareExamples {
     val cp = new HardwareGeneration(arch, connect)
 
     //      println(cp.connectMap)
-
-    val dataWidth = 32
 
     //Verilog generation
     chisel3.Driver.execute(Array("--no-check-comb-loops", "-td","ADRESv1"),
@@ -203,7 +201,8 @@ object HardwareExamples {
     arch.addOutPorts(Array("out_0", "out_1", "out_2", "out_3"))
     arch.addInPorts(Array("input_0", "input_1", "input_2", "input_3"))
 
-    val tile = new TileCompleteBlock("tile_0", 4, 4, 4, 4)
+    val dataWidth = 32
+    val tile = new TileCompleteBlock("tile_0", 4, 4, 4, 4, dataWidth = dataWidth)
 
     arch.addBlock(tile)
 
@@ -237,8 +236,6 @@ object HardwareExamples {
     val cp = new HardwareGeneration(arch, connect)
 
     //      println(cp.connectMap)
-
-    val dataWidth = 32
 
     //Verilog generation
     chisel3.Driver.execute(Array("--no-check-comb-loops", "-td","ADRESv2"),

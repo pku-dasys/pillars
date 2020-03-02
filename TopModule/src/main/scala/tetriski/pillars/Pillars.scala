@@ -8,7 +8,7 @@ object Pillars {
     HardwareExamples.exampleLSUAdres()
     HardwareExamples.exampleCompleteAdres()
 //
-//    ApplicationExamples.dumpArch(3, "MRRG/cgra-mrrg-4m4-ii3.txt")
+//    ApplicationExamples.dumpArch(2, "MRRG/cgra-mrrg-4m4-ii2-simple.txt")
     ApplicationExamples.exampleSum()
     ApplicationExamples.exampleVadd()
     ApplicationExamples.exampleAccum()
