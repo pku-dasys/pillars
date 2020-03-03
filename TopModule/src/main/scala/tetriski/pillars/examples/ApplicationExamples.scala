@@ -16,7 +16,7 @@ object ApplicationExamples {
   val dataWidth = 32
 
   val tile = new TileCompleteBlock("tile_0", 4, 4, 4, 4, dataWidth = dataWidth,
-    useMuxBypass = false, isFullArch = false, isReduceArch = true)
+    useMuxBypass = true, isFullArch = false, isReduceArch = false)
 
   arch.addBlock(tile)
 
@@ -45,6 +45,13 @@ object ApplicationExamples {
   def dumpArch(targetII: Int, filename: String = null): Unit = {
     arch.blockMap("tile_0").dumpMRRG(targetII, filename)
     arch.dumpArchitcture()
+  }
+
+  def dumpWrapperVerilog(): Unit ={
+    //Verilog generation
+    chisel3.Driver.execute(Array("--no-check-comb-loops", "-td", "WrapperTest"),
+      () => new TopModuleWrapper(cp.pillarsModuleInfo, cp.connectMap,
+        cp.configList, dataWidth))
   }
 
   def exampleVadd(): Unit = {
@@ -83,11 +90,6 @@ object ApplicationExamples {
       appTestHelper.setOutputCycle(outputCycle)
 
       if (useWrapper) {
-        //Verilog generation
-        chisel3.Driver.execute(Array("--no-check-comb-loops", "-td", "WrapperTest"),
-          () => new TopModuleWrapper(cp.pillarsModuleInfo, cp.connectMap,
-            cp.configList, dataWidth))
-
         iotesters.Driver.execute(Array("--no-check-comb-loops", "-tgvo", "on", "-tbn", "verilator"),
           () => new TopModuleWrapper(cp.pillarsModuleInfo, cp.connectMap, cp.configList, dataWidth)) {
           c => new VaddWrapperTester(c, appTestHelper)
@@ -104,50 +106,50 @@ object ApplicationExamples {
     var testII = 1
     var outputCycle = dataSize * (testII + 2)
 
-    var infoFilename = "app_mapping_results/vadd/ii1_simple_i.txt"
-    var resultFilename = "app_mapping_results/vadd/ii1_simple_r.txt"
+    var infoFilename = "app_mapping_results/vadd/ii1_i.txt"
+    var resultFilename = "app_mapping_results/vadd/ii1_r.txt"
 
     var a_base, b_base, c_base = 0
     var constVals = Array(a_base, b_base, c_base, 1)
     var addrVals = Array(a_base, b_base, c_base)
     var throughput = 1
 
-    testVadd(resultFilename, infoFilename, testII, constVals, addrVals, throughput, outputCycle)
 //    testVadd(resultFilename, infoFilename, testII, constVals, addrVals, throughput, outputCycle)
+    testVadd(resultFilename, infoFilename, testII, constVals, addrVals, throughput, outputCycle)
     //********     II = 1     ********
 
     //********     II = 2     ********
-//    testII = 2
-//    outputCycle = dataSize * (testII + 2)
-//
-//    infoFilename = "app_mapping_results/vadd/ii2_i.txt"
-//    resultFilename = "app_mapping_results/vadd/ii2_r.txt"
-//
-//    a_base = 0
-//    b_base = 0
-//    c_base = dataSize
-//    constVals = Array(a_base, b_base, c_base, 1)
-//    addrVals = Array(a_base, b_base, c_base)
-//    throughput = 1
-//
-//    testVadd(resultFilename, infoFilename, testII, constVals, addrVals, throughput, outputCycle)
+    testII = 2
+    outputCycle = dataSize * (testII + 2)
+
+    infoFilename = "app_mapping_results/vadd/ii2_i.txt"
+    resultFilename = "app_mapping_results/vadd/ii2_r.txt"
+
+    a_base = 0
+    b_base = 0
+    c_base = dataSize
+    constVals = Array(a_base, b_base, c_base, 1)
+    addrVals = Array(a_base, b_base, c_base)
+    throughput = 1
+
+    testVadd(resultFilename, infoFilename, testII, constVals, addrVals, throughput, outputCycle)
     //********     II = 2     ********
 
     //********     II = 3     ********
-//    testII = 3
-//    outputCycle = dataSize * (testII + 2)
-//
-//    infoFilename = "app_mapping_results/vadd/ii3_i.txt"
-//    resultFilename = "app_mapping_results/vadd/ii3_r.txt"
-//
-//    a_base = 0
-//    b_base = 0
-//    c_base = dataSize
-//    constVals = Array(a_base, b_base, c_base, 1)
-//    addrVals = Array(a_base, b_base, c_base)
-//    throughput = 1
-//
-//    testVadd(resultFilename, infoFilename, testII, constVals, addrVals, throughput, outputCycle)
+    testII = 3
+    outputCycle = dataSize * (testII + 2)
+
+    infoFilename = "app_mapping_results/vadd/ii3_i.txt"
+    resultFilename = "app_mapping_results/vadd/ii3_r.txt"
+
+    a_base = 0
+    b_base = 0
+    c_base = dataSize
+    constVals = Array(a_base, b_base, c_base, 1)
+    addrVals = Array(a_base, b_base, c_base)
+    throughput = 1
+
+    testVadd(resultFilename, infoFilename, testII, constVals, addrVals, throughput, outputCycle)
     //********     II = 3     ********
   }
 
@@ -190,11 +192,6 @@ object ApplicationExamples {
 
 
       if (useWrapper) {
-        //Verilog generation
-        chisel3.Driver.execute(Array("--no-check-comb-loops", "-td", "WrapperTest"),
-          () => new TopModuleWrapper(cp.pillarsModuleInfo, cp.connectMap,
-            cp.configList, dataWidth))
-
         iotesters.Driver.execute(Array("--no-check-comb-loops", "-tgvo", "on", "-tbn", "verilator"),
           () => new TopModuleWrapper(cp.pillarsModuleInfo, cp.connectMap, cp.configList, dataWidth)) {
           c => new SumWrapperTester(c, appTestHelper)
@@ -354,13 +351,13 @@ object ApplicationExamples {
   def exampleCap(): Unit = {
 
     val dataSize = 50
-//    val inDataA = (0 until dataSize).map(i => scala.util.Random.nextInt()).toArray
-//    val inDataM = (0 until dataSize).map(i => scala.util.Random.nextInt()).toArray
-//    val inDataC = Array(3)
-
-    val inDataA = (0 until dataSize).toArray
+    val inDataA = (0 until dataSize).map(i => scala.util.Random.nextInt()).toArray
     val inDataC = Array(3)
-    val inDataM = (0 until dataSize).toArray
+    val inDataM = (0 until dataSize).map(i => scala.util.Random.nextInt()).toArray
+
+//    val inDataA = (0 until dataSize).toArray
+//    val inDataC = Array(3)
+//    val inDataM = (0 until dataSize).toArray
 
 
     var refArray = Array[Int]()
@@ -424,9 +421,9 @@ object ApplicationExamples {
     resultFilename = "app_mapping_results/cap/ii2_r.txt"
 
     a_base = 0
-    c1_addr = dataSize
+    c1_addr = 0
     m_base = 0
-    b_base = 0
+    b_base = dataSize
 
     constVals = Array(a_base, 3, c1_addr, 2, m_base, 2, b_base, 1)
     addrVals = Array(a_base, c1_addr, m_base, b_base)
@@ -436,22 +433,22 @@ object ApplicationExamples {
     //********     II = 2     ********
 
     //********     II = 3     ********
-//    testII = 3
-//    outputCycle = dataSize * (testII + 2)
-//
-//    infoFilename = "app_mapping_results/cap/ii3_i.txt"
-//    resultFilename = "app_mapping_results/cap/ii3_r.txt"
-//
-//    a_base = 0
-//    c1_addr = 0
-//    m_base = dataSize
-//    b_base = 0
-//
-//    constVals = Array(a_base, 3, c1_addr, 2, m_base, 2, b_base, 1)
-//    addrVals = Array(a_base, c1_addr, m_base, b_base)
-//    throughput = 1
-//
-//    testCap(resultFilename, infoFilename, testII, constVals, addrVals, throughput, outputCycle)
+    testII = 3
+    outputCycle = dataSize * (testII + 2)
+
+    infoFilename = "app_mapping_results/cap/ii3_i.txt"
+    resultFilename = "app_mapping_results/cap/ii3_r.txt"
+
+    a_base = 0
+    c1_addr = 0
+    m_base = 0
+    b_base = dataSize
+
+    constVals = Array(a_base, 3, c1_addr, 2, m_base, 2, b_base, 1)
+    addrVals = Array(a_base, c1_addr, m_base, b_base)
+    throughput = 1
+
+    testCap(resultFilename, infoFilename, testII, constVals, addrVals, throughput, outputCycle)
     //********     II = 3     ********
   }
 }
