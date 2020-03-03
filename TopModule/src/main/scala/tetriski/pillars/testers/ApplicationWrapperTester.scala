@@ -100,16 +100,6 @@ class ApplicationWrapperTester(c: TopModuleWrapper, appTestHelper: AppTestHelper
       bit.toInt
     }
 
-    def getTestBit(bigInt: BigInt, pos: Int): BigInt ={
-      var mask = (1: BigInt)
-      for(i <- 0 until pos){
-        mask = mask << 1
-        mask = mask | 1
-      }
-      mask = mask << (c.topModule.io.configuration.getWidth - pos)
-      val bit = (bigInt & mask) >> pos
-      bit
-    }
     val schedules = appTestHelper.getSchedulesBigInt()
     val bitStreams = appTestHelper.getBitStreams()
 
@@ -124,8 +114,6 @@ class ApplicationWrapperTester(c: TopModuleWrapper, appTestHelper: AppTestHelper
         poke(c.io.singleBitConfig, getSingleBit(bitStreams(0), configPos))
       }
       step(1)
-      println(peek(c.io.test).toString() + " " + peek(c.io.test1).toString() +
-        " " + getTestBit(bitStreams(0), configPos))
     }
 
   }

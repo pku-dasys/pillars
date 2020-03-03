@@ -19,9 +19,9 @@ object Mapping {
   //  }
   def main(args: Array[String]): Unit = {
     //    System.out.println(System.getProperty("java.library.path"))
-    var dfgFilename = "DOT/cap/cap.dot"
-    var mrrgFilename = "MRRG/cgra-mrrg-4m4-ii2.txt"
-    var outFilename = "app_mapping_results/cap/ii2"
+    var dfgFilename = "DOT/accum/accum.dot"
+    var mrrgFilename = "MRRG/cgra-mrrg-4m4-ii3.txt"
+    var outFilename = "app_mapping_results/accum/ii3"
     var dfg: DFG = DotReader.loadDot(dfgFilename)
     //dfg.printDFG()
     println("dfg loaded!")
@@ -29,6 +29,6 @@ object Mapping {
     mrrg.loadtxt(mrrgFilename)
     println("mrrg loaded!")
     ILPMap.mapping(dfg, mrrg, filename = outFilename)
-    Scheduler.schedule(dfg, mrrg, filename = outFilename, II = 2)
+    Scheduler.schedule(dfg, mrrg, filename = outFilename, II = 3)
   }
 }

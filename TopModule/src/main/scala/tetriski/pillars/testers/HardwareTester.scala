@@ -48,19 +48,19 @@ class TopModule2PEUnitTest(c: TopModule) extends PeekPokeTester(c) {
   poke(c.io.en, 1)
 
   expect(c.out, 0)
-  expect(c.io.configTest(0), 2272)
-  expect(c.io.configTest(1), 2273)
+//  expect(c.io.configTest(0), 2272)
+//  expect(c.io.configTest(1), 2273)
   step(1)
   expect(c.out, 0)
 
-  expect(c.io.configTest(0), 1619)
-  expect(c.io.configTest(1), 1619)
+//  expect(c.io.configTest(0), 1619)
+//  expect(c.io.configTest(1), 1619)
   //  step(1)
   //  expect(c.out, 2) //0 or 2 due to SyncReadMem
   step(1)
   expect(c.out, 7)
-  expect(c.io.configTest(0), 3616)
-  expect(c.io.configTest(1), 64)
+//  expect(c.io.configTest(0), 3616)
+//  expect(c.io.configTest(1), 64)
   //  step(1)
   //  expect(c.out, 8)// 1 + 7 due to SyncReadMem
   step(1)

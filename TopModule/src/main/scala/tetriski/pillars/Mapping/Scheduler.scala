@@ -50,19 +50,14 @@ object Scheduler {
 
 
             if (in.ops.size != 0) {
-              val inputnode = in.mapnode.asInstanceOf[OpNode]
-              println(mapNode.name + " " + inputnode.name + " " + mapNode.input(0).name + " " +
+              val inputNode = in.mapnode.asInstanceOf[OpNode]
+              println(mapNode.name + " " + inputNode.name + " " + mapNode.input(0).name + " " +
                 mapNode.input.size + " " + cycle(mrrg.nodeMap(in.name)))
-              if (inputnode.name == mapNode.input(0).name) {
-                mapNode.inputLatency(0) = cycle(mrrg.nodeMap(in.name)) + 1
-                if(in.name.contains("load")){
-                  mapNode.inputLatency(0) += 1
-                }
+              val inputLatency = cycle(mrrg.nodeMap(in.name)) + 1
+              if (inputNode.name == mapNode.input(0).name) {
+                mapNode.inputLatency(0) = inputLatency
               } else {
-                mapNode.inputLatency(1) = cycle(mrrg.nodeMap(in.name)) + 1
-                if(in.name.contains("load")){
-                  mapNode.inputLatency(1) += 1
-                }
+                mapNode.inputLatency(1) = inputLatency
               }
             }
             else {
@@ -79,7 +74,8 @@ object Scheduler {
   def schedule(dfg: DFG, mrrg: MRRG, filename: String = null, II: Int = 0): Unit = {
     val vis = new Array[Set[String]](dfg.getOpSize())
     //var stack = new ArrayBuffer[OpNode]()
-    var stack = scala.collection.mutable.Stack[OpNode]()
+    //var stack = scala.collection.mutable.Stack[OpNode]()
+    var queue = scala.collection.mutable.Queue[OpNode]()
     for (node <- mrrg.nodes) {
       if (node.mapnode != null && node.ops.size != 0) {
         if (node.mapnode.isInstanceOf[OpNode]) {
@@ -87,7 +83,7 @@ object Scheduler {
           val mapnode = node.mapnode.asInstanceOf[OpNode]
           if (mapnode.input.size == 0) {
             //            stack.enqueue(mapnode)
-            stack.push(mapnode)
+            queue.enqueue(mapnode)
           }
 
           vis(dfg.op_nodes_map(mapnode.name)) = (0 until mapnode.input.size)
@@ -101,8 +97,8 @@ object Scheduler {
       }
     }
 
-    while (!stack.isEmpty) {
-      val node = stack.pop
+    while (!queue.isEmpty) {
+      val node = queue.dequeue()
       node.visited = true
       //var i, laten = 0
       var laten, preLaten, latenWithoutConst = node.latency
@@ -128,7 +124,7 @@ object Scheduler {
         }
       }
 
-      if (node.output != null && node.input.size == 0) {
+      if (node.output != null) {
         var temp, tempMin = -100
         for (outNode <- node.output.output) {
           for (i <- 0 until outNode.input.size) {
@@ -154,10 +150,21 @@ object Scheduler {
       if (preLaten != node.latency && node.latency != 0) {
         for (i <- 0 until node.input.size) {
           val inNode = node.input(i)
+          var pushBack = false
+          var tempNode = inNode
+          if(tempNode.input.size == 1){
+            if(tempNode.name != tempNode.input(0).name){
+              while(tempNode.input.size == 1){
+                tempNode = tempNode.input(0)
+              }
+            }
+          }
+          if(tempNode.input.size == 0){
+            pushBack = true
+          }
           if (inNode.latency + node.inputLatency(i) != node.latency
-            && inNode.name != node.name
-            && (inNode.input.size == 0)) {
-            stack.push(inNode)
+            && pushBack) {
+            queue.enqueue(inNode)
             for (inNodeOut <- inNode.output.output) {
               if (inNodeOut.name != node.name) {
                 vis(dfg.op_nodes_map(inNodeOut.name)) += inNode.name
@@ -167,6 +174,21 @@ object Scheduler {
         }
       }
 
+      if (node.output != null) {
+        for (out <- node.output.output) {
+          if (vis(dfg.op_nodes_map(out.name)).contains(node.name)) {
+            vis(dfg.op_nodes_map(out.name)) -= node.name
+            if (vis(dfg.op_nodes_map(out.name)).size == 0) {
+              queue.enqueue(out)
+              //            r += 1
+            }
+          }
+        }
+      }
+      //      l += 1
+    }
+
+    for(node <- dfg.op_nodes){
       if (node.input.size == 2) {
         if (node.annulateLatency != 0) {
           if (node.annulateLatency > 0) {
@@ -175,21 +197,11 @@ object Scheduler {
             node.skew = node.annulateLatency + II
           }
         } else if (!node.constInput) {
-          node.skew = node.input(0).latency + node.inputLatency(0) - node.input(1).latency - node.inputLatency(1)
+          var inLatency0 = node.input(0).latency + node.inputLatency(0)
+          var inLatency1 = node.input(1).latency + node.inputLatency(1)
+          node.skew = inLatency0 - inLatency1
         }
       }
-      if (node.output != null) {
-        for (out <- node.output.output) {
-          if (vis(dfg.op_nodes_map(out.name)).contains(node.name)) {
-            vis(dfg.op_nodes_map(out.name)) -= node.name
-            if (vis(dfg.op_nodes_map(out.name)).size == 0) {
-              stack.push(out)
-              //            r += 1
-            }
-          }
-        }
-      }
-      //      l += 1
     }
 
 

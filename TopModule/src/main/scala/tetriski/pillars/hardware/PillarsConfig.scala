@@ -2,13 +2,16 @@ package tetriski.pillars.hardware
 import chisel3._
 
 object PillarsConfig {
-  val LOG_II_UPPER_BOUND = 3
+  val LOG_II_UPPER_BOUND = 2
   val II_UPPER_BOUND =  Math.pow(2, LOG_II_UPPER_BOUND).toInt
 
   val MEM_DEPTH = 256
   val MEM_IN_WIDTH = 32
   val MEM_OUT_WIDTH = 32
 
+  //for TopModuleWrapper generation
+  //val LOG_SCHEDULE_SIZE = 4
+  //for verilator test
   val LOG_SCHEDULE_SIZE = 5
 
   val ALU_ADD = 0.U(4.W)

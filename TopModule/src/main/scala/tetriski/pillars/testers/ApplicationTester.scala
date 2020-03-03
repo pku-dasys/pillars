@@ -197,6 +197,7 @@ class AccumTester(c: TopModule, appTestHelper: AppTestHelper)
   val outputCycle = appTestHelper.getOutputCycle()
   step(outputCycle)
 
+  checkPortOuts(testII)
   checkLSUData()
 
 }
