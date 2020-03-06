@@ -118,7 +118,7 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
     .map(i => LOG_SCHEDULE_SIZE * 2 + 1).toList ::: (0 until LSUnitNum * II_UPPER_BOUND)
     .map(i => LOG_SCHEDULE_SIZE * 2 + 1).toList
   val totalScheduleBits = moduleScheduleBits.reduce(_ + _)
-  val scheduleDispatch = Module(new Dispatch(totalScheduleBits, moduleScheduleBits))
+  val scheduleDispatch = Module(new Dispatch(totalScheduleBits, moduleScheduleBits, regOut = true))
   scheduleDispatch.io.configuration := io.schedules
   scheduleDispatch.io.en := io.en
 
@@ -250,7 +250,7 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
     dispatchs.append(dispatch)
   }
   val totalBits = regionConfigBits.sum
-  val topDispatch = Module(new Dispatch(totalBits, regionConfigBits))
+  val topDispatch = Module(new Dispatch(totalBits, regionConfigBits, regOut = true))
   topDispatch.io.en <> io.en
   //println(totalBits, regionConfigBits)
   //  topDispatch.io.configuration := io.configuration
