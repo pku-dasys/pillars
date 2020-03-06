@@ -9,22 +9,43 @@ import tetriski.pillars.hardware.PillarsConfig._
 
 import scala.collection.mutable.ArrayBuffer
 
+
+//bad frequency
+//class RegNextN(w: Int) extends Module {
+//  val io = IO(new Bundle {
+//    val latency = Input(UInt((LOG_SCHEDULE_SIZE).W))
+//    val input = Input(UInt(w.W))
+//    val out = Output(UInt(w.W))
+//  })
+//  val regArray = RegInit(VecInit(Seq.fill((1 << LOG_SCHEDULE_SIZE) - 1)(0.U(w.W))))
+//  regArray(0) := io.input
+//  for (i <- 1 until (1 << LOG_SCHEDULE_SIZE) - 1) {
+//    regArray(i) := regArray(i - 1)
+//  }
+//  when(io.latency > 0.U) {
+//    io.out := regArray(io.latency - 1.U)
+//  }.otherwise {
+//    io.out := io.input
+//  }
+//}
+
 class RegNextN(w: Int) extends Module {
   val io = IO(new Bundle {
     val latency = Input(UInt((LOG_SCHEDULE_SIZE).W))
     val input = Input(UInt(w.W))
     val out = Output(UInt(w.W))
   })
-  val regArray = RegInit(VecInit(Seq.fill((1 << LOG_SCHEDULE_SIZE) - 1)(0.U(w.W))))
-  regArray(0) := io.input
-  for (i <- 1 until (1 << LOG_SCHEDULE_SIZE) - 1) {
-    regArray(i) := regArray(i - 1)
-  }
+  val regArray = RegInit(VecInit(Seq.fill((1 << LOG_SCHEDULE_SIZE))(0.U(w.W))))
+  val posReg = RegInit(0.U(LOG_SCHEDULE_SIZE.W))
+
   when(io.latency > 0.U) {
-    io.out := regArray(io.latency - 1.U)
+    io.out := regArray(posReg - io.latency)
+    regArray(posReg) := io.input
   }.otherwise {
     io.out := io.input
   }
+  posReg := posReg + 1.U
+
 }
 
 class SyncScheduleController(w: Int) extends Module {
@@ -398,7 +419,7 @@ class ADRESPE(w: Int) extends Module {
 }
 
 //to be update
-class Dispatch(wIn: Int, targets: List[Int]) extends Module {
+class Dispatch(wIn: Int, targets: List[Int], regOut: Boolean = false) extends Module {
   val io = IO(new Bundle {
     val en = Input(Bool())
 
@@ -409,8 +430,13 @@ class Dispatch(wIn: Int, targets: List[Int]) extends Module {
   var i = 0
   var offset: Int = 0
   when(io.en) {
+    var i = 0
     for (elem <- targets) {
-      io.outs(i) := io.configuration(offset + elem - 1, offset)
+      if(regOut){
+        io.outs(i) := RegNext(io.configuration(offset + elem - 1, offset))
+      }else{
+        io.outs(i) := io.configuration(offset + elem - 1, offset)
+      }
       i += 1
       offset += elem
     }
