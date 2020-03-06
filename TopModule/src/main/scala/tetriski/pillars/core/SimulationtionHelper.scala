@@ -3,7 +3,7 @@ package tetriski.pillars.core
 import scala.collection.mutable.ArrayBuffer
 import scala.io.Source
 
-class ValidationHelper(arch: ArchitctureHierarchy) {
+class SimulationtionHelper(arch: ArchitctureHierarchy) {
   var size =0
   val opArray = new ArrayBuffer[String]()
   val moduleArray = new ArrayBuffer[ModuleTrait]()
