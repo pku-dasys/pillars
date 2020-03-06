@@ -40,7 +40,7 @@ object ApplicationExamples {
 
   val cp = new HardwareGeneration(arch, connect)
 
-  val validationHelper = new ValidationHelper(arch)
+  val simulationHelper = new SimulationtionHelper(arch)
 
   def dumpArch(targetII: Int, filename: String = null): Unit = {
     arch.blockMap("tile_0").dumpMRRG(targetII, filename)
@@ -71,11 +71,11 @@ object ApplicationExamples {
 
     def testVadd(resultFilename: String, infoFilename: String, testII: Int, constVals: Array[Int],
                  addrArray: Array[Int], throughput: Int, outputCycle: Int, useWrapper: Boolean = false): Unit = {
-      validationHelper.init(resultFilename)
-      validationHelper.setConst(constVals, testII)
-      val constInfo = validationHelper.getConstInfo()
-      val schedules = validationHelper.getSchedules()
-      val dataWithAddr = validationHelper.getDataWithAddr(dataSize = dataSize,
+      simulationHelper.init(resultFilename)
+      simulationHelper.setConst(constVals, testII)
+      val constInfo = simulationHelper.getConstInfo()
+      val schedules = simulationHelper.getSchedules()
+      val dataWithAddr = simulationHelper.getDataWithAddr(dataSize = dataSize,
         inDataArrays = inDataArrays, outDataArrays = outDataArrays)
 
       val inDatas = dataWithAddr(0).asInstanceOf[Map[List[Int], Array[Int]]]
@@ -171,12 +171,12 @@ object ApplicationExamples {
     def testSum(resultFilename: String, infoFilename: String, testII: Int, constVals: Array[Int],
                 addrArray: Array[Int], throughput: Int, useWrapper: Boolean = false): Unit = {
 
-      validationHelper.init(resultFilename)
-      val outputCycle = validationHelper.getOutputCycle()
-      validationHelper.setConst(constVals, testII)
-      val constInfo = validationHelper.getConstInfo()
-      val schedules = validationHelper.getSchedules()
-      val dataWithAddr = validationHelper.getDataWithAddr(addrArray = addrArray,
+      simulationHelper.init(resultFilename)
+      val outputCycle = simulationHelper.getOutputCycle()
+      simulationHelper.setConst(constVals, testII)
+      val constInfo = simulationHelper.getConstInfo()
+      val schedules = simulationHelper.getSchedules()
+      val dataWithAddr = simulationHelper.getDataWithAddr(addrArray = addrArray,
         inDataArrays = inDataArrays, refDataArrays = outPortRefArrays)
 
       val inDatas = dataWithAddr(0).asInstanceOf[Map[List[Int], Array[Int]]]
@@ -278,12 +278,12 @@ object ApplicationExamples {
     def testAccum(resultFilename: String, infoFilename: String, testII: Int,
                   constVals: Array[Int], addrArray: Array[Int], throughput: Int): Unit = {
 
-      validationHelper.init(resultFilename)
-      val outputCycle = validationHelper.getOutputCycle()
-      validationHelper.setConst(constVals, testII)
-      val constInfo = validationHelper.getConstInfo()
-      val schedules = validationHelper.getSchedules()
-      val dataWithAddr = validationHelper.getDataWithAddr(addrArray = addrArray,
+      simulationHelper.init(resultFilename)
+      val outputCycle = simulationHelper.getOutputCycle()
+      simulationHelper.setConst(constVals, testII)
+      val constInfo = simulationHelper.getConstInfo()
+      val schedules = simulationHelper.getSchedules()
+      val dataWithAddr = simulationHelper.getDataWithAddr(addrArray = addrArray,
         inDataArrays = inDataArrays, outDataArrays = outDataRefArrays, refDataArrays = outPortRefArrays)
 
       val inDatas = dataWithAddr(0).asInstanceOf[Map[List[Int], Array[Int]]]
@@ -373,11 +373,11 @@ object ApplicationExamples {
     def testCap(resultFilename: String, infoFilename: String, testII: Int,
                   constVals: Array[Int], addrArray: Array[Int], throughput: Int, outputCycle: Int): Unit = {
 
-      validationHelper.init(resultFilename)
-      validationHelper.setConst(constVals, testII)
-      val constInfo = validationHelper.getConstInfo()
-      val schedules = validationHelper.getSchedules()
-      val dataWithAddr = validationHelper.getDataWithAddr(addrArray = addrArray,
+      simulationHelper.init(resultFilename)
+      simulationHelper.setConst(constVals, testII)
+      val constInfo = simulationHelper.getConstInfo()
+      val schedules = simulationHelper.getSchedules()
+      val dataWithAddr = simulationHelper.getDataWithAddr(addrArray = addrArray,
         inDataArrays = inDataArrays, outDataArrays = outDataRefArrays)
 
       val inDatas = dataWithAddr(0).asInstanceOf[Map[List[Int], Array[Int]]]

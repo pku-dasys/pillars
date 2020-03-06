@@ -565,18 +565,19 @@ class TileCompleteBlock(name: String, x: Int, y: Int, numIn: Int, numOut: Int, u
           }
         }
         var opList = List(OpEnum.ADD, OpEnum.MUL)
-        if(isReduceArch){
+
+        if(isFullArch){
+          opList = List(OpEnum.ADD, OpEnum.SUB, OpEnum.AND, OpEnum.OR, OpEnum.XOR,
+            OpEnum.MUL, OpEnum.SHLL, OpEnum.SHRA, OpEnum.SHRL)
+        }else if(isReduceArch){
           if((i % 2) == 0){
             opList = List(OpEnum.ADD, OpEnum.SUB, OpEnum.AND, OpEnum.OR, OpEnum.XOR,
-              OpEnum.MUL, OpEnum.DIV, OpEnum.SHLL, OpEnum.SHRA, OpEnum.SHRL)
+              OpEnum.MUL, OpEnum.SHLL, OpEnum.SHRA, OpEnum.SHRL)
           }else{
             opList = List(OpEnum.ADD, OpEnum.SUB)
           }
         }
-        if(isFullArch){
-          opList = List(OpEnum.ADD, OpEnum.SUB, OpEnum.AND, OpEnum.OR, OpEnum.XOR,
-            OpEnum.MUL, OpEnum.DIV, OpEnum.SHLL, OpEnum.SHRA, OpEnum.SHRL)
-        }
+
         val pe = new AdresPEBlock("pe_" + j.toString + "_" + i.toString, opList = opList,
           useMuxBypass = useMuxBypass, inPortsNeighbor = inPortsNeighbor, dataWidth = dataWidth)
         peMap = peMap + ((i + j * x) -> pe)

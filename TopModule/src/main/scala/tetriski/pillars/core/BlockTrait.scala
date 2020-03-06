@@ -45,11 +45,11 @@ trait BlockTrait extends ModuleTrait {
   //modulesMap: name -> corresponding module of this block
   var modulesMap = Map[String, ModuleTrait]()
 
-  def updateHierName(arg : ArrayBuffer[String]): Unit ={
-    for(str <- arg){
+  def updateHierName(arg: ArrayBuffer[String]): Unit = {
+    for (str <- arg) {
       hierName.append(str)
     }
-    for (subBlocks <- blockMap.values){
+    for (subBlocks <- blockMap.values) {
       subBlocks.updateHierName(arg)
     }
   }
@@ -78,102 +78,105 @@ trait BlockTrait extends ModuleTrait {
     configBit += arg.getConfigBit()
   }
 
-  def addConnect(arg : List[List[String]]): Unit ={
+  def addConnect(arg: List[List[String]]): Unit = {
     connectArray.append(arg)
   }
 
-  def addConnect(src : List[String], dst : List[String]) : Unit ={
+  def addConnect(src: List[String], dst: List[String]): Unit = {
     addConnect(List(src, dst))
   }
 
-  def updateConnect(): ArrayBuffer[List[List[String]]] ={
+  def updateConnect(): ArrayBuffer[List[List[String]]] = {
     val nameList = hierName.toList.reverse
     var resArray = new ArrayBuffer[List[List[String]]]
-    for (i <- 0 until connectArray.size){
+    for (i <- 0 until connectArray.size) {
       val src = connectArray(i)(0)
       val dst = connectArray(i)(1)
-      val resSrc = nameList.map( str => str + "/") ::: src
-      val resDst = nameList.map( str => str + "/") ::: dst
+      val resSrc = nameList.map(str => str + "/") ::: src
+      val resDst = nameList.map(str => str + "/") ::: dst
       resArray.append(List(resSrc, resDst).asInstanceOf[List[List[String]]])
     }
     connectArray = resArray
     //println("connectArray", connectArray)
-    for(subBlock <- blockMap.values){
+    for (subBlock <- blockMap.values) {
       val ret = subBlock.updateConnect()
       ret.foreach(i => connectArray.append(i))
     }
     connectArray
   }
 
-  def dumpMRRG(II: Int, filename: String = null): Unit ={
-    def updateMRRG(block: BlockTrait): Unit ={
-      val addName = block.hierName.map(i => i+".").reverse.reduce(_+_)
-      for(module <- block.owningModules){
+  def dumpMRRG(II: Int, filename: String = null): Unit = {
+    def updateMRRG(block: BlockTrait): Unit = {
+      val addName = block.hierName.map(i => i + ".").reverse.reduce(_ + _)
+      for (module <- block.owningModules) {
         val typeID = module(0)
         val moduleID = module(1)
         val m = block.modulesArray(typeID)(moduleID).asInstanceOf[ModuleTrait]
-        for(oldName <- m.mrrg.nodeMap.keys){
+        for (oldName <- m.mrrg.nodeMap.keys) {
           m.mrrg.update(oldName, addName + m.getName() + "." + oldName)
         }
       }
     }
-    def getStrMRRG(listStr: List[String]) : String= {
+
+    def getStrMRRG(listStr: List[String]): String = {
       val mrrgStr = ArrayBuffer[String]()
       listStr.foreach(str => mrrgStr.append(str.replaceAll("/", ".")))
-      if(!mrrgStr(listStr.size-2).contains(".")){
-        mrrgStr(listStr.size-2) = mrrgStr(listStr.size-2).concat(".")
+      if (!mrrgStr(listStr.size - 2).contains(".")) {
+        mrrgStr(listStr.size - 2) = mrrgStr(listStr.size - 2).concat(".")
       }
-      mrrgStr.reduce(_+_)
+      mrrgStr.reduce(_ + _)
     }
-    def dumpAsTXT(writer: PrintWriter, targetMRRG: MRRG): Unit ={
+
+    def dumpAsTXT(writer: PrintWriter, targetMRRG: MRRG): Unit = {
       writer.flush()
       val noOpSet = targetMRRG.getNoOpSet()
-      val funSet = targetMRRG.nodes.toSet&~(noOpSet)
+      val funSet = targetMRRG.nodes.toSet &~ (noOpSet)
       writer.println(noOpSet.size)
-      for(node <- noOpSet){
-        writer.println("<"+node.getName()+">")
+      for (node <- noOpSet) {
+        writer.println("<" + node.getName() + ">")
         writer.println(node.fanIn.size)
-        for(in <- node.fanIn){
+        for (in <- node.fanIn) {
           writer.println(in.getName())
         }
         writer.println(node.fanOut.size)
-        for(out <- node.fanOut){
+        for (out <- node.fanOut) {
           writer.println(out.getName())
         }
       }
 
       writer.println(funSet.size)
-      for(node <- funSet){
-        writer.println("<"+node.getName()+">")
+      for (node <- funSet) {
+        writer.println("<" + node.getName() + ">")
         writer.println(node.fanIn.size)
-        for(in <- node.fanIn){
+        for (in <- node.fanIn) {
           writer.println(in.getName())
         }
         writer.println(node.fanOut.size)
-        for(out <- node.fanOut){
+        for (out <- node.fanOut) {
           writer.println(out.getName())
         }
         writer.println(node.ops.size)
-        for(op <- node.ops){
+        for (op <- node.ops) {
           writer.println(op)
         }
       }
       writer.close()
     }
-    def initialization(): Unit ={
+
+    def initialization(): Unit = {
       initMRRG()
       val allBlocks = getAllBlocks()
-      for(block <- allBlocks){
+      for (block <- allBlocks) {
         updateMRRG(block)
       }
 
-      for(outPort <- outPorts){
+      for (outPort <- outPorts) {
         val funNode = new NodeMRRG(outPort + ".fun")
         funNode.ops.append(OpEnum.OUTPUT)
         mrrg.addNode(funNode)
         mrrg.addConnect(outPort, List(funNode.getName()))
       }
-      for(inPort <- inPorts){
+      for (inPort <- inPorts) {
         val funNode = new NodeMRRG(inPort + ".fun")
         funNode.ops.append(OpEnum.INPUT)
         mrrg.addNode(funNode)
@@ -181,36 +184,38 @@ trait BlockTrait extends ModuleTrait {
       }
 
       val addName = hierName.map(i => i + ".").reverse.reduce(_ + _)
-      for(oldName <- mrrg.nodeMap.keys){
-        mrrg.update(oldName, addName  + oldName)
+      for (oldName <- mrrg.nodeMap.keys) {
+        mrrg.update(oldName, addName + oldName)
       }
 
       val connect = new Connect(connectArray)
       val mapRelation = connect.mapRelation
       var mapRelationMRRG = Map[String, List[String]]()
-      for(src <- mapRelation.keys) {
+      for (src <- mapRelation.keys) {
         val srcMRRG = getStrMRRG(src)
         val dstMRRG = mapRelation(src).map(str => getStrMRRG(str))
         mapRelationMRRG = mapRelationMRRG + (srcMRRG -> dstMRRG.toList)
       }
 
-      for(modules <- modulesArray){
-        for(module <- modules){
+      for (modules <- modulesArray) {
+        for (module <- modules) {
           val tempMRRG = module.asInstanceOf[ModuleTrait].mrrg
           mrrg.mergy(tempMRRG)
         }
       }
 
-      mapRelationMRRG.foreach( connect => mrrg.addConnect(connect._1, connect._2))
+      mapRelationMRRG.foreach(connect => mrrg.addConnect(connect._1, connect._2))
     }
-    def graphUnroll(oriMRRG: MRRG, II: Int): MRRG ={
+
+    def graphUnroll(oriMRRG: MRRG, II: Int): MRRG = {
       def incModII(i: Int): Int = {
         (i + 1) % II
       }
+
       var targetMRRG = new MRRG()
-      for(i <- 0 until II){
+      for (i <- 0 until II) {
         var tempMRRG = oriMRRG.clone()
-        for(node <- tempMRRG.nodeMap){
+        for (node <- tempMRRG.nodeMap) {
           val name = node._1
           tempMRRG.update(name, i.toString + ":" + name)
         }
@@ -218,36 +223,36 @@ trait BlockTrait extends ModuleTrait {
       }
       var regSourceSet = Set[String]()
 
-      for(undeterminedInConnect <- oriMRRG.undeterminedInConnects){
+      for (undeterminedInConnect <- oriMRRG.undeterminedInConnects) {
         val source = undeterminedInConnect(0).getName()
         val sink = undeterminedInConnect(1).getName()
-        if(II == 1){
+        if (II == 1) {
           targetMRRG.addConnect("0:" + source, "0:" + sink)
-        }else{
+        } else {
           val sinkNode = undeterminedInConnect(1)
-          for(i <- 0 until II){
-            if(sinkNode.mode == REG_MODE){
+          for (i <- 0 until II) {
+            if (sinkNode.mode == REG_MODE) {
               targetMRRG.addConnect(i.toString + ":" + source, incModII(i).toString + ":" + sink)
-            }else {
+            } else {
               targetMRRG.addConnect(i.toString + ":" + source, i.toString + ":" + sink)
             }
           }
         }
       }
 
-      for(undeterminedOutConnect <- oriMRRG.undeterminedOutConnects){
+      for (undeterminedOutConnect <- oriMRRG.undeterminedOutConnects) {
         val source = undeterminedOutConnect(0).getName()
         val sink = undeterminedOutConnect(1).getName()
-        if(II == 1){
+        if (II == 1) {
           targetMRRG.addConnect("0:" + source, "0:" + sink)
-        }else{
+        } else {
           val sourceNode = undeterminedOutConnect(0)
-          for(i <- 0 until II){
-            if(sourceNode.mode == MEM_MODE){
+          for (i <- 0 until II) {
+            if (sourceNode.mode == MEM_MODE) {
               targetMRRG.addConnect(i.toString + ":" + source, incModII(i).toString + ":" + sink)
-            }else if(sourceNode.mode == NORMAL_MODE){
+            } else if (sourceNode.mode == NORMAL_MODE) {
               targetMRRG.addConnect(i.toString + ":" + source, i.toString + ":" + sink)
-            }else if(sourceNode.mode == REG_MODE){
+            } else if (sourceNode.mode == REG_MODE) {
               targetMRRG.addConnect(i.toString + ":" + source, i.toString + ":" + sink)
               regSourceSet = regSourceSet + source
             }
@@ -256,9 +261,8 @@ trait BlockTrait extends ModuleTrait {
       }
 
 
-
-      for(source <- regSourceSet){
-        for(i <- 0 until II) {
+      for (source <- regSourceSet) {
+        for (i <- 0 until II) {
           targetMRRG.addConnect(i.toString + ":" + source, incModII(i).toString + ":" + source)
         }
       }
@@ -269,23 +273,23 @@ trait BlockTrait extends ModuleTrait {
     val targetMRRG = graphUnroll(mrrg, II)
 
     var outFilename = filename
-    if(filename == null){
+    if (filename == null) {
       outFilename = hierName.map(str => str + ".").reverse.reduce(_ + _) + "mrrg.txt"
     }
     val writer = new PrintWriter(new File(outFilename))
     dumpAsTXT(writer, targetMRRG)
   }
 
-  def getAllSubBlocks() : ArrayBuffer[BlockTrait] = {
+  def getAllSubBlocks(): ArrayBuffer[BlockTrait] = {
     val ret = ArrayBuffer[BlockTrait]()
-    for(subBlock <- this.blockMap.values){
+    for (subBlock <- this.blockMap.values) {
       ret.append(subBlock)
       ret.appendAll(subBlock.getAllSubBlocks())
     }
     ret
   }
 
-  def getAllBlocks() : ArrayBuffer[BlockTrait] = {
+  def getAllBlocks(): ArrayBuffer[BlockTrait] = {
     val ret = getAllSubBlocks()
     ret.append(this)
     ret
@@ -347,7 +351,7 @@ trait BlockTrait extends ModuleTrait {
     writer.print("}")
   }
 
-  def setConfigRegion(): Unit ={
+  def setConfigRegion(): Unit = {
     isConfigRegion = true
   }
 
