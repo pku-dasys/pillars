@@ -1,5 +1,6 @@
 package tetriski.pillars.Mapping
 
+import java.io.FileWriter
 import java.util.ArrayList
 
 import tetriski.pillars.core.{MRRG, NodeMRRG}
@@ -7,13 +8,12 @@ import tetriski.pillars.core.{MRRG, NodeMRRG}
 import scala.collection.mutable.ArrayBuffer
 
 object ILPMap {
-  def mapping(dfg: DFG, mrrg: MRRG, filename: String = null): Unit = {
+  def mapping(dfg: DFG, mrrg: MRRG, filename: String = null, fw: FileWriter = null): Double = {
     var mapper = new gurobimap_java(filename)
 
     val num_dfg_op = dfg.getOpSize()
     val num_dfg_val = dfg.getValSize()
 
-    var i = 0
     for (i <- 0 until num_dfg_op) {
       mapper.DFGopnodename.add(dfg.op_nodes(i).name)
       mapper.DFGopnodeopcode.add(Integer.valueOf(dfg.op_nodes(i).opcode.id))
@@ -126,20 +126,26 @@ object ILPMap {
       mapper.MRRGroutingfanouttype.add(fanOutType)
     }
 
-    val result = mapper.ILPMap()
-    val routingResult = result(0)
-    for (i <- 0 until num_mrrg_r) {
-      if (routingResult.get(i).intValue != -1) {
-        routingNodes(i).mapnode = dfg.val_nodes(routingResult.get(i).intValue())
-        //println(routingNodes(i).name)
+    if(fw != null){
+      val result = mapper.ILPMap(fw)
+      return result
+    }else{
+      val result = mapper.ILPMap()
+      val routingResult = result(0)
+      for (i <- 0 until num_mrrg_r) {
+        if (routingResult.get(i).intValue != -1) {
+          routingNodes(i).mapnode = dfg.val_nodes(routingResult.get(i).intValue())
+          //println(routingNodes(i).name)
+        }
+      }
+      val functionResult = result(1)
+      for (i <- 0 until num_mrrg_f) {
+        if (functionResult.get(i).intValue != -1) {
+          functionNodes(i).mapnode = dfg.op_nodes(functionResult.get(i).intValue())
+          //println(functionNodes(i).name)
+        }
       }
     }
-    val functionResult = result(1)
-    for (i <- 0 until num_mrrg_f) {
-      if (functionResult.get(i).intValue != -1) {
-        functionNodes(i).mapnode = dfg.op_nodes(functionResult.get(i).intValue())
-        //println(functionNodes(i).name)
-      }
-    }
+    -1
   }
 }

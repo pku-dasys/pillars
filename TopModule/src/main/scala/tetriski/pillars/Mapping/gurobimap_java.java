@@ -166,6 +166,128 @@ public class gurobimap_java {
     }
 
     List<Integer>[] ILPMap() throws GRBException, IOException {
+        GRBModel model = getILPModel();
+        int num_dfg_vals = DFGvalnodename.size();
+        int num_dfg_ops = DFGopnodename.size();
+        int num_mrrg_r = MRRGroutingname.size();
+        int num_mrrg_f = MRRGfunctionname.size();
+
+        int count_R = num_dfg_vals * num_mrrg_r;
+        int count_F = num_dfg_ops * num_mrrg_f;
+
+        GRBVar[] Vars = model.getVars();
+        GRBVar[] R = new GRBVar[count_R];
+        System.arraycopy(Vars, 0, R, 0, count_R);
+        GRBVar[] F = new GRBVar[count_F];
+        System.arraycopy(Vars, count_R, F, 0, count_F);
+
+        int status = model.get(GRB.IntAttr.Status);
+
+        if (status == GRB.OPTIMAL || status == GRB.SUBOPTIMAL || status == GRB.SOLUTION_LIMIT) {
+            int[] r_mapped = new int[num_mrrg_r];
+            int[] f_mapped = new int[num_mrrg_f];
+            int[] r_result = new int[num_mrrg_r];
+            int[] f_result = new int[num_mrrg_f];
+
+            for (int r = 0; r < num_mrrg_r; r++) {
+                r_mapped[r] = 0;
+                r_result[r] = -1;
+            }
+            for (int f = 0; f < num_mrrg_f; f++) {
+                f_mapped[f] = 0;
+                f_result[f] = -1;
+            }
+
+            for (int val = 0; val < num_dfg_vals; val++)
+                for (int r = 0; r < num_mrrg_r; r++)
+                    if (R[RINDEX(val, r)].get(GRB.DoubleAttr.X) == 1.0) {
+                        //System.out.printf("%s->%s\n", DFGvalnodename.get(val), MRRGroutingname.get(r));
+                        r_mapped[r] = 1;
+                        r_result[r] = val;
+                    }
+            if (filename == null) {
+                Date now = new Date();
+                SimpleDateFormat format = new SimpleDateFormat("yyyyMMddhhmmss");
+                filename = "internalNodeinfo" + format.format(now);
+            }
+            FileWriter resultFile = new FileWriter(filename + "_r.txt");
+            for (int op = 0; op < num_dfg_ops; op++)
+                for (int f = 0; f < num_mrrg_f; f++)
+                    if (F[FINDEX(op, f)].get(GRB.DoubleAttr.X) == 1.0) {
+                        System.out.printf("%s->%s\n", DFGopnodename.get(op), MRRGfunctionname.get(f));
+                        resultFile.write(DFGopnodename.get(op) + " " + MRRGfunctionname.get(f) + "\n");
+                        f_mapped[f] = DFGopnodeopcode.get(op).intValue() + 1;
+                        f_result[f] = op;
+                    }
+            resultFile.flush();
+            resultFile.close();
+
+
+            FileWriter infoFile = new FileWriter(filename + "_i.txt");
+            for (int r = 0; r < num_mrrg_r; r++)
+                if (r_mapped[r] == 1 && MRRGroutingname.get(r).indexOf("internalNode") != -1) {
+                    List<Integer> fanin = new ArrayList<>();
+                    List<Integer> fanout = new ArrayList<>();
+                    for (int i = 0; i < MRRGroutingfanin.get(r).size(); i++) {
+                        if (r_mapped[MRRGroutingfanin.get(r).get(i)] == 1 &&
+                                r_result[MRRGroutingfanin.get(r).get(i)] == r_result[r])
+                            fanin.add(Integer.valueOf(i));
+                    }
+                    for (int i = 0; i < MRRGroutingfanout.get(r).size(); i++) {
+                        if (r_mapped[MRRGroutingfanout.get(r).get(i)] == 1 &&
+                                r_result[MRRGroutingfanout.get(r).get(i)] == r_result[r])
+                            fanout.add(Integer.valueOf(i));
+                    }
+                    if (fanin.size() > 1) {
+                        System.out.println("   " + MRRGroutingname.get(r) + "<-" + DFGvalnodename.get(r_mapped[r]));
+                    }
+                    if (fanin.size() > 0 && fanout.size() > 0) {
+                        infoFile.write("<" + MRRGroutingname.get(r) + ">\n");
+                        for (int i = 0; i < fanin.size(); i++)
+                            infoFile.write(fanin.get(i).toString() + " ");
+                        infoFile.write("\n");
+                        for (int i = 0; i < fanout.size(); i++)
+                            infoFile.write(fanout.get(i).toString() + " ");
+                        infoFile.write("\n");
+                    }
+                }
+            for (int f = 0; f < num_mrrg_f; f++) {
+                if (f_mapped[f] > 0 && MRRGfunctionname.get(f).indexOf("internalNode") != -1) {
+                    infoFile.write("<" + MRRGfunctionname.get(f) + ">\nSELECTED_OP\n");
+                    infoFile.write("" + (f_mapped[f] - 1) + "\n");
+                }
+            }
+            infoFile.flush();
+            infoFile.close();
+
+            List<Integer>[] result = new List[2];
+            result[0] = new ArrayList<>();
+            result[1] = new ArrayList<>();
+            for (int r = 0; r < num_mrrg_r; r++)
+                result[0].add(Integer.valueOf(r_result[r]));
+            for (int f = 0; f < num_mrrg_f; f++)
+                result[1].add(Integer.valueOf(f_result[f]));
+            return result;
+        }
+        return null;
+
+    }
+
+    Double ILPMap(FileWriter fw) throws GRBException, IOException {
+        GRBModel model = getILPModel();
+
+        int status = model.get(GRB.IntAttr.Status);
+
+        if (status == GRB.OPTIMAL || status == GRB.SUBOPTIMAL || status == GRB.SOLUTION_LIMIT) {
+            int vars = model.get(GRB.IntAttr.NumVars), constrs = model.get(GRB.IntAttr.NumConstrs);
+            fw.write("Vars : " + vars + " Constrs : " + constrs + " ");
+            return model.get(GRB.DoubleAttr.Runtime);
+        }
+        return -1.0;
+
+    }
+
+    GRBModel getILPModel()throws GRBException, IOException {
         GRBEnv env = new GRBEnv();
         int timelimit = 7200;
         double grb_mipgap = 0.2;
@@ -335,95 +457,8 @@ public class gurobimap_java {
 
         model.optimize();
 
-        int status = model.get(GRB.IntAttr.Status);
-
-        if (status == GRB.OPTIMAL || status == GRB.SUBOPTIMAL || status == GRB.SOLUTION_LIMIT) {
-            int[] r_mapped = new int[num_mrrg_r];
-            int[] f_mapped = new int[num_mrrg_f];
-            int[] r_result = new int[num_mrrg_r];
-            int[] f_result = new int[num_mrrg_f];
-
-            for (int r = 0; r < num_mrrg_r; r++) {
-                r_mapped[r] = 0;
-                r_result[r] = -1;
-            }
-            for (int f = 0; f < num_mrrg_f; f++) {
-                f_mapped[f] = 0;
-                f_result[f] = -1;
-            }
-
-            for (int val = 0; val < num_dfg_vals; val++)
-                for (int r = 0; r < num_mrrg_r; r++)
-                    if (R[RINDEX(val, r)].get(GRB.DoubleAttr.X) == 1.0) {
-                        //System.out.printf("%s->%s\n", DFGvalnodename.get(val), MRRGroutingname.get(r));
-                        r_mapped[r] = 1;
-                        r_result[r] = val;
-                    }
-            if (filename == null) {
-                Date now = new Date();
-                SimpleDateFormat format = new SimpleDateFormat("yyyyMMddhhmmss");
-                filename = "internalNodeinfo" + format.format(now);
-            }
-            FileWriter resultFile = new FileWriter(filename + "_r.txt");
-            for (int op = 0; op < num_dfg_ops; op++)
-                for (int f = 0; f < num_mrrg_f; f++)
-                    if (F[FINDEX(op, f)].get(GRB.DoubleAttr.X) == 1.0) {
-                        System.out.printf("%s->%s\n", DFGopnodename.get(op), MRRGfunctionname.get(f));
-                        resultFile.write(DFGopnodename.get(op) + " " + MRRGfunctionname.get(f) + "\n");
-                        f_mapped[f] = DFGopnodeopcode.get(op).intValue() + 1;
-                        f_result[f] = op;
-                    }
-            resultFile.flush();
-            resultFile.close();
-
-
-            FileWriter infoFile = new FileWriter(filename + "_i.txt");
-            for (int r = 0; r < num_mrrg_r; r++)
-                if (r_mapped[r] == 1 && MRRGroutingname.get(r).indexOf("internalNode") != -1) {
-                    List<Integer> fanin = new ArrayList<>();
-                    List<Integer> fanout = new ArrayList<>();
-                    for (int i = 0; i < MRRGroutingfanin.get(r).size(); i++) {
-                        if (r_mapped[MRRGroutingfanin.get(r).get(i)] == 1 &&
-                                r_result[MRRGroutingfanin.get(r).get(i)] == r_result[r])
-                            fanin.add(Integer.valueOf(i));
-                    }
-                    for (int i = 0; i < MRRGroutingfanout.get(r).size(); i++) {
-                        if (r_mapped[MRRGroutingfanout.get(r).get(i)] == 1 &&
-                                r_result[MRRGroutingfanout.get(r).get(i)] == r_result[r])
-                            fanout.add(Integer.valueOf(i));
-                    }
-                    if (fanin.size() > 1) {
-                        System.out.println("   " + MRRGroutingname.get(r) + "<-" + DFGvalnodename.get(r_mapped[r]));
-                    }
-                    if (fanin.size() > 0 && fanout.size() > 0) {
-                        infoFile.write("<" + MRRGroutingname.get(r) + ">\n");
-                        for (int i = 0; i < fanin.size(); i++)
-                            infoFile.write(fanin.get(i).toString() + " ");
-                        infoFile.write("\n");
-                        for (int i = 0; i < fanout.size(); i++)
-                            infoFile.write(fanout.get(i).toString() + " ");
-                        infoFile.write("\n");
-                    }
-                }
-            for (int f = 0; f < num_mrrg_f; f++) {
-                if (f_mapped[f] > 0 && MRRGfunctionname.get(f).indexOf("internalNode") != -1) {
-                    infoFile.write("<" + MRRGfunctionname.get(f) + ">\nSELECTED_OP\n");
-                    infoFile.write("" + (f_mapped[f] - 1) + "\n");
-                }
-            }
-            infoFile.flush();
-            infoFile.close();
-
-            List<Integer>[] result = new List[2];
-            result[0] = new ArrayList<>();
-            result[1] = new ArrayList<>();
-            for (int r = 0; r < num_mrrg_r; r++)
-                result[0].add(Integer.valueOf(r_result[r]));
-            for (int f = 0; f < num_mrrg_f; f++)
-                result[1].add(Integer.valueOf(f_result[f]));
-            return result;
-        }
-        return null;
+        return model;
 
     }
+
 }

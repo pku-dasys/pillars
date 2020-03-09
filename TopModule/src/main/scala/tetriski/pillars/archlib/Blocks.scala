@@ -539,6 +539,10 @@ class TileCompleteBlock(name: String, x: Int, y: Int, numIn: Int, numOut: Int, u
         }
         var opList = List(OpEnum.ADD, OpEnum.SUB, OpEnum.AND, OpEnum.OR, OpEnum.XOR,
           OpEnum.MUL, OpEnum.DIV, OpEnum.SHLL, OpEnum.SHRA, OpEnum.SHRL)
+        if(isFullArch || isReduceArch){
+          opList = List(OpEnum.ADD, OpEnum.SUB, OpEnum.AND, OpEnum.OR, OpEnum.XOR,
+            OpEnum.MUL, OpEnum.SHLL, OpEnum.SHRA, OpEnum.SHRL)
+        }
         val pe = new AdresVLIWPEBlock("pe_" + j.toString + "_" + i.toString, opList = opList,
           useMuxBypass = useMuxBypass, inPortsNeighbor = inPortsNeighbor, dataWidth = dataWidth)
         peMap = peMap + ((i + j * x) -> pe)
