@@ -16,7 +16,7 @@ object ApplicationExamples {
   val dataWidth = 32
 
   val tile = new TileCompleteBlock("tile_0", 4, 4, 4, 4, dataWidth = dataWidth,
-    useMuxBypass = false, isFullArch = false, isReduceArch = true)
+    useMuxBypass = true, isFullArch = false, isReduceArch = false)
 
   arch.addBlock(tile)
 

@@ -8,10 +8,10 @@ object Pillars {
 //    HardwareExamples.exampleLSUAdres()
 //    HardwareExamples.exampleCompleteAdres()
 //
-    ApplicationExamples.dumpWrapperVerilog()
+//    ApplicationExamples.dumpWrapperVerilog()
 //    ApplicationExamples.dumpArch(1, "MRRG/cgra-mrrg-4m4-ii1-simple.txt")
 
-//    ApplicationExamples.exampleSum()
+    ApplicationExamples.exampleSum()
 //    ApplicationExamples.exampleVadd()
 //    ApplicationExamples.exampleAccum()
 //    ApplicationExamples.exampleCap()
