@@ -104,7 +104,7 @@ object ApplicationExamples {
 
     //********     II = 1     ********
     var testII = 1
-    var outputCycle = dataSize * (testII + 2)
+    var outputCycle = dataSize * (testII + 3)
 
     var infoFilename = "app_mapping_results/vadd/ii1_i.txt"
     var resultFilename = "app_mapping_results/vadd/ii1_r.txt"
@@ -120,7 +120,7 @@ object ApplicationExamples {
 
     //********     II = 2     ********
     testII = 2
-    outputCycle = dataSize * (testII + 2)
+    outputCycle = dataSize * (testII + 3)
 
     infoFilename = "app_mapping_results/vadd/ii2_i.txt"
     resultFilename = "app_mapping_results/vadd/ii2_r.txt"
@@ -137,14 +137,14 @@ object ApplicationExamples {
 
     //********     II = 3     ********
     testII = 3
-    outputCycle = dataSize * (testII + 2)
+    outputCycle = dataSize * (testII + 3)
 
     infoFilename = "app_mapping_results/vadd/ii3_i.txt"
     resultFilename = "app_mapping_results/vadd/ii3_r.txt"
 
     a_base = 0
     b_base = 0
-    c_base = dataSize
+    c_base = 0
     constVals = Array(a_base, b_base, c_base, 1)
     addrVals = Array(a_base, b_base, c_base)
     throughput = 1
@@ -157,7 +157,7 @@ object ApplicationExamples {
 
     val dataSize = 50
     val inData = (0 until dataSize).map(i => scala.util.Random.nextInt()).toArray
-    //    var inData = (0 until dataSize).toArray
+//        var inData = (0 until dataSize).toArray
 
     var outPortRefArray = Array[Int]()
     var outPortRef = 0
@@ -325,9 +325,12 @@ object ApplicationExamples {
 
     infoFilename = "app_mapping_results/accum/ii2_i.txt"
     resultFilename = "app_mapping_results/accum/ii2_r.txt"
+    a_base = 0
+    b_base = dataSize
+    c_base = 0
     constVals = Array(1, a_base, b_base, 1, c_base)
     addrVals = Array(a_base, b_base, c_base, c_base)
-    throughput = 2
+    throughput = 1
 
     testAccum(resultFilename, infoFilename, testII, constVals, addrVals, throughput)
     //********     II = 2     ********
@@ -338,8 +341,8 @@ object ApplicationExamples {
     infoFilename = "app_mapping_results/accum/ii3_i.txt"
     resultFilename = "app_mapping_results/accum/ii3_r.txt"
     a_base = 0
-    b_base = dataSize
-    c_base = dataSize * 2
+    b_base = 0
+    c_base = dataSize
     constVals = Array(1, a_base, b_base, 1, c_base)
     addrVals = Array(a_base, b_base, c_base, c_base)
     throughput = 1
@@ -351,13 +354,13 @@ object ApplicationExamples {
   def exampleCap(): Unit = {
 
     val dataSize = 50
-    val inDataA = (0 until dataSize).map(i => scala.util.Random.nextInt()).toArray
-    val inDataC = Array(3)
-    val inDataM = (0 until dataSize).map(i => scala.util.Random.nextInt()).toArray
-
-//    val inDataA = (0 until dataSize).toArray
+//    val inDataA = (0 until dataSize).map(i => scala.util.Random.nextInt()).toArray
 //    val inDataC = Array(3)
-//    val inDataM = (0 until dataSize).toArray
+//    val inDataM = (0 until dataSize).map(i => scala.util.Random.nextInt()).toArray
+
+    val inDataA = (0 until dataSize).toArray
+    val inDataC = Array(3)
+    val inDataM = (0 until dataSize).toArray
 
 
     var refArray = Array[Int]()
@@ -423,7 +426,7 @@ object ApplicationExamples {
     a_base = 0
     c1_addr = 0
     m_base = 0
-    b_base = dataSize
+    b_base = 0
 
     constVals = Array(a_base, 3, c1_addr, 2, m_base, 2, b_base, 1)
     addrVals = Array(a_base, c1_addr, m_base, b_base)
@@ -441,8 +444,8 @@ object ApplicationExamples {
 
     a_base = 0
     c1_addr = 0
-    m_base = 0
-    b_base = dataSize
+    m_base = dataSize
+    b_base = 0
 
     constVals = Array(a_base, 3, c1_addr, 2, m_base, 2, b_base, 1)
     addrVals = Array(a_base, c1_addr, m_base, b_base)

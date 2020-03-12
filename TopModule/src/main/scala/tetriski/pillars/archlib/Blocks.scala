@@ -416,8 +416,8 @@ class TileBlock(name: String, x: Int, y: Int, numIn: Int, numOut: Int,
   for (j <- 0 until y){
     for (i <- 0 until x) {
       val peCurrent = peMap(i + j * x)
-      val peN = peMap(i + ((j + 1) % y) * x)
-      val peS = peMap(i + (((j - 1) + y) % y) * x)
+      val peN = peMap(i + ((j - 1 + y) % y) * x)
+      val peS = peMap(i + ((j + 1) % y) * x)
       val peE = peMap((i + 1) % x + j * x)
       val peW = peMap(((i - 1) + x) % x + j * x)
       if(j != y - 1){
@@ -468,8 +468,8 @@ class TileLSUBlock(name: String, x: Int, y: Int, numIn: Int, numOut: Int,
   for (j <- 0 until y){
     for (i <- 0 until x) {
       val peCurrent = peMap(i + j * x)
-      val peN = peMap(i + ((j + 1) % y) * x)
-      val peS = peMap(i + (((j - 1) + y) % y) * x)
+      val peN = peMap(i + ((j - 1 + y) % y) * x)
+      val peS = peMap(i + ((j + 1) % y) * x)
       val peE = peMap((i + 1) % x + j * x)
       val peW = peMap(((i - 1) + x) % x + j * x)
       if(j != y - 1){
@@ -500,13 +500,17 @@ class TileLSUBlock(name: String, x: Int, y: Int, numIn: Int, numOut: Int,
 }
 
 class TileCompleteBlock(name: String, x: Int, y: Int, numIn: Int, numOut: Int, useMuxBypass: Boolean = true,
-                        isReduceArch: Boolean = false, isFullArch: Boolean = false,
-                        isToroid: Boolean = true, dataWidth: Int = 32)
+                        isReduceArch: Boolean = false, isFullArch: Boolean = false, dataWidth: Int = 32)
   extends BlockTrait {
   setName(name)
   hierName.append(name)
   addOutPorts((0 to numOut-1).map(i => "out_" + i.toString).toArray)
   addInPorts((0 to numIn-1).map(i => "input_" + i.toString).toArray)
+
+  var isToroid = true
+  if(isReduceArch){
+    isToroid = false
+  }
 
 
 
@@ -592,8 +596,8 @@ class TileCompleteBlock(name: String, x: Int, y: Int, numIn: Int, numOut: Int, u
   for (j <- 0 until y){
     for (i <- 0 until x) {
       val peCurrent = peMap(i + j * x)
-      val peN = peMap(i + ((j + 1) % y) * x)
-      val peS = peMap(i + (((j - 1) + y) % y) * x)
+      val peN = peMap(i + ((j - 1 + y) % y) * x)
+      val peS = peMap(i + ((j + 1) % y) * x)
       val peE = peMap((i + 1) % x + j * x)
       val peW = peMap(((i - 1) + x) % x + j * x)
       if(j == 0){

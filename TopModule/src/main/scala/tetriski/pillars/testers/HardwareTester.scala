@@ -219,7 +219,7 @@ class TopModuleCompleteAdresUnitTest(c: TopModule, bitstreams: Array[BigInt], sc
   step(1)
 
   poke(c.io.en, 1)
-  step(9)
+  step(11)
 
   var ref = 0
   for (i <- 10 until 100) {
@@ -227,8 +227,8 @@ class TopModuleCompleteAdresUnitTest(c: TopModule, bitstreams: Array[BigInt], sc
     //poke(c.input_1, i)
     //if(i % 5 == 0)\
     ref = ref + i
-    expect(c.io.outs(3), ref)
-    println(ref.toString + " " + peek(c.io.outs(3)).toString())
+    expect(c.io.outs(0), ref)
+    println(ref.toString + " " + peek(c.io.outs(0)).toString())
     step(3)
   }
 }
