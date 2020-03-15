@@ -17,6 +17,7 @@ class HardwareGeneration(arch: BlockTrait, connect: Connect) {
       }
 
       var temp = arch
+//      println(strs)
       for (i <- 1 until strs.size) {
         if (strs(i)(strs(i).size - 1) == '/' ) {
           temp = temp(strs(i).substring(0, strs(i).size - 1))
