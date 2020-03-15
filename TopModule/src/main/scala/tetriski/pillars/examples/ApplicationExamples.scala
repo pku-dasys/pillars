@@ -118,7 +118,7 @@ object ApplicationExamples {
     testVadd(resultFilename, infoFilename, testII, constVals, addrVals, throughput, outputCycle)
     //********     II = 1     ********
 
-    //********     II = 2     ********
+//    //********     II = 2     ********
     testII = 2
     outputCycle = dataSize * (testII + 3)
 
