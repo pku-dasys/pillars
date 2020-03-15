@@ -279,7 +279,25 @@ class AdresVLIWPEBlock(name: String, useMuxBypass: Boolean, opList: List[OpEnum]
   }
 }
 
-class AdresIOBlock(name: String, numIn: Int, numOut: Int, numNeighbour: Int, dataWidth: Int = 32) extends BlockTrait{
+class RegBlock(name: String, dataWidth: Int = 32) extends BlockTrait{
+  setName(name)
+  hierName.append(name)
+
+  addOutPorts(Array("out_0"))
+  addInPorts(Array("input_0"))
+
+  val rf0 = new OpRF("rf0", List(0, 1, 1, dataWidth, 1))
+  rf0.addOutPorts(Array("out_0"))
+  rf0.addInPorts(Array("input_0"))
+  addModule(rf0)
+
+  addConnect(List("input_0"), List("rf0", "input_0"))
+  addConnect(List("rf0", "out_0"), List("out_0"))
+
+}
+
+class AdresIOBlock(name: String, numIn: Int, numOut: Int, numNeighbour: Int,
+                   dataWidth: Int = 32, regDirectConnectionIO: Boolean = false) extends BlockTrait{
 
   setName(name)
   hierName.append(name)
@@ -290,27 +308,46 @@ class AdresIOBlock(name: String, numIn: Int, numOut: Int, numNeighbour: Int, dat
   addInPorts((0 to numIn).map(i => "input_" + i.toString).toArray)
   addInPorts((0 to numNeighbour).map(i => "neighbour_input_" + i.toString).toArray)
 
-  for(i <- 0 until numOut){
-    val mux = new OpMux("muxN2O_" + i.toString, List(numNeighbour, dataWidth, log2Up(numNeighbour)))
-    mux.addOutPorts(Array("out_0"))
-    for(j <- 0 until numNeighbour){
-      mux.addInPorts(Array("input_" + j.toString))
-      addConnect(List(List("neighbour_input_" + j.toString),List(mux.getName(), "input_" + j.toString)))
+  if(regDirectConnectionIO){
+    if(numIn == numNeighbour && numOut == numNeighbour){
+      val inRfBlocks = (0 until numNeighbour).map(i => new RegBlock("inRegBlock_" + i.toString, dataWidth))
+      val outRfBlocks = (0 until numNeighbour).map(i => new RegBlock("outRegBlock_" + i.toString, dataWidth))
+      for(i <- 0 until numNeighbour){
+        addBlock(inRfBlocks(i))
+        addConnect(List("input_" + i.toString), List("inRegBlock_" + i.toString + "/", "input_0"))
+        addConnect(List("inRegBlock_" + i.toString + "/", "out_0"), List("neighbour_out_" + i.toString))
+
+        addBlock(outRfBlocks(i))
+        addConnect(List("neighbour_input_" + i.toString), List("outRegBlock_" + i.toString + "/", "input_0"))
+        addConnect(List("outRegBlock_" + i.toString + "/", "out_0"), List("out_" + i.toString))
+      }
+    }else{
+      System.err.println("Disaccord between number of ports!")
     }
-    addModule(mux)
-    addConnect(List(List(mux.getName(),"out_0"),List("out_" + i.toString)))
+  }else{
+    for(i <- 0 until numOut){
+      val mux = new OpMux("muxN2O_" + i.toString, List(numNeighbour, dataWidth, log2Up(numNeighbour)))
+      mux.addOutPorts(Array("out_0"))
+      for(j <- 0 until numNeighbour){
+        mux.addInPorts(Array("input_" + j.toString))
+        addConnect(List(List("neighbour_input_" + j.toString),List(mux.getName(), "input_" + j.toString)))
+      }
+      addModule(mux)
+      addConnect(List(List(mux.getName(),"out_0"),List("out_" + i.toString)))
+    }
+
+    for(i <- 0 until numNeighbour){
+      val mux = new OpMux("muxI2N_" + i.toString, List(numIn, dataWidth, log2Up(numIn)))
+      mux.addOutPorts(Array("out_0"))
+      for(j <- 0 until numIn){
+        mux.addInPorts(Array("input_" + j.toString))
+        addConnect(List(List("input_" + j.toString),List(mux.getName(), "input_" + j.toString)))
+      }
+      addModule(mux)
+      addConnect(List(List(mux.getName(),"out_0"),List("neighbour_out_" + i.toString)))
+    }
   }
 
-  for(i <- 0 until numNeighbour){
-    val mux = new OpMux("muxI2N_" + i.toString, List(numIn, dataWidth, log2Up(numIn)))
-    mux.addOutPorts(Array("out_0"))
-    for(j <- 0 until numIn){
-      mux.addInPorts(Array("input_" + j.toString))
-      addConnect(List(List("input_" + j.toString),List(mux.getName(), "input_" + j.toString)))
-    }
-    addModule(mux)
-    addConnect(List(List(mux.getName(),"out_0"),List("neighbour_out_" + i.toString)))
-  }
   // println("IOBlock!!!!",connectArray)
 
 }
@@ -416,8 +453,8 @@ class TileBlock(name: String, x: Int, y: Int, numIn: Int, numOut: Int,
   for (j <- 0 until y){
     for (i <- 0 until x) {
       val peCurrent = peMap(i + j * x)
-      val peN = peMap(i + ((j + 1) % y) * x)
-      val peS = peMap(i + (((j - 1) + y) % y) * x)
+      val peN = peMap(i + ((j - 1 + y) % y) * x)
+      val peS = peMap(i + ((j + 1) % y) * x)
       val peE = peMap((i + 1) % x + j * x)
       val peW = peMap(((i - 1) + x) % x + j * x)
       if(j != y - 1){
@@ -468,8 +505,8 @@ class TileLSUBlock(name: String, x: Int, y: Int, numIn: Int, numOut: Int,
   for (j <- 0 until y){
     for (i <- 0 until x) {
       val peCurrent = peMap(i + j * x)
-      val peN = peMap(i + ((j + 1) % y) * x)
-      val peS = peMap(i + (((j - 1) + y) % y) * x)
+      val peN = peMap(i + ((j - 1 + y) % y) * x)
+      val peS = peMap(i + ((j + 1) % y) * x)
       val peE = peMap((i + 1) % x + j * x)
       val peW = peMap(((i - 1) + x) % x + j * x)
       if(j != y - 1){
@@ -500,17 +537,26 @@ class TileLSUBlock(name: String, x: Int, y: Int, numIn: Int, numOut: Int,
 }
 
 class TileCompleteBlock(name: String, x: Int, y: Int, numIn: Int, numOut: Int, useMuxBypass: Boolean = true,
-                        isReduceArch: Boolean = false, isFullArch: Boolean = false,
-                        isToroid: Boolean = true, dataWidth: Int = 32)
+                        isReduceArch: Boolean = false, isFullArch: Boolean = false, dataWidth: Int = 32)
   extends BlockTrait {
   setName(name)
   hierName.append(name)
   addOutPorts((0 to numOut-1).map(i => "out_" + i.toString).toArray)
   addInPorts((0 to numIn-1).map(i => "input_" + i.toString).toArray)
 
+  var isToroid = true
+  if(isReduceArch){
+    isToroid = false
+  }
+  var regDirectConnectionIO = false
+  if(isReduceArch || isFullArch){
+    regDirectConnectionIO = true
+  }
 
 
-  val ioBlock = new AdresIOBlock("ioBlock", numIn, numOut, x, dataWidth = dataWidth)
+
+  val ioBlock = new AdresIOBlock("ioBlock", numIn, numOut, x,
+    dataWidth = dataWidth, regDirectConnectionIO = regDirectConnectionIO)
   addBlock(ioBlock)
 
   val globalRFBlock = new AdresGlobalRFBlock("globalRFBlock", x, dataWidth = dataWidth)
@@ -592,8 +638,8 @@ class TileCompleteBlock(name: String, x: Int, y: Int, numIn: Int, numOut: Int, u
   for (j <- 0 until y){
     for (i <- 0 until x) {
       val peCurrent = peMap(i + j * x)
-      val peN = peMap(i + ((j + 1) % y) * x)
-      val peS = peMap(i + (((j - 1) + y) % y) * x)
+      val peN = peMap(i + ((j - 1 + y) % y) * x)
+      val peS = peMap(i + ((j + 1) % y) * x)
       val peE = peMap((i + 1) % x + j * x)
       val peW = peMap(((i - 1) + x) % x + j * x)
       if(j == 0){

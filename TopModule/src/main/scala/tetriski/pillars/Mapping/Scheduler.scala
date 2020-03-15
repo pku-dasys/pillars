@@ -165,9 +165,20 @@ object Scheduler {
           if (inNode.latency + node.inputLatency(i) != node.latency
             && pushBack) {
             queue.enqueue(inNode)
-            for (inNodeOut <- inNode.output.output) {
-              if (inNodeOut.name != node.name) {
-                vis(dfg.op_nodes_map(inNodeOut.name)) += inNode.name
+            val tempQueue = scala.collection.mutable.Queue[OpNode]()
+            tempQueue.enqueue(inNode)
+            while(!tempQueue.isEmpty){
+              val tempNodeIn = tempQueue.dequeue()
+              if(tempNodeIn.output != null){
+                for (tempNodeOut <- tempNodeIn.output.output) {
+                  if (tempNodeOut.name != node.name && tempNodeOut.name != tempNodeIn.name) {
+                    vis(dfg.op_nodes_map(tempNodeOut.name)) += tempNodeIn.name
+                    tempQueue.enqueue(tempNodeOut)
+                    if(queue.contains(tempNodeOut)){
+                      queue.dequeueAll(n => n.name == tempNodeOut.name)
+                    }
+                  }
+                }
               }
             }
           }

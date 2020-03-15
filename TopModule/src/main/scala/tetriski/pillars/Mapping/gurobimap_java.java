@@ -296,7 +296,11 @@ public class gurobimap_java {
         env.set(GRB.DoubleParam.TimeLimit, timelimit);
         env.set(GRB.IntParam.SolutionLimit, grb_solnlimit);
 
-        env.set(GRB.IntParam.MIPFocus, 1);
+        //focus on time
+//        env.set(GRB.IntParam.MIPFocus, 1);
+
+        //a time-quality trade off
+        env.set(GRB.IntParam.MIPFocus, 2);
 
         GRBModel model = new GRBModel(env);
 

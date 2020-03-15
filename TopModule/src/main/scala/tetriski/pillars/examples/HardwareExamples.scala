@@ -242,8 +242,8 @@ object HardwareExamples {
       () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, dataWidth))
 
     val constInfo = new ConstInfo(targetII)
-    constInfo.addConst(arch("tile_0")("pe_1_0").getModule("const0").getModuleID(), 1, 1)
-    constInfo.addConst(arch("tile_0")("pe_0_2").getModule("const0").getModuleID(), 1, 1)
+    constInfo.addConst(arch("tile_0")("pe_0_3").getModule("const0").getModuleID(), 0, 1)
+    constInfo.addConst(arch("tile_0")("pe_3_1").getModule("const0").getModuleID(), 1, 1)
 
     //      arch.genConfig("internalNodeinfo_complete.txt", 1)
     val bitStreams = arch.genConfig("internalNodeinfo_complete.txt", targetII, constInfo)
@@ -258,7 +258,7 @@ object HardwareExamples {
     //      println(bitStream)
 
     //      arch("tile_0")("pe_0_2").getModule("alu0").setWaitCycle(1)
-    arch("tile_0")("pe_1_1").getModule("alu0").setWaitCycle(4, 0)
+    arch("tile_0")("pe_3_0").getModule("alu0").setWaitCycle(4, 1)
 
     val schedules = arch.getSchedules()
 

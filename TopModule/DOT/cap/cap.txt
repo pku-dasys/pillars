@@ -15,3 +15,7 @@ const20 b_base
 const23 1
 
 throughput = add22.skew / II + 1
+
+NOTE:
+If add22.skew is not equal to 0,
+we suggest GRB.IntParam.MIPFocus in gurobimap_java should be set to 2 to make a time-quality trade off.

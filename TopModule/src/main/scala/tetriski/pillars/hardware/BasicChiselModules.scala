@@ -292,37 +292,48 @@ class RegisterFiles(log2Regs: Int, numIn: Int, numOut: Int, w: Int) extends Modu
     val inputs = Input(MixedVec((1 to numIn) map { i => UInt(w.W) }))
     val outs = Output(MixedVec((1 to numOut) map { i => UInt(w.W) }))
   })
-  val targets = (0 until numIn + numOut).toList.map(t => log2Regs)
-  val dispatch = Module(new Dispatch((log2Regs * (numIn + numOut)), targets))
-  val configSize = log2Regs * (numIn + numOut)
-  dispatch.io.configuration := io.configuration(configSize - 1, 0)
-  dispatch.io.en <> io.en
-  val forbidden = io.configuration(configSize, configSize)
+  if(log2Regs == 0){
+    //single register
+    val reg = RegInit(0.U(w.W))
+    reg := io.inputs(0)
+    when(io.configuration === 1.U && io.en){
+      io.outs(0) := reg
+    }.otherwise{
+      io.outs(0) := 0.U
+    }
+  }else{
+    //register files
+    val targets = (0 until numIn + numOut).toList.map(t => log2Regs)
+    val dispatch = Module(new Dispatch((log2Regs * (numIn + numOut)), targets))
+    val configSize = log2Regs * (numIn + numOut)
+    dispatch.io.configuration := io.configuration(configSize - 1, 0)
+    dispatch.io.en <> io.en
+    val forbidden = io.configuration(configSize, configSize)
 
-  //val registers = SyncReadMem(Math.pow(2, log2Regs).toInt, UInt(w.W))
-  //val registers = Mem(Math.pow(2, log2Regs).toInt, UInt(w.W))
+    //val registers = SyncReadMem(Math.pow(2, log2Regs).toInt, UInt(w.W))
+    //val registers = Mem(Math.pow(2, log2Regs).toInt, UInt(w.W))
 
-  val regs = RegInit(VecInit(Seq.fill(Math.pow(2, log2Regs).toInt)(0.U(32.W))))
+    val regs = RegInit(VecInit(Seq.fill(Math.pow(2, log2Regs).toInt)(0.U(w.W))))
 
-  when(io.en) {
-    when(forbidden === false.B) {
-      for (i <- 0 until numIn) {
-        //registers.write(dispatch.io.outs(i), io.inputs(i))
-        regs(dispatch.io.outs(i)) := io.inputs(i)
+    when(io.en) {
+      when(forbidden === false.B) {
+        for (i <- 0 until numIn) {
+          //registers.write(dispatch.io.outs(i), io.inputs(i))
+          regs(dispatch.io.outs(i)) := io.inputs(i)
+        }
+        //      io.configTest(i) := dispatch.io.outs(i)
       }
-      //      io.configTest(i) := dispatch.io.outs(i)
-    }
-    for (i <- 0 until numOut) {
-      //io.outs(i) := registers.read(dispatch.io.outs(i + numIn))
-      io.outs(i) := regs(dispatch.io.outs(i + numIn))
-      //      io.configTest(i + numIn) := dispatch.io.outs(i + numIn)
-    }
-  }.otherwise {
-    for (out <- io.outs) {
-      out := 0.U
+      for (i <- 0 until numOut) {
+        //io.outs(i) := registers.read(dispatch.io.outs(i + numIn))
+        io.outs(i) := regs(dispatch.io.outs(i + numIn))
+        //      io.configTest(i + numIn) := dispatch.io.outs(i + numIn)
+      }
+    }.otherwise {
+      for (out <- io.outs) {
+        out := 0.U
+      }
     }
   }
-
 }
 
 class Multiplexer(inNum: Int, w: Int) extends Module {

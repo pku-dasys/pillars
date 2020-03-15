@@ -113,8 +113,15 @@ trait ModuleTrait extends Ports with ModuleBasic {
 
       }
     } else {
-      //mux
-      updateConfigArray(fanInNums(0))
+      if(mode == REG_MODE){
+        //single register
+        if(fanInNums(0) != -1){
+          updateConfigArray(1)
+        }
+      }else{
+        //mux
+        updateConfigArray(fanInNums(0))
+      }
     }
   }
 

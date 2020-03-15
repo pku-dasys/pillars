@@ -19,9 +19,9 @@ object Mapping {
   //  }
   def main(args: Array[String]): Unit = {
     //    System.out.println(System.getProperty("java.library.path"))
-    var dfgFilename = "DOT/sum/sum.dot"
-    var mrrgFilename = "MRRG/cgra-mrrg-4m4-ii1.txt"
-    var outFilename = "app_mapping_results/sum/ii1"
+    var dfgFilename = "DOT/vadd/vadd.dot"
+    var mrrgFilename = "MRRG/cgra-mrrg-4m4-ii1-full-simple.txt"
+    var outFilename = "app_mapping_results/vadd/ii1_full-simple"
     var dfg: DFG = DotReader.loadDot(dfgFilename)
     //dfg.printDFG()
     println("dfg loaded!")
