@@ -119,37 +119,37 @@ object ApplicationExamples {
     //********     II = 1     ********
 
 //    //********     II = 2     ********
-//    testII = 2
-//    outputCycle = dataSize * (testII + 3)
-//
-//    infoFilename = "app_mapping_results/vadd/ii2_i.txt"
-//    resultFilename = "app_mapping_results/vadd/ii2_r.txt"
-//
-//    a_base = 0
-//    b_base = 0
-//    c_base = 0
-//    constVals = Array(a_base, b_base, c_base, 1)
-//    addrVals = Array(a_base, b_base, c_base)
-//    throughput = 1
-//
-//    testVadd(resultFilename, infoFilename, testII, constVals, addrVals, throughput, outputCycle)
+    testII = 2
+    outputCycle = dataSize * (testII + 3)
+
+    infoFilename = "app_mapping_results/vadd/ii2_i.txt"
+    resultFilename = "app_mapping_results/vadd/ii2_r.txt"
+
+    a_base = 0
+    b_base = 0
+    c_base = 0
+    constVals = Array(a_base, b_base, c_base, 1)
+    addrVals = Array(a_base, b_base, c_base)
+    throughput = 1
+
+    testVadd(resultFilename, infoFilename, testII, constVals, addrVals, throughput, outputCycle)
     //********     II = 2     ********
 
     //********     II = 3     ********
-//    testII = 3
-//    outputCycle = dataSize * (testII + 3)
-//
-//    infoFilename = "app_mapping_results/vadd/ii3_i.txt"
-//    resultFilename = "app_mapping_results/vadd/ii3_r.txt"
-//
-//    a_base = 0
-//    b_base = dataSize
-//    c_base = 0
-//    constVals = Array(a_base, b_base, c_base, 1)
-//    addrVals = Array(a_base, b_base, c_base)
-//    throughput = 1
-//
-//    testVadd(resultFilename, infoFilename, testII, constVals, addrVals, throughput, outputCycle)
+    testII = 3
+    outputCycle = dataSize * (testII + 3)
+
+    infoFilename = "app_mapping_results/vadd/ii3_i.txt"
+    resultFilename = "app_mapping_results/vadd/ii3_r.txt"
+
+    a_base = 0
+    b_base = dataSize
+    c_base = 0
+    constVals = Array(a_base, b_base, c_base, 1)
+    addrVals = Array(a_base, b_base, c_base)
+    throughput = 1
+
+    testVadd(resultFilename, infoFilename, testII, constVals, addrVals, throughput, outputCycle)
     //********     II = 3     ********
   }
 
@@ -326,8 +326,8 @@ object ApplicationExamples {
     infoFilename = "app_mapping_results/accum/ii2_i.txt"
     resultFilename = "app_mapping_results/accum/ii2_r.txt"
     a_base = 0
-    b_base = dataSize
-    c_base = 0
+    b_base = 0
+    c_base = dataSize
     constVals = Array(1, a_base, b_base, 1, c_base)
     addrVals = Array(a_base, b_base, c_base, c_base)
     throughput = 1
