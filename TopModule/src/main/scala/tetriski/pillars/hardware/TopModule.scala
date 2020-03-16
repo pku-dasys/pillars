@@ -214,13 +214,13 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
   inPorts.append(LSUs.map(i => i.io.inputs.toList))
 
 
-  val configController = Module(new ConfigController(moduleInfos.getTotalBits()))
-  configController.io.en <> io.enConfig
-  configController.io.II <> io.II
-  configController.io.inConfig <> io.configuration
+//  val configController = Module(new ConfigController(moduleInfos.getTotalBits()))
+//  configController.io.en <> io.enConfig
+//  configController.io.II <> io.II
+//  configController.io.inConfig <> io.configuration
 
   //println(configList)
-  var dispatchs = ArrayBuffer[Dispatch]()
+  var configControllers = ArrayBuffer[ConfigController]()
   var regionConfigBits = List[Int]()
   for (region <- configList) {
     var configBits = List[Int]()
@@ -239,6 +239,11 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
       configPorts = configPorts :+ configPort
     }
     val regionTotalBits = configBits.sum
+
+    val configController = Module(new ConfigController(regionTotalBits))
+    configController.io.II <> io.II
+    configController.io.en <> io.enConfig
+
     //println(configBits)
     regionConfigBits = regionConfigBits :+ regionTotalBits
     val dispatch = Module(new Dispatch(regionTotalBits, configBits))
@@ -247,16 +252,18 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
       configPorts(i) := dispatch.io.outs(i)
     }
     //io.configTest(0) := alus
-    dispatchs.append(dispatch)
+    configControllers.append(configController)
+    dispatch.io.configuration := configController.io.outConfig
   }
   val totalBits = regionConfigBits.sum
   val topDispatch = Module(new Dispatch(totalBits, regionConfigBits))
-  topDispatch.io.en <> io.en
+  topDispatch.io.en <> true.B
   //println(totalBits, regionConfigBits)
   //  topDispatch.io.configuration := io.configuration
-  topDispatch.io.configuration := configController.io.outConfig
-  for (i <- 0 until dispatchs.size) {
-    dispatchs(i).io.configuration := topDispatch.io.outs(i)
+  topDispatch.io.configuration := io.configuration
+  for (i <- 0 until configControllers.size) {
+    configControllers(i).io.inConfig := topDispatch.io.outs(i)
+
   }
 
   //println(regionConfigBits)

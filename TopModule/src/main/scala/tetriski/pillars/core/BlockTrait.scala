@@ -317,9 +317,10 @@ trait BlockTrait extends ModuleTrait {
     writer.print("\"out ports\": \"" + strOutPorts + "\",\n")
     writer.print("\"config bit\": " + getConfigBit() + ",\n")
     var i = 0
-    for (blk <- blockMap.values) {
+    val sortedBlocks = blockMap.toList.sortBy(x => x._1)
+    for (blk <- sortedBlocks) {
       i += 1
-      blk.printModules(writer)
+      blk._2.printModules(writer)
       if (i < blockMap.size || owningModules.size > 0) {
         writer.print(",\n")
       } else {

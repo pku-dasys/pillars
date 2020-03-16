@@ -42,7 +42,7 @@ class ArchitctureHierarchy extends BlockTrait {
       }
       ret
     }
-    val configRegions = findConfigRegion(blockMap)
+    val configRegions = findConfigRegion(blockMap).sortBy(x => x.getName())
     for (configRegion <- configRegions){
       var moduleList = List[List[Int]]()
       for (i <- 0 until configRegion.modulesArray.size) {
