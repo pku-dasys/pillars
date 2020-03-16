@@ -9,7 +9,7 @@ object Pillars {
     HardwareExamples.exampleCompleteAdres()
 //
 //    ApplicationExamples.dumpWrapperVerilog()
-//    ApplicationExamples.dumpArch(1, "MRRG/cgra-mrrg-4m4-ii1-full-simple.txt")
+//    ApplicationExamples.dumpArch(1, "MRRG/cgra-mrrg-4m4-ii1-full.txt")
 
     ApplicationExamples.exampleSum()
     ApplicationExamples.exampleVadd()
