@@ -296,7 +296,7 @@ class RegisterFiles(log2Regs: Int, numIn: Int, numOut: Int, w: Int) extends Modu
     //single register
     val reg = RegInit(0.U(w.W))
     reg := io.inputs(0)
-    when(io.configuration === 1.U && io.en){
+    when(io.configuration === 1.U){
       io.outs(0) := reg
     }.otherwise{
       io.outs(0) := 0.U
@@ -315,7 +315,7 @@ class RegisterFiles(log2Regs: Int, numIn: Int, numOut: Int, w: Int) extends Modu
 
     val regs = RegInit(VecInit(Seq.fill(Math.pow(2, log2Regs).toInt)(0.U(w.W))))
 
-    when(io.en) {
+//    when(io.en) {
       when(forbidden === false.B) {
         for (i <- 0 until numIn) {
           //registers.write(dispatch.io.outs(i), io.inputs(i))
@@ -328,11 +328,11 @@ class RegisterFiles(log2Regs: Int, numIn: Int, numOut: Int, w: Int) extends Modu
         io.outs(i) := regs(dispatch.io.outs(i + numIn))
         //      io.configTest(i + numIn) := dispatch.io.outs(i + numIn)
       }
-    }.otherwise {
-      for (out <- io.outs) {
-        out := 0.U
-      }
-    }
+//    }.otherwise {
+//      for (out <- io.outs) {
+//        out := 0.U
+//      }
+//    }
   }
 }
 
@@ -349,13 +349,13 @@ class Multiplexer(inNum: Int, w: Int) extends Module {
   val out = io.outs(0)
   val selectArray = (0 to inNum - 1).map(i => i.U -> io.inputs(i))
   val muxIn0 = MuxLookup(io.configuration, io.inputs(0), selectArray)
-  when(io.en) {
+//  when(io.en) {
     io.outs(0) := muxIn0
-  }.otherwise {
-    for (out <- io.outs) {
-      out := 0.U
-    }
-  }
+//  }.otherwise {
+//    for (out <- io.outs) {
+//      out := 0.U
+//    }
+//  }
 }
 
 //  object Common {
@@ -385,14 +385,14 @@ class ConstUnit(w: Int) extends Module {
   //  const.write(0.U, io.configuration)
 
 
-  when(io.en) {
+//  when(io.en) {
     //io.outs(0) := const.read((0.U))
     io.outs(0) := io.configuration
-  }.otherwise {
-    for (out <- io.outs) {
-      out := 0.U
-    }
-  }
+//  }.otherwise {
+//    for (out <- io.outs) {
+//      out := 0.U
+//    }
+//  }
 }
 
 //unused currently
@@ -438,9 +438,9 @@ class Dispatch(wIn: Int, targets: List[Int], regOut: Boolean = false) extends Mo
     val outs = Output(MixedVec(targets.map { i => UInt(i.W) }))
   })
   //  val outt =io.outs(targets.size - 2)
-  var i = 0
+//  var i = 0
   var offset: Int = 0
-  when(io.en) {
+//  when(io.en) {
     var i = 0
     for (elem <- targets) {
       if(regOut){
@@ -451,11 +451,11 @@ class Dispatch(wIn: Int, targets: List[Int], regOut: Boolean = false) extends Mo
       i += 1
       offset += elem
     }
-  }.otherwise {
-    for (out <- io.outs) {
-      out := 0.U
-    }
-  }
+//  }.otherwise {
+//    for (out <- io.outs) {
+//      out := 0.U
+//    }
+//  }
 }
 
 class DispatchT(wIn: Int, targets: List[Int]) extends Module {
