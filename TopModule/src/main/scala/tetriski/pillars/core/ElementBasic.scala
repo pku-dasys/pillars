@@ -6,7 +6,7 @@ import scala.collection.mutable.ArrayBuffer
 import tetriski.pillars.hardware.PillarsConfig._
 
 //ModuleBasic is basic information of a module
-trait ModuleBasic {
+trait ElementBasic {
   var typeID = -1
   var moduleID = -1
   var width = -1

@@ -6,7 +6,7 @@ import scala.io.Source
 class SimulationtionHelper(arch: ArchitctureHierarchy) {
   var size =0
   val opArray = new ArrayBuffer[String]()
-  val moduleArray = new ArrayBuffer[ModuleTrait]()
+  val moduleArray = new ArrayBuffer[ElementTrait]()
   val IIArray = new ArrayBuffer[Int]()
   val waitCycleArray = new ArrayBuffer[Int]()
   val skewArray = new ArrayBuffer[Int]()
@@ -33,7 +33,7 @@ class SimulationtionHelper(arch: ArchitctureHierarchy) {
         outPorts.append(port)
       }
     }else{
-      val module = temp.getModule(moduleName(moduleName.size - 2))
+      val module = temp.getElement(moduleName(moduleName.size - 2))
       moduleArray.append(module)
     }
 

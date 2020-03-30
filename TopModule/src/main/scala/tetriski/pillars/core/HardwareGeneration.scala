@@ -22,7 +22,7 @@ class HardwareGeneration(arch: BlockTrait, connect: Connect) {
         if (strs(i)(strs(i).size - 1) == '/' ) {
           temp = temp(strs(i).substring(0, strs(i).size - 1))
         } else if (i == strs.size - 2) {
-          var target = temp.getModule(strs(i))
+          var target = temp.getElement(strs(i))
           return List(target.getTypeID(), target.getModuleID(), target.getPortID(strs(strs.size - 1)))
         }
 

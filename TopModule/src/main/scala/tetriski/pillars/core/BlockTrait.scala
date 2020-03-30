@@ -6,7 +6,7 @@ import firrtl.annotations.Target.NamedException
 import MRRGMode._
 import scala.collection.mutable.ArrayBuffer
 
-trait BlockTrait extends ModuleTrait {
+trait BlockTrait extends ElementTrait {
 
   //  var memPortArray = new ArrayBuffer[MemPort]
   //  var rfArray      = new ArrayBuffer[Rf]
@@ -27,15 +27,15 @@ trait BlockTrait extends ModuleTrait {
   var ConstsArray = new ArrayBuffer[Any]
   var LSUsArray = new ArrayBuffer[Any]
   //var PEArray = new ArrayBuffer[Any]
-  var modulesArray = new ArrayBuffer[ArrayBuffer[Any]]
-  var owningModules = new ArrayBuffer[List[Int]]
+  var elementsArray = new ArrayBuffer[ArrayBuffer[Any]]
+  var owningElements = new ArrayBuffer[List[Int]]
 
-  modulesArray.append(aluArray)
-  modulesArray.append(RFsArray)
-  modulesArray.append(MuxsArray)
-  modulesArray.append(ConstsArray)
-  modulesArray.append(LSUsArray)
-  val typeNum = modulesArray.size
+  elementsArray.append(aluArray)
+  elementsArray.append(RFsArray)
+  elementsArray.append(MuxsArray)
+  elementsArray.append(ConstsArray)
+  elementsArray.append(LSUsArray)
+  val typeNum = elementsArray.size
 
   var hierName = new ArrayBuffer[String]
   var connectArray = new ArrayBuffer[List[List[String]]]
@@ -43,7 +43,7 @@ trait BlockTrait extends ModuleTrait {
   //blockMap: name -> sub-block
   var blockMap = Map[String, BlockTrait]()
   //modulesMap: name -> corresponding module of this block
-  var modulesMap = Map[String, ModuleTrait]()
+  var elementsMap = Map[String, ElementTrait]()
 
   def updateHierName(arg: ArrayBuffer[String]): Unit = {
     for (str <- arg) {
@@ -58,9 +58,9 @@ trait BlockTrait extends ModuleTrait {
   def addBlock(arg: BlockTrait): Map[String, BlockTrait] = {
     blockMap += (arg.getName() -> arg)
     //Add sub-block's realistic modules into relevant array of parent module
-    for (i <- 0 until arg.modulesArray.size) {
-      for (j <- 0 until arg.modulesArray(i).size) {
-        modulesArray(i).append(arg.modulesArray(i)(j))
+    for (i <- 0 until arg.elementsArray.size) {
+      for (j <- 0 until arg.elementsArray(i).size) {
+        elementsArray(i).append(arg.elementsArray(i)(j))
       }
     }
     arg.updateHierName(hierName)
@@ -69,12 +69,12 @@ trait BlockTrait extends ModuleTrait {
   }
 
   //Add a realistic module into this block's modulesArray
-  def addModule(arg: ModuleTrait): Unit = {
+  def addElement(arg: ElementTrait): Unit = {
     arg.initMRRG()
     val typeNum = arg.getTypeID()
-    modulesArray(typeNum).append(arg)
-    modulesMap += (arg.getName() -> arg)
-    owningModules.append(List(typeNum, modulesArray(typeNum).size - 1))
+    elementsArray(typeNum).append(arg)
+    elementsMap += (arg.getName() -> arg)
+    owningElements.append(List(typeNum, elementsArray(typeNum).size - 1))
     configBit += arg.getConfigBit()
   }
 
@@ -108,10 +108,10 @@ trait BlockTrait extends ModuleTrait {
   def dumpMRRG(II: Int, filename: String = null): Unit = {
     def updateMRRG(block: BlockTrait): Unit = {
       val addName = block.hierName.map(i => i + ".").reverse.reduce(_ + _)
-      for (module <- block.owningModules) {
+      for (module <- block.owningElements) {
         val typeID = module(0)
         val moduleID = module(1)
-        val m = block.modulesArray(typeID)(moduleID).asInstanceOf[ModuleTrait]
+        val m = block.elementsArray(typeID)(moduleID).asInstanceOf[ElementTrait]
         for (oldName <- m.mrrg.nodeMap.keys) {
           m.mrrg.update(oldName, addName + m.getName() + "." + oldName)
         }
@@ -197,9 +197,9 @@ trait BlockTrait extends ModuleTrait {
         mapRelationMRRG = mapRelationMRRG + (srcMRRG -> dstMRRG.toList)
       }
 
-      for (modules <- modulesArray) {
+      for (modules <- elementsArray) {
         for (module <- modules) {
-          val tempMRRG = module.asInstanceOf[ModuleTrait].mrrg
+          val tempMRRG = module.asInstanceOf[ElementTrait].mrrg
           mrrg.mergy(tempMRRG)
         }
       }
@@ -321,17 +321,17 @@ trait BlockTrait extends ModuleTrait {
     for (blk <- sortedBlocks) {
       i += 1
       blk._2.printModules(writer)
-      if (i < blockMap.size || owningModules.size > 0) {
+      if (i < blockMap.size || owningElements.size > 0) {
         writer.print(",\n")
       } else {
         writer.print("\n")
       }
     }
 
-    for (i <- 0 until owningModules.size) {
-      val typeNum = owningModules(i)(0)
-      val moduleNum = owningModules(i)(1)
-      val m = modulesArray(typeNum)(moduleNum).asInstanceOf[ModuleTrait]
+    for (i <- 0 until owningElements.size) {
+      val typeNum = owningElements(i)(0)
+      val moduleNum = owningElements(i)(1)
+      val m = elementsArray(typeNum)(moduleNum).asInstanceOf[ElementTrait]
       writer.println("\"" + m.getName() + "\": {")
       val inPorts = m.getInPorts()
       val strInPorts = tails(inPorts.toList, " ")
@@ -343,7 +343,7 @@ trait BlockTrait extends ModuleTrait {
       val ops = m.getSupOps()
       val strOps = tails(ops.toList.map(i => i.toString()), " ")
       writer.print("\"ops\": \"" + strOps + "\"\n")
-      if (i < owningModules.size - 1) {
+      if (i < owningElements.size - 1) {
         writer.print("},\n")
       } else {
         writer.print("}\n")
@@ -359,6 +359,6 @@ trait BlockTrait extends ModuleTrait {
   //We can use block("name") to get a sub-block
   def apply(name: String): BlockTrait = blockMap(name)
 
-  //We can use block.getModule("name") to get a realistic module
-  def getModule(name: String): ModuleTrait = modulesMap(name)
+  //We can use block.getElement("name") to get a realistic module
+  def getElement(name: String): ElementTrait = elementsMap(name)
 }
