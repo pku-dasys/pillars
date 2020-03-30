@@ -1,11 +1,11 @@
 package tetriski.pillars.archlib
 
 import tetriski.pillars.core.OpEnum.OpEnum
-import tetriski.pillars.core.{BlockTrait, ModuleTrait, OpEnum, OpcodeTranslator}
+import tetriski.pillars.core.{BlockTrait, ElementTrait, OpEnum, OpcodeTranslator}
 import tetriski.pillars.core.MRRGMode._
 
 
-class OpAlu(name: String, aluOpList: List[OpEnum], supBypass: Boolean, params: List[Int]) extends ModuleTrait {
+class ElementAlu(name: String, aluOpList: List[OpEnum], supBypass: Boolean, params: List[Int]) extends ElementTrait {
   //Module ID 0
   setTypeID(0)
   //Default
@@ -31,7 +31,7 @@ class OpAlu(name: String, aluOpList: List[OpEnum], supBypass: Boolean, params: L
 
 }
 
-class OpRF(name: String, params: List[Int]) extends ModuleTrait {
+class ElementRF(name: String, params: List[Int]) extends ElementTrait {
 
   //Module ID 1
   setTypeID(1)
@@ -49,7 +49,7 @@ class OpRF(name: String, params: List[Int]) extends ModuleTrait {
   setMRRGMode(REG_MODE)
 }
 
-class OpMux(name: String, params: List[Int]) extends ModuleTrait {
+class ElementMux(name: String, params: List[Int]) extends ElementTrait {
 
   //Module ID 2
   setTypeID(2)
@@ -65,7 +65,7 @@ class OpMux(name: String, params: List[Int]) extends ModuleTrait {
   addInternalNodesNum(1)
 }
 
-class OpConst(name: String, params: List[Int]) extends ModuleTrait {
+class ElementConst(name: String, params: List[Int]) extends ElementTrait {
   //Module ID 3
   setTypeID(3)
 
@@ -80,7 +80,7 @@ class OpConst(name: String, params: List[Int]) extends ModuleTrait {
   addInternalNodesNum(1)
 }
 
-class OpLSU(name: String, params: List[Int]) extends ModuleTrait {
+class ElementLSU(name: String, params: List[Int]) extends ElementTrait {
   //Module ID 4
   setTypeID(4)
 

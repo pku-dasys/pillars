@@ -4,13 +4,13 @@ import chisel3.util.log2Up
 
 import scala.collection.mutable.ArrayBuffer
 import MRRGMode._
-import tetriski.pillars.archlib.OpRF
+import tetriski.pillars.archlib.ElementRF
 
 import util.control.Breaks._
 //import tetriski.pillars.hardware.PillarsConfig._
 //import tetriski.pillars.core.NodeMRRG
 
-trait ModuleTrait extends Ports with ModuleBasic {
+trait ElementTrait extends Ports with ElementBasic {
   var mrrg = new MRRG()
   var mode = NORMAL_MODE
   var internalNodes = List[String]()
