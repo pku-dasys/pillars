@@ -16,6 +16,13 @@ trait ElementTrait extends Ports with ElementBasic {
   var internalNodes = List[String]()
   var bannedINodeSet = Set[BigInt]()
 
+  def /(portName: String): ValidPort = {
+    if (!(getInPorts().toSet.contains(portName) || getOutPorts().toSet.contains(portName))) {
+      System.err.println(s"Invalid port name $name / $portName!")
+    }
+    new ValidPort(name, portName)
+  }
+
   def setMRRGMode(newMode: Int): Unit = {
     mode = newMode
   }
@@ -113,12 +120,12 @@ trait ElementTrait extends Ports with ElementBasic {
 
       }
     } else {
-      if(mode == REG_MODE){
+      if (mode == REG_MODE) {
         //single register
-        if(fanInNums(0) != -1){
+        if (fanInNums(0) != -1) {
           updateConfigArray(1)
         }
-      }else{
+      } else {
         //mux
         updateConfigArray(fanInNums(0))
       }
@@ -251,4 +258,20 @@ trait ElementTrait extends Ports with ElementBasic {
     mrrg
   }
 
+}
+
+class ValidPort(parentName: String, portName: String) {
+  def getParentName(): String = parentName
+  def getPortName(): String = portName
+  def ->(dst: ValidPort): List[List[String]] = {
+    var srcList = List(parentName, portName)
+    var dstList = List(dst.getParentName(), dst.getPortName())
+    if (parentName == null) {
+      srcList = List(portName)
+    }
+    if (dst.getParentName()== null) {
+      dstList = List(dst.getPortName())
+    }
+    List(srcList, dstList)
+  }
 }

@@ -45,6 +45,20 @@ trait BlockTrait extends ElementTrait {
   //modulesMap: name -> corresponding module of this block
   var elementsMap = Map[String, ElementTrait]()
 
+  override def /(portName: String): ValidPort = {
+    if (!(getInPorts().toSet.contains(portName) || getOutPorts().toSet.contains(portName))) {
+      System.err.println(s"Invalid port name $name / $portName!")
+    }
+    new ValidPort(name + "/", portName)
+  }
+
+  def term(portName: String): ValidPort = {
+    if (!(getInPorts().toSet.contains(portName) || getOutPorts().toSet.contains(portName))) {
+      System.err.println(s"Invalid port name $portName!")
+    }
+    new ValidPort(null, portName)
+  }
+
   def updateHierName(arg: ArrayBuffer[String]): Unit = {
     for (str <- arg) {
       hierName.append(str)
@@ -121,10 +135,14 @@ trait BlockTrait extends ElementTrait {
     def getStrMRRG(listStr: List[String]): String = {
       val mrrgStr = ArrayBuffer[String]()
       listStr.foreach(str => mrrgStr.append(str.replaceAll("/", ".")))
-      if (!mrrgStr(listStr.size - 2).contains(".")) {
-        mrrgStr(listStr.size - 2) = mrrgStr(listStr.size - 2).concat(".")
+      if (listStr.size == 1) {
+        listStr(0)
+      }else {
+        if (!mrrgStr(listStr.size - 2).contains(".")) {
+          mrrgStr(listStr.size - 2) = mrrgStr(listStr.size - 2).concat(".")
+        }
+        mrrgStr.reduce(_ + _)
       }
-      mrrgStr.reduce(_ + _)
     }
 
     def dumpAsTXT(writer: PrintWriter, targetMRRG: MRRG): Unit = {

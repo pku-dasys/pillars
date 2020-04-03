@@ -72,7 +72,7 @@ class AdresPEBlock(name: String, useMuxBypass: Boolean, opList: List[OpEnum] = n
   hierName.append(name)
   isConfigRegion = true
 
-  addOutPorts(Array("out"))
+  addOutPorts(Array("out_0"))
   addInPorts(inPortsNeighbor)
 
   val neighborSize = inPortsNeighbor.size
@@ -116,29 +116,27 @@ class AdresPEBlock(name: String, useMuxBypass: Boolean, opList: List[OpEnum] = n
   const0.addOutPorts(Array("out_0"))
   addElement(const0)
 
-  //  addConnect(List("input_w"),List("mux0","input_0"))
-  //  addConnect(List("input_w"),List("mux1","input_0"))
-  //  addConnect(List("input_e"),List("mux0","input_1"))
-  //  addConnect(List("input_e"),List("mux1","input_1"))
-  //  addConnect(List("input_n"),List("mux0","input_2"))
-  //  addConnect(List("input_n"),List("mux1","input_2"))
-  //  addConnect(List("input_s"),List("mux0","input_3"))
-  //  addConnect(List("input_s"),List("mux1","input_3"))
-  //  addConnect(List("input_lsu"),List("mux0","input_4"))
-  //  addConnect(List("input_lsu"),List("mux1","input_4"))
-  //  addConnect(List("const0", "out_0"),List("mux0","input_5"))
-  //  addConnect(List("const0", "out_0"),List("mux1","input_5"))
 
   for (i <- 0 until neighborSize) {
-    addConnect(List(inPortsNeighbor(i)), List("mux0", "input_" + i.toString))
-    addConnect(List(inPortsNeighbor(i)), List("mux1", "input_" + i.toString))
+    //    addConnect(List(inPortsNeighbor(i)), List("mux0", "input_" + i.toString))
+    //    addConnect(List(inPortsNeighbor(i)), List("mux1", "input_" + i.toString))
+
+    addConnect(term(inPortsNeighbor(i)) -> mux0 / s"input_$i")
+    addConnect(term(inPortsNeighbor(i)) -> mux1 / s"input_$i")
   }
-  addConnect(List("const0", "out_0"), List("mux0", "input_" + (neighborSize).toString))
-  addConnect(List("const0", "out_0"), List("mux1", "input_" + (neighborSize).toString))
-  addConnect(List("rf0", "out_0"), List("mux0", "input_" + (neighborSize + 1).toString))
-  addConnect(List("mux0", "out_0"), List("alu0", "input_a"))
-  addConnect(List("mux1", "out_0"), List("alu0", "input_b"))
-  addConnect(List("alu0", "out_0"), List("rf0", "input_0"))
+  //  addConnect(List("const0", "out_0"), List("mux0", "input_" + (neighborSize).toString))
+  //  addConnect(List("const0", "out_0"), List("mux1", "input_" + (neighborSize).toString))
+  //  addConnect(List("rf0", "out_0"), List("mux0", "input_" + (neighborSize + 1).toString))
+  //  addConnect(List("mux0", "out_0"), List("alu0", "input_a"))
+  //  addConnect(List("mux1", "out_0"), List("alu0", "input_b"))
+  //  addConnect(List("alu0", "out_0"), List("rf0", "input_0"))
+
+  addConnect(const0 / "out_0" -> mux0 / s"input_$neighborSize")
+  addConnect(const0 / "out_0" -> mux1 / s"input_$neighborSize")
+  addConnect(rf0 / "out_0" -> mux0 / ("input_" + (neighborSize + 1).toString))
+  addConnect(mux0 / "out_0" -> alu0 / "input_a")
+  addConnect(mux1 / "out_0" -> alu0 / "input_b")
+  addConnect(alu0 / "out_0" -> rf0 / "input_0")
 
 
   if (useMuxBypass) {
@@ -164,14 +162,21 @@ class AdresPEBlock(name: String, useMuxBypass: Boolean, opList: List[OpEnum] = n
     //    addConnect(List("input_lsu"),List("muxBp","input_4"))
 
     for (i <- 0 until neighborSize) {
-      addConnect(List(inPortsNeighbor(i)), List("muxBp", "input_" + i.toString))
+      //      addConnect(List(inPortsNeighbor(i)), List("muxBp", "input_" + i.toString))
+      addConnect(term(inPortsNeighbor(i)) -> muxBp / s"input_$i")
     }
 
-    addConnect(List("muxBp", "out_0"), List("muxOut", "input_1"))
-    addConnect(List("rf0", "out_1"), List("muxOut", "input_0"))
-    addConnect(List("muxOut", "out_0"), List("out_0"))
+    //    addConnect(List("muxBp", "out_0"), List("muxOut", "input_1"))
+    //    addConnect(List("rf0", "out_1"), List("muxOut", "input_0"))
+    //    addConnect(List("muxOut", "out_0"), List("out_0"))
+
+    addConnect(muxBp / "out_0" -> muxOut / "input_1")
+    addConnect(rf0 / "out_1" -> muxOut / "input_0")
+    addConnect(muxOut / "out_0" -> term("out_0"))
+
   } else {
-    addConnect(List("rf0", "out_1"), List("out_0"))
+    //    addConnect(List("rf0", "out_1"), List("out_0"))
+    addConnect(rf0 / "out_1" -> term("out_0"))
   }
 }
 
@@ -184,7 +189,7 @@ class AdresVLIWPEBlock(name: String, useMuxBypass: Boolean, opList: List[OpEnum]
 
   //  inPortsNeighbor = Array("input_w", "input_e", "input_n", "input_s", "input_lsu")
 
-  addOutPorts(Array("out", "rf_out"))
+  addOutPorts(Array("out_0", "rf_out"))
   addInPorts(inPortsNeighbor ++ Array("input_rf_mux0", "input_rf_muxOut", "input_IO"))
 
 
@@ -561,10 +566,12 @@ class TileCompleteBlock(name: String, x: Int, y: Int, numIn: Int, numOut: Int, u
   addBlock(globalRFBlock)
 
   for (i <- 0 until numOut) {
-    addConnect(List(List(ioBlock.getName() + "/", "out_" + i.toString), List("out_" + i.toString)))
+    addConnect(ioBlock / s"out_$i" -> term(s"out_$i"))
+    //    addConnect(List(List(ioBlock.getName() + "/", "out_" + i.toString), List("out_" + i.toString)))
   }
   for (i <- 0 until numIn) {
-    addConnect(List(List("input_" + i.toString), List(ioBlock.getName() + "/", "input_" + i.toString)))
+    addConnect(term(s"input_$i") -> ioBlock / s"input_$i")
+    //    addConnect(List(List("input_" + i.toString), List(ioBlock.getName() + "/", "input_" + i.toString)))
   }
 
   var peMap = Map[Int, BlockTrait]()
@@ -641,34 +648,51 @@ class TileCompleteBlock(name: String, x: Int, y: Int, numIn: Int, numOut: Int, u
       val peE = peMap((i + 1) % x + j * x)
       val peW = peMap(((i - 1) + x) % x + j * x)
       if (j == 0) {
-        connectArray.append(List(List(ioBlock.getName() + "/", "neighbour_out_" + i.toString),
-          List(peCurrent.getName() + "/", "input_IO")))
-        connectArray.append(List(List(peCurrent.getName() + "/", "out_0"),
-          List(ioBlock.getName() + "/", "neighbour_input_" + i.toString)))
-        connectArray.append(List(List(peCurrent.getName() + "/", "rf_out"),
-          List(globalRFBlock.getName() + "/", "input_" + i.toString)))
-        connectArray.append(List(List(globalRFBlock.getName() + "/", "out_" + (i * 2).toString),
-          List(peCurrent.getName() + "/", "input_rf_mux0")))
-        connectArray.append(List(List(globalRFBlock.getName() + "/", "out_" + (i * 2 + 1).toString),
-          List(peCurrent.getName() + "/", "input_rf_muxOut")))
+        //        connectArray.append(List(List(ioBlock.getName() + "/", "neighbour_out_" + i.toString),
+        //          List(peCurrent.getName() + "/", "input_IO")))
+        //        connectArray.append(List(List(peCurrent.getName() + "/", "out_0"),
+        //          List(ioBlock.getName() + "/", "neighbour_input_" + i.toString)))
+        //        connectArray.append(List(List(peCurrent.getName() + "/", "rf_out"),
+        //          List(globalRFBlock.getName() + "/", "input_" + i.toString)))
+        //        connectArray.append(List(List(globalRFBlock.getName() + "/", "out_" + (i * 2).toString),
+        //          List(peCurrent.getName() + "/", "input_rf_mux0")))
+        //        connectArray.append(List(List(globalRFBlock.getName() + "/", "out_" + (i * 2 + 1).toString),
+        //          List(peCurrent.getName() + "/", "input_rf_muxOut")))
+
+        val mux0Index = i * 2
+        val muxOutIndex = i * 2 + 1
+        addConnect(ioBlock / s"neighbour_out_$i" -> peCurrent / "input_IO")
+        addConnect(peCurrent / "out_0" -> ioBlock / s"neighbour_input_$i")
+        addConnect(peCurrent / "rf_out" -> globalRFBlock / s"input_$i")
+        addConnect(globalRFBlock / s"out_$mux0Index" -> peCurrent / "input_rf_mux0")
+        addConnect(globalRFBlock / s"out_$muxOutIndex" -> peCurrent / "input_rf_muxOut")
       }
       if (isToroid) {
-        connectArray.append(List(List(peCurrent.getName() + "/", "out_0"), List(peS.getName() + "/", "input_n")))
-        connectArray.append(List(List(peCurrent.getName() + "/", "out_0"), List(peN.getName() + "/", "input_s")))
-        connectArray.append(List(List(peCurrent.getName() + "/", "out_0"), List(peE.getName() + "/", "input_w")))
-        connectArray.append(List(List(peCurrent.getName() + "/", "out_0"), List(peW.getName() + "/", "input_e")))
+        addConnect(peCurrent / "out_0" -> peS / "input_n")
+        addConnect(peCurrent / "out_0" -> peN / "input_s")
+        addConnect(peCurrent / "out_0" -> peE / "input_w")
+        addConnect(peCurrent / "out_0" -> peW / "input_e")
+
+        //        connectArray.append(List(List(peCurrent.getName() + "/", "out_0"), List(peS.getName() + "/", "input_n")))
+        //        connectArray.append(List(List(peCurrent.getName() + "/", "out_0"), List(peN.getName() + "/", "input_s")))
+        //        connectArray.append(List(List(peCurrent.getName() + "/", "out_0"), List(peE.getName() + "/", "input_w")))
+        //        connectArray.append(List(List(peCurrent.getName() + "/", "out_0"), List(peW.getName() + "/", "input_e")))
       } else {
         if (j != y - 1) {
-          connectArray.append(List(List(peCurrent.getName() + "/", "out_0"), List(peS.getName() + "/", "input_n")))
+          addConnect(peCurrent / "out_0" -> peS / "input_n")
+          //          connectArray.append(List(List(peCurrent.getName() + "/", "out_0"), List(peS.getName() + "/", "input_n")))
         }
         if (j != 0) {
-          connectArray.append(List(List(peCurrent.getName() + "/", "out_0"), List(peN.getName() + "/", "input_s")))
+          addConnect(peCurrent / "out_0" -> peN / "input_s")
+          //          connectArray.append(List(List(peCurrent.getName() + "/", "out_0"), List(peN.getName() + "/", "input_s")))
         }
         if (i != x - 1) {
-          connectArray.append(List(List(peCurrent.getName() + "/", "out_0"), List(peE.getName() + "/", "input_w")))
+          addConnect(peCurrent / "out_0" -> peE / "input_w")
+          //          connectArray.append(List(List(peCurrent.getName() + "/", "out_0"), List(peE.getName() + "/", "input_w")))
         }
         if (i != 0) {
-          connectArray.append(List(List(peCurrent.getName() + "/", "out_0"), List(peW.getName() + "/", "input_e")))
+          addConnect(peCurrent / "out_0" -> peW / "input_e")
+          //          connectArray.append(List(List(peCurrent.getName() + "/", "out_0"), List(peW.getName() + "/", "input_e")))
         }
       }
     }
@@ -680,8 +704,11 @@ class TileCompleteBlock(name: String, x: Int, y: Int, numIn: Int, numOut: Int, u
     addBlock(lsuBlock)
     for (i <- 0 until x) {
       val pe = peMap(i + j * x)
-      addConnect(List(pe.getName() + "/", "out_0"), List(lsuBlock.getName() + "/", "neighbour_input_" + i.toString))
-      addConnect(List(lsuBlock.getName() + "/", "out"), List(pe.getName() + "/", "input_lsu"))
+      addConnect(pe / "out_0" -> lsuBlock / s"neighbour_input_$i")
+      addConnect(lsuBlock / "out" -> pe / "input_lsu")
+
+      //      addConnect(List(pe.getName() + "/", "out_0"), List(lsuBlock.getName() + "/", "neighbour_input_" + i.toString))
+      //      addConnect(List(lsuBlock.getName() + "/", "out"), List(pe.getName() + "/", "input_lsu"))
     }
   }
 
@@ -693,8 +720,7 @@ class BlockImmediate(name: String) extends BlockTrait {
   val constParams = List(32, 32)
   setName(name)
   hierName.append(name)
-
-
+  
   addInPorts(Array("in0"))
   addOutPorts(Array("out0"))
 
@@ -704,12 +730,12 @@ class BlockImmediate(name: String) extends BlockTrait {
   addElement(alu0)
 
   val const0 = new ElementConst("const0", constParams)
-  alu0.addOutPorts(Array("out0"))
+  const0.addOutPorts(Array("out0"))
   addElement(const0)
 
-  addConnect(List("const0", "out0"), List("alu0", "inputB"))
-  addConnect(List("in0"), List("alu0", "inputA"))
-  addConnect(List("alu0", "out0"), List("out0"))
+  addConnect(const0 / "out0" -> alu0 / "inputB")
+  addConnect(term("in0") -> alu0 / "inputA")
+  addConnect(alu0 / "out0" -> term("out0"))
 }
 
 class BlockChain(name: String) extends BlockTrait {
@@ -719,14 +745,10 @@ class BlockChain(name: String) extends BlockTrait {
   addInPorts(Array("in0"))
   addOutPorts(Array("out0"))
 
-  for(i <- 0 until 4){
-    val blockImmediate = new BlockImmediate("b" + i.toString)
-    addBlock(blockImmediate)
-  }
+  val subBLocks = (0 until 4).map(i => new BlockImmediate(s"b$i"))
+  subBLocks.foreach(x => addBlock(x))
 
-  addConnect(List("in0"), List("b0/", "in0"))
-  for(i <- 0 until 3){
-    addConnect(List("b" + i.toString + "/", "out0"), List("b" + (i + 1).toString + "/", "in0"))
-  }
-  addConnect(List("b3/","out0"), List("out0"))
+  addConnect(term("in0") -> subBLocks(0) / "in0")
+  (0 until 3).foreach(i => addConnect(subBLocks(i) / "out0" -> subBLocks(i + 1) / "in0"))
+  addConnect(subBLocks(3) / "out0" -> term("out0"))
 }

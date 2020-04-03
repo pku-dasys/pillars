@@ -1,14 +1,14 @@
 package tetriski.pillars.examples
 
 import chisel3.iotesters
-import tetriski.pillars.archlib.{PEBlock, TileBlock, TileCompleteBlock, TileLSUBlock}
-import tetriski.pillars.core.{ArchitctureHierarchy, Connect, ConstInfo, HardwareGeneration, ElementTrait}
+import tetriski.pillars.archlib.{BlockChain, PEBlock, TileBlock, TileCompleteBlock, TileLSUBlock}
+import tetriski.pillars.core.{ArchitctureHierarchy, Connect, ConstInfo, ElementTrait, HardwareGeneration}
 import tetriski.pillars.hardware.TopModule
 import tetriski.pillars.testers.{TopModule2PEUnitTest, TopModuleAdresUnitTest,
   TopModuleCompleteAdresUnitTest, TopModuleLSUAdresUnitTest}
 
 object HardwareExamples {
-  def example2PE(): Unit ={
+  def example2PE(): Unit = {
     //Eliminated
 
     val arch = new ArchitctureHierarchy()
@@ -22,15 +22,15 @@ object HardwareExamples {
     arch.addBlock(pe0)
     arch.addBlock(pe1)
 
-    arch.addConnect(List(List("input_0"),List("pe0/", "input_0")))
-    arch.addConnect(List(List("input_0"),List("pe0/", "input_1")))
-    arch.addConnect(List(List("input_1"),List("pe0/", "input_2")))
-    arch.addConnect(List(List("input_1"),List("pe1/", "input_0")))
-    arch.addConnect(List(List("input_1"),List("pe1/", "input_1")))
-    arch.addConnect(List(List("input_0"),List("pe1/", "input_2")))
-    arch.addConnect(List(List("pe1/","out_0"),List("pe0/", "input_3")))
-    arch.addConnect(List(List("pe0/","out_0"),List("pe1/", "input_3")))
-    arch.addConnect(List(List("pe0/","out_0"),List("output")))
+    arch.addConnect(List(List("input_0"), List("pe0/", "input_0")))
+    arch.addConnect(List(List("input_0"), List("pe0/", "input_1")))
+    arch.addConnect(List(List("input_1"), List("pe0/", "input_2")))
+    arch.addConnect(List(List("input_1"), List("pe1/", "input_0")))
+    arch.addConnect(List(List("input_1"), List("pe1/", "input_1")))
+    arch.addConnect(List(List("input_0"), List("pe1/", "input_2")))
+    arch.addConnect(List(List("pe1/", "out_0"), List("pe0/", "input_3")))
+    arch.addConnect(List(List("pe0/", "out_0"), List("pe1/", "input_3")))
+    arch.addConnect(List(List("pe0/", "out_0"), List("output")))
 
     arch.init()
 
@@ -61,7 +61,19 @@ object HardwareExamples {
     }
   }
 
-  def exampleAdres(): Unit ={
+  def exampleBlockChain(): Unit = {
+    val arch = new ArchitctureHierarchy()
+    arch.addOutPorts(Array("out_0"))
+    arch.addInPorts(Array("input_0"))
+    val blockChain = new BlockChain("blockChain")
+    arch.addBlock(blockChain)
+    arch.addConnect(arch.term("input_0") -> blockChain / "in0")
+    arch.addConnect(blockChain / "out0" -> arch.term("out_0"))
+    arch.init()
+    blockChain.dumpMRRG(2, "BlockChain.txt")
+  }
+
+  def exampleAdres(): Unit = {
     val arch = new ArchitctureHierarchy()
     //The order of ports should be same as TopModule
     arch.addOutPorts(Array("output"))
@@ -73,9 +85,9 @@ object HardwareExamples {
     arch.addBlock(tile)
 
 
-    arch.addConnect(List(List("input_0"),List("tile_0/", "input_0")))
-    arch.addConnect(List(List("input_1"),List("tile_0/", "input_1")))
-    arch.addConnect(List(List("tile_0/","out_0"),List("output")))
+    arch.addConnect(List(List("input_0"), List("tile_0/", "input_0")))
+    arch.addConnect(List(List("input_1"), List("tile_0/", "input_1")))
+    arch.addConnect(List(List("tile_0/", "out_0"), List("output")))
 
     arch.init()
 
@@ -96,7 +108,7 @@ object HardwareExamples {
     //      println(cp.connectMap)
 
     //Verilog generation
-    chisel3.Driver.execute(Array("--no-check-comb-loops", "-td","ADRESv0"),
+    chisel3.Driver.execute(Array("--no-check-comb-loops", "-td", "ADRESv0"),
       () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, dataWidth))
 
     val constInfo = new ConstInfo(1)
@@ -119,13 +131,13 @@ object HardwareExamples {
 
 
     //Run tester
-    iotesters.Driver.execute(Array( "--no-check-comb-loops","-tgvo", "on", "-tbn" ,"verilator"),
+    iotesters.Driver.execute(Array("--no-check-comb-loops", "-tgvo", "on", "-tbn", "verilator"),
       () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, dataWidth)) {
       c => new TopModuleAdresUnitTest(c, bitStream)
     }
   }
 
-  def exampleLSUAdres(): Unit ={
+  def exampleLSUAdres(): Unit = {
     val arch = new ArchitctureHierarchy()
     //The order of ports should be same as TopModule
     arch.addOutPorts(Array("output"))
@@ -137,9 +149,9 @@ object HardwareExamples {
     arch.addBlock(tile)
 
 
-    arch.addConnect(List(List("input_0"),List("tile_0/", "input_0")))
-    arch.addConnect(List(List("input_1"),List("tile_0/", "input_1")))
-    arch.addConnect(List(List("tile_0/","out_0"),List("output")))
+    arch.addConnect(List(List("input_0"), List("tile_0/", "input_0")))
+    arch.addConnect(List(List("input_1"), List("tile_0/", "input_1")))
+    arch.addConnect(List(List("tile_0/", "out_0"), List("output")))
 
     arch.init()
 
@@ -160,7 +172,7 @@ object HardwareExamples {
     //      println(cp.connectMap)
 
     //Verilog generation
-    chisel3.Driver.execute(Array("--no-check-comb-loops", "-td","ADRESv1"),
+    chisel3.Driver.execute(Array("--no-check-comb-loops", "-td", "ADRESv1"),
       () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, dataWidth))
 
     val constInfo = new ConstInfo(1)
@@ -189,13 +201,13 @@ object HardwareExamples {
     //Run tester
     //      iotesters.Driver.execute(Array( "--no-check-comb-loops","-tiac", "-tiwv"),
     //      () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, 32)) {
-    iotesters.Driver.execute(Array( "--no-check-comb-loops","-tgvo", "on", "-tbn" ,"verilator"),
+    iotesters.Driver.execute(Array("--no-check-comb-loops", "-tgvo", "on", "-tbn", "verilator"),
       () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, dataWidth)) {
       c => new TopModuleLSUAdresUnitTest(c, bitStream, schedules)
     }
   }
 
-  def exampleCompleteAdres(): Unit ={
+  def exampleCompleteAdres(): Unit = {
     var arch = new ArchitctureHierarchy()
     //The order of ports should be same as TopModule
     arch.addOutPorts(Array("out_0", "out_1", "out_2", "out_3"))
@@ -206,15 +218,15 @@ object HardwareExamples {
 
     arch.addBlock(tile)
 
-    arch.addConnect(List(List("input_0"),List("tile_0/", "input_0")))
-    arch.addConnect(List(List("input_1"),List("tile_0/", "input_1")))
-    arch.addConnect(List(List("input_2"),List("tile_0/", "input_2")))
-    arch.addConnect(List(List("input_3"),List("tile_0/", "input_3")))
+    arch.addConnect(List(List("input_0"), List("tile_0/", "input_0")))
+    arch.addConnect(List(List("input_1"), List("tile_0/", "input_1")))
+    arch.addConnect(List(List("input_2"), List("tile_0/", "input_2")))
+    arch.addConnect(List(List("input_3"), List("tile_0/", "input_3")))
 
-    arch.addConnect(List(List("tile_0/","out_0"),List("out_0")))
-    arch.addConnect(List(List("tile_0/","out_1"),List("out_1")))
-    arch.addConnect(List(List("tile_0/","out_2"),List("out_2")))
-    arch.addConnect(List(List("tile_0/","out_3"),List("out_3")))
+    arch.addConnect(List(List("tile_0/", "out_0"), List("out_0")))
+    arch.addConnect(List(List("tile_0/", "out_1"), List("out_1")))
+    arch.addConnect(List(List("tile_0/", "out_2"), List("out_2")))
+    arch.addConnect(List(List("tile_0/", "out_3"), List("out_3")))
 
 
     arch.init()
@@ -238,7 +250,7 @@ object HardwareExamples {
     //      println(cp.connectMap)
 
     //Verilog generation
-    chisel3.Driver.execute(Array("--no-check-comb-loops", "-td","ADRESv2"),
+    chisel3.Driver.execute(Array("--no-check-comb-loops", "-td", "ADRESv2"),
       () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, dataWidth))
 
     val constInfo = new ConstInfo(targetII)
@@ -250,7 +262,6 @@ object HardwareExamples {
 
     //      arch("tile_0")("pe_0_3").getModule("const0").updateConfigArray(1)
     //      arch("tile_0")("pe_0_0").getModule("const0").updateConfigArray(1)
-
 
 
     //      val bitStream = arch.getConfigBitStream()
@@ -273,7 +284,7 @@ object HardwareExamples {
     //Run tester
     //iotesters.Driver.execute(Array( "--no-check-comb-loops","-tiac", "-tiwv"),
     // () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, 32)) {
-    iotesters.Driver.execute(Array("--no-check-comb-loops","-tgvo", "on", "-tbn" ,"verilator"),
+    iotesters.Driver.execute(Array("--no-check-comb-loops", "-tgvo", "on", "-tbn", "verilator"),
       () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, dataWidth)) {
       c => new TopModuleCompleteAdresUnitTest(c, bitStreams, schedules)
     }
