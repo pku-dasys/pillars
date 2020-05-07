@@ -15,7 +15,7 @@ trait ElementBasic {
   var params = new ArrayBuffer[Int]
   var configBit = 0
   var configArray = new ArrayBuffer[Int]
-  var waitCycles = new Array[Int](II_UPPER_BOUND)
+  var fireTimes = new Array[Int](II_UPPER_BOUND)
   var skews = new Array[Int](II_UPPER_BOUND)
 
   def setModuleID(arg: Int): Unit = {
@@ -51,17 +51,17 @@ trait ElementBasic {
     configArray.append(0)
   }
 
-  def setWaitCycle(waitCycle: Int, II: Int): Unit ={
-    waitCycles(II) = waitCycle
+  def setFireTime(fireTime: Int, II: Int): Unit ={
+    fireTimes(II) = fireTime
   }
 
   def setSkew(skew: Int, II: Int): Unit ={
     skews(II) = skew
   }
 
-  def resetWaitCycle(): Unit ={
+  def resetFireTimes(): Unit ={
     for(i <- 0 until II_UPPER_BOUND){
-      waitCycles(i) = 0
+      fireTimes(i) = 0
     }
   }
 
@@ -99,8 +99,8 @@ trait ElementBasic {
     configBit
   }
 
-  def getWaitCycles(): Array[Int] = {
-    waitCycles
+  def getFireTimes(): Array[Int] = {
+    fireTimes
   }
 
   def getSchedule(): Array[Int] = {
@@ -110,8 +110,8 @@ trait ElementBasic {
       if(skew < 0){
         skew = Math.pow(2, LOG_SCHEDULE_SIZE).toInt - skew
       }
-      val waitCycle = waitCycles(i)
-      val sche = (skew << LOG_SCHEDULE_SIZE) + waitCycle
+      val fireTime = fireTimes(i)
+      val sche = (skew << LOG_SCHEDULE_SIZE) + fireTime
       ret(i) = sche
     }
     ret

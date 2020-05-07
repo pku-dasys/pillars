@@ -1,0 +1,673 @@
+<!DOCTYPE html >
+<html>
+        <head>
+          <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+          <title></title>
+          <meta name="description" content="" />
+          <meta name="keywords" content="" />
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      
+      <link href="../../../lib/index.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../../lib/jquery.min.js"></script>
+      <script type="text/javascript" src="../../../lib/jquery.panzoom.min.js"></script>
+      <script type="text/javascript" src="../../../lib/jquery.mousewheel.min.js"></script>
+      <script type="text/javascript" src="../../../lib/index.js"></script>
+      <script type="text/javascript" src="../../../index.js"></script>
+      <script type="text/javascript" src="../../../lib/scheduler.js"></script>
+      <script type="text/javascript" src="../../../lib/template.js"></script>
+      
+      <script type="text/javascript">
+        /* this variable can be used by the JS to determine the path to the root document */
+        var toRoot = '../../../';
+      </script>
+    
+        </head>
+        <body>
+      <div id="search">
+        <span id="doc-title"><span id="doc-version"></span></span>
+        <span class="close-results"><span class="left">&lt;</span> Back</span>
+        <div id="textfilter">
+          <span class="input">
+            <input autocapitalize="none" placeholder="Search" id="index-input" type="text" accesskey="/" />
+            <i class="clear material-icons"></i>
+            <i id="search-icon" class="material-icons"></i>
+          </span>
+        </div>
+    </div>
+      <div id="search-results">
+        <div id="search-progress">
+          <div id="progress-fill"></div>
+        </div>
+        <div id="results-content">
+          <div id="entity-results"></div>
+          <div id="member-results"></div>
+        </div>
+      </div>
+      <div id="content-scroll-container" style="-webkit-overflow-scrolling: touch;">
+        <div id="content-container" style="-webkit-overflow-scrolling: touch;">
+          <div id="subpackage-spacer">
+            <div id="packages">
+              <h1>Packages</h1>
+              <ul>
+                <li name="_root_.root" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="_root_"></a><a id="root:_root_"></a>
+      <span class="permalink">
+      <a href="../../../index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../../../index.html"><span class="name">root</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../index.html" class="extype" name="_root_">root</a></dd></dl></div>
+    </li><li name="_root_.tetriski" visbl="pub" class="indented1 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="tetriski"></a><a id="tetriski:tetriski"></a>
+      <span class="permalink">
+      <a href="../../../tetriski/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../../index.html"><span class="name">tetriski</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../index.html" class="extype" name="_root_">root</a></dd></dl></div>
+    </li><li name="tetriski.pillars" visbl="pub" class="indented2 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="pillars"></a><a id="pillars:pillars"></a>
+      <span class="permalink">
+      <a href="../../../tetriski/pillars/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../index.html"><span class="name">pillars</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="tetriski">tetriski</a></dd></dl></div>
+    </li><li name="tetriski.pillars.archlib" visbl="pub" class="indented3 current" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="archlib"></a><a id="archlib:archlib"></a>
+      <span class="permalink">
+      <a href="../../../tetriski/pillars/archlib/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <span class="name">archlib</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="tetriski.pillars">pillars</a></dd></dl></div>
+    </li><li class="current-entities indented3">
+                        <span class="separator"></span>
+                        <a class="class" href="AdresGlobalRFBlock.html" title="A block with a global RF."></a>
+                        <a href="AdresGlobalRFBlock.html" title="A block with a global RF.">AdresGlobalRFBlock</a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
+                        <a class="class" href="AdresIOBlock.html" title="A block connecting ports of the top design and PEs."></a>
+                        <a href="AdresIOBlock.html" title="A block connecting ports of the top design and PEs.">AdresIOBlock</a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
+                        <a class="class" href="AdresLSUBlock.html" title="A block with an LSU and some multiplexers."></a>
+                        <a href="AdresLSUBlock.html" title="A block with an LSU and some multiplexers.">AdresLSUBlock</a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
+                        <a class="class" href="AdresPEBlock.html" title="An ADRES PE block with a local RF, an ALU and some multiplexers."></a>
+                        <a href="AdresPEBlock.html" title="An ADRES PE block with a local RF, an ALU and some multiplexers.">AdresPEBlock</a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
+                        <a class="class" href="AdresVLIWPEBlock.html" title="An ADRES VLIW PE block with an ALU and some multiplexers."></a>
+                        <a href="AdresVLIWPEBlock.html" title="An ADRES VLIW PE block with an ALU and some multiplexers.">AdresVLIWPEBlock</a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
+                        <a class="class" href="Block.html" title="A block."></a>
+                        <a href="Block.html" title="A block.">Block</a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
+                        <a class="class" href="BlockChain.html" title="A parent block that consists of a chain of four sub-blocks."></a>
+                        <a href="BlockChain.html" title="A parent block that consists of a chain of four sub-blocks.">BlockChain</a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
+                        <a class="class" href="BlockImmediate.html" title="A subblock that performs computation between the input and a immediate operand."></a>
+                        <a href="BlockImmediate.html" title="A subblock that performs computation between the input and a immediate operand.">BlockImmediate</a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
+                        <a class="class" href="ElementAlu.html" title="An element corresponding arithmetic logical unit."></a>
+                        <a href="ElementAlu.html" title="An element corresponding arithmetic logical unit.">ElementAlu</a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
+                        <a class="class" href="ElementConst.html" title="An element corresponding const unit."></a>
+                        <a href="ElementConst.html" title="An element corresponding const unit.">ElementConst</a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
+                        <a class="class" href="ElementLSU.html" title="An element corresponding load/store unit."></a>
+                        <a href="ElementLSU.html" title="An element corresponding load/store unit.">ElementLSU</a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
+                        <a class="class" href="ElementMux.html" title="An element corresponding multiplexer."></a>
+                        <a href="ElementMux.html" title="An element corresponding multiplexer.">ElementMux</a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
+                        <a class="class" href="ElementRF.html" title="An element corresponding register file."></a>
+                        <a href="ElementRF.html" title="An element corresponding register file.">ElementRF</a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
+                        <a class="class" href="PEBlock.html" title="A simple PE block, only used in a deprecated example."></a>
+                        <a href="PEBlock.html" title="A simple PE block, only used in a deprecated example.">PEBlock</a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
+                        <a class="class" href="RegBlock.html" title="A PE block with a single register."></a>
+                        <a href="RegBlock.html" title="A PE block with a single register.">RegBlock</a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
+                        <a class="class" href="TileBlock.html" title="A tile with an IOBlock and a PE array which has torus connectivity."></a>
+                        <a href="TileBlock.html" title="A tile with an IOBlock and a PE array which has torus connectivity.">TileBlock</a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
+                        <a class="class" href="TileCompleteBlock.html" title="A complete tile with an IOBlock, an GlobalRFBlock, some LSUBLocks and a PE array."></a>
+                        <a href="TileCompleteBlock.html" title="A complete tile with an IOBlock, an GlobalRFBlock, some LSUBLocks and a PE array.">TileCompleteBlock</a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
+                        <a class="class" href="TileLSUBlock.html" title="A tile with an IOBlock, some LSUBLocks and a PE array which has torus connectivity."></a>
+                        <a href="TileLSUBlock.html" title="A tile with an IOBlock, some LSUBLocks and a PE array which has torus connectivity.">TileLSUBlock</a>
+                      </li><li name="tetriski.pillars.core" visbl="pub" class="indented3 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="core"></a><a id="core:core"></a>
+      <span class="permalink">
+      <a href="../../../tetriski/pillars/core/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../core/index.html"><span class="name">core</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="tetriski.pillars">pillars</a></dd></dl></div>
+    </li><li name="tetriski.pillars.examples" visbl="pub" class="indented3 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="examples"></a><a id="examples:examples"></a>
+      <span class="permalink">
+      <a href="../../../tetriski/pillars/examples/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../examples/index.html"><span class="name">examples</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="tetriski.pillars">pillars</a></dd></dl></div>
+    </li><li name="tetriski.pillars.hardware" visbl="pub" class="indented3 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="hardware"></a><a id="hardware:hardware"></a>
+      <span class="permalink">
+      <a href="../../../tetriski/pillars/hardware/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../hardware/index.html"><span class="name">hardware</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="tetriski.pillars">pillars</a></dd></dl></div>
+    </li><li name="tetriski.pillars.mapping" visbl="pub" class="indented3 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="mapping"></a><a id="mapping:mapping"></a>
+      <span class="permalink">
+      <a href="../../../tetriski/pillars/mapping/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../mapping/index.html"><span class="name">mapping</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="tetriski.pillars">pillars</a></dd></dl></div>
+    </li><li name="tetriski.pillars.testers" visbl="pub" class="indented3 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="testers"></a><a id="testers:testers"></a>
+      <span class="permalink">
+      <a href="../../../tetriski/pillars/testers/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../testers/index.html"><span class="name">testers</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="tetriski.pillars">pillars</a></dd></dl></div>
+    </li><li name="tetriski.pillars.util" visbl="pub" class="indented3 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="util"></a><a id="util:util"></a>
+      <span class="permalink">
+      <a href="../../../tetriski/pillars/util/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../util/index.html"><span class="name">util</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="tetriski.pillars">pillars</a></dd></dl></div>
+    </li>
+              </ul>
+            </div>
+          </div>
+          <div id="content">
+            <body class="package value">
+      <div id="definition">
+        <div class="big-circle package">p</div>
+        <p id="owner"><a href="../../index.html" class="extype" name="tetriski">tetriski</a>.<a href="../index.html" class="extype" name="tetriski.pillars">pillars</a></p>
+        <h1>archlib<span class="permalink">
+      <a href="../../../tetriski/pillars/archlib/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span></h1>
+        
+      </div>
+
+      <h4 id="signature" class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <span class="name">archlib</span>
+      </span>
+      </h4>
+
+      
+          <div id="comment" class="fullcommenttop"></div>
+        
+
+      
+
+      <div id="template">
+        <div id="allMembers">
+        
+
+        <div id="types" class="types members">
+              <h3>Type Members</h3>
+              <ol><li name="tetriski.pillars.archlib.AdresGlobalRFBlock" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="AdresGlobalRFBlockextendsBlockTrait"></a><a id="AdresGlobalRFBlock:AdresGlobalRFBlock"></a>
+      <span class="permalink">
+      <a href="../../../tetriski/pillars/archlib/AdresGlobalRFBlock.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="A block with a global RF." href="AdresGlobalRFBlock.html"><span class="name">AdresGlobalRFBlock</span></a><span class="result"> extends <a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">A block with a global RF.</p>
+    </li><li name="tetriski.pillars.archlib.AdresIOBlock" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="AdresIOBlockextendsBlockTrait"></a><a id="AdresIOBlock:AdresIOBlock"></a>
+      <span class="permalink">
+      <a href="../../../tetriski/pillars/archlib/AdresIOBlock.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="A block connecting ports of the top design and PEs." href="AdresIOBlock.html"><span class="name">AdresIOBlock</span></a><span class="result"> extends <a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">A block connecting ports of the top design and PEs.</p>
+    </li><li name="tetriski.pillars.archlib.AdresLSUBlock" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="AdresLSUBlockextendsBlockTrait"></a><a id="AdresLSUBlock:AdresLSUBlock"></a>
+      <span class="permalink">
+      <a href="../../../tetriski/pillars/archlib/AdresLSUBlock.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="A block with an LSU and some multiplexers." href="AdresLSUBlock.html"><span class="name">AdresLSUBlock</span></a><span class="result"> extends <a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">A block with an LSU and some multiplexers.</p>
+    </li><li name="tetriski.pillars.archlib.AdresPEBlock" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="AdresPEBlockextendsBlockTrait"></a><a id="AdresPEBlock:AdresPEBlock"></a>
+      <span class="permalink">
+      <a href="../../../tetriski/pillars/archlib/AdresPEBlock.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="An ADRES PE block with a local RF, an ALU and some multiplexers." href="AdresPEBlock.html"><span class="name">AdresPEBlock</span></a><span class="result"> extends <a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">An ADRES PE block with a local RF, an ALU and some multiplexers.</p>
+    </li><li name="tetriski.pillars.archlib.AdresVLIWPEBlock" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="AdresVLIWPEBlockextendsBlockTrait"></a><a id="AdresVLIWPEBlock:AdresVLIWPEBlock"></a>
+      <span class="permalink">
+      <a href="../../../tetriski/pillars/archlib/AdresVLIWPEBlock.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="An ADRES VLIW PE block with an ALU and some multiplexers." href="AdresVLIWPEBlock.html"><span class="name">AdresVLIWPEBlock</span></a><span class="result"> extends <a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">An ADRES VLIW PE block with an ALU and some multiplexers.</p><div class="fullcomment"><div class="comment cmt"><p>An ADRES VLIW PE block with an ALU and some multiplexers.
+This PE is connected to a global RF and the IO block, so it have some additional ports.
+</p></div></div>
+    </li><li name="tetriski.pillars.archlib.BlockChain" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="BlockChainextendsBlockTrait"></a><a id="BlockChain:BlockChain"></a>
+      <span class="permalink">
+      <a href="../../../tetriski/pillars/archlib/BlockChain.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="A parent block that consists of a chain of four sub-blocks." href="BlockChain.html"><span class="name">BlockChain</span></a><span class="result"> extends <a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">A parent block that consists of a chain of four sub-blocks.</p>
+    </li><li name="tetriski.pillars.archlib.BlockImmediate" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="BlockImmediateextendsBlockTrait"></a><a id="BlockImmediate:BlockImmediate"></a>
+      <span class="permalink">
+      <a href="../../../tetriski/pillars/archlib/BlockImmediate.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="A subblock that performs computation between the input and a immediate operand." href="BlockImmediate.html"><span class="name">BlockImmediate</span></a><span class="result"> extends <a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">A subblock that performs computation between the input and a immediate operand.</p>
+    </li><li name="tetriski.pillars.archlib.ElementAlu" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ElementAluextendsElementTrait"></a><a id="ElementAlu:ElementAlu"></a>
+      <span class="permalink">
+      <a href="../../../tetriski/pillars/archlib/ElementAlu.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="An element corresponding arithmetic logical unit." href="ElementAlu.html"><span class="name">ElementAlu</span></a><span class="result"> extends <a href="../core/ElementTrait.html" class="extype" name="tetriski.pillars.core.ElementTrait">ElementTrait</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">An element corresponding arithmetic logical unit.</p>
+    </li><li name="tetriski.pillars.archlib.ElementConst" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ElementConstextendsElementTrait"></a><a id="ElementConst:ElementConst"></a>
+      <span class="permalink">
+      <a href="../../../tetriski/pillars/archlib/ElementConst.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="An element corresponding const unit." href="ElementConst.html"><span class="name">ElementConst</span></a><span class="result"> extends <a href="../core/ElementTrait.html" class="extype" name="tetriski.pillars.core.ElementTrait">ElementTrait</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">An element corresponding const unit.</p>
+    </li><li name="tetriski.pillars.archlib.ElementLSU" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ElementLSUextendsElementTrait"></a><a id="ElementLSU:ElementLSU"></a>
+      <span class="permalink">
+      <a href="../../../tetriski/pillars/archlib/ElementLSU.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="An element corresponding load/store unit." href="ElementLSU.html"><span class="name">ElementLSU</span></a><span class="result"> extends <a href="../core/ElementTrait.html" class="extype" name="tetriski.pillars.core.ElementTrait">ElementTrait</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">An element corresponding load/store unit.</p>
+    </li><li name="tetriski.pillars.archlib.ElementMux" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ElementMuxextendsElementTrait"></a><a id="ElementMux:ElementMux"></a>
+      <span class="permalink">
+      <a href="../../../tetriski/pillars/archlib/ElementMux.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="An element corresponding multiplexer." href="ElementMux.html"><span class="name">ElementMux</span></a><span class="result"> extends <a href="../core/ElementTrait.html" class="extype" name="tetriski.pillars.core.ElementTrait">ElementTrait</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">An element corresponding multiplexer.</p>
+    </li><li name="tetriski.pillars.archlib.ElementRF" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ElementRFextendsElementTrait"></a><a id="ElementRF:ElementRF"></a>
+      <span class="permalink">
+      <a href="../../../tetriski/pillars/archlib/ElementRF.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="An element corresponding register file." href="ElementRF.html"><span class="name">ElementRF</span></a><span class="result"> extends <a href="../core/ElementTrait.html" class="extype" name="tetriski.pillars.core.ElementTrait">ElementTrait</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">An element corresponding register file.</p>
+    </li><li name="tetriski.pillars.archlib.RegBlock" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RegBlockextendsBlockTrait"></a><a id="RegBlock:RegBlock"></a>
+      <span class="permalink">
+      <a href="../../../tetriski/pillars/archlib/RegBlock.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="A PE block with a single register." href="RegBlock.html"><span class="name">RegBlock</span></a><span class="result"> extends <a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">A PE block with a single register.</p>
+    </li><li name="tetriski.pillars.archlib.TileBlock" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="TileBlockextendsBlockTrait"></a><a id="TileBlock:TileBlock"></a>
+      <span class="permalink">
+      <a href="../../../tetriski/pillars/archlib/TileBlock.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="A tile with an IOBlock and a PE array which has torus connectivity." href="TileBlock.html"><span class="name">TileBlock</span></a><span class="result"> extends <a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">A tile with an IOBlock and a PE array which has torus connectivity.</p>
+    </li><li name="tetriski.pillars.archlib.TileCompleteBlock" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="TileCompleteBlockextendsBlockTrait"></a><a id="TileCompleteBlock:TileCompleteBlock"></a>
+      <span class="permalink">
+      <a href="../../../tetriski/pillars/archlib/TileCompleteBlock.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="A complete tile with an IOBlock, an GlobalRFBlock, some LSUBLocks and a PE array." href="TileCompleteBlock.html"><span class="name">TileCompleteBlock</span></a><span class="result"> extends <a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">A complete tile with an IOBlock, an GlobalRFBlock, some LSUBLocks and a PE array.</p><div class="fullcomment"><div class="comment cmt"><p>A complete tile with an IOBlock, an GlobalRFBlock, some LSUBLocks and a PE array.
+PEs in the same row share a block with a load/store unit.
+Similar to the original ADRES architecture,
+the PEs in the top row share a global RF instead of a local RF.
+It can generate different tiles according to the parameter.
+</p></div><dl class="attributes block"> <div class="block">Examples:
+               <ol><li class="cmt"><p>If isReduceArch and isFullArch are both false,
+         a default architecture which has a PE array with torus connectivity will be generated.
+         All PEs in the PE array have default set of operations.
+         And some multiplexers is used to connect PEs and ports of the top design.</p></li>, <li class="cmt"><p>If isFullArch is true,
+         a full architecture which has a PE array with torus connectivity will be generated.
+         All PEs in the PE array have full set of operations.
+         ALUs in full PEs can perform a full set of operations:
+         add, subtract, multiply, shifts, and, or, and xor.
+         And PEs and ports of the top design are connected directly.</p></li>, <li class="cmt"><p>If isReduceArch is true,
+         a reduce architecture which has a PE array will be generated.
+         Less PEs in the PE array have full set of operations.
+         And PEs and ports of the top design are connected directly.</p></li></ol>
+            </div></dl></div>
+    </li><li name="tetriski.pillars.archlib.TileLSUBlock" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="TileLSUBlockextendsBlockTrait"></a><a id="TileLSUBlock:TileLSUBlock"></a>
+      <span class="permalink">
+      <a href="../../../tetriski/pillars/archlib/TileLSUBlock.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="A tile with an IOBlock, some LSUBLocks and a PE array which has torus connectivity." href="TileLSUBlock.html"><span class="name">TileLSUBlock</span></a><span class="result"> extends <a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">A tile with an IOBlock, some LSUBLocks and a PE array which has torus connectivity.</p><div class="fullcomment"><div class="comment cmt"><p>A tile with an IOBlock, some LSUBLocks and a PE array which has torus connectivity.
+PEs in the same row share a block with a load/store unit.
+</p></div></div>
+    </li><li name="tetriski.pillars.archlib.Block" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="BlockextendsBlockTrait"></a><a id="Block:Block"></a>
+      <span class="permalink">
+      <a href="../../../tetriski/pillars/archlib/Block.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="A block." href="Block.html"><span class="name deprecated" title="Deprecated: ">Block</span></a><span class="result"> extends <a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">A block.</p><div class="fullcomment"><div class="comment cmt"><p>A block.
+</p></div><dl class="attributes block"> <dt>Deprecated</dt><dd class="cmt"></dd></dl></div>
+    </li><li name="tetriski.pillars.archlib.PEBlock" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="PEBlockextendsBlockTrait"></a><a id="PEBlock:PEBlock"></a>
+      <span class="permalink">
+      <a href="../../../tetriski/pillars/archlib/PEBlock.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="A simple PE block, only used in a deprecated example." href="PEBlock.html"><span class="name deprecated" title="Deprecated: ">PEBlock</span></a><span class="result"> extends <a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">A simple PE block, only used in a deprecated example.</p><div class="fullcomment"><div class="comment cmt"><p>A simple PE block, only used in a deprecated example.
+</p></div><dl class="attributes block"> <dt>Deprecated</dt><dd class="cmt"></dd></dl></div>
+    </li></ol>
+            </div>
+
+        
+
+        
+
+        
+
+        
+        </div>
+
+        <div id="inheritedMembers">
+        
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+    </body>
+          </div>
+        </div>
+      </div>
+    </body>
+      </html>

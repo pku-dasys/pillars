@@ -6,6 +6,11 @@ import tetriski.pillars.core._
 import tetriski.pillars.hardware.{TopModule, TopModuleWrapper}
 import tetriski.pillars.testers._
 
+/** Some examples showing how to test applications with a 4*4 TileCompleteBlock.
+ * We suggest users employ functions and classes in this object.
+ * Some pre-generated mapping results for accum, cap, sum and vadd are provided.
+ * One can modify the parameters when creating TileCompleteBlock to create different hardware and test.
+ */
 object ApplicationExamples {
 
   val arch = new ArchitctureHierarchy()
@@ -38,24 +43,34 @@ object ApplicationExamples {
 
   connect.dumpConnect()
 
-  val cp = new HardwareGeneration(arch, connect)
+  val hardwareGenerator = new HardwareGenerator(arch, connect)
 
   val simulationHelper = new SimulationtionHelper(arch)
 
+  /** Dump MRRG and a description file in JSON of the target architecture.
+   *
+   * @param targetII the target II
+   * @param filename the file name to save MRRG
+   */
   def dumpArch(targetII: Int, filename: String = null): Unit = {
     arch.blockMap("tile_0").dumpMRRG(targetII, filename)
     arch.dumpArchitcture()
   }
 
-  def dumpWrapperVerilog(): Unit ={
+  /** Dump generated Verilog of the target architecture.
+   */
+  def dumpWrapperVerilog(): Unit = {
     //Verilog generation
     chisel3.Driver.execute(Array("--no-check-comb-loops", "-td", "WrapperTest"),
-      () => new TopModuleWrapper(cp.pillarsModuleInfo, cp.connectMap,
-        cp.configList, dataWidth))
+      () => new TopModuleWrapper(hardwareGenerator.pillarsModuleInfo, hardwareGenerator.connectMap,
+        hardwareGenerator.regionList, dataWidth))
   }
 
+  /** An example for testing vadd when II = 1-3.
+   */
   def exampleVadd(): Unit = {
     val dataSize = 50
+    //prepare the input and expected data
     val inData0 = (0 until dataSize).map(i => scala.util.Random.nextInt()).toArray
     val inData1 = (0 until dataSize).map(i => scala.util.Random.nextInt()).toArray
     //    var inData0 = (50 until dataSize + 50).toArray
@@ -69,6 +84,17 @@ object ApplicationExamples {
     val inDataArrays = Array(inData0, inData1)
     val outDataArrays = Array(outDataRefArray)
 
+    /** Uses simulationHelper and appTestHelper to generate Chisel PeekPokeTester for testing vadd.
+     *
+     * @param resultFilename the file name of result TXT
+     * @param infoFilename   the file name of information TXT
+     * @param testII         the target II
+     * @param constVals      an array of const values
+     * @param addrArray      an array of the address of input/output data
+     * @param throughput     a parameter indicating the throughput of mapping result
+     * @param outputCycle    the cycle we can obtain the result
+     * @param useWrapper     a parameter indicating whether we use TopModuleWrapper for testing
+     */
     def testVadd(resultFilename: String, infoFilename: String, testII: Int, constVals: Array[Int],
                  addrArray: Array[Int], throughput: Int, outputCycle: Int, useWrapper: Boolean = false): Unit = {
       simulationHelper.init(resultFilename)
@@ -91,12 +117,14 @@ object ApplicationExamples {
 
       if (useWrapper) {
         iotesters.Driver.execute(Array("--no-check-comb-loops", "-tgvo", "on", "-tbn", "verilator"),
-          () => new TopModuleWrapper(cp.pillarsModuleInfo, cp.connectMap, cp.configList, dataWidth)) {
+          () => new TopModuleWrapper(hardwareGenerator.pillarsModuleInfo,
+            hardwareGenerator.connectMap, hardwareGenerator.regionList, dataWidth)) {
           c => new VaddWrapperTester(c, appTestHelper)
         }
       } else {
         iotesters.Driver.execute(Array("--no-check-comb-loops", "-tgvo", "on", "-tbn", "verilator"),
-          () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, dataWidth)) {
+          () => new TopModule(hardwareGenerator.pillarsModuleInfo,
+            hardwareGenerator.connectMap, hardwareGenerator.regionList, dataWidth)) {
           c => new VaddTester(c, appTestHelper)
         }
       }
@@ -114,11 +142,10 @@ object ApplicationExamples {
     var addrVals = Array(a_base, b_base, c_base)
     var throughput = 1
 
-//    testVadd(resultFilename, infoFilename, testII, constVals, addrVals, throughput, outputCycle)
     testVadd(resultFilename, infoFilename, testII, constVals, addrVals, throughput, outputCycle)
     //********     II = 1     ********
 
-//    //********     II = 2     ********
+    //    //********     II = 2     ********
     testII = 2
     outputCycle = dataSize * (testII + 3)
 
@@ -143,6 +170,7 @@ object ApplicationExamples {
     resultFilename = "app_mapping_results/vadd/ii3_r.txt"
 
     a_base = 0
+    //Since a & b are both use the same LSU, the storage space of them cannot overlap.
     b_base = dataSize
     c_base = 0
     constVals = Array(a_base, b_base, c_base, 1)
@@ -153,11 +181,14 @@ object ApplicationExamples {
     //********     II = 3     ********
   }
 
+  /** An example for testing sum when II = 1-3.
+   */
   def exampleSum(): Unit = {
 
     val dataSize = 50
+    //prepare the input and expected data
     val inData = (0 until dataSize).map(i => scala.util.Random.nextInt()).toArray
-//        var inData = (0 until dataSize).toArray
+    //        var inData = (0 until dataSize).toArray
 
     var outPortRefArray = Array[Int]()
     var outPortRef = 0
@@ -168,6 +199,17 @@ object ApplicationExamples {
     val inDataArrays = Array(inData)
     val outPortRefArrays = Array(outPortRefArray)
 
+    /** Uses simulationHelper and appTestHelper to generate Chisel PeekPokeTester for testing sum.
+     * In this example, the outputCycle is automatically inferred by simulationHelper.
+     *
+     * @param resultFilename the file name of result TXT
+     * @param infoFilename   the file name of information TXT
+     * @param testII         the target II
+     * @param constVals      an array of const values
+     * @param addrArray      an array of the address of input/output data
+     * @param throughput     a parameter indicating the throughput of mapping result
+     * @param useWrapper     a parameter indicating whether we use TopModuleWrapper for testing
+     */
     def testSum(resultFilename: String, infoFilename: String, testII: Int, constVals: Array[Int],
                 addrArray: Array[Int], throughput: Int, useWrapper: Boolean = false): Unit = {
 
@@ -193,12 +235,14 @@ object ApplicationExamples {
 
       if (useWrapper) {
         iotesters.Driver.execute(Array("--no-check-comb-loops", "-tgvo", "on", "-tbn", "verilator"),
-          () => new TopModuleWrapper(cp.pillarsModuleInfo, cp.connectMap, cp.configList, dataWidth)) {
+          () => new TopModuleWrapper(hardwareGenerator.pillarsModuleInfo,
+            hardwareGenerator.connectMap, hardwareGenerator.regionList, dataWidth)) {
           c => new SumWrapperTester(c, appTestHelper)
         }
       } else {
         iotesters.Driver.execute(Array("--no-check-comb-loops", "-tgvo", "on", "-tbn", "verilator"),
-          () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, dataWidth)) {
+          () => new TopModule(hardwareGenerator.pillarsModuleInfo,
+            hardwareGenerator.connectMap, hardwareGenerator.regionList, dataWidth)) {
           c => new SumTester(c, appTestHelper)
         }
       }
@@ -248,16 +292,19 @@ object ApplicationExamples {
     //********     II = 3     ********
   }
 
+  /** An example for testing accumulate when II = 1-3.
+   */
   def exampleAccum(): Unit = {
 
     val dataSize = 50
+    //prepare the input and expected data
     val inDataA = (0 until dataSize).map(i => scala.util.Random.nextInt()).toArray
     val inDataB = (0 until dataSize).map(i => scala.util.Random.nextInt()).toArray
     val inDataC = (0 until dataSize).map(i => scala.util.Random.nextInt()).toArray
 
-//        var inDataA = (2 until dataSize + 2).toArray
-//        var inDataB = (2 until dataSize + 2).toArray
-//        var inDataC = (2 until dataSize + 2).toArray
+    //        var inDataA = (2 until dataSize + 2).toArray
+    //        var inDataB = (2 until dataSize + 2).toArray
+    //        var inDataC = (2 until dataSize + 2).toArray
 
     var refArray = Array[Int]()
     var outPortRefArray = Array[Int]()
@@ -275,6 +322,16 @@ object ApplicationExamples {
     val outDataRefArrays = Array(refArray)
     val outPortRefArrays = Array(outPortRefArray)
 
+    /** Uses simulationHelper and appTestHelper to generate Chisel PeekPokeTester for testing accumulate.
+     * In this example, the outputCycle is automatically inferred by simulationHelper.
+     *
+     * @param resultFilename the file name of result TXT
+     * @param infoFilename   the file name of information TXT
+     * @param testII         the target II
+     * @param constVals      an array of const values
+     * @param addrArray      an array of the address of input/output data
+     * @param throughput     a parameter indicating the throughput of mapping result
+     */
     def testAccum(resultFilename: String, infoFilename: String, testII: Int,
                   constVals: Array[Int], addrArray: Array[Int], throughput: Int): Unit = {
 
@@ -302,7 +359,8 @@ object ApplicationExamples {
 
 
       iotesters.Driver.execute(Array("--no-check-comb-loops", "-tgvo", "on", "-tbn", "verilator"),
-        () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, dataWidth)) {
+        () => new TopModule(hardwareGenerator.pillarsModuleInfo,
+          hardwareGenerator.connectMap, hardwareGenerator.regionList, dataWidth)) {
         c => new AccumTester(c, appTestHelper)
       }
     }
@@ -327,6 +385,7 @@ object ApplicationExamples {
     resultFilename = "app_mapping_results/accum/ii2_r.txt"
     a_base = 0
     b_base = 0
+    //Since a & c are both use the same LSU, the storage space of them cannot overlap.
     c_base = dataSize
     constVals = Array(1, a_base, b_base, 1, c_base)
     addrVals = Array(a_base, b_base, c_base, c_base)
@@ -342,6 +401,7 @@ object ApplicationExamples {
     resultFilename = "app_mapping_results/accum/ii3_r.txt"
     a_base = 0
     b_base = 0
+    //Since a & c are both use the same LSU, the storage space of them cannot overlap.
     c_base = dataSize
     constVals = Array(1, a_base, b_base, 1, c_base)
     addrVals = Array(a_base, b_base, c_base, c_base)
@@ -351,30 +411,42 @@ object ApplicationExamples {
     //********     II = 3     ********
   }
 
+  /** An example for testing cap when II = 1-3.
+   */
   def exampleCap(): Unit = {
 
     val dataSize = 50
-//    val inDataA = (0 until dataSize).map(i => scala.util.Random.nextInt()).toArray
-//    val inDataC = Array(3)
-//    val inDataM = (0 until dataSize).map(i => scala.util.Random.nextInt()).toArray
-
-    val inDataA = (0 until dataSize).toArray
+    //prepare the input and expected data
+    val inDataA = (0 until dataSize).map(i => scala.util.Random.nextInt()).toArray
     val inDataC = Array(3)
-    val inDataM = (0 until dataSize).toArray
+    val inDataM = (0 until dataSize).map(i => scala.util.Random.nextInt()).toArray
 
+    //    val inDataA = (0 until dataSize).toArray
+    //    val inDataC = Array(3)
+    //    val inDataM = (0 until dataSize).toArray
 
     var refArray = Array[Int]()
     var ref = 0
 
     for (i <- 0 until inDataA.size) {
-      ref = (((inDataA(i) * 3 * inDataC(0)) >> 2 ) * inDataC(0)) * (((inDataM(i) * 3 * inDataA(i)) >> 2 ) * inDataA(i))
+      ref = (((inDataA(i) * 3 * inDataC(0)) >> 2) * inDataC(0)) * (((inDataM(i) * 3 * inDataA(i)) >> 2) * inDataA(i))
       refArray = refArray :+ ref
     }
     val inDataArrays = Array(inDataA, inDataC, inDataM)
     val outDataRefArrays = Array(refArray)
 
+    /** Uses simulationHelper and appTestHelper to generate Chisel PeekPokeTester for testing accumulate.
+     *
+     * @param resultFilename the file name of result TXT
+     * @param infoFilename   the file name of information TXT
+     * @param testII         the target II
+     * @param constVals      an array of const values
+     * @param addrArray      an array of the address of input/output data
+     * @param throughput     a parameter indicating the throughput of mapping result
+     * @param outputCycle    the cycle we can obtain the result
+     */
     def testCap(resultFilename: String, infoFilename: String, testII: Int,
-                  constVals: Array[Int], addrArray: Array[Int], throughput: Int, outputCycle: Int): Unit = {
+                constVals: Array[Int], addrArray: Array[Int], throughput: Int, outputCycle: Int): Unit = {
 
       simulationHelper.init(resultFilename)
       simulationHelper.setConst(constVals, testII)
@@ -397,7 +469,8 @@ object ApplicationExamples {
 
 
       iotesters.Driver.execute(Array("--no-check-comb-loops", "-tgvo", "on", "-tbn", "verilator"),
-        () => new TopModule(cp.pillarsModuleInfo, cp.connectMap, cp.configList, dataWidth)) {
+        () => new TopModule(hardwareGenerator.pillarsModuleInfo,
+          hardwareGenerator.connectMap, hardwareGenerator.regionList, dataWidth)) {
         c => new CapTester(c, appTestHelper)
       }
     }
@@ -444,7 +517,7 @@ object ApplicationExamples {
 
     a_base = 0
     c1_addr = 0
-    m_base = dataSize
+    m_base = 0
     b_base = 0
 
     constVals = Array(a_base, 3, c1_addr, 2, m_base, 2, b_base, 1)

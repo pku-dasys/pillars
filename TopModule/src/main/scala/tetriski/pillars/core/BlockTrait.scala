@@ -52,6 +52,11 @@ trait BlockTrait extends ElementTrait {
     new ValidPort(name + "/", portName)
   }
 
+  def initName(arg: String): Unit = {
+    hierName.append(arg)
+    setName(arg)
+  }
+
   def term(portName: String): ValidPort = {
     if (!(getInPorts().toSet.contains(portName) || getOutPorts().toSet.contains(portName))) {
       System.err.println(s"Invalid port name $portName!")

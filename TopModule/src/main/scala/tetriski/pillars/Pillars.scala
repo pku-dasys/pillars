@@ -1,8 +1,9 @@
 package tetriski.pillars
-import tetriski.pillars.archlib.BlockChain
-import tetriski.pillars.core.ArchitctureHierarchy
+
 import tetriski.pillars.examples.{ApplicationExamples, HardwareExamples}
 
+/** Main object testing some examples.
+ */
 object Pillars {
   def main(args: Array[String]): Unit = {
 

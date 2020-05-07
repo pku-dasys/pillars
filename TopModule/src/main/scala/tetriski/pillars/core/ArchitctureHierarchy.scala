@@ -29,7 +29,7 @@ class ArchitctureHierarchy extends BlockTrait {
     new PillarsModuleInfo(moduleNums, moduleParams, inPorts.size, outPorts.size)
   }
 
-  def getConfigList(): List[List[List[Int]]] = {
+  def getRegionList(): List[List[List[Int]]] = {
     var ret = List[List[List[Int]]]()
     def findConfigRegion(blockMap : Map[String, BlockTrait]): List[BlockTrait] ={
       var ret = List[BlockTrait]()
@@ -60,7 +60,7 @@ class ArchitctureHierarchy extends BlockTrait {
 
   def getConfigBitStream(): BigInt = {
     var bitBuffer = ArrayBuffer[Int]()
-    val configList = getConfigList()
+    val configList = getRegionList()
     for (configRegionModules <- configList){
       for(configRegionModule <- configRegionModules){
         val typeID = configRegionModule(0)
@@ -105,11 +105,11 @@ class ArchitctureHierarchy extends BlockTrait {
 
   def resetSchedules(): Unit ={
     for(alu <- aluArray){
-      alu.asInstanceOf[ElementTrait].resetWaitCycle()
+      alu.asInstanceOf[ElementTrait].resetFireTimes()
       alu.asInstanceOf[ElementTrait].resetSkew()
     }
     for(lsu <- LSUsArray){
-      lsu.asInstanceOf[ElementTrait].resetWaitCycle()
+      lsu.asInstanceOf[ElementTrait].resetFireTimes()
       lsu.asInstanceOf[ElementTrait].resetSkew()
     }
   }

@@ -1,19 +1,23 @@
 package tetriski.pillars.hardware
+
 import chisel3._
 
+/** Hardware config in Pillars including the depth of RAM in LSU,
+ * limitation of II and the schedule length.
+ */
 object PillarsConfig {
   //for TopModuleWrapper generation
-//  val LOG_II_UPPER_BOUND = 1
+  //  val LOG_II_UPPER_BOUND = 1
   //for verilator test
   val LOG_II_UPPER_BOUND = 2
-  val II_UPPER_BOUND =  Math.pow(2, LOG_II_UPPER_BOUND).toInt
+  val II_UPPER_BOUND = Math.pow(2, LOG_II_UPPER_BOUND).toInt
 
   val MEM_DEPTH = 256
   val MEM_IN_WIDTH = 32
   val MEM_OUT_WIDTH = 32
 
   //for TopModuleWrapper generation
-//  val LOG_SCHEDULE_SIZE = 3
+  //  val LOG_SCHEDULE_SIZE = 3
   //for verilator test
   val LOG_SCHEDULE_SIZE = 5
 
