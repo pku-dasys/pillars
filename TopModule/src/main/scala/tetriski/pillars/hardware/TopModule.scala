@@ -7,16 +7,33 @@ import scala.collection.mutable.ArrayBuffer
 import tetriski.pillars.hardware.PillarsConfig._
 import tetriski.pillars.testers.AppTestHelper
 
-//configBits is the last param
+
+/** A class containing the parameters of modules and the port number of top design.
+ * It should be guaranteed that "configBits" is the last param of the parameters of a module.
+ *
+ * @param moduleNums the number of modules for each type
+ * @param params     the parameters of each module
+ * @param inPortNum  the input port number of top design
+ * @param outPortNum the output port number of top design
+ */
 class PillarsModuleInfo(moduleNums: List[Int], params: List[List[Int]], inPortNum: Int, outPortNum: Int) {
+  /** Gets the number of modules for each type.
+   */
   def getModuleNums(): List[Int] = {
     moduleNums
   }
 
+  /** Gets the parameters of each module.
+   */
   def getParams(num: Int): List[Int] = {
     params(num)
   }
 
+  /** Gets the config bits of a module.
+   *
+   * @param typeID   the type of the module
+   * @param moduleID the ID of the module
+   */
   def getConfigBits(typeID: Int, moduleID: Int): Int = {
     var currentNum = 0
     for (i <- 0 until typeID) {
@@ -26,22 +43,35 @@ class PillarsModuleInfo(moduleNums: List[Int], params: List[List[Int]], inPortNu
     params(currentNum)(params(currentNum).length - 1)
   }
 
+  /** Gets the sum of config bits of all modules.
+   */
   def getTotalBits(): Int = {
     params.toArray.map(t => t(t.length - 1)).reduce(_ + _)
   }
 
+  /** Gets the input port number of top design.
+   */
   def getInPortNum: Int = {
     inPortNum
   }
 
+  /** Gets the output port number of top design.
+   */
   def getOutPortNum: Int = {
     outPortNum
   }
 }
 
-
+/** The top design of CGRA.
+ * It should be guaranteed that the type ID of each element should be the same with its order in this class.
+ *
+ * @param moduleInfos a class containing the parameters of modules and the port number of top design.
+ * @param connect     a map showing the connections between modules
+ * @param regionList  the list of regions where modules share a configuration controller
+ * @param w           the data width
+ */
 class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], List[List[Int]]],
-                val configList: List[List[List[Int]]], w: Int) extends Module {
+                val regionList: List[List[List[Int]]], w: Int) extends Module {
 
 
   val moduleNums = moduleInfos.getModuleNums()
@@ -64,56 +94,24 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
 
     val enConfig = Input(Bool())
     val en = Input(Bool())
-    //    val schedules = Input(Vec((aluNum + LSUnitNum) * II_UPPER_BOUND,
-    //      UInt((LOG_SCHEDULE_SIZE + LOG_SCHEDULE_SIZE + 1).W)))
     val schedules = Input(UInt((((aluNum + LSUnitNum) * II_UPPER_BOUND) *
       (LOG_SCHEDULE_SIZE + LOG_SCHEDULE_SIZE + 1)).W))
     val II = Input(UInt(LOG_II_UPPER_BOUND.W))
 
-    //port sequnces outs: 0: out
-    //port sequnces inputs: 0: input_a, 1: input_b
-//    val configTest = Output(Vec(2, UInt(moduleInfos.getTotalBits().W)))
     val configuration = Input(UInt(moduleInfos.getTotalBits().W))
-    //    val inputs = Input(MixedVec(Seq(UInt(w.W), UInt(w.W))))
-    //    val outs = Output(MixedVec(Seq(UInt(w.W))))
 
     val inputs = Input(MixedVec((1 to moduleInfos.getInPortNum) map { i => UInt(w.W) }))
     val outs = Output(MixedVec((1 to moduleInfos.getOutPortNum) map { i => UInt(w.W) }))
   })
 
+  val types = moduleNums.size
+  var currentNum = 0
 
-  //print("configList", configList)
-
-  //  def getConfigBit (typeID : Int): Int ={
-  //    val ret = typeID match {
-  //      case 0 => 4
-  //      case 1 => 3
-  //      case 2 => 3
-  //      case 3 => 32
-  //    }
-  //    ret
-  //  }
-  val input_0 = io.inputs(0)
-  val input_1 = io.inputs(1)
   val out = io.outs(0)
 
 
-  val types = moduleNums.size
-  //  println(io.getElements(0))
-  var currentNum = 0
-  //  val addNum = moduleNums(0)
-  //  val adders = (0 until addNum).toArray.map(t => Module(new Adder(moduleInfo(1)(t + currentNum))))
-  //  currentNum += addNum
-  //
-  //  val mulNum = moduleNums(1)
-  //  val muls = (0 until mulNum).toArray.map(t => Module(new Multiplier(moduleInfo(1)(t + currentNum))))
-  //  currentNum += mulNum
-  //
-  //  val PENum = moduleNums(3)
-  //  val PEs = (0 until PENum).toArray.map(t => Module(new ADRESPE(moduleInfo(1)(t + currentNum))))
-  //  currentNum += PENum
-  //
-
+  //To control the cycle modules should fire, we employ the schedule controllers
+  //to fire ALUs and LSUs when functional nodes are mapped onto them.
   val moduleScheduleBits = (0 until aluNum * II_UPPER_BOUND)
     .map(i => LOG_SCHEDULE_SIZE * 2 + 1).toList ::: (0 until LSUnitNum * II_UPPER_BOUND)
     .map(i => LOG_SCHEDULE_SIZE * 2 + 1).toList
@@ -122,6 +120,7 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
   scheduleDispatch.io.configuration := io.schedules
   scheduleDispatch.io.en := io.en
 
+  //ALUs have type ID = 0, and they will be fired by schedule controllers.
   val alus = (0 until aluNum).toArray.map(t => Module(new Alu(moduleInfos.getParams(t + currentNum)(0),
     moduleInfos.getParams(t + currentNum)(1))))
   val aluScheduleControllers = (0 until aluNum).toArray.map(t => Module(new MultiIIScheduleController))
@@ -138,9 +137,9 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
   }
   currentNum += aluNum
 
-
+  //RFs have type ID = 1.
   val RFs = (0 until RFNum).toArray
-    .map(t => Module(new RegisterFiles(moduleInfos.getParams(t + currentNum)(0),
+    .map(t => Module(new RegisterFile(moduleInfos.getParams(t + currentNum)(0),
       moduleInfos.getParams(t + currentNum)(1),
       moduleInfos.getParams(t + currentNum)(2),
       moduleInfos.getParams(t + currentNum)(3))))
@@ -149,16 +148,15 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
   }
   currentNum += RFNum
 
-
+  //Muxs have type ID = 2.
   val Muxs = (0 until MuxNum).toArray.map(t =>
     Module(new Multiplexer(moduleInfos.getParams(t + currentNum)(0), moduleInfos.getParams(t + currentNum)(1))))
-  //println("2110", moduleInfos.getParams(11 + currentNum))
   for (mux <- Muxs) {
     mux.io.en <> io.en
   }
   currentNum += MuxNum
 
-
+  //Const units have type ID = 3.
   val Consts = (0 until ConstNum).toArray
     .map(t => Module(new ConstUnit(moduleInfos.getParams(t + currentNum)(0))))
   for (const <- Consts) {
@@ -166,13 +164,11 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
   }
   currentNum += ConstNum
 
-
+  //LSUs have type ID = 4, and they will be fired by schedule controllers.
+  //They are connected with some ports of top design to perform DMA.
   val LSUs = (0 until LSUnitNum).toArray
     .map(t => Module(new LoadStoreUnit(moduleInfos.getParams(t + currentNum)(0))))
   val LSUnitScheduleControllers = (0 until LSUnitNum).toArray.map(t => Module(new MultiIIScheduleController))
-  //  for(lsu <- LSUs){
-  //    lsu.io.en <> io.en
-  //  }
   for (i <- 0 until LSUnitNum) {
     val lsu = LSUs(i)
     lsu.io.base <> io.baseLSU(i)
@@ -183,7 +179,6 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
     lsu.io.deqEn <> io.deqEnLSU(i)
     lsu.io.streamIn <> io.streamInLSU(i)
     lsu.io.streamOut <> io.streamOutLSU(i)
-
 
     val LSUnitScheduleController = LSUnitScheduleControllers(i)
     LSUnitScheduleController.io.en <> io.en
@@ -214,15 +209,11 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
   inPorts.append(LSUs.map(i => i.io.inputs.toList))
 
 
-//  val configController = Module(new ConfigController(moduleInfos.getTotalBits()))
-//  configController.io.en <> io.enConfig
-//  configController.io.II <> io.II
-//  configController.io.inConfig <> io.configuration
-
-  //println(configList)
+  //Dispatchs configurations of modules in a configuration region
+  // to corresponding configuration controllers, and connects them.
   var configControllers = ArrayBuffer[ConfigController]()
   var regionConfigBits = List[Int]()
-  for (region <- configList) {
+  for (region <- regionList) {
     var configBits = List[Int]()
     var configPorts = List[Data]()
     for (moduleList <- region) {
@@ -244,39 +235,30 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
     configController.io.II <> io.II
     configController.io.en <> io.enConfig
 
-    //println(configBits)
     regionConfigBits = regionConfigBits :+ regionTotalBits
     val dispatch = Module(new Dispatch(regionTotalBits, configBits))
     dispatch.io.en <> io.en
     for (i <- 0 until configBits.size) {
       configPorts(i) := dispatch.io.outs(i)
     }
-    //io.configTest(0) := alus
     configControllers.append(configController)
     dispatch.io.configuration := configController.io.outConfig
   }
   val totalBits = regionConfigBits.sum
   val topDispatch = Module(new Dispatch(totalBits, regionConfigBits))
   topDispatch.io.en <> true.B
-  //println(totalBits, regionConfigBits)
-  //  topDispatch.io.configuration := io.configuration
   topDispatch.io.configuration := io.configuration
   for (i <- 0 until configControllers.size) {
     configControllers(i).io.inConfig := topDispatch.io.outs(i)
-
   }
 
-  //println(regionConfigBits)
-  //  println(configList(1))
-//  io.configTest(0) := topDispatch.io.outs(0)
-//  io.configTest(1) := topDispatch.io.outs(1)
 
+  //AddS wires between modules.
   for (i <- 0 until connect.keys.size) {
     val src = connect.keys.toList(i)
     val dsts = connect(src)
     for (j <- 0 until dsts.size) {
       val dst = dsts(j)
-      //println(dst, src)
       if (dst(0) == types) {
         io.outs(dst(2)) := outPorts(src(0))(src(1))(src(2)).asInstanceOf[Data]
       } else if (src(0) == types) {
@@ -290,11 +272,18 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
 }
 
 
+/** Makeshift facilities for context transmission within the limitation of I/O ports in FPGA.
+ *
+ * @param moduleInfos a class containing the parameters of modules and the port number of top design.
+ * @param connect     a map showing the connections between modules
+ * @param regionList  the list of regions where modules share a configuration controller
+ * @param w           the data width
+ */
 class TopModuleWrapper(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], List[List[Int]]],
-                       val configList: List[List[List[Int]]], w: Int)
+                       val regionList: List[List[List[Int]]], w: Int)
   extends Module {
 
-  val topModule = Module(new TopModule(moduleInfos, connect, configList, w))
+  val topModule = Module(new TopModule(moduleInfos, connect, regionList, w))
   val LSUnitNum = topModule.LSUnitNum
 
   val io = IO(new Bundle {
@@ -324,6 +313,10 @@ class TopModuleWrapper(val moduleInfos: PillarsModuleInfo, val connect: Map[List
   topModule.io.en <> io.en
   topModule.io.II <> io.II
 
+  /** Connects a LSU with ports of the wrapper.
+   *
+   * @param i the module ID of LSU
+   */
   def connectLSU(i: Int): Unit = {
     topModule.io.baseLSU(i.U) <> io.baseLSU
     topModule.io.lenLSU(i.U) <> io.lenLSU
@@ -346,6 +339,7 @@ class TopModuleWrapper(val moduleInfos: PillarsModuleInfo, val connect: Map[List
     }
   }
 
+  //connect LSU with ports according to the input "LSUintID"
   when(io.LSUnitID === 0.U) {
     connectLSU(0)
   }.elsewhen(io.LSUnitID === 1.U) {
@@ -367,18 +361,14 @@ class TopModuleWrapper(val moduleInfos: PillarsModuleInfo, val connect: Map[List
   val posSize = log2Up(maxSize)
   val posReg = RegInit(0.U(posSize.W))
 
-  //  val schedules = appTestHelper.getSchedulesBigInt()
-  //  val bitStreams = appTestHelper.getBitStreams()
-  //
-  //  val schedulesInit =schedules.U(topModule.io.schedules.getWidth.W)
-  //  val bitStreamsInit = bitStreams.map(t => t.U(topModule.io.schedules.getWidth.W))
-  //
-  //  val scheduleReg = VecInit(schedulesInit)
-  //  val bitStreamsReg = VecInit(bitStreamsInit)
 
   val scheduleSize = topModule.io.schedules.getWidth
   val configSize = topModule.io.configuration.getWidth
+  /** Register of schedule.
+   */
   val scheduleReg = RegInit(0.U(scheduleSize.W))
+  /** Register of configuration.
+   */
   val bitStreamsReg = RegInit(0.U(configSize.W))
 
   val s_wait :: s_input_config :: s_work :: Nil = Enum(3)
@@ -389,7 +379,9 @@ class TopModuleWrapper(val moduleInfos: PillarsModuleInfo, val connect: Map[List
   topModule.io.configuration := bitStreamsReg
   topModule.io.enConfig := io.enConfig
 
+  //Waits inputs.
   when(state === s_wait) {
+    //Stores 1 bit into the registers every cycle.
     when(!(posReg === (maxSize).U)) {
       posReg := posReg + 1.U
     }
@@ -404,6 +396,7 @@ class TopModuleWrapper(val moduleInfos: PillarsModuleInfo, val connect: Map[List
       cycleReg := cycleReg + 1.U
     }
   }.elsewhen(state === s_input_config) {
+    //Peeks configurations and schedules into the top design.
     when(cycleReg === io.II - 1.U) {
       state := s_work
     }.otherwise {
@@ -417,11 +410,19 @@ class TopModuleWrapper(val moduleInfos: PillarsModuleInfo, val connect: Map[List
 
 }
 
+/** A wrapper with solid configurations and schedules.
+ * Some may call it "soft CGRA", which is used for quick compiler.
+ *
+ * @param moduleInfos a class containing the parameters of modules and the port number of top design.
+ * @param connect     a map showing the connections between modules
+ * @param regionList  the list of regions where modules share a configuration controller
+ * @param w           the data width
+ */
 class TopModuleWrapperSolid(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], List[List[Int]]],
-                            val configList: List[List[List[Int]]], w: Int, appTestHelper: AppTestHelper)
+                            val regionList: List[List[List[Int]]], w: Int, appTestHelper: AppTestHelper)
   extends Module {
 
-  val topModule = Module(new TopModule(moduleInfos, connect, configList, w))
+  val topModule = Module(new TopModule(moduleInfos, connect, regionList, w))
   val LSUnitNum = topModule.LSUnitNum
 
   val io = IO(new Bundle {
@@ -447,6 +448,10 @@ class TopModuleWrapperSolid(val moduleInfos: PillarsModuleInfo, val connect: Map
   topModule.io.en <> io.en
   topModule.io.II <> io.II
 
+  /** Connects a LSU with ports of the wrapper.
+   *
+   * @param i the module ID of LSU
+   */
   def connectLSU(i: Int): Unit = {
     topModule.io.baseLSU(i.U) <> io.baseLSU
     topModule.io.lenLSU(i.U) <> io.lenLSU

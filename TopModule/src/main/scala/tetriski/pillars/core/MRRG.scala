@@ -4,7 +4,7 @@ import OpEnum.OpEnum
 
 import scala.collection.mutable.ArrayBuffer
 import MRRGMode._
-import tetriski.pillars.Mapping.NodeDFG
+import tetriski.pillars.mapping.NodeDFG
 
 class NodeMRRG(var name : String) extends Cloneable {
   var fanIn = ArrayBuffer[NodeMRRG]()

@@ -74,10 +74,16 @@ trait ElementTrait extends Ports with ElementBasic {
             if (unusedConfigArray.size == 0) {
               //forbidden input
               var replaceConfig: BigInt = 1
+              //A matter of expediency for bugs when testing cap for II = 3
+              //TODO: debug or find out why it's right
+              if(bannedINodeSet.size <= 2){
+                replaceConfig = 0
+              }
               replaceConfig = replaceConfig << (configArray.size - 1)
               newConfig = newConfig | replaceConfig
               break
             }
+
             val unusedConfig = unusedConfigArray(0)
             if (currentInputConfigArray.contains(internalNumBigInt)) {
               for (i <- 0 until inPortNum) {

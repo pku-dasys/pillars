@@ -1,17 +1,20 @@
 package tetriski.pillars.testers
 
-import chisel3.iotesters
-import chisel3.assert
+import chisel3.{assert, iotesters}
 import chisel3.iotesters.PeekPokeTester
 import tetriski.pillars.hardware.PillarsConfig.LOG_SCHEDULE_SIZE
-import tetriski.pillars.hardware.{DispatchT, LoadStoreUnit, Multiplexer, SyncScheduleController, TopModule}
-import tetriski.pillars.testers.LoadStoreUnitVerilog.args
+import tetriski.pillars.hardware._
 import tetriski.pillars.util.SplitOrConcat
 
+/** A tester of the PEBlock.
+ * Since the configuration is set according to human computation, it is deprecated.
+ *
+ * @deprecated
+ * @param c the top design
+ */
 class TopModule2PEUnitTest(c: TopModule) extends PeekPokeTester(c) {
-  //Eliminated
-  poke(c.input_0, 2)
-  poke(c.input_1, 3)
+  poke(c.io.inputs(0), 2)
+  poke(c.io.inputs(1), 3)
 
 
   //because input data is poked on the falling edge, we should wait a cycle
@@ -48,19 +51,19 @@ class TopModule2PEUnitTest(c: TopModule) extends PeekPokeTester(c) {
   poke(c.io.en, 1)
 
   expect(c.out, 0)
-//  expect(c.io.configTest(0), 2272)
-//  expect(c.io.configTest(1), 2273)
+  //  expect(c.io.configTest(0), 2272)
+  //  expect(c.io.configTest(1), 2273)
   step(1)
   expect(c.out, 0)
 
-//  expect(c.io.configTest(0), 1619)
-//  expect(c.io.configTest(1), 1619)
+  //  expect(c.io.configTest(0), 1619)
+  //  expect(c.io.configTest(1), 1619)
   //  step(1)
   //  expect(c.out, 2) //0 or 2 due to SyncReadMem
   step(1)
   expect(c.out, 7)
-//  expect(c.io.configTest(0), 3616)
-//  expect(c.io.configTest(1), 64)
+  //  expect(c.io.configTest(0), 3616)
+  //  expect(c.io.configTest(1), 64)
   //  step(1)
   //  expect(c.out, 8)// 1 + 7 due to SyncReadMem
   step(1)
@@ -69,10 +72,14 @@ class TopModule2PEUnitTest(c: TopModule) extends PeekPokeTester(c) {
   expect(c.out, 10)
 }
 
+/** A tester of a 2*2 TileBlock with 2 input ports and 1 output port.
+ * The schedules have not been taken into consideration.
+ *
+ * @param c         the top design
+ * @param bitstream the configuration
+ */
 class TopModuleAdresUnitTest(c: TopModule, bitstream: BigInt) extends PeekPokeTester(c) {
-  //MixedVec don't support c.io.inputs(0) in poke
-  //  poke(c.input_0, 2)
-  //  poke(c.input_1, 3)
+
   println(bitstream.toString())
 
   poke(c.io.II, 1)
@@ -84,8 +91,7 @@ class TopModuleAdresUnitTest(c: TopModule, bitstream: BigInt) extends PeekPokeTe
   poke(c.io.en, 1)
 
   for (i <- 0 until 40) {
-    //    println("cycle "+ i.toString)
-    poke(c.input_1, i)
+    poke(c.io.inputs(1), i)
     if (i > 2) {
       expect(c.out, 5 * (i - 2 + 4))
     }
@@ -94,10 +100,13 @@ class TopModuleAdresUnitTest(c: TopModule, bitstream: BigInt) extends PeekPokeTe
   }
 }
 
+/** A tester of a 2*2 TileLSUBlock with 2 input ports and 1 output port.
+ *
+ * @param c         the top design
+ * @param bitstream the configuration
+ * @param schedules the schedules of modules
+ */
 class TopModuleLSUAdresUnitTest(c: TopModule, bitstream: BigInt, schedules: List[Int]) extends PeekPokeTester(c) {
-  //MixedVec don't support c.io.inputs(0) in poke
-  //  poke(c.input_0, 2)
-  //  poke(c.input_1, 3)
 
   val inData = (1 to 128).toArray
   poke(c.io.en, 0)
@@ -105,6 +114,7 @@ class TopModuleLSUAdresUnitTest(c: TopModule, bitstream: BigInt, schedules: List
 
   val base = 0
 
+  //The serial number of LSU is explicitly set according to the mapping result.
   poke(c.io.startLSU(0), 1)
   poke(c.io.enqEnLSU(0), 1)
   poke(c.io.streamInLSU(0).valid, 0)
@@ -133,7 +143,7 @@ class TopModuleLSUAdresUnitTest(c: TopModule, bitstream: BigInt, schedules: List
 
   poke(c.io.enqEnLSU(0), 0)
 
-
+  //Set the configuration and schedules in the pre-process.
   poke(c.io.enConfig, 1)
   poke(c.io.configuration, bitstream)
 
@@ -145,6 +155,7 @@ class TopModuleLSUAdresUnitTest(c: TopModule, bitstream: BigInt, schedules: List
   poke(c.io.schedules, schedulesBigInt)
   step(1)
 
+  //Start the activating process.
   poke(c.io.en, 1)
   step(5)
   var ref = 0
@@ -156,9 +167,20 @@ class TopModuleLSUAdresUnitTest(c: TopModule, bitstream: BigInt, schedules: List
   }
 }
 
+/** A tester of a 4*4 TileCompleteBlock with 4 input ports and 4 output port.
+ *
+ * @param c          the top design
+ * @param bitstreams the configurations
+ * @param schedules  the schedules of modules
+ */
 class TopModuleCompleteAdresUnitTest(c: TopModule, bitstreams: Array[BigInt], schedules: List[Int])
   extends PeekPokeTester(c) {
 
+  /** Enters data into a LSU.
+   *
+   * @param numInLSU the serial number of this LSU
+   * @param inData   the input data array
+   */
   def enqData(numInLSU: Int, inData: Array[Int]): Unit = {
     poke(c.io.startLSU(numInLSU), 1)
     poke(c.io.enqEnLSU(numInLSU), 1)
@@ -193,13 +215,14 @@ class TopModuleCompleteAdresUnitTest(c: TopModule, bitstreams: Array[BigInt], sc
   poke(c.io.en, 0)
 
   val base = 0
+  //The serial number of LSU is explicitly set according to the mapping result.
   val numInLSU = 3
-
 
   enqData(numInLSU, inData)
 
-
   poke(c.io.II, 3)
+
+  //Set the configurations and schedules in the pre-process.
   poke(c.io.enConfig, 1)
 
   var schedulesBigInt: BigInt = 0
@@ -221,11 +244,9 @@ class TopModuleCompleteAdresUnitTest(c: TopModule, bitstreams: Array[BigInt], sc
   poke(c.io.en, 1)
   step(11)
 
+  //Start the activating process.
   var ref = 0
   for (i <- 10 until 100) {
-    //    println("cycle "+ i.toString)
-    //poke(c.input_1, i)
-    //if(i % 5 == 0)\
     ref = ref + i
     expect(c.io.outs(0), ref)
     println(ref.toString + " " + peek(c.io.outs(0)).toString())
@@ -233,9 +254,13 @@ class TopModuleCompleteAdresUnitTest(c: TopModule, bitstreams: Array[BigInt], sc
   }
 }
 
-
+/** A tester of a simple dispatcher.
+ *
+ * @deprecated
+ * @param c         the dispatcher
+ * @param bitstream the configuration
+ */
 class DispatchUnitTest(c: DispatchT, bitstream: BigInt) extends PeekPokeTester(c) {
-  //MixedVec don't support c.io.inputs(0) in poke
   poke(c.io.configuration, bitstream)
   println(bitstream.toString())
 
@@ -243,7 +268,13 @@ class DispatchUnitTest(c: DispatchT, bitstream: BigInt) extends PeekPokeTester(c
   step(1)
 }
 
-
+/** A tester of a load/store unit.
+ * In this tester, the functions of LSU for storing and loading data are tested.
+ * Since the schedule is needed in current version of LSU, this tester is deprecated.
+ *
+ * @deprecated
+ * @param c the LSU
+ */
 class LoadStoreUnitTester(c: LoadStoreUnit) extends PeekPokeTester(c) {
   poke(c.io.en, 0)
   val idata = c.memWrapper.enq_mem.manip.mode match {
@@ -323,25 +354,29 @@ class LoadStoreUnitTester(c: LoadStoreUnit) extends PeekPokeTester(c) {
   expect(c.out, 233)
 }
 
+/** A object invoking the tester of a load/store unit.
+ * Since the schedule is needed in current version of LSU, this tester is deprecated.
+ *
+ * @deprecated
+ */
 object LSUTest extends App {
-  iotesters.Driver.execute(Array("-tgvo", "on", "-fiac"),
+  iotesters.Driver.execute(Array("-tgvo", "on", "-tbn", "verilator"),
     () => new LoadStoreUnit(32)) { c => new LoadStoreUnitTester(c) }
 }
 
+/** A object generating the Verilog of a load/store unit.
+ */
 object LoadStoreUnitVerilog extends App {
   chisel3.Driver.execute(args, () => new LoadStoreUnit(32))
 }
 
-
+/** A tester of a multiplexer.
+ * @param c the multiplexer
+ */
 class MultiplexerUnitTester(c: Multiplexer) extends PeekPokeTester(c) {
-  //MixedVec don't support c.io.inputs(0) in poke
-  //  poke(c.input_0, 2)
-  //  poke(c.input_1, 3)
-
   poke(c.io.configuration, 1)
 
   for (i <- 0 until 40) {
-    //    println("cycle "+ i.toString)
     poke(c.input0, i)
     poke(c.input1, i + 1)
     expect(c.out, i + 1)
@@ -349,12 +384,18 @@ class MultiplexerUnitTester(c: Multiplexer) extends PeekPokeTester(c) {
   }
 }
 
+/** A object invoking the tester of a multiplexer.
+ */
 object MuxTest extends App {
   chisel3.Driver.execute(args, () => new Multiplexer(6, 32))
-  iotesters.Driver.execute(Array("--help", "-tiwv"), () => new Multiplexer(6, 32)) { c => new MultiplexerUnitTester(c) }
+  iotesters.Driver.execute(Array("-tgvo", "on", "-tbn", "verilator"),
+    () => new Multiplexer(6, 32)) { c => new MultiplexerUnitTester(c) }
 }
 
-class SyncScheduleControllerTester(c: SyncScheduleController) extends PeekPokeTester(c) {
+/** A tester of a synchronizer with skew = 3.
+ * @param c the synchronizer
+ */
+class SynchronizerTester(c: Synchronizer) extends PeekPokeTester(c) {
   poke(c.io.skewing, 3)
   poke(c.io.input0, 2)
   poke(c.io.input1, 3)
@@ -368,6 +409,8 @@ class SyncScheduleControllerTester(c: SyncScheduleController) extends PeekPokeTe
   }
 }
 
+/** A object invoking the tester of a synchronizer.
+ */
 object SkewTest extends App {
-  iotesters.Driver.execute(args, () => new SyncScheduleController(32)) { c => new SyncScheduleControllerTester(c) }
+  iotesters.Driver.execute(args, () => new Synchronizer(32)) { c => new SynchronizerTester(c) }
 }

@@ -8,7 +8,7 @@ class SimulationtionHelper(arch: ArchitctureHierarchy) {
   val opArray = new ArrayBuffer[String]()
   val moduleArray = new ArrayBuffer[ElementTrait]()
   val IIArray = new ArrayBuffer[Int]()
-  val waitCycleArray = new ArrayBuffer[Int]()
+  val fireTimeArray = new ArrayBuffer[Int]()
   val skewArray = new ArrayBuffer[Int]()
   val constInfo = new ConstInfo()
   val outPorts = new ArrayBuffer[Int]()
@@ -42,10 +42,10 @@ class SimulationtionHelper(arch: ArchitctureHierarchy) {
     val II = tempStr(0).replace(":","").toInt
     IIArray.append(II)
 
-    var waitCycle = tempList(2).toInt
-    waitCycleArray.append(waitCycle)
+    val fireTime = tempList(2).toInt
+    fireTimeArray.append(fireTime)
     if(op.contains("output")){
-      outputCycle = waitCycle + 1
+      outputCycle = fireTime + 1
     }
 
     val skew = tempList(3).toInt
@@ -57,7 +57,7 @@ class SimulationtionHelper(arch: ArchitctureHierarchy) {
     opArray.clear()
     moduleArray.clear()
     IIArray.clear()
-    waitCycleArray.clear()
+    fireTimeArray.clear()
     skewArray.clear()
     outPorts.clear()
   }
@@ -73,7 +73,7 @@ class SimulationtionHelper(arch: ArchitctureHierarchy) {
     arch.resetSchedules()
     for(i <- 0 until size){
       moduleArray(i).setSkew(skewArray(i), IIArray(i))
-      moduleArray(i).setWaitCycle(waitCycleArray(i), IIArray(i))
+      moduleArray(i).setFireTime(fireTimeArray(i), IIArray(i))
     }
     arch.getSchedules()
   }
