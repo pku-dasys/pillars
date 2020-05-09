@@ -75,7 +75,7 @@ object DotReader {
           val sink = file(i).substring(index0 + 2, index1)
           val operand = Integer.parseInt(file(i).substring(index2 + 1, index3))
           dfg.applyOp(from).output.output.append(dfg.applyOp(sink))
-          dfg.applyOp(from).output.output_operand.append(operand)
+          dfg.applyOp(from).output.outputOperand.append(operand)
           dfg.applyOp(sink).input += (operand -> (dfg.applyOp(from)))
           dfg.applyOp(sink).inputLatency.append(0)
         }

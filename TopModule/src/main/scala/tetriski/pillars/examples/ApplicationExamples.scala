@@ -45,7 +45,7 @@ object ApplicationExamples {
 
   val hardwareGenerator = new HardwareGenerator(arch, connect)
 
-  val simulationHelper = new SimulationtionHelper(arch)
+  val simulationHelper = new SimulationHelper(arch)
 
   /** Dump MRRG and a description file in JSON of the target architecture.
    *
@@ -54,7 +54,7 @@ object ApplicationExamples {
    */
   def dumpArch(targetII: Int, filename: String = null): Unit = {
     arch.blockMap("tile_0").dumpMRRG(targetII, filename)
-    arch.dumpArchitcture()
+    arch.dumpArchitecture()
   }
 
   /** Dump generated Verilog of the target architecture.
@@ -114,6 +114,7 @@ object ApplicationExamples {
       appTestHelper.addInData(inDatas)
       appTestHelper.addOutData(refLSUOutDatas)
       appTestHelper.setOutputCycle(outputCycle)
+      appTestHelper.setThroughput(throughput)
 
       if (useWrapper) {
         iotesters.Driver.execute(Array("--no-check-comb-loops", "-tgvo", "on", "-tbn", "verilator"),
@@ -145,7 +146,7 @@ object ApplicationExamples {
     testVadd(resultFilename, infoFilename, testII, constVals, addrVals, throughput, outputCycle)
     //********     II = 1     ********
 
-    //    //********     II = 2     ********
+    //********     II = 2     ********
     testII = 2
     outputCycle = dataSize * (testII + 3)
 
@@ -154,7 +155,8 @@ object ApplicationExamples {
 
     a_base = 0
     b_base = 0
-    c_base = 0
+    //Since a & c are both use the same LSU, the storage space of them cannot overlap.
+    c_base = dataSize
     constVals = Array(a_base, b_base, c_base, 1)
     addrVals = Array(a_base, b_base, c_base)
     throughput = 1
@@ -231,6 +233,7 @@ object ApplicationExamples {
       appTestHelper.addInData(inDatas)
       appTestHelper.setOutPortRefs(outPortRefs)
       appTestHelper.setOutputCycle(outputCycle)
+      appTestHelper.setThroughput(throughput)
 
 
       if (useWrapper) {

@@ -25,23 +25,23 @@ object ILPMap {
     val num_dfg_val = dfg.getValSize()
 
     for (i <- 0 until num_dfg_op) {
-      mapper.DFGopnodename.add(dfg.op_nodes(i).name)
-      mapper.DFGopnodeopcode.add(Integer.valueOf(dfg.op_nodes(i).opcode.id))
-      if (dfg.op_nodes(i).output != null) {
-        mapper.DFGopnodeout.add(Integer.valueOf(dfg.val_nodes_map(dfg.op_nodes(i).output.name)))
+      mapper.DFGopnodename.add(dfg.opNodes(i).name)
+      mapper.DFGopnodeopcode.add(Integer.valueOf(dfg.opNodes(i).opcode.id))
+      if (dfg.opNodes(i).output != null) {
+        mapper.DFGopnodeout.add(Integer.valueOf(dfg.valNodesMap(dfg.opNodes(i).output.name)))
       } else {
         mapper.DFGopnodeout.add(Integer.valueOf(-1))
       }
     }
     for (i <- 0 until num_dfg_val) {
-      mapper.DFGvalnodename.add(dfg.val_nodes(i).name)
+      mapper.DFGvalnodename.add(dfg.valNodes(i).name)
       var j = 0
-      val outputSize = dfg.val_nodes(i).output.size
+      val outputSize = dfg.valNodes(i).output.size
       val out = new ArrayList[Integer]()
       val operand = new ArrayList[Integer]()
       for (j <- 0 until outputSize) {
-        out.add(Integer.valueOf(dfg.op_nodes_map(dfg.val_nodes(i).output(j).name)))
-        operand.add(Integer.valueOf(dfg.val_nodes(i).output_operand(j)))
+        out.add(Integer.valueOf(dfg.opNodesMap(dfg.valNodes(i).output(j).name)))
+        operand.add(Integer.valueOf(dfg.valNodes(i).outputOperand(j)))
       }
       mapper.DFGvalnodeout.add(out)
       mapper.DFGvalnodeoutputoperand.add(operand)
@@ -144,14 +144,14 @@ object ILPMap {
       val routingResult = result(0)
       for (i <- 0 until num_mrrg_r) {
         if (routingResult.get(i).intValue != -1) {
-          routingNodes(i).mapnode = dfg.val_nodes(routingResult.get(i).intValue())
+          routingNodes(i).mapNode = dfg.valNodes(routingResult.get(i).intValue())
           //println(routingNodes(i).name)
         }
       }
       val functionResult = result(1)
       for (i <- 0 until num_mrrg_f) {
         if (functionResult.get(i).intValue != -1) {
-          functionNodes(i).mapnode = dfg.op_nodes(functionResult.get(i).intValue())
+          functionNodes(i).mapNode = dfg.opNodes(functionResult.get(i).intValue())
           //println(functionNodes(i).name)
         }
       }

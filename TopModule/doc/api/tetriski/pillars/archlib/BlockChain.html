@@ -222,7 +222,7 @@
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a>, <a href="../core/ElementTrait.html" class="extype" name="tetriski.pillars.core.ElementTrait">ElementTrait</a>, <a href="../core/ElementBasic.html" class="extype" name="tetriski.pillars.core.ElementBasic">ElementBasic</a>, <a href="../core/Ports.html" class="extype" name="tetriski.pillars.core.Ports">Ports</a>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+          <div class="superTypes hiddenContent"><a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a>, <a href="../core/ElementTrait.html" class="extype" name="tetriski.pillars.core.ElementTrait">ElementTrait</a>, <a href="../core/BasicTrait.html" class="extype" name="tetriski.pillars.core.BasicTrait">BasicTrait</a>, <a href="../core/Ports.html" class="extype" name="tetriski.pillars.core.Ports">Ports</a>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div></div>
         
 
@@ -248,7 +248,7 @@
                   <span class="filtertype">Inherited<br />
                   </span>
                   <ol id="linearization">
-                    <li class="in" name="tetriski.pillars.archlib.BlockChain"><span>BlockChain</span></li><li class="in" name="tetriski.pillars.core.BlockTrait"><span>BlockTrait</span></li><li class="in" name="tetriski.pillars.core.ElementTrait"><span>ElementTrait</span></li><li class="in" name="tetriski.pillars.core.ElementBasic"><span>ElementBasic</span></li><li class="in" name="tetriski.pillars.core.Ports"><span>Ports</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                    <li class="in" name="tetriski.pillars.archlib.BlockChain"><span>BlockChain</span></li><li class="in" name="tetriski.pillars.core.BlockTrait"><span>BlockTrait</span></li><li class="in" name="tetriski.pillars.core.ElementTrait"><span>ElementTrait</span></li><li class="in" name="tetriski.pillars.core.BasicTrait"><span>BasicTrait</span></li><li class="in" name="tetriski.pillars.core.Ports"><span>Ports</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                   </ol>
                 </div><div class="ancestors">
               <span class="filtertype"></span>
@@ -341,7 +341,11 @@
         <span title="gt4s: $div" class="name">/</span><span class="params">(<span name="portName">portName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="../core/ValidPort.html" class="extype" name="tetriski.pillars.core.ValidPort">ValidPort</a></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a> → <a href="../core/ElementTrait.html" class="extype" name="tetriski.pillars.core.ElementTrait">ElementTrait</a></dd></dl></div>
+      <p class="shortcomment cmt">Get a port of this block,
+and declare it belongs to this block.</p><div class="fullcomment"><div class="comment cmt"><p>Get a port of this block,
+and declare it belongs to this block.
+It will be used for get ports of sub-block of current block when designing the architecture.
+</p></div><dl class="paramcmts block"><dt class="param">portName</dt><dd class="cmt"><p>the name of this port</p></dd><dt>returns</dt><dd class="cmt"><p>a valid port</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a> → <a href="../core/ElementTrait.html" class="extype" name="tetriski.pillars.core.ElementTrait">ElementTrait</a></dd></dl></div>
     </li><li name="scala.AnyRef#==" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="==(x$1:Any):Boolean"></a><a id="==(Any):Boolean"></a>
       <span class="permalink">
@@ -358,10 +362,27 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="tetriski.pillars.core.BlockTrait#ALUsArray" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ALUsArray:scala.collection.mutable.ArrayBuffer[tetriski.pillars.core.ElementTrait]"></a><a id="ALUsArray:ArrayBuffer[ElementTrait]"></a>
+      <span class="permalink">
+      <a href="../../../tetriski/pillars/archlib/BlockChain.html#ALUsArray:scala.collection.mutable.ArrayBuffer[tetriski.pillars.core.ElementTrait]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">ALUsArray</span><span class="result">: <span class="extype" name="scala.collection.mutable.ArrayBuffer">ArrayBuffer</span>[<a href="../core/ElementTrait.html" class="extype" name="tetriski.pillars.core.ElementTrait">ElementTrait</a>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">An array of ALUs belonging to this block or its sub-blocks.</p><div class="fullcomment"><div class="comment cmt"><p>An array of ALUs belonging to this block or its sub-blocks.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></dd></dl></div>
     </li><li name="tetriski.pillars.core.BlockTrait#ConstsArray" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="ConstsArray:scala.collection.mutable.ArrayBuffer[Any]"></a><a id="ConstsArray:ArrayBuffer[Any]"></a>
+      <a id="ConstsArray:scala.collection.mutable.ArrayBuffer[tetriski.pillars.core.ElementTrait]"></a><a id="ConstsArray:ArrayBuffer[ElementTrait]"></a>
       <span class="permalink">
-      <a href="../../../tetriski/pillars/archlib/BlockChain.html#ConstsArray:scala.collection.mutable.ArrayBuffer[Any]" title="Permalink">
+      <a href="../../../tetriski/pillars/archlib/BlockChain.html#ConstsArray:scala.collection.mutable.ArrayBuffer[tetriski.pillars.core.ElementTrait]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -370,14 +391,15 @@
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">ConstsArray</span><span class="result">: <span class="extype" name="scala.collection.mutable.ArrayBuffer">ArrayBuffer</span>[<span class="extype" name="scala.Any">Any</span>]</span>
+        <span class="name">ConstsArray</span><span class="result">: <span class="extype" name="scala.collection.mutable.ArrayBuffer">ArrayBuffer</span>[<a href="../core/ElementTrait.html" class="extype" name="tetriski.pillars.core.ElementTrait">ElementTrait</a>]</span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></dd></dl></div>
+      <p class="shortcomment cmt">An array of const units belonging to this block or its sub-blocks.</p><div class="fullcomment"><div class="comment cmt"><p>An array of const units belonging to this block or its sub-blocks.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></dd></dl></div>
     </li><li name="tetriski.pillars.core.BlockTrait#LSUsArray" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="LSUsArray:scala.collection.mutable.ArrayBuffer[Any]"></a><a id="LSUsArray:ArrayBuffer[Any]"></a>
+      <a id="LSUsArray:scala.collection.mutable.ArrayBuffer[tetriski.pillars.core.ElementTrait]"></a><a id="LSUsArray:ArrayBuffer[ElementTrait]"></a>
       <span class="permalink">
-      <a href="../../../tetriski/pillars/archlib/BlockChain.html#LSUsArray:scala.collection.mutable.ArrayBuffer[Any]" title="Permalink">
+      <a href="../../../tetriski/pillars/archlib/BlockChain.html#LSUsArray:scala.collection.mutable.ArrayBuffer[tetriski.pillars.core.ElementTrait]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -386,14 +408,15 @@
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">LSUsArray</span><span class="result">: <span class="extype" name="scala.collection.mutable.ArrayBuffer">ArrayBuffer</span>[<span class="extype" name="scala.Any">Any</span>]</span>
+        <span class="name">LSUsArray</span><span class="result">: <span class="extype" name="scala.collection.mutable.ArrayBuffer">ArrayBuffer</span>[<a href="../core/ElementTrait.html" class="extype" name="tetriski.pillars.core.ElementTrait">ElementTrait</a>]</span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></dd></dl></div>
+      <p class="shortcomment cmt">An array of LSUs belonging to this block or its sub-blocks.</p><div class="fullcomment"><div class="comment cmt"><p>An array of LSUs belonging to this block or its sub-blocks.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></dd></dl></div>
     </li><li name="tetriski.pillars.core.BlockTrait#MuxsArray" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="MuxsArray:scala.collection.mutable.ArrayBuffer[Any]"></a><a id="MuxsArray:ArrayBuffer[Any]"></a>
+      <a id="MuxsArray:scala.collection.mutable.ArrayBuffer[tetriski.pillars.core.ElementTrait]"></a><a id="MuxsArray:ArrayBuffer[ElementTrait]"></a>
       <span class="permalink">
-      <a href="../../../tetriski/pillars/archlib/BlockChain.html#MuxsArray:scala.collection.mutable.ArrayBuffer[Any]" title="Permalink">
+      <a href="../../../tetriski/pillars/archlib/BlockChain.html#MuxsArray:scala.collection.mutable.ArrayBuffer[tetriski.pillars.core.ElementTrait]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -402,14 +425,15 @@
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">MuxsArray</span><span class="result">: <span class="extype" name="scala.collection.mutable.ArrayBuffer">ArrayBuffer</span>[<span class="extype" name="scala.Any">Any</span>]</span>
+        <span class="name">MuxsArray</span><span class="result">: <span class="extype" name="scala.collection.mutable.ArrayBuffer">ArrayBuffer</span>[<a href="../core/ElementTrait.html" class="extype" name="tetriski.pillars.core.ElementTrait">ElementTrait</a>]</span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></dd></dl></div>
+      <p class="shortcomment cmt">An array of multiplexers belonging to this block or its sub-blocks.</p><div class="fullcomment"><div class="comment cmt"><p>An array of multiplexers belonging to this block or its sub-blocks.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></dd></dl></div>
     </li><li name="tetriski.pillars.core.BlockTrait#RFsArray" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="RFsArray:scala.collection.mutable.ArrayBuffer[Any]"></a><a id="RFsArray:ArrayBuffer[Any]"></a>
+      <a id="RFsArray:scala.collection.mutable.ArrayBuffer[tetriski.pillars.core.ElementTrait]"></a><a id="RFsArray:ArrayBuffer[ElementTrait]"></a>
       <span class="permalink">
-      <a href="../../../tetriski/pillars/archlib/BlockChain.html#RFsArray:scala.collection.mutable.ArrayBuffer[Any]" title="Permalink">
+      <a href="../../../tetriski/pillars/archlib/BlockChain.html#RFsArray:scala.collection.mutable.ArrayBuffer[tetriski.pillars.core.ElementTrait]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -418,10 +442,11 @@
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">RFsArray</span><span class="result">: <span class="extype" name="scala.collection.mutable.ArrayBuffer">ArrayBuffer</span>[<span class="extype" name="scala.Any">Any</span>]</span>
+        <span class="name">RFsArray</span><span class="result">: <span class="extype" name="scala.collection.mutable.ArrayBuffer">ArrayBuffer</span>[<a href="../core/ElementTrait.html" class="extype" name="tetriski.pillars.core.ElementTrait">ElementTrait</a>]</span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></dd></dl></div>
+      <p class="shortcomment cmt">An array of RFs belonging to this block or its sub-blocks.</p><div class="fullcomment"><div class="comment cmt"><p>An array of RFs belonging to this block or its sub-blocks.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></dd></dl></div>
     </li><li name="tetriski.pillars.core.BlockTrait#addBlock" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="addBlock(arg:tetriski.pillars.core.BlockTrait):Map[String,tetriski.pillars.core.BlockTrait]"></a><a id="addBlock(BlockTrait):Map[String,BlockTrait]"></a>
       <span class="permalink">
@@ -437,7 +462,8 @@
         <span class="name">addBlock</span><span class="params">(<span name="arg">arg: <a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></span>)</span><span class="result">: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a>]</span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></dd></dl></div>
+      <p class="shortcomment cmt">Add a sub-block into this block.</p><div class="fullcomment"><div class="comment cmt"><p>Add a sub-block into this block.
+</p></div><dl class="paramcmts block"><dt class="param">arg</dt><dd class="cmt"><p>this sub-block</p></dd><dt>returns</dt><dd class="cmt"><p>the map between the name of a sub-block and itself.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></dd></dl></div>
     </li><li name="tetriski.pillars.core.BlockTrait#addConnect" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="addConnect(src:List[String],dst:List[String]):Unit"></a><a id="addConnect(List[String],List[String]):Unit"></a>
       <span class="permalink">
@@ -453,7 +479,8 @@
         <span class="name">addConnect</span><span class="params">(<span name="src">src: <span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="dst">dst: <span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></dd></dl></div>
+      <p class="shortcomment cmt">Add a connection into this block.</p><div class="fullcomment"><div class="comment cmt"><p>Add a connection into this block.
+</p></div><dl class="paramcmts block"><dt class="param">src</dt><dd class="cmt"><p>a list representing the source port</p></dd><dt class="param">dst</dt><dd class="cmt"><p>a list representing the sink port</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></dd></dl></div>
     </li><li name="tetriski.pillars.core.BlockTrait#addConnect" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="addConnect(arg:List[List[String]]):Unit"></a><a id="addConnect(List[List[String]]):Unit"></a>
       <span class="permalink">
@@ -469,7 +496,9 @@
         <span class="name">addConnect</span><span class="params">(<span name="arg">arg: <span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Predef.String">String</span>]]</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></dd></dl></div>
+      <p class="shortcomment cmt">Add a connection into this block.</p><div class="fullcomment"><div class="comment cmt"><p>Add a connection into this block.
+</p></div><dl class="paramcmts block"><dt class="param">arg</dt><dd class="cmt"><p>List(src, dst),
+           where src and dst are lists representing ports which have a connection</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></dd></dl></div>
     </li><li name="tetriski.pillars.core.BlockTrait#addElement" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="addElement(arg:tetriski.pillars.core.ElementTrait):Unit"></a><a id="addElement(ElementTrait):Unit"></a>
       <span class="permalink">
@@ -485,7 +514,8 @@
         <span class="name">addElement</span><span class="params">(<span name="arg">arg: <a href="../core/ElementTrait.html" class="extype" name="tetriski.pillars.core.ElementTrait">ElementTrait</a></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></dd></dl></div>
+      <p class="shortcomment cmt">Add an element into this block.</p><div class="fullcomment"><div class="comment cmt"><p>Add an element into this block.
+</p></div><dl class="paramcmts block"><dt class="param">arg</dt><dd class="cmt"><p>this element</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></dd></dl></div>
     </li><li name="tetriski.pillars.core.Ports#addInPorts" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="addInPorts(args:Array[String]):Map[String,Int]"></a><a id="addInPorts(Array[String]):Map[String,Int]"></a>
       <span class="permalink">
@@ -501,7 +531,8 @@
         <span class="name">addInPorts</span><span class="params">(<span name="args">args: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Int">Int</span>]</span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/Ports.html" class="extype" name="tetriski.pillars.core.Ports">Ports</a></dd></dl></div>
+      <p class="shortcomment cmt">Add some input ports.</p><div class="fullcomment"><div class="comment cmt"><p>Add some input ports.
+</p></div><dl class="paramcmts block"><dt class="param">args</dt><dd class="cmt"><p>a array of names of input ports.</p></dd><dt>returns</dt><dd class="cmt"><p>inPortMap after add this ports</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/Ports.html" class="extype" name="tetriski.pillars.core.Ports">Ports</a></dd></dl></div>
     </li><li name="tetriski.pillars.core.ElementTrait#addInternalNodes" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="addInternalNodes(arg:List[String]):Unit"></a><a id="addInternalNodes(List[String]):Unit"></a>
       <span class="permalink">
@@ -517,7 +548,8 @@
         <span class="name">addInternalNodes</span><span class="params">(<span name="arg">arg: <span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/ElementTrait.html" class="extype" name="tetriski.pillars.core.ElementTrait">ElementTrait</a></dd></dl></div>
+      <p class="shortcomment cmt">Add some internal nodes.</p><div class="fullcomment"><div class="comment cmt"><p>Add some internal nodes.
+</p></div><dl class="paramcmts block"><dt class="param">arg</dt><dd class="cmt"><p>a list of names of the internal nodes will be added</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/ElementTrait.html" class="extype" name="tetriski.pillars.core.ElementTrait">ElementTrait</a></dd></dl></div>
     </li><li name="tetriski.pillars.core.ElementTrait#addInternalNodesNum" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="addInternalNodesNum(num:Int):Unit"></a><a id="addInternalNodesNum(Int):Unit"></a>
       <span class="permalink">
@@ -533,7 +565,11 @@
         <span class="name">addInternalNodesNum</span><span class="params">(<span name="num">num: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/ElementTrait.html" class="extype" name="tetriski.pillars.core.ElementTrait">ElementTrait</a></dd></dl></div>
+      <p class="shortcomment cmt">Add some internal nodes.</p><div class="fullcomment"><div class="comment cmt"><p>Add some internal nodes.
+When using this function,
+users should guarantee correct correspondence of the number of internal routing nodes
+and the routing capabilities of a module.
+</p></div><dl class="paramcmts block"><dt class="param">num</dt><dd class="cmt"><p>the number of the internal nodes will be added</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/ElementTrait.html" class="extype" name="tetriski.pillars.core.ElementTrait">ElementTrait</a></dd></dl></div>
     </li><li name="tetriski.pillars.core.Ports#addOutPorts" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="addOutPorts(args:Array[String]):Map[String,Int]"></a><a id="addOutPorts(Array[String]):Map[String,Int]"></a>
       <span class="permalink">
@@ -549,23 +585,8 @@
         <span class="name">addOutPorts</span><span class="params">(<span name="args">args: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Int">Int</span>]</span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/Ports.html" class="extype" name="tetriski.pillars.core.Ports">Ports</a></dd></dl></div>
-    </li><li name="tetriski.pillars.core.BlockTrait#aluArray" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="aluArray:scala.collection.mutable.ArrayBuffer[Any]"></a><a id="aluArray:ArrayBuffer[Any]"></a>
-      <span class="permalink">
-      <a href="../../../tetriski/pillars/archlib/BlockChain.html#aluArray:scala.collection.mutable.ArrayBuffer[Any]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">aluArray</span><span class="result">: <span class="extype" name="scala.collection.mutable.ArrayBuffer">ArrayBuffer</span>[<span class="extype" name="scala.Any">Any</span>]</span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></dd></dl></div>
+      <p class="shortcomment cmt">Add some output ports.</p><div class="fullcomment"><div class="comment cmt"><p>Add some output ports.
+</p></div><dl class="paramcmts block"><dt class="param">args</dt><dd class="cmt"><p>a array of names of output ports.</p></dd><dt>returns</dt><dd class="cmt"><p>outPortMap after add this ports</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/Ports.html" class="extype" name="tetriski.pillars.core.Ports">Ports</a></dd></dl></div>
     </li><li name="tetriski.pillars.core.BlockTrait#apply" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="apply(name:String):tetriski.pillars.core.BlockTrait"></a><a id="apply(String):BlockTrait"></a>
       <span class="permalink">
@@ -581,7 +602,8 @@
         <span class="name">apply</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></dd></dl></div>
+      <p class="shortcomment cmt">Get a sub-block.</p><div class="fullcomment"><div class="comment cmt"><p>Get a sub-block.
+</p></div><dl class="paramcmts block"><dt class="param">name</dt><dd class="cmt"><p>the name of this sub-block</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></dd></dl></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <span class="permalink">
@@ -613,7 +635,8 @@
         <span class="name">bannedINodeSet</span><span class="result">: <span class="extype" name="scala.collection.immutable.Set">Set</span>[<span class="extype" name="scala.BigInt">BigInt</span>]</span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/ElementTrait.html" class="extype" name="tetriski.pillars.core.ElementTrait">ElementTrait</a></dd></dl></div>
+      <p class="shortcomment cmt">A set of internal nodes which have been used for routing.</p><div class="fullcomment"><div class="comment cmt"><p>A set of internal nodes which have been used for routing.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/ElementTrait.html" class="extype" name="tetriski.pillars.core.ElementTrait">ElementTrait</a></dd></dl></div>
     </li><li name="tetriski.pillars.core.BlockTrait#blockMap" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="blockMap:scala.collection.immutable.Map[String,tetriski.pillars.core.BlockTrait]"></a><a id="blockMap:Map[String,BlockTrait]"></a>
       <span class="permalink">
@@ -629,7 +652,8 @@
         <span class="name">blockMap</span><span class="result">: <span class="extype" name="scala.collection.immutable.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a>]</span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></dd></dl></div>
+      <p class="shortcomment cmt">A map between the name of a sub-block and itself.</p><div class="fullcomment"><div class="comment cmt"><p>A map between the name of a sub-block and itself.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></dd></dl></div>
     </li><li name="scala.AnyRef#clone" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a><a id="clone():AnyRef"></a>
       <span class="permalink">
@@ -656,7 +680,7 @@
                 <span class="name">@HotSpotIntrinsicCandidate</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="tetriski.pillars.core.ElementBasic#configArray" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="tetriski.pillars.core.BasicTrait#configArray" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="configArray:scala.collection.mutable.ArrayBuffer[Int]"></a><a id="configArray:ArrayBuffer[Int]"></a>
       <span class="permalink">
       <a href="../../../tetriski/pillars/archlib/BlockChain.html#configArray:scala.collection.mutable.ArrayBuffer[Int]" title="Permalink">
@@ -671,8 +695,9 @@
         <span class="name">configArray</span><span class="result">: <span class="extype" name="scala.collection.mutable.ArrayBuffer">ArrayBuffer</span>[<span class="extype" name="scala.Int">Int</span>]</span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/ElementBasic.html" class="extype" name="tetriski.pillars.core.ElementBasic">ElementBasic</a></dd></dl></div>
-    </li><li name="tetriski.pillars.core.ElementBasic#configBit" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <p class="shortcomment cmt">The configuration of the module represented by this abstract model.</p><div class="fullcomment"><div class="comment cmt"><p>The configuration of the module represented by this abstract model.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BasicTrait.html" class="extype" name="tetriski.pillars.core.BasicTrait">BasicTrait</a></dd></dl></div>
+    </li><li name="tetriski.pillars.core.BasicTrait#configBit" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="configBit:Int"></a>
       <span class="permalink">
       <a href="../../../tetriski/pillars/archlib/BlockChain.html#configBit:Int" title="Permalink">
@@ -687,7 +712,8 @@
         <span class="name">configBit</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/ElementBasic.html" class="extype" name="tetriski.pillars.core.ElementBasic">ElementBasic</a></dd></dl></div>
+      <p class="shortcomment cmt">The configuration bits of the module represented by this abstract model.</p><div class="fullcomment"><div class="comment cmt"><p>The configuration bits of the module represented by this abstract model.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BasicTrait.html" class="extype" name="tetriski.pillars.core.BasicTrait">BasicTrait</a></dd></dl></div>
     </li><li name="tetriski.pillars.core.BlockTrait#connectArray" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="connectArray:scala.collection.mutable.ArrayBuffer[List[List[String]]]"></a><a id="connectArray:ArrayBuffer[List[List[String]]]"></a>
       <span class="permalink">
@@ -703,7 +729,11 @@
         <span class="name">connectArray</span><span class="result">: <span class="extype" name="scala.collection.mutable.ArrayBuffer">ArrayBuffer</span>[<span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Predef.String">String</span>]]]</span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></dd></dl></div>
+      <p class="shortcomment cmt">Array(List(src, dst)),
+where src and dst are lists representing ports which have a connection
+</p><div class="fullcomment"><div class="comment cmt"><p>Array(List(src, dst)),
+where src and dst are lists representing ports which have a connection
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></dd></dl></div>
     </li><li name="tetriski.pillars.core.BlockTrait#dumpMRRG" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="dumpMRRG(II:Int,filename:String):Unit"></a><a id="dumpMRRG(Int,String):Unit"></a>
       <span class="permalink">
@@ -719,11 +749,57 @@
         <span class="name">dumpMRRG</span><span class="params">(<span name="II">II: <span class="extype" name="scala.Int">Int</span></span>, <span name="filename">filename: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">null</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></dd></dl></div>
-    </li><li name="tetriski.pillars.core.BlockTrait#elementsArray" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="elementsArray:scala.collection.mutable.ArrayBuffer[scala.collection.mutable.ArrayBuffer[Any]]"></a><a id="elementsArray:ArrayBuffer[ArrayBuffer[Any]]"></a>
+      <p class="shortcomment cmt">Dump the MRRG of this block with II.</p><div class="fullcomment"><div class="comment cmt"><p>Dump the MRRG of this block with II.
+</p></div><dl class="paramcmts block"><dt class="param">II</dt><dd class="cmt"><p>the target II</p></dd><dt class="param">filename</dt><dd class="cmt"><p>the name of file for dumping</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></dd></dl></div>
+    </li><li name="tetriski.pillars.core.BlockTrait#dumpMRRGAsTXT" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="dumpMRRGAsTXT(writer:java.io.PrintWriter,targetMRRG:tetriski.pillars.core.MRRG):Unit"></a><a id="dumpMRRGAsTXT(PrintWriter,MRRG):Unit"></a>
       <span class="permalink">
-      <a href="../../../tetriski/pillars/archlib/BlockChain.html#elementsArray:scala.collection.mutable.ArrayBuffer[scala.collection.mutable.ArrayBuffer[Any]]" title="Permalink">
+      <a href="../../../tetriski/pillars/archlib/BlockChain.html#dumpMRRGAsTXT(writer:java.io.PrintWriter,targetMRRG:tetriski.pillars.core.MRRG):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">dumpMRRGAsTXT</span><span class="params">(<span name="writer">writer: <span class="extype" name="java.io.PrintWriter">PrintWriter</span></span>, <span name="targetMRRG">targetMRRG: <a href="../core/MRRG.html" class="extype" name="tetriski.pillars.core.MRRG">MRRG</a></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Save an MRRG as a TXT.</p><div class="fullcomment"><div class="comment cmt"><p>Save an MRRG as a TXT.
+</p></div><dl class="paramcmts block"><dt class="param">writer</dt><dd class="cmt"><p>the JAVA PrintWriter</p></dd><dt class="param">targetMRRG</dt><dd class="cmt"><p>this MRRG</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></dd><div class="block">Example:
+               <ol><li class="cmt"><p>An MRRG TXT is in the following format.
+         &quot;number of nodes without opcode&quot;
+         &quot;&lt;the name of an MRRG node&gt;    &quot;
+         &quot;nIn (the number of fan-ins)   &quot;
+         &quot;the name of fan-in 0          &quot;
+         ......
+         &quot;the name of fan-in nIn        &quot;
+         &quot;nOut (the number of fan-outs) &quot;
+         &quot;the name of fan-out 0         &quot;
+         ......
+         &quot;the name of fan-out nOut      &quot;
+         ......
+         &quot;number of nodes with opcodes  &quot;
+         &quot;&lt;the name of an MRRG node&gt;    &quot;
+         &quot;nIn (the number of fan-ins)   &quot;
+         &quot;the name of fan-in 0          &quot;
+         ......
+         &quot;the name of fan-in nIn        &quot;
+         &quot;nOut (the number of fan-outs) &quot;
+         &quot;the name of fan-out 0         &quot;
+         ......
+         &quot;the name of fan-out nOut      &quot;
+         &quot;nOp (the number of opcodes)   &quot;
+         &quot;opcode 0                      &quot;
+         ......
+         &quot;opcode nOp                    &quot;
+         ......</p></li></ol>
+            </div></dl></div>
+    </li><li name="tetriski.pillars.core.BlockTrait#elementsArray" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="elementsArray:scala.collection.mutable.ArrayBuffer[scala.collection.mutable.ArrayBuffer[tetriski.pillars.core.ElementTrait]]"></a><a id="elementsArray:ArrayBuffer[ArrayBuffer[ElementTrait]]"></a>
+      <span class="permalink">
+      <a href="../../../tetriski/pillars/archlib/BlockChain.html#elementsArray:scala.collection.mutable.ArrayBuffer[scala.collection.mutable.ArrayBuffer[tetriski.pillars.core.ElementTrait]]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -732,10 +808,11 @@
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">elementsArray</span><span class="result">: <span class="extype" name="scala.collection.mutable.ArrayBuffer">ArrayBuffer</span>[<span class="extype" name="scala.collection.mutable.ArrayBuffer">ArrayBuffer</span>[<span class="extype" name="scala.Any">Any</span>]]</span>
+        <span class="name">elementsArray</span><span class="result">: <span class="extype" name="scala.collection.mutable.ArrayBuffer">ArrayBuffer</span>[<span class="extype" name="scala.collection.mutable.ArrayBuffer">ArrayBuffer</span>[<a href="../core/ElementTrait.html" class="extype" name="tetriski.pillars.core.ElementTrait">ElementTrait</a>]]</span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></dd></dl></div>
+      <p class="shortcomment cmt">An array of elements belonging to this block or its sub-blocks.</p><div class="fullcomment"><div class="comment cmt"><p>An array of elements belonging to this block or its sub-blocks.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></dd></dl></div>
     </li><li name="tetriski.pillars.core.BlockTrait#elementsMap" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="elementsMap:scala.collection.immutable.Map[String,tetriski.pillars.core.ElementTrait]"></a><a id="elementsMap:Map[String,ElementTrait]"></a>
       <span class="permalink">
@@ -751,7 +828,8 @@
         <span class="name">elementsMap</span><span class="result">: <span class="extype" name="scala.collection.immutable.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <a href="../core/ElementTrait.html" class="extype" name="tetriski.pillars.core.ElementTrait">ElementTrait</a>]</span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></dd></dl></div>
+      <p class="shortcomment cmt">A map between the name of an element and itself.</p><div class="fullcomment"><div class="comment cmt"><p>A map between the name of an element and itself.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></dd></dl></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -784,7 +862,7 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="tetriski.pillars.core.ElementBasic#fireTimes" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="tetriski.pillars.core.BasicTrait#fireTimes" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="fireTimes:Array[Int]"></a>
       <span class="permalink">
       <a href="../../../tetriski/pillars/archlib/BlockChain.html#fireTimes:Array[Int]" title="Permalink">
@@ -799,7 +877,8 @@
         <span class="name">fireTimes</span><span class="result">: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Int">Int</span>]</span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/ElementBasic.html" class="extype" name="tetriski.pillars.core.ElementBasic">ElementBasic</a></dd></dl></div>
+      <p class="shortcomment cmt">The fire times of the module represented by this abstract model in different reconfiguration cycles.</p><div class="fullcomment"><div class="comment cmt"><p>The fire times of the module represented by this abstract model in different reconfiguration cycles.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BasicTrait.html" class="extype" name="tetriski.pillars.core.BasicTrait">BasicTrait</a></dd></dl></div>
     </li><li name="tetriski.pillars.core.BlockTrait#getAllBlocks" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getAllBlocks():scala.collection.mutable.ArrayBuffer[tetriski.pillars.core.BlockTrait]"></a><a id="getAllBlocks():ArrayBuffer[BlockTrait]"></a>
       <span class="permalink">
@@ -815,7 +894,8 @@
         <span class="name">getAllBlocks</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.collection.mutable.ArrayBuffer">ArrayBuffer</span>[<a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a>]</span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></dd></dl></div>
+      <p class="shortcomment cmt">Get all sub-blocks belonging to this block and itself as a array.</p><div class="fullcomment"><div class="comment cmt"><p>Get all sub-blocks belonging to this block and itself as a array.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the all sub-blocks belonging to this block</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></dd></dl></div>
     </li><li name="tetriski.pillars.core.BlockTrait#getAllSubBlocks" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getAllSubBlocks():scala.collection.mutable.ArrayBuffer[tetriski.pillars.core.BlockTrait]"></a><a id="getAllSubBlocks():ArrayBuffer[BlockTrait]"></a>
       <span class="permalink">
@@ -831,7 +911,8 @@
         <span class="name">getAllSubBlocks</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.collection.mutable.ArrayBuffer">ArrayBuffer</span>[<a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a>]</span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></dd></dl></div>
+      <p class="shortcomment cmt">Get all sub-blocks belonging to this block as a array.</p><div class="fullcomment"><div class="comment cmt"><p>Get all sub-blocks belonging to this block as a array.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the all sub-blocks belonging to this block</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></dd></dl></div>
     </li><li name="tetriski.pillars.core.ElementTrait#getBigIntConfig" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getBigIntConfig():BigInt"></a>
       <span class="permalink">
@@ -847,7 +928,8 @@
         <span class="name">getBigIntConfig</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.BigInt">BigInt</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/ElementTrait.html" class="extype" name="tetriski.pillars.core.ElementTrait">ElementTrait</a></dd></dl></div>
+      <p class="shortcomment cmt">Get the configuration of the module represented by this element.</p><div class="fullcomment"><div class="comment cmt"><p>Get the configuration of the module represented by this element.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the new configuration in BigInt format</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/ElementTrait.html" class="extype" name="tetriski.pillars.core.ElementTrait">ElementTrait</a></dd></dl></div>
     </li><li name="scala.AnyRef#getClass" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <span class="permalink">
@@ -869,7 +951,7 @@
                 <span class="name">@HotSpotIntrinsicCandidate</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="tetriski.pillars.core.ElementBasic#getConfigBit" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="tetriski.pillars.core.BasicTrait#getConfigBit" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getConfigBit():Int"></a>
       <span class="permalink">
       <a href="../../../tetriski/pillars/archlib/BlockChain.html#getConfigBit():Int" title="Permalink">
@@ -884,7 +966,8 @@
         <span class="name">getConfigBit</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/ElementBasic.html" class="extype" name="tetriski.pillars.core.ElementBasic">ElementBasic</a></dd></dl></div>
+      <p class="shortcomment cmt">Get the configuration bits of the module represented by this abstract model.</p><div class="fullcomment"><div class="comment cmt"><p>Get the configuration bits of the module represented by this abstract model.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the configuration bits of the module represented by this abstract model.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BasicTrait.html" class="extype" name="tetriski.pillars.core.BasicTrait">BasicTrait</a></dd></dl></div>
     </li><li name="tetriski.pillars.core.BlockTrait#getElement" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getElement(name:String):tetriski.pillars.core.ElementTrait"></a><a id="getElement(String):ElementTrait"></a>
       <span class="permalink">
@@ -900,8 +983,9 @@
         <span class="name">getElement</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="../core/ElementTrait.html" class="extype" name="tetriski.pillars.core.ElementTrait">ElementTrait</a></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></dd></dl></div>
-    </li><li name="tetriski.pillars.core.ElementBasic#getFireTimes" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <p class="shortcomment cmt">Get an element.</p><div class="fullcomment"><div class="comment cmt"><p>Get an element.
+</p></div><dl class="paramcmts block"><dt class="param">name</dt><dd class="cmt"><p>the name of this element</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></dd></dl></div>
+    </li><li name="tetriski.pillars.core.BasicTrait#getFireTimes" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getFireTimes():Array[Int]"></a>
       <span class="permalink">
       <a href="../../../tetriski/pillars/archlib/BlockChain.html#getFireTimes():Array[Int]" title="Permalink">
@@ -916,7 +1000,8 @@
         <span class="name">getFireTimes</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Int">Int</span>]</span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/ElementBasic.html" class="extype" name="tetriski.pillars.core.ElementBasic">ElementBasic</a></dd></dl></div>
+      <p class="shortcomment cmt">Get the fire times of the module represented by this abstract model.</p><div class="fullcomment"><div class="comment cmt"><p>Get the fire times of the module represented by this abstract model.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the fire times of the module represented by this abstract model.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BasicTrait.html" class="extype" name="tetriski.pillars.core.BasicTrait">BasicTrait</a></dd></dl></div>
     </li><li name="tetriski.pillars.core.Ports#getInPorts" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getInPorts():Iterable[String]"></a>
       <span class="permalink">
@@ -932,8 +1017,26 @@
         <span class="name">getInPorts</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Iterable">Iterable</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/Ports.html" class="extype" name="tetriski.pillars.core.Ports">Ports</a></dd></dl></div>
-    </li><li name="tetriski.pillars.core.ElementBasic#getModuleID" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <p class="shortcomment cmt">Get names the input ports.</p><div class="fullcomment"><div class="comment cmt"><p>Get names the input ports.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>names the input ports</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/Ports.html" class="extype" name="tetriski.pillars.core.Ports">Ports</a></dd></dl></div>
+    </li><li name="tetriski.pillars.core.BlockTrait#getMRRG" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getMRRG(II:Int):tetriski.pillars.core.MRRG"></a><a id="getMRRG(Int):MRRG"></a>
+      <span class="permalink">
+      <a href="../../../tetriski/pillars/archlib/BlockChain.html#getMRRG(II:Int):tetriski.pillars.core.MRRG" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getMRRG</span><span class="params">(<span name="II">II: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <a href="../core/MRRG.html" class="extype" name="tetriski.pillars.core.MRRG">MRRG</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Get the MRRG of this block with II.</p><div class="fullcomment"><div class="comment cmt"><p>Get the MRRG of this block with II.
+</p></div><dl class="paramcmts block"><dt class="param">II</dt><dd class="cmt"><p>the target II</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></dd></dl></div>
+    </li><li name="tetriski.pillars.core.BasicTrait#getModuleID" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getModuleID():Int"></a>
       <span class="permalink">
       <a href="../../../tetriski/pillars/archlib/BlockChain.html#getModuleID():Int" title="Permalink">
@@ -948,8 +1051,9 @@
         <span class="name">getModuleID</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/ElementBasic.html" class="extype" name="tetriski.pillars.core.ElementBasic">ElementBasic</a></dd></dl></div>
-    </li><li name="tetriski.pillars.core.ElementBasic#getName" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <p class="shortcomment cmt">Get the module serial number of the module represented by this abstract model.</p><div class="fullcomment"><div class="comment cmt"><p>Get the module serial number of the module represented by this abstract model.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the module serial number of the module represented by this abstract model</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BasicTrait.html" class="extype" name="tetriski.pillars.core.BasicTrait">BasicTrait</a></dd></dl></div>
+    </li><li name="tetriski.pillars.core.BasicTrait#getName" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getName():String"></a>
       <span class="permalink">
       <a href="../../../tetriski/pillars/archlib/BlockChain.html#getName():String" title="Permalink">
@@ -964,7 +1068,8 @@
         <span class="name">getName</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/ElementBasic.html" class="extype" name="tetriski.pillars.core.ElementBasic">ElementBasic</a></dd></dl></div>
+      <p class="shortcomment cmt">Get the name of the this abstract model.</p><div class="fullcomment"><div class="comment cmt"><p>Get the name of the this abstract model.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the name of the this abstract model</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BasicTrait.html" class="extype" name="tetriski.pillars.core.BasicTrait">BasicTrait</a></dd></dl></div>
     </li><li name="tetriski.pillars.core.Ports#getOutPorts" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getOutPorts():Iterable[String]"></a>
       <span class="permalink">
@@ -980,8 +1085,9 @@
         <span class="name">getOutPorts</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Iterable">Iterable</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/Ports.html" class="extype" name="tetriski.pillars.core.Ports">Ports</a></dd></dl></div>
-    </li><li name="tetriski.pillars.core.ElementBasic#getParams" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <p class="shortcomment cmt">Get names the output ports.</p><div class="fullcomment"><div class="comment cmt"><p>Get names the output ports.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>names the output ports</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/Ports.html" class="extype" name="tetriski.pillars.core.Ports">Ports</a></dd></dl></div>
+    </li><li name="tetriski.pillars.core.BasicTrait#getParams" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getParams():List[Int]"></a>
       <span class="permalink">
       <a href="../../../tetriski/pillars/archlib/BlockChain.html#getParams():List[Int]" title="Permalink">
@@ -996,7 +1102,8 @@
         <span class="name">getParams</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Int">Int</span>]</span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/ElementBasic.html" class="extype" name="tetriski.pillars.core.ElementBasic">ElementBasic</a></dd></dl></div>
+      <p class="shortcomment cmt">Get the parameters of the module represented by this abstract model.</p><div class="fullcomment"><div class="comment cmt"><p>Get the parameters of the module represented by this abstract model.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the parameters of the module represented by this abstract model.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BasicTrait.html" class="extype" name="tetriski.pillars.core.BasicTrait">BasicTrait</a></dd></dl></div>
     </li><li name="tetriski.pillars.core.Ports#getPortID" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getPortID(name:String):Int"></a><a id="getPortID(String):Int"></a>
       <span class="permalink">
@@ -1012,8 +1119,9 @@
         <span class="name">getPortID</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/Ports.html" class="extype" name="tetriski.pillars.core.Ports">Ports</a></dd></dl></div>
-    </li><li name="tetriski.pillars.core.ElementBasic#getSchedule" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <p class="shortcomment cmt">Get the serial number of a port with its name.</p><div class="fullcomment"><div class="comment cmt"><p>Get the serial number of a port with its name.
+</p></div><dl class="paramcmts block"><dt class="param">name</dt><dd class="cmt"><p>the name of this port</p></dd><dt>returns</dt><dd class="cmt"><p>the serial number of this port</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/Ports.html" class="extype" name="tetriski.pillars.core.Ports">Ports</a></dd></dl></div>
+    </li><li name="tetriski.pillars.core.BasicTrait#getSchedule" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getSchedule():Array[Int]"></a>
       <span class="permalink">
       <a href="../../../tetriski/pillars/archlib/BlockChain.html#getSchedule():Array[Int]" title="Permalink">
@@ -1028,8 +1136,30 @@
         <span class="name">getSchedule</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Int">Int</span>]</span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/ElementBasic.html" class="extype" name="tetriski.pillars.core.ElementBasic">ElementBasic</a></dd></dl></div>
-    </li><li name="tetriski.pillars.core.ElementBasic#getSupOps" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <p class="shortcomment cmt">Get the schedule of the module represented by this abstract model in Int format.</p><div class="fullcomment"><div class="comment cmt"><p>Get the schedule of the module represented by this abstract model in Int format.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the schedule of the module represented by this abstract model</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BasicTrait.html" class="extype" name="tetriski.pillars.core.BasicTrait">BasicTrait</a></dd><div class="block">Example:
+               <ol><li class="cmt"><p>If II_UPPER_BOUND = 1, only schedule at reconfiguration cycle 0 will be got.
+         If skew = 2, fire time = 3 and LOG_SCHEDULE_SIZE = 3, the result is Array(19).
+         If skew = -2, fire time = 3 and LOG_SCHEDULE_SIZE = 3, the result is Array(83).</p></li></ol>
+            </div></dl></div>
+    </li><li name="tetriski.pillars.core.BlockTrait#getStrMRRG" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getStrMRRG(listStr:List[String]):String"></a><a id="getStrMRRG(List[String]):String"></a>
+      <span class="permalink">
+      <a href="../../../tetriski/pillars/archlib/BlockChain.html#getStrMRRG(listStr:List[String]):String" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getStrMRRG</span><span class="params">(<span name="listStr">listStr: <span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Translate a list of String representing a MRRG node into a String.</p><div class="fullcomment"><div class="comment cmt"><p>Translate a list of String representing a MRRG node into a String.
+</p></div><dl class="paramcmts block"><dt class="param">listStr</dt><dd class="cmt"><p>a list of String representing this MRRG node</p></dd><dt>returns</dt><dd class="cmt"><p>a String representing this MRRG node</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></dd></dl></div>
+    </li><li name="tetriski.pillars.core.BasicTrait#getSupOps" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getSupOps():scala.collection.mutable.ArrayBuffer[tetriski.pillars.core.OpEnum.OpEnum]"></a><a id="getSupOps():ArrayBuffer[OpEnum]"></a>
       <span class="permalink">
       <a href="../../../tetriski/pillars/archlib/BlockChain.html#getSupOps():scala.collection.mutable.ArrayBuffer[tetriski.pillars.core.OpEnum.OpEnum]" title="Permalink">
@@ -1044,8 +1174,9 @@
         <span class="name">getSupOps</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.collection.mutable.ArrayBuffer">ArrayBuffer</span>[<a href="../core/OpEnum$.html#OpEnum=tetriski.pillars.core.OpEnum.Value" class="extmbr" name="tetriski.pillars.core.OpEnum.OpEnum">OpEnum</a>]</span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/ElementBasic.html" class="extype" name="tetriski.pillars.core.ElementBasic">ElementBasic</a></dd></dl></div>
-    </li><li name="tetriski.pillars.core.ElementBasic#getTypeID" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <p class="shortcomment cmt">Get the opcodes supported by the module represented by this abstract model.</p><div class="fullcomment"><div class="comment cmt"><p>Get the opcodes supported by the module represented by this abstract model.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the opcodes supported by the module represented by this abstract model</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BasicTrait.html" class="extype" name="tetriski.pillars.core.BasicTrait">BasicTrait</a></dd></dl></div>
+    </li><li name="tetriski.pillars.core.BasicTrait#getTypeID" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getTypeID():Int"></a>
       <span class="permalink">
       <a href="../../../tetriski/pillars/archlib/BlockChain.html#getTypeID():Int" title="Permalink">
@@ -1060,8 +1191,9 @@
         <span class="name">getTypeID</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/ElementBasic.html" class="extype" name="tetriski.pillars.core.ElementBasic">ElementBasic</a></dd></dl></div>
-    </li><li name="tetriski.pillars.core.ElementBasic#getWidth" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <p class="shortcomment cmt">Get the type serial number of the module represented by this abstract model.</p><div class="fullcomment"><div class="comment cmt"><p>Get the type serial number of the module represented by this abstract model.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the type serial number of the module represented by this abstract model</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BasicTrait.html" class="extype" name="tetriski.pillars.core.BasicTrait">BasicTrait</a></dd></dl></div>
+    </li><li name="tetriski.pillars.core.BasicTrait#getWidth" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getWidth():Int"></a>
       <span class="permalink">
       <a href="../../../tetriski/pillars/archlib/BlockChain.html#getWidth():Int" title="Permalink">
@@ -1076,7 +1208,29 @@
         <span class="name">getWidth</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/ElementBasic.html" class="extype" name="tetriski.pillars.core.ElementBasic">ElementBasic</a></dd></dl></div>
+      <p class="shortcomment cmt">Get the width of the module represented by this abstract model.</p><div class="fullcomment"><div class="comment cmt"><p>Get the width of the module represented by this abstract model.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the width of the module represented by this abstract model</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BasicTrait.html" class="extype" name="tetriski.pillars.core.BasicTrait">BasicTrait</a></dd></dl></div>
+    </li><li name="tetriski.pillars.core.BlockTrait#graphUnroll" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="graphUnroll(oriMRRG:tetriski.pillars.core.MRRG,II:Int):tetriski.pillars.core.MRRG"></a><a id="graphUnroll(MRRG,Int):MRRG"></a>
+      <span class="permalink">
+      <a href="../../../tetriski/pillars/archlib/BlockChain.html#graphUnroll(oriMRRG:tetriski.pillars.core.MRRG,II:Int):tetriski.pillars.core.MRRG" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">graphUnroll</span><span class="params">(<span name="oriMRRG">oriMRRG: <a href="../core/MRRG.html" class="extype" name="tetriski.pillars.core.MRRG">MRRG</a></span>, <span name="II">II: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <a href="../core/MRRG.html" class="extype" name="tetriski.pillars.core.MRRG">MRRG</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Unroll a MRRG with II.</p><div class="fullcomment"><div class="comment cmt"><p>Unroll a MRRG with II.
+In this function,
+the modeling consistency guarantees the latency between an I/O port
+and an inner routing or functional unit in a module keeps consistency with
+the corresponding latency in generated MRRG.
+</p></div><dl class="paramcmts block"><dt class="param">oriMRRG</dt><dd class="cmt"><p>the origin MRRG</p></dd><dt class="param">II</dt><dd class="cmt"><p>the target II</p></dd><dt>returns</dt><dd class="cmt"><p>unrolled MRRG</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></dd></dl></div>
     </li><li name="scala.AnyRef#hashCode" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="hashCode():Int"></a>
       <span class="permalink">
@@ -1098,10 +1252,10 @@
                 <span class="name">@HotSpotIntrinsicCandidate</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="tetriski.pillars.core.BlockTrait#hierName" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="hierName:scala.collection.mutable.ArrayBuffer[String]"></a><a id="hierName:ArrayBuffer[String]"></a>
+    </li><li name="tetriski.pillars.core.BlockTrait#hierarchyName" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="hierarchyName:scala.collection.mutable.ArrayBuffer[String]"></a><a id="hierarchyName:ArrayBuffer[String]"></a>
       <span class="permalink">
-      <a href="../../../tetriski/pillars/archlib/BlockChain.html#hierName:scala.collection.mutable.ArrayBuffer[String]" title="Permalink">
+      <a href="../../../tetriski/pillars/archlib/BlockChain.html#hierarchyName:scala.collection.mutable.ArrayBuffer[String]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1110,10 +1264,11 @@
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">hierName</span><span class="result">: <span class="extype" name="scala.collection.mutable.ArrayBuffer">ArrayBuffer</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+        <span class="name">hierarchyName</span><span class="result">: <span class="extype" name="scala.collection.mutable.ArrayBuffer">ArrayBuffer</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></dd></dl></div>
+      <p class="shortcomment cmt">The hierarchy name of this block.</p><div class="fullcomment"><div class="comment cmt"><p>The hierarchy name of this block.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></dd></dl></div>
     </li><li name="tetriski.pillars.core.Ports#inPortMap" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="inPortMap:scala.collection.immutable.Map[String,Int]"></a><a id="inPortMap:Map[String,Int]"></a>
       <span class="permalink">
@@ -1129,7 +1284,8 @@
         <span class="name">inPortMap</span><span class="result">: <span class="extype" name="scala.collection.immutable.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Int">Int</span>]</span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/Ports.html" class="extype" name="tetriski.pillars.core.Ports">Ports</a></dd></dl></div>
+      <p class="shortcomment cmt">A map between name and serial number of a input port.</p><div class="fullcomment"><div class="comment cmt"><p>A map between name and serial number of a input port.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/Ports.html" class="extype" name="tetriski.pillars.core.Ports">Ports</a></dd></dl></div>
     </li><li name="tetriski.pillars.core.Ports#inPorts" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="inPorts:scala.collection.mutable.ArrayBuffer[String]"></a><a id="inPorts:ArrayBuffer[String]"></a>
       <span class="permalink">
@@ -1145,7 +1301,8 @@
         <span class="name">inPorts</span><span class="result">: <span class="extype" name="scala.collection.mutable.ArrayBuffer">ArrayBuffer</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/Ports.html" class="extype" name="tetriski.pillars.core.Ports">Ports</a></dd></dl></div>
+      <p class="shortcomment cmt">The array of names of input ports.</p><div class="fullcomment"><div class="comment cmt"><p>The array of names of input ports.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/Ports.html" class="extype" name="tetriski.pillars.core.Ports">Ports</a></dd></dl></div>
     </li><li name="tetriski.pillars.core.ElementTrait#initMRRG" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="initMRRG():tetriski.pillars.core.MRRG"></a><a id="initMRRG():MRRG"></a>
       <span class="permalink">
@@ -1161,7 +1318,8 @@
         <span class="name">initMRRG</span><span class="params">()</span><span class="result">: <a href="../core/MRRG.html" class="extype" name="tetriski.pillars.core.MRRG">MRRG</a></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/ElementTrait.html" class="extype" name="tetriski.pillars.core.ElementTrait">ElementTrait</a></dd></dl></div>
+      <p class="shortcomment cmt">Initialize MRRG of this element.</p><div class="fullcomment"><div class="comment cmt"><p>Initialize MRRG of this element.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the MRRG of this element</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/ElementTrait.html" class="extype" name="tetriski.pillars.core.ElementTrait">ElementTrait</a></dd></dl></div>
     </li><li name="tetriski.pillars.core.BlockTrait#initName" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="initName(arg:String):Unit"></a><a id="initName(String):Unit"></a>
       <span class="permalink">
@@ -1177,7 +1335,27 @@
         <span class="name">initName</span><span class="params">(<span name="arg">arg: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></dd></dl></div>
+      <p class="shortcomment cmt">Initialize the name and hierarchy name of this block.</p><div class="fullcomment"><div class="comment cmt"><p>Initialize the name and hierarchy name of this block.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></dd></dl></div>
+    </li><li name="tetriski.pillars.core.BlockTrait#initialization" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="initialization():Unit"></a>
+      <span class="permalink">
+      <a href="../../../tetriski/pillars/archlib/BlockChain.html#initialization():Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">initialization</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Initialize MRRG of this block.</p><div class="fullcomment"><div class="comment cmt"><p>Initialize MRRG of this block.
+The hierarchy name of its sub-blocks will be updated accordingly.
+The I/O ports of this block will generate opNodes that can perform input/output operation.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></dd></dl></div>
     </li><li name="tetriski.pillars.core.ElementTrait#internalNodes" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="internalNodes:List[String]"></a>
       <span class="permalink">
@@ -1193,7 +1371,8 @@
         <span class="name">internalNodes</span><span class="result">: <span class="extype" name="scala.collection.immutable.List">List</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/ElementTrait.html" class="extype" name="tetriski.pillars.core.ElementTrait">ElementTrait</a></dd></dl></div>
+      <p class="shortcomment cmt">The names of internal nodes in the MRRG.</p><div class="fullcomment"><div class="comment cmt"><p>The names of internal nodes in the MRRG.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/ElementTrait.html" class="extype" name="tetriski.pillars.core.ElementTrait">ElementTrait</a></dd></dl></div>
     </li><li name="tetriski.pillars.core.BlockTrait#isConfigRegion" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isConfigRegion:Boolean"></a>
       <span class="permalink">
@@ -1209,7 +1388,8 @@
         <span class="name">isConfigRegion</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></dd></dl></div>
+      <p class="shortcomment cmt">A variable indicating whether this block is a configuration region.</p><div class="fullcomment"><div class="comment cmt"><p>A variable indicating whether this block is a configuration region.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <span class="permalink">
@@ -1241,8 +1421,9 @@
         <span class="name">mode</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/ElementTrait.html" class="extype" name="tetriski.pillars.core.ElementTrait">ElementTrait</a></dd></dl></div>
-    </li><li name="tetriski.pillars.core.ElementBasic#moduleID" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <p class="shortcomment cmt">The MRRG generation mode of this element.</p><div class="fullcomment"><div class="comment cmt"><p>The MRRG generation mode of this element.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/ElementTrait.html" class="extype" name="tetriski.pillars.core.ElementTrait">ElementTrait</a></dd></dl></div>
+    </li><li name="tetriski.pillars.core.BasicTrait#moduleID" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="moduleID:Int"></a>
       <span class="permalink">
       <a href="../../../tetriski/pillars/archlib/BlockChain.html#moduleID:Int" title="Permalink">
@@ -1257,7 +1438,8 @@
         <span class="name">moduleID</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/ElementBasic.html" class="extype" name="tetriski.pillars.core.ElementBasic">ElementBasic</a></dd></dl></div>
+      <p class="shortcomment cmt">The module serial number of the module represented by this abstract model.</p><div class="fullcomment"><div class="comment cmt"><p>The module serial number of the module represented by this abstract model.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BasicTrait.html" class="extype" name="tetriski.pillars.core.BasicTrait">BasicTrait</a></dd></dl></div>
     </li><li name="tetriski.pillars.core.ElementTrait#mrrg" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="mrrg:tetriski.pillars.core.MRRG"></a><a id="mrrg:MRRG"></a>
       <span class="permalink">
@@ -1273,8 +1455,9 @@
         <span class="name">mrrg</span><span class="result">: <a href="../core/MRRG.html" class="extype" name="tetriski.pillars.core.MRRG">MRRG</a></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/ElementTrait.html" class="extype" name="tetriski.pillars.core.ElementTrait">ElementTrait</a></dd></dl></div>
-    </li><li name="tetriski.pillars.core.ElementBasic#name" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <p class="shortcomment cmt">The MRRG corresponding to this element.</p><div class="fullcomment"><div class="comment cmt"><p>The MRRG corresponding to this element.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/ElementTrait.html" class="extype" name="tetriski.pillars.core.ElementTrait">ElementTrait</a></dd></dl></div>
+    </li><li name="tetriski.pillars.core.BasicTrait#name" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="name:String"></a>
       <span class="permalink">
       <a href="../../../tetriski/pillars/archlib/BlockChain.html#name:String" title="Permalink">
@@ -1289,7 +1472,8 @@
         <span class="name">name</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/ElementBasic.html" class="extype" name="tetriski.pillars.core.ElementBasic">ElementBasic</a></dd></dl></div>
+      <p class="shortcomment cmt">The name of this abstract model.</p><div class="fullcomment"><div class="comment cmt"><p>The name of this abstract model.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BasicTrait.html" class="extype" name="tetriski.pillars.core.BasicTrait">BasicTrait</a></dd></dl></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -1363,7 +1547,8 @@
         <span class="name">outPortMap</span><span class="result">: <span class="extype" name="scala.collection.immutable.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Int">Int</span>]</span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/Ports.html" class="extype" name="tetriski.pillars.core.Ports">Ports</a></dd></dl></div>
+      <p class="shortcomment cmt">A map between name and serial number of a output port.</p><div class="fullcomment"><div class="comment cmt"><p>A map between name and serial number of a output port.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/Ports.html" class="extype" name="tetriski.pillars.core.Ports">Ports</a></dd></dl></div>
     </li><li name="tetriski.pillars.core.Ports#outPorts" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="outPorts:scala.collection.mutable.ArrayBuffer[String]"></a><a id="outPorts:ArrayBuffer[String]"></a>
       <span class="permalink">
@@ -1379,7 +1564,8 @@
         <span class="name">outPorts</span><span class="result">: <span class="extype" name="scala.collection.mutable.ArrayBuffer">ArrayBuffer</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/Ports.html" class="extype" name="tetriski.pillars.core.Ports">Ports</a></dd></dl></div>
+      <p class="shortcomment cmt">The array of names of output ports.</p><div class="fullcomment"><div class="comment cmt"><p>The array of names of output ports.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/Ports.html" class="extype" name="tetriski.pillars.core.Ports">Ports</a></dd></dl></div>
     </li><li name="tetriski.pillars.core.BlockTrait#owningElements" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="owningElements:scala.collection.mutable.ArrayBuffer[List[Int]]"></a><a id="owningElements:ArrayBuffer[List[Int]]"></a>
       <span class="permalink">
@@ -1395,8 +1581,10 @@
         <span class="name">owningElements</span><span class="result">: <span class="extype" name="scala.collection.mutable.ArrayBuffer">ArrayBuffer</span>[<span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Int">Int</span>]]</span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></dd></dl></div>
-    </li><li name="tetriski.pillars.core.ElementBasic#params" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <p class="shortcomment cmt">An array of elements belonging to this block directly.</p><div class="fullcomment"><div class="comment cmt"><p>An array of elements belonging to this block directly.
+Lists in Int format represent those elements.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></dd></dl></div>
+    </li><li name="tetriski.pillars.core.BasicTrait#params" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="params:scala.collection.mutable.ArrayBuffer[Int]"></a><a id="params:ArrayBuffer[Int]"></a>
       <span class="permalink">
       <a href="../../../tetriski/pillars/archlib/BlockChain.html#params:scala.collection.mutable.ArrayBuffer[Int]" title="Permalink">
@@ -1411,7 +1599,8 @@
         <span class="name">params</span><span class="result">: <span class="extype" name="scala.collection.mutable.ArrayBuffer">ArrayBuffer</span>[<span class="extype" name="scala.Int">Int</span>]</span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/ElementBasic.html" class="extype" name="tetriski.pillars.core.ElementBasic">ElementBasic</a></dd></dl></div>
+      <p class="shortcomment cmt">The parameters of the module represented by this abstract model.</p><div class="fullcomment"><div class="comment cmt"><p>The parameters of the module represented by this abstract model.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BasicTrait.html" class="extype" name="tetriski.pillars.core.BasicTrait">BasicTrait</a></dd></dl></div>
     </li><li name="tetriski.pillars.core.BlockTrait#printModules" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="printModules(writer:java.io.PrintWriter):Unit"></a><a id="printModules(PrintWriter):Unit"></a>
       <span class="permalink">
@@ -1427,8 +1616,9 @@
         <span class="name">printModules</span><span class="params">(<span name="writer">writer: <span class="extype" name="java.io.PrintWriter">PrintWriter</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></dd></dl></div>
-    </li><li name="tetriski.pillars.core.ElementBasic#resetFireTimes" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <p class="shortcomment cmt">Print sub-blocks and elements of this block with PrintWriter.</p><div class="fullcomment"><div class="comment cmt"><p>Print sub-blocks and elements of this block with PrintWriter.
+</p></div><dl class="paramcmts block"><dt class="param">writer</dt><dd class="cmt"><p>the JAVA PrintWriter</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></dd></dl></div>
+    </li><li name="tetriski.pillars.core.BasicTrait#resetFireTimes" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="resetFireTimes():Unit"></a>
       <span class="permalink">
       <a href="../../../tetriski/pillars/archlib/BlockChain.html#resetFireTimes():Unit" title="Permalink">
@@ -1443,8 +1633,9 @@
         <span class="name">resetFireTimes</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/ElementBasic.html" class="extype" name="tetriski.pillars.core.ElementBasic">ElementBasic</a></dd></dl></div>
-    </li><li name="tetriski.pillars.core.ElementBasic#resetSkew" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <p class="shortcomment cmt">Reset all fire times.</p><div class="fullcomment"><div class="comment cmt"><p>Reset all fire times.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BasicTrait.html" class="extype" name="tetriski.pillars.core.BasicTrait">BasicTrait</a></dd></dl></div>
+    </li><li name="tetriski.pillars.core.BasicTrait#resetSkew" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="resetSkew():Unit"></a>
       <span class="permalink">
       <a href="../../../tetriski/pillars/archlib/BlockChain.html#resetSkew():Unit" title="Permalink">
@@ -1459,8 +1650,9 @@
         <span class="name">resetSkew</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/ElementBasic.html" class="extype" name="tetriski.pillars.core.ElementBasic">ElementBasic</a></dd></dl></div>
-    </li><li name="tetriski.pillars.core.ElementBasic#setConfigBit" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <p class="shortcomment cmt">Reset all skews.</p><div class="fullcomment"><div class="comment cmt"><p>Reset all skews.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BasicTrait.html" class="extype" name="tetriski.pillars.core.BasicTrait">BasicTrait</a></dd></dl></div>
+    </li><li name="tetriski.pillars.core.BasicTrait#setConfigBit" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="setConfigBit(arg:Int):Unit"></a><a id="setConfigBit(Int):Unit"></a>
       <span class="permalink">
       <a href="../../../tetriski/pillars/archlib/BlockChain.html#setConfigBit(arg:Int):Unit" title="Permalink">
@@ -1475,7 +1667,8 @@
         <span class="name">setConfigBit</span><span class="params">(<span name="arg">arg: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/ElementBasic.html" class="extype" name="tetriski.pillars.core.ElementBasic">ElementBasic</a></dd></dl></div>
+      <p class="shortcomment cmt">Set configuration bits of the module represented by this abstract model.</p><div class="fullcomment"><div class="comment cmt"><p>Set configuration bits of the module represented by this abstract model.
+</p></div><dl class="paramcmts block"><dt class="param">arg</dt><dd class="cmt"><p>the new configuration bits</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BasicTrait.html" class="extype" name="tetriski.pillars.core.BasicTrait">BasicTrait</a></dd></dl></div>
     </li><li name="tetriski.pillars.core.BlockTrait#setConfigRegion" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="setConfigRegion():Unit"></a>
       <span class="permalink">
@@ -1491,11 +1684,12 @@
         <span class="name">setConfigRegion</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></dd></dl></div>
-    </li><li name="tetriski.pillars.core.ElementBasic#setFireTime" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="setFireTime(fireTime:Int,II:Int):Unit"></a><a id="setFireTime(Int,Int):Unit"></a>
+      <p class="shortcomment cmt">Set this block as a reconfiguration region.</p><div class="fullcomment"><div class="comment cmt"><p>Set this block as a reconfiguration region.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></dd></dl></div>
+    </li><li name="tetriski.pillars.core.BasicTrait#setFireTime" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="setFireTime(fireTime:Int,RC:Int):Unit"></a><a id="setFireTime(Int,Int):Unit"></a>
       <span class="permalink">
-      <a href="../../../tetriski/pillars/archlib/BlockChain.html#setFireTime(fireTime:Int,II:Int):Unit" title="Permalink">
+      <a href="../../../tetriski/pillars/archlib/BlockChain.html#setFireTime(fireTime:Int,RC:Int):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1504,10 +1698,11 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">setFireTime</span><span class="params">(<span name="fireTime">fireTime: <span class="extype" name="scala.Int">Int</span></span>, <span name="II">II: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="name">setFireTime</span><span class="params">(<span name="fireTime">fireTime: <span class="extype" name="scala.Int">Int</span></span>, <span name="RC">RC: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/ElementBasic.html" class="extype" name="tetriski.pillars.core.ElementBasic">ElementBasic</a></dd></dl></div>
+      <p class="shortcomment cmt">Set fire time of the module represented by this abstract model in a reconfiguration cycle.</p><div class="fullcomment"><div class="comment cmt"><p>Set fire time of the module represented by this abstract model in a reconfiguration cycle.
+</p></div><dl class="paramcmts block"><dt class="param">fireTime</dt><dd class="cmt"><p>the fire time</p></dd><dt class="param">RC</dt><dd class="cmt"><p>the reconfiguration cycle</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BasicTrait.html" class="extype" name="tetriski.pillars.core.BasicTrait">BasicTrait</a></dd></dl></div>
     </li><li name="tetriski.pillars.core.ElementTrait#setMRRGMode" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="setMRRGMode(newMode:Int):Unit"></a><a id="setMRRGMode(Int):Unit"></a>
       <span class="permalink">
@@ -1523,8 +1718,9 @@
         <span class="name">setMRRGMode</span><span class="params">(<span name="newMode">newMode: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/ElementTrait.html" class="extype" name="tetriski.pillars.core.ElementTrait">ElementTrait</a></dd></dl></div>
-    </li><li name="tetriski.pillars.core.ElementBasic#setModuleID" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <p class="shortcomment cmt">Set the MRRG generation mode of this element.</p><div class="fullcomment"><div class="comment cmt"><p>Set the MRRG generation mode of this element.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/ElementTrait.html" class="extype" name="tetriski.pillars.core.ElementTrait">ElementTrait</a></dd></dl></div>
+    </li><li name="tetriski.pillars.core.BasicTrait#setModuleID" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="setModuleID(arg:Int):Unit"></a><a id="setModuleID(Int):Unit"></a>
       <span class="permalink">
       <a href="../../../tetriski/pillars/archlib/BlockChain.html#setModuleID(arg:Int):Unit" title="Permalink">
@@ -1539,8 +1735,9 @@
         <span class="name">setModuleID</span><span class="params">(<span name="arg">arg: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/ElementBasic.html" class="extype" name="tetriski.pillars.core.ElementBasic">ElementBasic</a></dd></dl></div>
-    </li><li name="tetriski.pillars.core.ElementBasic#setName" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <p class="shortcomment cmt">Set the module serial number of the module represented by this abstract model.</p><div class="fullcomment"><div class="comment cmt"><p>Set the module serial number of the module represented by this abstract model.
+</p></div><dl class="paramcmts block"><dt class="param">arg</dt><dd class="cmt"><p>the new module serial number</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BasicTrait.html" class="extype" name="tetriski.pillars.core.BasicTrait">BasicTrait</a></dd></dl></div>
+    </li><li name="tetriski.pillars.core.BasicTrait#setName" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="setName(arg:String):Unit"></a><a id="setName(String):Unit"></a>
       <span class="permalink">
       <a href="../../../tetriski/pillars/archlib/BlockChain.html#setName(arg:String):Unit" title="Permalink">
@@ -1555,8 +1752,9 @@
         <span class="name">setName</span><span class="params">(<span name="arg">arg: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/ElementBasic.html" class="extype" name="tetriski.pillars.core.ElementBasic">ElementBasic</a></dd></dl></div>
-    </li><li name="tetriski.pillars.core.ElementBasic#setParams" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <p class="shortcomment cmt">Set the name of this abstract model.</p><div class="fullcomment"><div class="comment cmt"><p>Set the name of this abstract model.
+</p></div><dl class="paramcmts block"><dt class="param">arg</dt><dd class="cmt"><p>the new width</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BasicTrait.html" class="extype" name="tetriski.pillars.core.BasicTrait">BasicTrait</a></dd></dl></div>
+    </li><li name="tetriski.pillars.core.BasicTrait#setParams" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="setParams(arg:List[Int]):Unit"></a><a id="setParams(List[Int]):Unit"></a>
       <span class="permalink">
       <a href="../../../tetriski/pillars/archlib/BlockChain.html#setParams(arg:List[Int]):Unit" title="Permalink">
@@ -1571,11 +1769,13 @@
         <span class="name">setParams</span><span class="params">(<span name="arg">arg: <span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Int">Int</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/ElementBasic.html" class="extype" name="tetriski.pillars.core.ElementBasic">ElementBasic</a></dd></dl></div>
-    </li><li name="tetriski.pillars.core.ElementBasic#setSkew" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="setSkew(skew:Int,II:Int):Unit"></a><a id="setSkew(Int,Int):Unit"></a>
+      <p class="shortcomment cmt">Set a list of parameters of the module represented by this abstract model.</p><div class="fullcomment"><div class="comment cmt"><p>Set a list of parameters of the module represented by this abstract model.
+Configuration bits is the end of the list.
+</p></div><dl class="paramcmts block"><dt class="param">arg</dt><dd class="cmt"><p>a list of the new parameters</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BasicTrait.html" class="extype" name="tetriski.pillars.core.BasicTrait">BasicTrait</a></dd></dl></div>
+    </li><li name="tetriski.pillars.core.BasicTrait#setSkew" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="setSkew(skew:Int,RC:Int):Unit"></a><a id="setSkew(Int,Int):Unit"></a>
       <span class="permalink">
-      <a href="../../../tetriski/pillars/archlib/BlockChain.html#setSkew(skew:Int,II:Int):Unit" title="Permalink">
+      <a href="../../../tetriski/pillars/archlib/BlockChain.html#setSkew(skew:Int,RC:Int):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1584,11 +1784,12 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">setSkew</span><span class="params">(<span name="skew">skew: <span class="extype" name="scala.Int">Int</span></span>, <span name="II">II: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="name">setSkew</span><span class="params">(<span name="skew">skew: <span class="extype" name="scala.Int">Int</span></span>, <span name="RC">RC: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/ElementBasic.html" class="extype" name="tetriski.pillars.core.ElementBasic">ElementBasic</a></dd></dl></div>
-    </li><li name="tetriski.pillars.core.ElementBasic#setSupOps" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <p class="shortcomment cmt">Set skew of the module represented by this abstract model in a reconfiguration cycle.</p><div class="fullcomment"><div class="comment cmt"><p>Set skew of the module represented by this abstract model in a reconfiguration cycle.
+</p></div><dl class="paramcmts block"><dt class="param">skew</dt><dd class="cmt"><p>the skew</p></dd><dt class="param">RC</dt><dd class="cmt"><p>the reconfiguration cycle</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BasicTrait.html" class="extype" name="tetriski.pillars.core.BasicTrait">BasicTrait</a></dd></dl></div>
+    </li><li name="tetriski.pillars.core.BasicTrait#setSupOps" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="setSupOps(arg:List[tetriski.pillars.core.OpEnum.OpEnum]):Unit"></a><a id="setSupOps(List[OpEnum]):Unit"></a>
       <span class="permalink">
       <a href="../../../tetriski/pillars/archlib/BlockChain.html#setSupOps(arg:List[tetriski.pillars.core.OpEnum.OpEnum]):Unit" title="Permalink">
@@ -1603,8 +1804,12 @@
         <span class="name">setSupOps</span><span class="params">(<span name="arg">arg: <span class="extype" name="scala.List">List</span>[<a href="../core/OpEnum$.html#OpEnum=tetriski.pillars.core.OpEnum.Value" class="extmbr" name="tetriski.pillars.core.OpEnum.OpEnum">OpEnum</a>]</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/ElementBasic.html" class="extype" name="tetriski.pillars.core.ElementBasic">ElementBasic</a></dd></dl></div>
-    </li><li name="tetriski.pillars.core.ElementBasic#setTypeID" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <p class="shortcomment cmt">Set the opcodes supported by the module represented by this abstract model.</p><div class="fullcomment"><div class="comment cmt"><p>Set the opcodes supported by the module represented by this abstract model.
+When using this function,
+users should guarantee correct correspondence of the opcodes owned by a
+functional node and the functional capabilities of a module.
+</p></div><dl class="paramcmts block"><dt class="param">arg</dt><dd class="cmt"><p>the new opcodes</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BasicTrait.html" class="extype" name="tetriski.pillars.core.BasicTrait">BasicTrait</a></dd></dl></div>
+    </li><li name="tetriski.pillars.core.BasicTrait#setTypeID" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="setTypeID(arg:Int):Unit"></a><a id="setTypeID(Int):Unit"></a>
       <span class="permalink">
       <a href="../../../tetriski/pillars/archlib/BlockChain.html#setTypeID(arg:Int):Unit" title="Permalink">
@@ -1619,8 +1824,9 @@
         <span class="name">setTypeID</span><span class="params">(<span name="arg">arg: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/ElementBasic.html" class="extype" name="tetriski.pillars.core.ElementBasic">ElementBasic</a></dd></dl></div>
-    </li><li name="tetriski.pillars.core.ElementBasic#setWidth" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <p class="shortcomment cmt">Set the type serial number of the module represented by this abstract model.</p><div class="fullcomment"><div class="comment cmt"><p>Set the type serial number of the module represented by this abstract model.
+</p></div><dl class="paramcmts block"><dt class="param">arg</dt><dd class="cmt"><p>the new type serial number</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BasicTrait.html" class="extype" name="tetriski.pillars.core.BasicTrait">BasicTrait</a></dd></dl></div>
+    </li><li name="tetriski.pillars.core.BasicTrait#setWidth" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="setWidth(arg:Int):Unit"></a><a id="setWidth(Int):Unit"></a>
       <span class="permalink">
       <a href="../../../tetriski/pillars/archlib/BlockChain.html#setWidth(arg:Int):Unit" title="Permalink">
@@ -1635,8 +1841,9 @@
         <span class="name">setWidth</span><span class="params">(<span name="arg">arg: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/ElementBasic.html" class="extype" name="tetriski.pillars.core.ElementBasic">ElementBasic</a></dd></dl></div>
-    </li><li name="tetriski.pillars.core.ElementBasic#skews" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <p class="shortcomment cmt">Set the width of the module represented by this abstract model.</p><div class="fullcomment"><div class="comment cmt"><p>Set the width of the module represented by this abstract model.
+</p></div><dl class="paramcmts block"><dt class="param">arg</dt><dd class="cmt"><p>the new width</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BasicTrait.html" class="extype" name="tetriski.pillars.core.BasicTrait">BasicTrait</a></dd></dl></div>
+    </li><li name="tetriski.pillars.core.BasicTrait#skews" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="skews:Array[Int]"></a>
       <span class="permalink">
       <a href="../../../tetriski/pillars/archlib/BlockChain.html#skews:Array[Int]" title="Permalink">
@@ -1651,7 +1858,8 @@
         <span class="name">skews</span><span class="result">: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Int">Int</span>]</span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/ElementBasic.html" class="extype" name="tetriski.pillars.core.ElementBasic">ElementBasic</a></dd></dl></div>
+      <p class="shortcomment cmt">The skews of the module represented by this abstract model in different reconfiguration cycles.</p><div class="fullcomment"><div class="comment cmt"><p>The skews of the module represented by this abstract model in different reconfiguration cycles.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BasicTrait.html" class="extype" name="tetriski.pillars.core.BasicTrait">BasicTrait</a></dd></dl></div>
     </li><li name="tetriski.pillars.archlib.BlockChain#subBLocks" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="subBLocks:scala.collection.immutable.IndexedSeq[tetriski.pillars.archlib.BlockImmediate]"></a><a id="subBLocks:IndexedSeq[BlockImmediate]"></a>
       <span class="permalink">
@@ -1668,7 +1876,7 @@
       </span>
       
       
-    </li><li name="tetriski.pillars.core.ElementBasic#supOps" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="tetriski.pillars.core.BasicTrait#supOps" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="supOps:scala.collection.mutable.ArrayBuffer[tetriski.pillars.core.OpEnum.OpEnum]"></a><a id="supOps:ArrayBuffer[OpEnum]"></a>
       <span class="permalink">
       <a href="../../../tetriski/pillars/archlib/BlockChain.html#supOps:scala.collection.mutable.ArrayBuffer[tetriski.pillars.core.OpEnum.OpEnum]" title="Permalink">
@@ -1683,7 +1891,8 @@
         <span class="name">supOps</span><span class="result">: <span class="extype" name="scala.collection.mutable.ArrayBuffer">ArrayBuffer</span>[<a href="../core/OpEnum$.html#OpEnum=tetriski.pillars.core.OpEnum.Value" class="extmbr" name="tetriski.pillars.core.OpEnum.OpEnum">OpEnum</a>]</span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/ElementBasic.html" class="extype" name="tetriski.pillars.core.ElementBasic">ElementBasic</a></dd></dl></div>
+      <p class="shortcomment cmt">The opcodes supported by the module represented by this abstract model.</p><div class="fullcomment"><div class="comment cmt"><p>The opcodes supported by the module represented by this abstract model.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BasicTrait.html" class="extype" name="tetriski.pillars.core.BasicTrait">BasicTrait</a></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">
@@ -1715,7 +1924,9 @@
         <span class="name">term</span><span class="params">(<span name="portName">portName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="../core/ValidPort.html" class="extype" name="tetriski.pillars.core.ValidPort">ValidPort</a></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></dd></dl></div>
+      <p class="shortcomment cmt">Get a port of this block.</p><div class="fullcomment"><div class="comment cmt"><p>Get a port of this block.
+It will be used for get ports of current block when designing the architecture.
+</p></div><dl class="paramcmts block"><dt class="param">portName</dt><dd class="cmt"><p>the name of this port</p></dd><dt>returns</dt><dd class="cmt"><p>a valid port</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></dd></dl></div>
     </li><li name="scala.AnyRef#toString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="toString():String"></a>
       <span class="permalink">
@@ -1732,7 +1943,7 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="tetriski.pillars.core.ElementBasic#typeID" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="tetriski.pillars.core.BasicTrait#typeID" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="typeID:Int"></a>
       <span class="permalink">
       <a href="../../../tetriski/pillars/archlib/BlockChain.html#typeID:Int" title="Permalink">
@@ -1747,7 +1958,8 @@
         <span class="name">typeID</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/ElementBasic.html" class="extype" name="tetriski.pillars.core.ElementBasic">ElementBasic</a></dd></dl></div>
+      <p class="shortcomment cmt">The type serial number of the module represented by this abstract model.</p><div class="fullcomment"><div class="comment cmt"><p>The type serial number of the module represented by this abstract model.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BasicTrait.html" class="extype" name="tetriski.pillars.core.BasicTrait">BasicTrait</a></dd></dl></div>
     </li><li name="tetriski.pillars.core.BlockTrait#typeNum" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="typeNum:Int"></a>
       <span class="permalink">
@@ -1763,7 +1975,8 @@
         <span class="name">typeNum</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></dd></dl></div>
+      <p class="shortcomment cmt">The number of types of elements.</p><div class="fullcomment"><div class="comment cmt"><p>The number of types of elements.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></dd></dl></div>
     </li><li name="tetriski.pillars.core.ElementTrait#updateConfig" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="updateConfig(opcode:Int):Unit"></a><a id="updateConfig(Int):Unit"></a>
       <span class="permalink">
@@ -1779,7 +1992,9 @@
         <span class="name">updateConfig</span><span class="params">(<span name="opcode">opcode: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/ElementTrait.html" class="extype" name="tetriski.pillars.core.ElementTrait">ElementTrait</a></dd></dl></div>
+      <p class="shortcomment cmt">Update the configuration of the module represented by this element.</p><div class="fullcomment"><div class="comment cmt"><p>Update the configuration of the module represented by this element.
+This function only is used when this module will perform a function.
+</p></div><dl class="paramcmts block"><dt class="param">opcode</dt><dd class="cmt"><p>the opcode of the function will be performed</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/ElementTrait.html" class="extype" name="tetriski.pillars.core.ElementTrait">ElementTrait</a></dd></dl></div>
     </li><li name="tetriski.pillars.core.ElementTrait#updateConfig" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="updateConfig(fanInNums:List[Int],fanOutNums:List[Int],internalNum:Int):Unit"></a><a id="updateConfig(List[Int],List[Int],Int):Unit"></a>
       <span class="permalink">
@@ -1795,7 +2010,9 @@
         <span class="name">updateConfig</span><span class="params">(<span name="fanInNums">fanInNums: <span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Int">Int</span>]</span>, <span name="fanOutNums">fanOutNums: <span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Int">Int</span>]</span>, <span name="internalNum">internalNum: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/ElementTrait.html" class="extype" name="tetriski.pillars.core.ElementTrait">ElementTrait</a></dd></dl></div>
+      <p class="shortcomment cmt">Update the configuration of the module represented by this element.</p><div class="fullcomment"><div class="comment cmt"><p>Update the configuration of the module represented by this element.
+This function only is used when this module will perform routing.
+</p></div><dl class="paramcmts block"><dt class="param">fanInNums</dt><dd class="cmt"><p>a list of the serial numbers of fan-ins</p></dd><dt class="param">fanOutNums</dt><dd class="cmt"><p>a list of the serial numbers of fan-outs</p></dd><dt class="param">internalNum</dt><dd class="cmt"><p>the serial numbers of internal node that</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/ElementTrait.html" class="extype" name="tetriski.pillars.core.ElementTrait">ElementTrait</a></dd></dl></div>
     </li><li name="tetriski.pillars.core.ElementTrait#updateConfigArray" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="updateConfigArray(newConfig:BigInt):Unit"></a><a id="updateConfigArray(BigInt):Unit"></a>
       <span class="permalink">
@@ -1811,7 +2028,9 @@
         <span class="name">updateConfigArray</span><span class="params">(<span name="newConfig">newConfig: <span class="extype" name="scala.BigInt">BigInt</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/ElementTrait.html" class="extype" name="tetriski.pillars.core.ElementTrait">ElementTrait</a></dd></dl></div>
+      <p class="shortcomment cmt">Update the configuration of the module represented by this element.</p><div class="fullcomment"><div class="comment cmt"><p>Update the configuration of the module represented by this element.
+The configuration is saved in an array of bits.
+</p></div><dl class="paramcmts block"><dt class="param">newConfig</dt><dd class="cmt"><p>the new configuration in BigInt format</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/ElementTrait.html" class="extype" name="tetriski.pillars.core.ElementTrait">ElementTrait</a></dd></dl></div>
     </li><li name="tetriski.pillars.core.ElementTrait#updateConfigArray" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="updateConfigArray(newConfig:Int):Unit"></a><a id="updateConfigArray(Int):Unit"></a>
       <span class="permalink">
@@ -1827,7 +2046,9 @@
         <span class="name">updateConfigArray</span><span class="params">(<span name="newConfig">newConfig: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/ElementTrait.html" class="extype" name="tetriski.pillars.core.ElementTrait">ElementTrait</a></dd></dl></div>
+      <p class="shortcomment cmt">Update the configuration of the module represented by this element.</p><div class="fullcomment"><div class="comment cmt"><p>Update the configuration of the module represented by this element.
+The configuration is saved in an array of bits.
+</p></div><dl class="paramcmts block"><dt class="param">newConfig</dt><dd class="cmt"><p>the new configuration in Int format</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/ElementTrait.html" class="extype" name="tetriski.pillars.core.ElementTrait">ElementTrait</a></dd></dl></div>
     </li><li name="tetriski.pillars.core.BlockTrait#updateConnect" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="updateConnect():scala.collection.mutable.ArrayBuffer[List[List[String]]]"></a><a id="updateConnect():ArrayBuffer[List[List[String]]]"></a>
       <span class="permalink">
@@ -1843,11 +2064,12 @@
         <span class="name">updateConnect</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.collection.mutable.ArrayBuffer">ArrayBuffer</span>[<span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Predef.String">String</span>]]]</span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></dd></dl></div>
-    </li><li name="tetriski.pillars.core.BlockTrait#updateHierName" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="updateHierName(arg:scala.collection.mutable.ArrayBuffer[String]):Unit"></a><a id="updateHierName(ArrayBuffer[String]):Unit"></a>
+      <p class="shortcomment cmt">Update the connections when the hierarchy name of this block is changed.</p><div class="fullcomment"><div class="comment cmt"><p>Update the connections when the hierarchy name of this block is changed.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the new array representing connections</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></dd></dl></div>
+    </li><li name="tetriski.pillars.core.BlockTrait#updateHierarchyName" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="updateHierarchyName(arg:scala.collection.mutable.ArrayBuffer[String]):Unit"></a><a id="updateHierarchyName(ArrayBuffer[String]):Unit"></a>
       <span class="permalink">
-      <a href="../../../tetriski/pillars/archlib/BlockChain.html#updateHierName(arg:scala.collection.mutable.ArrayBuffer[String]):Unit" title="Permalink">
+      <a href="../../../tetriski/pillars/archlib/BlockChain.html#updateHierarchyName(arg:scala.collection.mutable.ArrayBuffer[String]):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1856,10 +2078,28 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">updateHierName</span><span class="params">(<span name="arg">arg: <span class="extype" name="scala.collection.mutable.ArrayBuffer">ArrayBuffer</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="name">updateHierarchyName</span><span class="params">(<span name="arg">arg: <span class="extype" name="scala.collection.mutable.ArrayBuffer">ArrayBuffer</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></dd></dl></div>
+      <p class="shortcomment cmt">Update the hierarchy name.</p><div class="fullcomment"><div class="comment cmt"><p>Update the hierarchy name.
+</p></div><dl class="paramcmts block"><dt class="param">arg</dt><dd class="cmt"><p>the new hierarchy name</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></dd></dl></div>
+    </li><li name="tetriski.pillars.core.BlockTrait#updateMRRG" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="updateMRRG(block:tetriski.pillars.core.BlockTrait):Unit"></a><a id="updateMRRG(BlockTrait):Unit"></a>
+      <span class="permalink">
+      <a href="../../../tetriski/pillars/archlib/BlockChain.html#updateMRRG(block:tetriski.pillars.core.BlockTrait):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">updateMRRG</span><span class="params">(<span name="block">block: <a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Update the MRRG of a block with its hierarchy name.</p><div class="fullcomment"><div class="comment cmt"><p>Update the MRRG of a block with its hierarchy name.
+</p></div><dl class="paramcmts block"><dt class="param">block</dt><dd class="cmt"><p>this block</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></dd></dl></div>
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait(x$1:Long,x$2:Int):Unit"></a><a id="wait(Long,Int):Unit"></a>
       <span class="permalink">
@@ -1928,7 +2168,7 @@
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="tetriski.pillars.core.ElementBasic#width" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="tetriski.pillars.core.BasicTrait#width" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="width:Int"></a>
       <span class="permalink">
       <a href="../../../tetriski/pillars/archlib/BlockChain.html#width:Int" title="Permalink">
@@ -1943,7 +2183,8 @@
         <span class="name">width</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/ElementBasic.html" class="extype" name="tetriski.pillars.core.ElementBasic">ElementBasic</a></dd></dl></div>
+      <p class="shortcomment cmt">The width of the module represented by this abstract model.</p><div class="fullcomment"><div class="comment cmt"><p>The width of the module represented by this abstract model.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BasicTrait.html" class="extype" name="tetriski.pillars.core.BasicTrait">BasicTrait</a></dd></dl></div>
     </li>
               </ol>
             </div>
@@ -1987,8 +2228,8 @@
               <h3>Inherited from <a href="../core/BlockTrait.html" class="extype" name="tetriski.pillars.core.BlockTrait">BlockTrait</a></h3>
             </div><div class="parent" name="tetriski.pillars.core.ElementTrait">
               <h3>Inherited from <a href="../core/ElementTrait.html" class="extype" name="tetriski.pillars.core.ElementTrait">ElementTrait</a></h3>
-            </div><div class="parent" name="tetriski.pillars.core.ElementBasic">
-              <h3>Inherited from <a href="../core/ElementBasic.html" class="extype" name="tetriski.pillars.core.ElementBasic">ElementBasic</a></h3>
+            </div><div class="parent" name="tetriski.pillars.core.BasicTrait">
+              <h3>Inherited from <a href="../core/BasicTrait.html" class="extype" name="tetriski.pillars.core.BasicTrait">BasicTrait</a></h3>
             </div><div class="parent" name="tetriski.pillars.core.Ports">
               <h3>Inherited from <a href="../core/Ports.html" class="extype" name="tetriski.pillars.core.Ports">Ports</a></h3>
             </div><div class="parent" name="scala.AnyRef">

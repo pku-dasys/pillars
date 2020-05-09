@@ -119,8 +119,8 @@
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="tetriski.pillars">pillars</a></dd></dl></div>
     </li><li class="current-entities indented3">
                         <span class="separator"></span>
-                        <a class="class" href="DFG.html" title="Class describing DFG in pillars."></a>
-                        <a href="DFG.html" title="Class describing DFG in pillars.">DFG</a>
+                        <a class="class" href="DFG.html" title="Class describing DFGs in Pillars."></a>
+                        <a href="DFG.html" title="Class describing DFGs in Pillars.">DFG</a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
                         <a class="object" href="DotReader$.html" title="Class to load DFG from a DOT file."></a>
@@ -185,7 +185,9 @@
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Class describing valNodes in DFG.</p></div><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Class describing valNodes in DFG.
+The valNodes represent output values of operators in a DFG.
+</p></div><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
@@ -235,7 +237,7 @@
         <div id="allMembers">
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
-              <ol><li name="tetriski.pillars.mapping.ValNode#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+              <ol><li name="tetriski.pillars.mapping.ValNode#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="&lt;init&gt;(name:String):tetriski.pillars.mapping.ValNode"></a><a id="&lt;init&gt;:ValNode"></a>
       <span class="permalink">
       <a href="../../../tetriski/pillars/mapping/ValNode.html#&lt;init&gt;(name:String):tetriski.pillars.mapping.ValNode" title="Permalink">
@@ -250,7 +252,7 @@
         <span class="name">ValNode</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span>
       </span>
       
-      
+      <p class="shortcomment cmt">create a valNode</p><div class="fullcomment"><div class="comment cmt"><p>create a valNode</p></div><dl class="paramcmts block"><dt class="param">name</dt><dd class="cmt"><p>the name of this valNode</p></dd></dl></div>
     </li></ol>
             </div>
 
@@ -351,22 +353,6 @@
                 <span class="name">@HotSpotIntrinsicCandidate</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="tetriski.pillars.mapping.NodeDFG#cycles" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="cycles:Int"></a>
-      <span class="permalink">
-      <a href="../../../tetriski/pillars/mapping/ValNode.html#cycles:Int" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">var</span>
-      </span>
-      <span class="symbol">
-        <span class="name">cycles</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="NodeDFG.html" class="extype" name="tetriski.pillars.mapping.NodeDFG">NodeDFG</a></dd></dl></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -546,11 +532,11 @@
         <span class="name">output</span><span class="result">: <span class="extype" name="scala.collection.mutable.ArrayBuffer">ArrayBuffer</span>[<a href="OpNode.html" class="extype" name="tetriski.pillars.mapping.OpNode">OpNode</a>]</span>
       </span>
       
-      
-    </li><li name="tetriski.pillars.mapping.ValNode#output_operand" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="output_operand:scala.collection.mutable.ArrayBuffer[Int]"></a><a id="output_operand:ArrayBuffer[Int]"></a>
+      <p class="shortcomment cmt">Fan-outs of a valNode.</p>
+    </li><li name="tetriski.pillars.mapping.ValNode#outputOperand" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="outputOperand:scala.collection.mutable.ArrayBuffer[Int]"></a><a id="outputOperand:ArrayBuffer[Int]"></a>
       <span class="permalink">
-      <a href="../../../tetriski/pillars/mapping/ValNode.html#output_operand:scala.collection.mutable.ArrayBuffer[Int]" title="Permalink">
+      <a href="../../../tetriski/pillars/mapping/ValNode.html#outputOperand:scala.collection.mutable.ArrayBuffer[Int]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -559,10 +545,10 @@
         <span class="kind">var</span>
       </span>
       <span class="symbol">
-        <span class="name">output_operand</span><span class="result">: <span class="extype" name="scala.collection.mutable.ArrayBuffer">ArrayBuffer</span>[<span class="extype" name="scala.Int">Int</span>]</span>
+        <span class="name">outputOperand</span><span class="result">: <span class="extype" name="scala.collection.mutable.ArrayBuffer">ArrayBuffer</span>[<span class="extype" name="scala.Int">Int</span>]</span>
       </span>
       
-      
+      <p class="shortcomment cmt">Corresponding operands in each fan-out.</p>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">

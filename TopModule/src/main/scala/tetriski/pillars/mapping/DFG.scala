@@ -9,20 +9,50 @@ import scala.collection.mutable.ArrayBuffer
  *
  */
 class NodeDFG() {
-  var cycles: Int = 0
 }
 
 /** Class describing opNodes in DFG.
+ * The opNodes represent operators and primary I/O in a DFG.
+ *
+ * @constructor create a opNode
+ * @param name the name of this opNode
  */
 class OpNode(var name: String) extends NodeDFG {
+  /** The output valNode of this opNode.
+   */
   var output: ValNode = null
+
+  /** The opcode of this opNode.
+   */
   var opcode: OpEnum = null
+
+  /** A map between the serial number of inputs and corresponding opNode.
+   */
   var input = Map[Int, OpNode]()
+
+  /** The latency of this opNode.
+   */
   var latency = 0
+
+  /** The annulate latency of this opNode.
+   * This variable is only used for annulated DFG.
+   */
   var annulateLatency = 0
+
+  /** A variable indicating whether this opNode has a const input.
+   */
   var constInput = false
+
+  /** A variable indicating whether this opNode has been visited.
+   */
   var visited = false
+
+  /** The skew of this opNode.
+   */
   var skew = 0
+
+  /** The latencies between the inputs of this opNode and itself.
+   */
   var inputLatency = ArrayBuffer[Int]()
 
   /** Set latency of an opNode.
@@ -35,32 +65,53 @@ class OpNode(var name: String) extends NodeDFG {
 }
 
 /** Class describing valNodes in DFG.
+ * The valNodes represent output values of operators in a DFG.
  *
+ * @constructor create a valNode
+ * @param name the name of this valNode
  */
 class ValNode(var name: String) extends NodeDFG {
+  /** Fan-outs of a valNode.
+   */
   var output = ArrayBuffer[OpNode]()
-  var output_operand = ArrayBuffer[Int]()
+
+  /** Corresponding operands in each fan-out.
+   */
+  var outputOperand = ArrayBuffer[Int]()
 }
 
-/** Class describing DFG in pillars.
+/** Class describing DFGs in Pillars.
  *
+ * @constructor create a DFG
+ * @param name the name of this DFG
  */
 class DFG(var name: String) {
-  var op_nodes = ArrayBuffer[OpNode]()
-  var val_nodes = ArrayBuffer[ValNode]()
-  var op_nodes_map = Map[String, Int]()
-  var val_nodes_map = Map[String, Int]()
+  /** Operators and primary I/O in a DFG.
+   */
+  var opNodes = ArrayBuffer[OpNode]()
+
+  /** Output values of operators in a DFG.
+   */
+  var valNodes = ArrayBuffer[ValNode]()
+
+  /** A map between opNodes and a serial number.
+   */
+  var opNodesMap = Map[String, Int]()
+
+  /** A map between valNodes and a serial number.
+   */
+  var valNodesMap = Map[String, Int]()
 
   /** Get the num of opNodes.
    */
   def getOpSize(): Int = {
-    op_nodes.size
+    opNodes.size
   }
 
   /** Get the num of valNodes.
    */
   def getValSize(): Int = {
-    val_nodes.size
+    valNodes.size
   }
 
   /** Add an opNode into DFG.
@@ -68,8 +119,8 @@ class DFG(var name: String) {
    * @param node the opNode being added
    */
   def addOpNode(node: OpNode): Unit = {
-    op_nodes.append(node)
-    op_nodes_map = op_nodes_map + (node.name -> (getOpSize() - 1))
+    opNodes.append(node)
+    opNodesMap = opNodesMap + (node.name -> (getOpSize() - 1))
   }
 
   /** Add a valNode into DFG.
@@ -77,8 +128,8 @@ class DFG(var name: String) {
    * @param node the valNode being added
    */
   def addValNode(node: ValNode): Unit = {
-    val_nodes.append(node)
-    val_nodes_map = val_nodes_map + (node.name -> (getValSize() - 1))
+    valNodes.append(node)
+    valNodesMap = valNodesMap + (node.name -> (getValSize() - 1))
   }
 
   /** Get a valNode from DFG using its name.
@@ -86,7 +137,7 @@ class DFG(var name: String) {
    * @param name the name of valNode
    */
   def applyVal(name: String) = {
-    val_nodes(val_nodes_map(name))
+    valNodes(valNodesMap(name))
   }
 
   /** Get an opNode from DFG using its name.
@@ -94,7 +145,7 @@ class DFG(var name: String) {
    * @param name the name of opNode
    */
   def applyOp(name: String) = {
-    op_nodes(op_nodes_map(name))
+    opNodes(opNodesMap(name))
   }
 
   /** Load a DFG from a TXT file, not used in real process.
@@ -107,45 +158,45 @@ class DFG(var name: String) {
     val buffer = Source.fromFile(Filename)
     val file = buffer.getLines().toArray
     var now: Int = 0
-    val valsize: Int = Integer.parseInt(file(now))
+    val valSize: Int = Integer.parseInt(file(now))
 
-    for (i <- 0 until valsize) {
+    for (i <- 0 until valSize) {
       now += 1
       val name: String = file(now).substring(1, file(now).length - 1)
       addValNode(new ValNode(name))
       now += 1
-      val outputsize = Integer.parseInt(file(now))
-      now += (outputsize + 1)
-      for (j <- 0 until outputsize) {
+      val outputSize = Integer.parseInt(file(now))
+      now += (outputSize + 1)
+      for (j <- 0 until outputSize) {
         now += 1
-        val_nodes(i).output_operand.append(Integer.parseInt(file(now)))
+        valNodes(i).outputOperand.append(Integer.parseInt(file(now)))
       }
     }
 
     now += 1
-    val opsize: Int = Integer.parseInt(file(now))
+    val opSize: Int = Integer.parseInt(file(now))
 
-    for (i <- 0 until opsize) {
+    for (i <- 0 until opSize) {
       now += 1
       val name: String = file(now).substring(1, file(now).length - 1)
       addOpNode(new OpNode(name))
       now += 1
       if (file(now) != "----") {
-        op_nodes(i).output = applyVal(file(now))
+        opNodes(i).output = applyVal(file(now))
       }
       now += 1
-      op_nodes(i).opcode = OpEnum(Integer.parseInt(file(now)));
+      opNodes(i).opcode = OpEnum(Integer.parseInt(file(now)));
     }
 
     now = 1
-    for (i <- 0 until valsize) {
+    for (i <- 0 until valSize) {
       now += 1
-      val outputsize = Integer.parseInt(file(now))
-      for (j <- 0 until outputsize) {
+      val outputSize = Integer.parseInt(file(now))
+      for (j <- 0 until outputSize) {
         now += 1
-        val_nodes(i).output.append(applyOp(file(now)))
+        valNodes(i).output.append(applyOp(file(now)))
       }
-      now += (outputsize + 2)
+      now += (outputSize + 2)
     }
   }
 
@@ -153,20 +204,20 @@ class DFG(var name: String) {
    *
    */
   def printDFG(): Unit = {
-    println(val_nodes.size)
-    for (_val <- val_nodes) {
+    println(valNodes.size)
+    for (_val <- valNodes) {
       println("<" + _val.name + ">")
       println(_val.output.size)
       for (output <- _val.output) {
         println(output.name)
       }
-      println(_val.output_operand.size)
-      for (operand <- _val.output_operand) {
+      println(_val.outputOperand.size)
+      for (operand <- _val.outputOperand) {
         println(operand)
       }
     }
-    println(op_nodes.size)
-    for (op <- op_nodes) {
+    println(opNodes.size)
+    for (op <- opNodes) {
       println("<" + op.name + ">")
       println(op.output.name)
       println(op.opcode.id)

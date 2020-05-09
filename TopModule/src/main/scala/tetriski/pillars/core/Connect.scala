@@ -4,16 +4,26 @@ import java.io.{File, PrintWriter}
 
 import scala.collection.mutable.{ArrayBuffer, Queue}
 
-//This class is obtained from GenerateConnection and records the
-// connection information of the two blocks mentioned above.
-//The outArray and inArray individually contains the ports which have the intrinsic mapping sequences.
+/** A class containing the connections between ports.
+ *
+ * @param connectArray Array(List(src, dst)),
+ *                     where src and dst are lists representing ports which have a connection
+ */
 class Connect(connectArray: ArrayBuffer[List[List[String]]]) {
-
+  /** An array of sink ports.
+   */
   val outArray = ArrayBuffer[List[String]]()
+
+  /** An array of source ports.
+   */
   val inArray = ArrayBuffer[List[String]]()
+
+  //Initialize outArray and inArray.
   connectArray.foreach(t => outArray.append(t(0)))
   connectArray.foreach(t => inArray.append(t(1)))
 
+  /** A map showing the connections between ports in String format.
+   */
   var mapRelation = Map[List[String], ArrayBuffer[List[String]]]()
 
 
@@ -26,57 +36,66 @@ class Connect(connectArray: ArrayBuffer[List[List[String]]]) {
     }
 
   }
-  mapRelation = simplify()
+  mapRelation = flatten()
 
-  // (to be defined)
-  //"cgra/b_0/b_0_0:out" should be equal to "cgra/b_0/b_0_0:out/adder0:out"
-  def simplify(): Map[List[String], ArrayBuffer[List[String]]] = {
+  /** Flatten the architecture.
+   *
+   * @return a flattened map showing the connections between ports in String format.
+   */
+  def flatten(): Map[List[String], ArrayBuffer[List[String]]] = {
     var ret = Map[List[String], ArrayBuffer[List[String]]]()
     val srcs = outArray.toSet
     val dsts = inArray.toSet
-    val sources = srcs&~(srcs.&(dsts))
-    val sinks = dsts&~(srcs.&(dsts))
-    //    println(srcs)
-    //    println(dsts)
-    //    println(sources)
-    //    println(sources.contains(List("cgra/","input_1")))
-    //    println(sources.contains(List("cgra/","input_0")))
-    for (src <- sources){
+    val sources = srcs &~ srcs.&(dsts)
+    val sinks = dsts &~ srcs.&(dsts)
+    for (src <- sources) {
       //BFS
-      var targets = ArrayBuffer[List[String]]()
-      var queue = Queue[List[String]]()
+      val targets = ArrayBuffer[List[String]]()
+      val queue = Queue[List[String]]()
       mapRelation(src).map(i => queue.enqueue(i))
-      while (!queue.isEmpty){
+      while (!queue.isEmpty) {
         val temp = queue.dequeue()
-        if(sinks(temp)){
+        if (sinks(temp)) {
           targets.append(temp)
-        }else{
+        } else {
           mapRelation(temp).map(i => queue.enqueue(i))
         }
       }
       ret += (src -> targets)
     }
-    //    println(ret(List("cgra/","input_0")))
-    //    println(ret(List("cgra/","input_1")))
     ret
   }
 
-  //Get connect relations
+  /** Get the map showing the connections between ports in String format.
+   *
+   * @return the map showing the connections between ports in String format.
+   */
   def getConnect(): Map[List[String], ArrayBuffer[List[String]]] = {
     mapRelation
   }
 
-  //Save connection information as connect.json
+  /** Save connection information as connect.json.
+   */
   def dumpConnect(): Unit = {
     val writer = new PrintWriter(new File("connect.json"))
 
     writer.flush()
 
+    /** Print the connection between a source port and its sink ports.
+     *
+     * @param src   a list representing the source port
+     * @param dsts  lists representing the sink ports
+     * @param comma use comma or not
+     */
     def printConnect(src: List[String], dsts: ArrayBuffer[List[String]], comma: Boolean): Unit = {
+      /** Print the information of a port.
+       *
+       * @param port a list representing this port
+       */
       def printPort(port: List[String]): Unit = {
         var ii = 0
         for (i <- 0 until port.size) {
-          var str = port(i)
+          val str = port(i)
           var label = ""
           if (ii % 2 != 0) {
             label = "/"
@@ -125,6 +144,5 @@ class Connect(connectArray: ArrayBuffer[List[List[String]]]) {
     writer.print("}")
     writer.close()
   }
-
 
 }

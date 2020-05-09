@@ -239,14 +239,14 @@ class Alu(funSelect: Int, w: Int) extends Module {
     funSeq
   }
 
-  val syncScheduleController = Module(new Synchronizer(w))
-  syncScheduleController.io.input0 := io.inputs(0)
-  syncScheduleController.io.input1 := io.inputs(1)
+  val synchronizer = Module(new Synchronizer(w))
+  synchronizer.io.input0 := io.inputs(0)
+  synchronizer.io.input1 := io.inputs(1)
 
-  syncScheduleController.io.skewing := io.skewing
+  synchronizer.io.skewing := io.skewing
 
-  val input_a = syncScheduleController.io.skewedInput0
-  val input_b = syncScheduleController.io.skewedInput1
+  val input_a = synchronizer.io.skewedInput0
+  val input_b = synchronizer.io.skewedInput1
   val out = io.outs(0)
   val shamt = input_b(log2Up(w), 0).asUInt
 
@@ -625,18 +625,18 @@ class LoadStoreUnit(w: Int) extends Module {
   memWrapper.io.out <> io.streamOut
   memWrapper.io.workEn <> io.en
 
-  val syncScheduleController = Module(new Synchronizer(w))
-  syncScheduleController.io.input0 := io.inputs(0)
-  syncScheduleController.io.input1 := io.inputs(1)
+  val synchronizer = Module(new Synchronizer(w))
+  synchronizer.io.input0 := io.inputs(0)
+  synchronizer.io.input1 := io.inputs(1)
 
-  syncScheduleController.io.skewing := io.skewing
+  synchronizer.io.skewing := io.skewing
 
   /** The address where to load/store data.
    */
-  val addr = syncScheduleController.io.skewedInput0
+  val addr = synchronizer.io.skewedInput0
   /** The input data which is only used for storing.
    */
-  val dataIn = syncScheduleController.io.skewedInput1
+  val dataIn = synchronizer.io.skewedInput1
   val out = io.outs(0)
 
   val readMem = memWrapper.io.readMem

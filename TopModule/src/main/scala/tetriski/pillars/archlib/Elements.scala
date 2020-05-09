@@ -130,5 +130,5 @@ class ElementLSU(name: String, params: List[Int]) extends ElementTrait {
  */
 class Block(name: String) extends BlockTrait {
   setName(name)
-  hierName.append(name)
+  hierarchyName.append(name)
 }
