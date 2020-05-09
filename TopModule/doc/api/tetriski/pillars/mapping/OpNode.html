@@ -119,8 +119,8 @@
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="tetriski.pillars">pillars</a></dd></dl></div>
     </li><li class="current-entities indented3">
                         <span class="separator"></span>
-                        <a class="class" href="DFG.html" title="Class describing DFG in pillars."></a>
-                        <a href="DFG.html" title="Class describing DFG in pillars.">DFG</a>
+                        <a class="class" href="DFG.html" title="Class describing DFGs in Pillars."></a>
+                        <a href="DFG.html" title="Class describing DFGs in Pillars.">DFG</a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
                         <a class="object" href="DotReader$.html" title="Class to load DFG from a DOT file."></a>
@@ -186,6 +186,7 @@
 
       
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Class describing opNodes in DFG.
+The opNodes represent operators and primary I/O in a DFG.
 </p></div><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
@@ -236,7 +237,7 @@
         <div id="allMembers">
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
-              <ol><li name="tetriski.pillars.mapping.OpNode#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+              <ol><li name="tetriski.pillars.mapping.OpNode#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="&lt;init&gt;(name:String):tetriski.pillars.mapping.OpNode"></a><a id="&lt;init&gt;:OpNode"></a>
       <span class="permalink">
       <a href="../../../tetriski/pillars/mapping/OpNode.html#&lt;init&gt;(name:String):tetriski.pillars.mapping.OpNode" title="Permalink">
@@ -251,7 +252,7 @@
         <span class="name">OpNode</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span>
       </span>
       
-      
+      <p class="shortcomment cmt">create a opNode</p><div class="fullcomment"><div class="comment cmt"><p>create a opNode</p></div><dl class="paramcmts block"><dt class="param">name</dt><dd class="cmt"><p>the name of this opNode</p></dd></dl></div>
     </li></ol>
             </div>
 
@@ -310,7 +311,7 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="tetriski.pillars.mapping.OpNode#annulateLatency" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="tetriski.pillars.mapping.OpNode#annulateLatency" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="annulateLatency:Int"></a>
       <span class="permalink">
       <a href="../../../tetriski/pillars/mapping/OpNode.html#annulateLatency:Int" title="Permalink">
@@ -325,7 +326,9 @@
         <span class="name">annulateLatency</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
       </span>
       
-      
+      <p class="shortcomment cmt">The annulate latency of this opNode.</p><div class="fullcomment"><div class="comment cmt"><p>The annulate latency of this opNode.
+This variable is only used for annulated DFG.
+</p></div></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <span class="permalink">
@@ -383,23 +386,7 @@
         <span class="name">constInput</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       
-      
-    </li><li name="tetriski.pillars.mapping.NodeDFG#cycles" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="cycles:Int"></a>
-      <span class="permalink">
-      <a href="../../../tetriski/pillars/mapping/OpNode.html#cycles:Int" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">var</span>
-      </span>
-      <span class="symbol">
-        <span class="name">cycles</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="NodeDFG.html" class="extype" name="tetriski.pillars.mapping.NodeDFG">NodeDFG</a></dd></dl></div>
+      <p class="shortcomment cmt">A variable indicating whether this opNode has a const input.</p>
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -489,7 +476,7 @@
         <span class="name">input</span><span class="result">: <span class="extype" name="scala.collection.immutable.Map">Map</span>[<span class="extype" name="scala.Int">Int</span>, <a href="" class="extype" name="tetriski.pillars.mapping.OpNode">OpNode</a>]</span>
       </span>
       
-      
+      <p class="shortcomment cmt">A map between the serial number of inputs and corresponding opNode.</p>
     </li><li name="tetriski.pillars.mapping.OpNode#inputLatency" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="inputLatency:scala.collection.mutable.ArrayBuffer[Int]"></a><a id="inputLatency:ArrayBuffer[Int]"></a>
       <span class="permalink">
@@ -505,7 +492,7 @@
         <span class="name">inputLatency</span><span class="result">: <span class="extype" name="scala.collection.mutable.ArrayBuffer">ArrayBuffer</span>[<span class="extype" name="scala.Int">Int</span>]</span>
       </span>
       
-      
+      <p class="shortcomment cmt">The latencies between the inputs of this opNode and itself.</p>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <span class="permalink">
@@ -537,7 +524,7 @@
         <span class="name">latency</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
       </span>
       
-      
+      <p class="shortcomment cmt">The latency of this opNode.</p>
     </li><li name="tetriski.pillars.mapping.OpNode#name" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="name:String"></a>
       <span class="permalink">
@@ -627,7 +614,7 @@
         <span class="name">opcode</span><span class="result">: <a href="../core/OpEnum$.html#OpEnum=tetriski.pillars.core.OpEnum.Value" class="extmbr" name="tetriski.pillars.core.OpEnum.OpEnum">OpEnum</a></span>
       </span>
       
-      
+      <p class="shortcomment cmt">The opcode of this opNode.</p>
     </li><li name="tetriski.pillars.mapping.OpNode#output" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="output:tetriski.pillars.mapping.ValNode"></a><a id="output:ValNode"></a>
       <span class="permalink">
@@ -643,7 +630,7 @@
         <span class="name">output</span><span class="result">: <a href="ValNode.html" class="extype" name="tetriski.pillars.mapping.ValNode">ValNode</a></span>
       </span>
       
-      
+      <p class="shortcomment cmt">The output valNode of this opNode.</p>
     </li><li name="tetriski.pillars.mapping.OpNode#setLatency" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="setLatency(arg:Int):Unit"></a><a id="setLatency(Int):Unit"></a>
       <span class="permalink">
@@ -676,7 +663,7 @@
         <span class="name">skew</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
       </span>
       
-      
+      <p class="shortcomment cmt">The skew of this opNode.</p>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">
@@ -724,7 +711,7 @@
         <span class="name">visited</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       
-      
+      <p class="shortcomment cmt">A variable indicating whether this opNode has been visited.</p>
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait(x$1:Long,x$2:Int):Unit"></a><a id="wait(Long,Int):Unit"></a>
       <span class="permalink">

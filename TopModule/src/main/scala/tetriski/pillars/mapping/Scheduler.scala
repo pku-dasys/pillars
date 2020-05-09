@@ -18,16 +18,16 @@ object Scheduler {
    * @param from the node we will check
    */
   def checkConnect(sink: NodeMRRG, from: NodeMRRG): Int = {
-    if (sink.mapnode.isInstanceOf[OpNode]) return 1
-    if (from.mapnode.isInstanceOf[OpNode]) {
-      val sinkMap = sink.mapnode.asInstanceOf[ValNode]
-      val sourceMap = from.mapnode.asInstanceOf[OpNode]
+    if (sink.mapNode.isInstanceOf[OpNode]) return 1
+    if (from.mapNode.isInstanceOf[OpNode]) {
+      val sinkMap = sink.mapNode.asInstanceOf[ValNode]
+      val sourceMap = from.mapNode.asInstanceOf[OpNode]
       if (sinkMap.name.indexOf(sourceMap.name) != -1) return 1
       0
     }
     else {
-      val sinkMap = sink.mapnode.asInstanceOf[ValNode]
-      val sourceMap = from.mapnode.asInstanceOf[ValNode]
+      val sinkMap = sink.mapNode.asInstanceOf[ValNode]
+      val sourceMap = from.mapNode.asInstanceOf[ValNode]
       if (sinkMap.name == sourceMap.name) return 1
       0
     }
@@ -43,14 +43,14 @@ object Scheduler {
     for (i <- 0 until cycle.length)
       cycle(i) = -1
     val queue = new ArrayBuffer[NodeMRRG]()
-    val mapNode = node.mapnode.asInstanceOf[OpNode]
+    val mapNode = node.mapNode.asInstanceOf[OpNode]
     queue.append(node)
 
     var l, r = 0
     while (l <= r) {
       val node = queue(l)
       for (in <- node.fanIn) {
-        if (in.mapnode != null && cycle(mrrg.nodeMap(in.name)) == -1) {
+        if (in.mapNode != null && cycle(mrrg.nodeMap(in.name)) == -1) {
           if (checkConnect(node, in) == 1) {
             //TODO: get delay with MRRG mode.
             if ((node.name.indexOf("rf0.internalNode") != -1) ||
@@ -63,7 +63,7 @@ object Scheduler {
 
 
             if (in.ops.size != 0) {
-              val inputNode = in.mapnode.asInstanceOf[OpNode]
+              val inputNode = in.mapNode.asInstanceOf[OpNode]
               println(mapNode.name + " " + inputNode.name + " " + mapNode.input(0).name + " " +
                 mapNode.input.size + " " + cycle(mrrg.nodeMap(in.name)))
               val inputLatency = cycle(mrrg.nodeMap(in.name)) + 1
@@ -94,25 +94,25 @@ object Scheduler {
    */
   def schedule(dfg: DFG, mrrg: MRRG, filename: String = null, II: Int = 0): Unit = {
     val vis = new Array[Set[String]](dfg.getOpSize())
-    var queue = scala.collection.mutable.Queue[OpNode]()
+    val queue = scala.collection.mutable.Queue[OpNode]()
 
     /** Determine delay on each arcs.
      */
     for (node <- mrrg.nodes) {
-      if (node.mapnode != null && node.ops.size != 0) {
-        if (node.mapnode.isInstanceOf[OpNode]) {
+      if (node.mapNode != null && node.ops.size != 0) {
+        if (node.mapNode.isInstanceOf[OpNode]) {
           bfs(node, mrrg)
-          val mapnode = node.mapnode.asInstanceOf[OpNode]
+          val mapnode = node.mapNode.asInstanceOf[OpNode]
           if (mapnode.input.size == 0) {
             queue.enqueue(mapnode)
           }
 
-          vis(dfg.op_nodes_map(mapnode.name)) = (0 until mapnode.input.size)
+          vis(dfg.opNodesMap(mapnode.name)) = (0 until mapnode.input.size)
             .map(i => (mapnode.input(i).name)).toSet
 
           for (i <- 0 until mapnode.input.size)
             if (mapnode.input(i).name == mapnode.name) {
-              vis(dfg.op_nodes_map(mapnode.name)) -= mapnode.name
+              vis(dfg.opNodesMap(mapnode.name)) -= mapnode.name
             }
         }
       }
@@ -193,7 +193,7 @@ object Scheduler {
               if (tempNodeIn.output != null) {
                 for (tempNodeOut <- tempNodeIn.output.output) {
                   if (tempNodeOut.name != node.name && tempNodeOut.name != tempNodeIn.name) {
-                    vis(dfg.op_nodes_map(tempNodeOut.name)) += tempNodeIn.name
+                    vis(dfg.opNodesMap(tempNodeOut.name)) += tempNodeIn.name
                     tempQueue.enqueue(tempNodeOut)
                     if (queue.contains(tempNodeOut)) {
                       queue.dequeueAll(n => n.name == tempNodeOut.name)
@@ -208,9 +208,9 @@ object Scheduler {
 
       if (node.output != null) {
         for (out <- node.output.output) {
-          if (vis(dfg.op_nodes_map(out.name)).contains(node.name)) {
-            vis(dfg.op_nodes_map(out.name)) -= node.name
-            if (vis(dfg.op_nodes_map(out.name)).size == 0) {
+          if (vis(dfg.opNodesMap(out.name)).contains(node.name)) {
+            vis(dfg.opNodesMap(out.name)) -= node.name
+            if (vis(dfg.opNodesMap(out.name)).size == 0) {
               queue.enqueue(out)
             }
           }
@@ -220,7 +220,7 @@ object Scheduler {
 
     /** Calculate skew of each opNodes in DFG.
      */
-    for (node <- dfg.op_nodes) {
+    for (node <- dfg.opNodes) {
       if (node.input.size == 2) {
         if (node.annulateLatency != 0) {
           if (node.annulateLatency > 0) {
@@ -243,23 +243,23 @@ object Scheduler {
     var beginCycle = 0
     val pattern = "[0-9]+:".r
 
-    val minLatency = dfg.op_nodes.map(op => op.latency).min
-    dfg.op_nodes.foreach(op => op.setLatency(op.latency - minLatency))
+    val minLatency = dfg.opNodes.map(op => op.latency).min
+    dfg.opNodes.foreach(op => op.setLatency(op.latency - minLatency))
 
     /** Calculate fire time of each opNods in DFG.
      */
-    for (j <- 0 until dfg.op_nodes.size) {
-      val op = dfg.op_nodes(j)
+    for (j <- 0 until dfg.opNodes.size) {
+      val op = dfg.opNodes(j)
       val tempResult = unscheduledArray(j).split(" ").toList
       val mrrgName = tempResult(1)
       val tempStr = (pattern findFirstIn mrrgName).toArray
-      val ii = tempStr(0).replace(":", "").toInt
+      val rc = tempStr(0).replace(":", "").toInt
       if (op.latency == 0 && op.annulateLatency == 0) {
-        beginCycle = ii
+        beginCycle = rc
       }
     }
 
-    for (op <- dfg.op_nodes) {
+    for (op <- dfg.opNodes) {
       var outLatency = op.latency + beginCycle
       if (op.annulateLatency != 0 && op.constInput) {
         outLatency = outLatency + II

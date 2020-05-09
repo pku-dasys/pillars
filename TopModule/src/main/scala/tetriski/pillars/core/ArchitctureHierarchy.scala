@@ -9,15 +9,18 @@ import tetriski.pillars.core.MRRGMode._
 import scala.collection.mutable.ArrayBuffer
 import scala.io.Source
 
-//This class describes the archtectures of the designed CGRA Demo
+/** A special block describing the architecture of the top desgin.
+ * It is the highest level in the hierarchy.
+ */
 class ArchitctureHierarchy extends BlockTrait {
 
-  setName("cgra")
-  hierName.append(name)
+  initName("cgra")
 
-  //Get integer module list.
+  /** Get a class containing the parameters of modules and the port number of top design.
+   *
+   * @return the class containing the parameters of modules and the port number of top design
+   */
   def getPillarsModuleInfo(): PillarsModuleInfo = {
-    //var ret = List[List[Int]]()
     var moduleNums = List[Int]()
     var moduleParams = List[List[Int]]()
     for (i <- 0 until elementsArray.size) {
@@ -29,26 +32,43 @@ class ArchitctureHierarchy extends BlockTrait {
     new PillarsModuleInfo(moduleNums, moduleParams, inPorts.size, outPorts.size)
   }
 
+  /** Get a list of configuration regions where modules share a configuration controller.
+   *
+   * @example If there is a configuration region,
+   *          which is List(List(1,2),List(2,2)),
+   *          the module "2" in the "1" type and the module "2" in the type "2"
+   *          will share a configuration controller.
+   * @return the list of regions where modules share a configuration controller
+   */
   def getRegionList(): List[List[List[Int]]] = {
+    //TODO: abstract the concept of configuration region as a class.
     var ret = List[List[List[Int]]]()
-    def findConfigRegion(blockMap : Map[String, BlockTrait]): List[BlockTrait] ={
+
+    /** Find configuration regions with a map between the name of sub-blocks and themselves.
+     *
+     * @param blockMap the map between the name of sub-blocks and themselves
+     * @return blocks declared as configuration regions
+     */
+    def findConfigRegion(blockMap: Map[String, BlockTrait]): List[BlockTrait] = {
       var ret = List[BlockTrait]()
-      for(subBlock <- blockMap.values){
-        if(subBlock.isConfigRegion){
+      for (subBlock <- blockMap.values) {
+        if (subBlock.isConfigRegion) {
           ret = ret :+ subBlock
-        }else{
+        } else {
           ret = ret ::: findConfigRegion(subBlock.blockMap)
         }
       }
       ret
     }
+
     val configRegions = findConfigRegion(blockMap).sortBy(x => x.getName())
-    for (configRegion <- configRegions){
+    //Translate the information of configuration regions into the List format.
+    for (configRegion <- configRegions) {
       var moduleList = List[List[Int]]()
       for (i <- 0 until configRegion.elementsArray.size) {
         for (j <- 0 until configRegion.elementsArray(i).size) {
           val module = configRegion.elementsArray(i)(j).asInstanceOf[ElementTrait]
-          if(module.getConfigBit()>0) {
+          if (module.getConfigBit() > 0) {
             moduleList = moduleList :+ List(module.getTypeID(), module.getModuleID())
           }
         }
@@ -58,11 +78,16 @@ class ArchitctureHierarchy extends BlockTrait {
     ret
   }
 
+  /** Get the configurations of modules in BigInt format.
+   * They are sorted by the configuration regions.
+   *
+   * @return the configuration in BigInt format
+   */
   def getConfigBitStream(): BigInt = {
     var bitBuffer = ArrayBuffer[Int]()
-    val configList = getRegionList()
-    for (configRegionModules <- configList){
-      for(configRegionModule <- configRegionModules){
+    val regionList = getRegionList()
+    for (configRegionModules <- regionList) {
+      for (configRegionModule <- configRegionModules) {
         val typeID = configRegionModule(0)
         val moduleID = configRegionModule(1)
         val module = elementsArray(typeID)(moduleID).asInstanceOf[ElementTrait]
@@ -70,17 +95,18 @@ class ArchitctureHierarchy extends BlockTrait {
       }
     }
     bitBuffer = bitBuffer.reverse
-    //bitBuffer.reverse
-    var ret : BigInt = 0
-    for(i <- 0 until bitBuffer.size){
+    var ret: BigInt = 0
+    for (i <- 0 until bitBuffer.size) {
       ret = ret << 1
       ret += bitBuffer(i)
     }
     ret
   }
 
-  //After initialization, all module's ModuleID, also called global index,
-  //is set as it's sequence number in relevant array of ArchitctureHierarchy
+  /** Initialize elements in the hierarchy.
+   * After initialization, all module's ModuleID, also called global index,
+   * is set as its sequence number in relevant array of ArchitctureHierarchy.
+   */
   def init(): Unit = {
     for (i <- 0 until elementsArray.size) {
       for (j <- 0 until elementsArray(i).size) {
@@ -91,8 +117,9 @@ class ArchitctureHierarchy extends BlockTrait {
     updateConnect()
   }
 
-  //Save hierarchy information as modules.json
-  def dumpArchitcture(): Unit = {
+  /** Save hierarchy information as modules.json.
+   */
+  def dumpArchitecture(): Unit = {
     val writer = new PrintWriter(new File("modules.json"))
     writer.flush()
 
@@ -103,32 +130,64 @@ class ArchitctureHierarchy extends BlockTrait {
     writer.close()
   }
 
-  def resetSchedules(): Unit ={
-    for(alu <- aluArray){
+  /** Reset schedules of ALUs and LSUs.
+   */
+  def resetSchedules(): Unit = {
+    for (alu <- ALUsArray) {
       alu.asInstanceOf[ElementTrait].resetFireTimes()
       alu.asInstanceOf[ElementTrait].resetSkew()
     }
-    for(lsu <- LSUsArray){
+    for (lsu <- LSUsArray) {
       lsu.asInstanceOf[ElementTrait].resetFireTimes()
       lsu.asInstanceOf[ElementTrait].resetSkew()
     }
   }
 
-  def resetConfigs(): Unit ={
-    for(moduleArray <- elementsArray){
-      for(module <- moduleArray){
+  /** Reset configurations of modules.
+   */
+  def resetConfigs(): Unit = {
+    for (moduleArray <- elementsArray) {
+      for (module <- moduleArray) {
         module.asInstanceOf[ElementTrait].updateConfigArray(0)
         module.asInstanceOf[ElementTrait].bannedINodeSet = Set[BigInt]()
       }
     }
   }
 
-  def genConfig(filename: String, II: Int, constInfo: ConstInfo = null): Array[BigInt] ={
+  /** Generate configurations of modules.
+   * The secondary consistency requirement, runtime consistency, should be guaranteed here.
+   * The runtime consistency ensures the context generated for the hardware modules in a specific cycle
+   * should be consistent with the corresponding RRG time slice and the functional description.
+   * In this function, after generating origin contexts by pattern matching with the RRG dataflow slices,
+   * we split and reconstruct the contexts according to the RRG time slices to produce correct runtime contexts.
+   *
+   * @example "<0:cgra.tile_0.pe_1_1.muxOut.internalNode_0>"
+   *          "1                                           "
+   *          "0                                           "
+   *          means that the module corresponding to a element
+   *          whose hierarchy name is "cgra.tile_0.pe_1_1.muxOut",
+   *          should route the data from input port "1" to the output port "0".
+   *          So its configuration should be 1 at reconfiguration cycle 0.
+   * @example "<0:cgra.tile_0.pe_3_0.alu0.internalNode_0>"
+   *          "SELECTED_OP                               "
+   *          "8                                         "
+   *          means that the module corresponding to a element
+   *          whose hierarchy name is "cgra.tile_0.pe_3_0.alu0",
+   *          should perform the opcode "8" (i.e. ADD).
+   *          So its configuration should be 0, seen in OpcodeTranslator.
+   * @param filename  the file name of information TXT
+   * @param II        the target initiation interval (II)
+   * @param constInfo the class containing const values, the corresponding RCs and serial number of const units
+   */
+  def genConfig(filename: String, II: Int, constInfo: ConstInfo = null): Array[BigInt] = {
     val retBitstreams = new ArrayBuffer[BigInt]()
     val infos = Source.fromFile(filename).getLines().toArray
+
+    //Get information of the configurations of modules
+    //and elements corresponding to them from the information TXT
     val infoArrays = new ArrayBuffer[ArrayBuffer[String]]()
     val reconfigModuleArrays = new ArrayBuffer[ArrayBuffer[ElementTrait]]()
-    for(i <- 0 until II){
+    for (i <- 0 until II) {
       val tempIA = new ArrayBuffer[String]()
       infoArrays.append(tempIA)
       val tempMA = new ArrayBuffer[ElementTrait]()
@@ -137,16 +196,13 @@ class ArchitctureHierarchy extends BlockTrait {
 
     val pattern = "[0-9]+:".r
 
-//    for(info <- infos){
-//      infoArray.append(info)
-//    }
-
-    for(i <- 0 until (infos.size/3)){
-      val targetStr = infos(i*3)
+    for (i <- 0 until (infos.size / 3)) {
+      val targetStr = infos(i * 3)
       val tempStr = (pattern findFirstIn targetStr).toArray
-      val tempII = tempStr(0).replace(":","").toInt
+      val tempII = tempStr(0).replace(":", "").toInt
 
-      val moduleName = infos(i*3).replaceAll("([0-9]+:)|<|>", "").split("\\.", 0)
+      val moduleName = infos(i * 3).replaceAll("([0-9]+:)|<|>", "")
+        .split("\\.", 0)
       var temp = this.asInstanceOf[BlockTrait]
       for (j <- 1 until moduleName.size - 2) {
         temp = temp(moduleName(j))
@@ -154,13 +210,14 @@ class ArchitctureHierarchy extends BlockTrait {
       val module = temp.getElement(moduleName(moduleName.size - 2))
       reconfigModuleArrays(tempII).append(module)
 
-      if(II == 1){
+      if (II == 1) {
         infoArrays(tempII).append(moduleName(moduleName.size - 1))
         infoArrays(tempII).append(infos(i * 3 + 1))
         infoArrays(tempII).append(infos(i * 3 + 2))
-      }else{
+      } else {
         val mode = module.mode
-        if(mode == REG_MODE){
+        if (mode == REG_MODE) {
+          //Split and reconstruct the contexts.
           infoArrays(tempII).append(moduleName(moduleName.size - 1))
           infoArrays(tempII).append("-1")
           infoArrays(tempII).append(infos(i * 3 + 2))
@@ -171,45 +228,35 @@ class ArchitctureHierarchy extends BlockTrait {
           reconfigModuleArrays(preII).append(module)
           infoArrays(preII).append(infos(i * 3 + 1))
           infoArrays(preII).append("-1")
-        }else{
+        } else {
           infoArrays(tempII).append(moduleName(moduleName.size - 1))
-          for(j <-1 until 3){
+          for (j <- 1 until 3) {
             infoArrays(tempII).append(infos(i * 3 + j))
           }
         }
       }
     }
 
-//    val routeConfigGroup = ArrayBuffer[List[String]]()
-//    val funConfigGroup = Map[ModuleTrait, Int]
-    for(ii <- 0 until II) {
+    for (ii <- 0 until II) {
       resetConfigs()
       val infoArray = infoArrays(ii)
       for (i <- 0 until infoArray.size / 3) {
         val offset = i * 3
-        // val moduleName = infoArray(offset).substring(1, infoArray(offset).size-1).split("\\.", 0)
-//        val moduleName = infoArray(offset).replaceAll("([0-9]+:)|<|>", "").split("\\.", 0)
-//        var temp = this.asInstanceOf[BlockTrait]
-//        for (j <- 1 until moduleName.size - 2) {
-//          temp = temp(moduleName(j))
-//        }
-//        val module = temp.getModule(moduleName(moduleName.size - 2))
 
         val module = reconfigModuleArrays(ii)(i)
         val second = infoArray(offset + 1)
         if (second == "SELECTED_OP") {
           val opcode = infoArray(offset + 2).toInt
           module.updateConfig(opcode)
-          // println(opcode)
         }
         else {
           val fanInNums = second.split(" ").toList.map(i => i.toInt)
-          //val fanInNum = second(second.size-1).toString.toInt
           val fanOutNode = infoArray(offset + 2)
           val fanOutNums = fanOutNode.split(" ").toList.map(i => i.toInt)
-//          val moduleName = module.getName()
           val internalNodeName = infoArray(offset)
           var internalNum = 0
+
+          //Only a internal node whose name is in the name set of internal nodes of the module is decisive.
           var isDecisive = false
           for (i <- 0 until module.internalNodes.size) {
             val iN = module.internalNodes(i)
@@ -224,20 +271,25 @@ class ArchitctureHierarchy extends BlockTrait {
           module.configArray
         }
       }
-     for(j <- 0 until constInfo.constIDArray(ii).size){
-       val constID = constInfo.constIDArray(ii)(j)
-       val constVal = constInfo.constValArray(ii)(j)
-       this.ConstsArray(constID).asInstanceOf[ElementConst].updateConfigArray(constVal)
-     }
+
+      //Update configurations of const units.
+      for (j <- 0 until constInfo.constIDArray(ii).size) {
+        val constID = constInfo.constIDArray(ii)(j)
+        val constVal = constInfo.constValArray(ii)(j)
+        this.ConstsArray(constID).asInstanceOf[ElementConst].updateConfigArray(constVal)
+      }
       retBitstreams.append(getConfigBitStream())
     }
     retBitstreams.toArray
-//    println(infoArray)
   }
 
-  def getSchedules(): List[Int] ={
-    var schedules = aluArray.map(alu => alu.asInstanceOf[ElementTrait].getSchedule().toList).reduce(_++_)
-    schedules = schedules ++ LSUsArray.map(lsu => lsu.asInstanceOf[ElementTrait].getSchedule().toList).reduce(_++_)
+  /** Get schedules of ALUs and LSUs.
+   *
+   * @return the schedules of ALUs and LSUs
+   */
+  def getSchedules(): List[Int] = {
+    var schedules = ALUsArray.map(alu => alu.asInstanceOf[ElementTrait].getSchedule().toList).reduce(_ ++ _)
+    schedules = schedules ++ LSUsArray.map(lsu => lsu.asInstanceOf[ElementTrait].getSchedule().toList).reduce(_ ++ _)
     schedules
   }
 }

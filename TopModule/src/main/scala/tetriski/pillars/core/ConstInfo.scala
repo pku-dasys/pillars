@@ -2,26 +2,50 @@ package tetriski.pillars.core
 
 import scala.collection.mutable.ArrayBuffer
 
+/** A class containing const values, the corresponding RCs and serial number of const units.
+ *
+ * @param initII the target II
+ */
 class ConstInfo(initII: Int = 0) {
+  /** A two dimensional array.
+   * We can get a array of the serial numbers of const units in a reconfiguration cycle
+   * with constIDArray(RC).
+   */
   val constIDArray = new ArrayBuffer[ArrayBuffer[Int]]()
-  val constValArray = new ArrayBuffer[ArrayBuffer[Int]]()
-  var testII = initII
 
-  for(i <- 0 until testII){
+  /** A two dimensional array.
+   * We can get a array of values of const units in a reconfiguration cycle
+   * with constValArray(RC).
+   */
+  val constValArray = new ArrayBuffer[ArrayBuffer[Int]]()
+
+  /** A target II.
+   */
+  var targetII = initII
+
+  for (i <- 0 until targetII) {
     constIDArray.append(new ArrayBuffer[Int]())
     constValArray.append(new ArrayBuffer[Int]())
   }
 
-  def addConst(constID: Int, II: Int, constVal: Int): Unit ={
-    constIDArray(II).append(constID)
-    constValArray(II).append(constVal)
+  /** Add a item of const information.
+   *
+   * @param constID  the serial number of a const unit
+   * @param RC       the reconfiguration cycle
+   * @param constVal the const value
+   */
+  def addConst(constID: Int, RC: Int, constVal: Int): Unit = {
+    constIDArray(RC).append(constID)
+    constValArray(RC).append(constVal)
   }
 
-  def reset(newTestII: Int): Unit ={
+  /** Reset values in this class.
+   */
+  def reset(newTestII: Int): Unit = {
     constIDArray.clear()
     constValArray.clear()
-    testII = newTestII
-    for(i <- 0 until testII){
+    targetII = newTestII
+    for (i <- 0 until targetII) {
       constIDArray.append(new ArrayBuffer[Int]())
       constValArray.append(new ArrayBuffer[Int]())
     }
