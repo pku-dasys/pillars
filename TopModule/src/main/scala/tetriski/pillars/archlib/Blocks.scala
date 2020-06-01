@@ -854,7 +854,7 @@ class BlockMesh(name: String) extends BlockTrait {
 
   /** Interconnection inside this block.
    */
-  (0 until 1).foreach(i => addConnect(term(s"in$i") -> subBLocks(i) / "in0"))
+  Array(0, 1).foreach(i => addConnect(term(s"in$i") -> subBLocks(i) / "in0"))
   Array(1, 2).foreach(i => addConnect(subBLocks(0) / "out0" -> subBLocks(i) / "in1"))
   Array(0, 3).foreach(i => addConnect(subBLocks(1) / "out0" -> subBLocks(i) / "in1"))
   addConnect(subBLocks(2) / "out0" -> subBLocks(3) / "in0")
