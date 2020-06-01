@@ -26,7 +26,7 @@ class OpNode(var name: String) extends NodeDFG {
    */
   var opcode: OpEnum = null
 
-  /** A map between the serial number of inputs and corresponding opNode.
+  /** A map between the identity number of inputs and corresponding opNode.
    */
   var input = Map[Int, OpNode]()
 
@@ -94,11 +94,11 @@ class DFG(var name: String) {
    */
   var valNodes = ArrayBuffer[ValNode]()
 
-  /** A map between opNodes and a serial number.
+  /** A map between opNodes and a identity number.
    */
   var opNodesMap = Map[String, Int]()
 
-  /** A map between valNodes and a serial number.
+  /** A map between valNodes and a identity number.
    */
   var valNodesMap = Map[String, Int]()
 

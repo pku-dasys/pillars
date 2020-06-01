@@ -2,13 +2,13 @@ package tetriski.pillars.core
 
 import scala.collection.mutable.ArrayBuffer
 
-/** A class containing const values, the corresponding RCs and serial number of const units.
+/** A class containing const values, the corresponding RCs and identity number of const units.
  *
  * @param initII the target II
  */
 class ConstInfo(initII: Int = 0) {
   /** A two dimensional array.
-   * We can get a array of the serial numbers of const units in a reconfiguration cycle
+   * We can get a array of the identity numbers of const units in a reconfiguration cycle
    * with constIDArray(RC).
    */
   val constIDArray = new ArrayBuffer[ArrayBuffer[Int]]()
@@ -30,7 +30,7 @@ class ConstInfo(initII: Int = 0) {
 
   /** Add a item of const information.
    *
-   * @param constID  the serial number of a const unit
+   * @param constID  the identity number of a const unit
    * @param RC       the reconfiguration cycle
    * @param constVal the const value
    */

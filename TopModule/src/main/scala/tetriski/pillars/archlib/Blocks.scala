@@ -791,7 +791,7 @@ class TileCompleteBlock(name: String, x: Int, y: Int, numIn: Int, numOut: Int, u
 
 }
 
-/** A subblock that performs computation between the input and a immediate operand.
+/** A subblock that performs computation between the selected input and a immediate operand.
  *
  * @constructor create an abstract block model that performs computation between the input and a immediate operand
  * @param name         the name of the model
@@ -799,43 +799,65 @@ class TileCompleteBlock(name: String, x: Int, y: Int, numIn: Int, numOut: Int, u
 class BlockImmediate(name: String) extends BlockTrait {
   val aluParams = List(32)
   val aluOpList = List(OpEnum.ADD)
+  val muxParams = List(2, 32)
   val constParams = List(32)
   initName(name)
 
-  addInPorts(Array("in0"))
+  addInPorts(Array("in0", "in1"))
   addOutPorts(Array("out0"))
-
   setConfigRegion()
 
+  /** A multiplexer that can choose a data source for the port "inputA" of the ALU.
+   */
+  val mux0 = new ElementMux("mux0", muxParams)
+  mux0.addInPorts(Array("input0", "input1"))
+  mux0.addOutPorts(Array("out0"))
+  addElement(mux0)
+
+  /** An ALU that can perform some operations.
+   */
   val alu0 = new ElementAlu("alu0", aluOpList, supBypass = true, aluParams)
   alu0.addInPorts(Array("inputA", "inputB"))
   alu0.addOutPorts(Array("out0"))
   addElement(alu0)
 
+  /** A const unit connected to the port "inputB" of ALU.
+   */
   val const0 = new ElementConst("const0", constParams)
   const0.addOutPorts(Array("out0"))
   addElement(const0)
 
+  /** Interconnection inside this block.
+   */
+  addConnect(term("in0") -> mux0 / "input0")
+  addConnect(term("in1") -> mux0 / "input1")
+  addConnect(mux0 / "out0" -> alu0 / "inputA")
   addConnect(const0 / "out0" -> alu0 / "inputB")
-  addConnect(term("in0") -> alu0 / "inputA")
   addConnect(alu0 / "out0" -> term("out0"))
 }
 
-/** A parent block that consists of a chain of four sub-blocks.
+/** A parent block that consists of a simple mesh of four sub-blocks.
  *
- * @constructor create an abstract block model that consists of a chain of four sub-blocks
+ * @constructor create an abstract block model that consists of a simple mesh of four sub-blocks
  * @param name         the name of the model
  */
-class BlockChain(name: String) extends BlockTrait {
+class BlockMesh(name: String) extends BlockTrait {
   initName(name)
 
-  addInPorts(Array("in0"))
+  addInPorts(Array("in0", "in1"))
   addOutPorts(Array("out0"))
 
+  /** The four sub-blocks.
+   */
   val subBLocks = (0 until 4).map(i => new BlockImmediate(s"b$i"))
   subBLocks.foreach(x => addBlock(x))
 
-  addConnect(term("in0") -> subBLocks(0) / "in0")
-  (0 until 3).foreach(i => addConnect(subBLocks(i) / "out0" -> subBLocks(i + 1) / "in0"))
+  /** Interconnection inside this block.
+   */
+  (0 until 1).foreach(i => addConnect(term(s"in$i") -> subBLocks(i) / "in0"))
+  Array(1, 2).foreach(i => addConnect(subBLocks(0) / "out0" -> subBLocks(i) / "in1"))
+  Array(0, 3).foreach(i => addConnect(subBLocks(1) / "out0" -> subBLocks(i) / "in1"))
+  addConnect(subBLocks(2) / "out0" -> subBLocks(3) / "in0")
+  addConnect(subBLocks(3) / "out0" -> subBLocks(2) / "in0")
   addConnect(subBLocks(3) / "out0" -> term("out0"))
 }

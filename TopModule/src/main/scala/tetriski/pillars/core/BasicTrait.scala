@@ -10,11 +10,11 @@ import tetriski.pillars.hardware.PillarsConfig._
  * It helps to produce an in-memory model for both behavior and structure.
  */
 trait BasicTrait {
-  /** The type serial number of the module represented by this abstract model.
+  /** The type identity number of the module represented by this abstract model.
    */
   var typeID = -1
 
-  /** The module serial number of the module represented by this abstract model.
+  /** The module identity number of the module represented by this abstract model.
    */
   var moduleID = -1
 
@@ -50,17 +50,17 @@ trait BasicTrait {
    */
   var skews = new Array[Int](II_UPPER_BOUND)
 
-  /** Set the module serial number of the module represented by this abstract model.
+  /** Set the module identity number of the module represented by this abstract model.
    *
-   * @param arg the new module serial number
+   * @param arg the new module identity number
    */
   def setModuleID(arg: Int): Unit = {
     moduleID = arg
   }
 
-  /** Set the type serial number of the module represented by this abstract model.
+  /** Set the type identity number of the module represented by this abstract model.
    *
-   * @param arg the new type serial number
+   * @param arg the new type identity number
    */
   def setTypeID(arg: Int): Unit = {
     typeID = arg
@@ -148,17 +148,17 @@ trait BasicTrait {
     }
   }
 
-  /** Get the module serial number of the module represented by this abstract model.
+  /** Get the module identity number of the module represented by this abstract model.
    *
-   * @return the module serial number of the module represented by this abstract model
+   * @return the module identity number of the module represented by this abstract model
    */
   def getModuleID(): Int = {
     moduleID
   }
 
-  /** Get the type serial number of the module represented by this abstract model.
+  /** Get the type identity number of the module represented by this abstract model.
    *
-   * @return the type serial number of the module represented by this abstract model
+   * @return the type identity number of the module represented by this abstract model
    */
   def getTypeID(): Int = {
     typeID

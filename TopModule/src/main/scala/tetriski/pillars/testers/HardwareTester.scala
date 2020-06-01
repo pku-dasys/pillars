@@ -114,7 +114,7 @@ class TopModuleLSUAdresUnitTest(c: TopModule, bitstream: BigInt, schedules: List
 
   val base = 0
 
-  //The serial number of LSU is explicitly set according to the mapping result.
+  //The identity number of LSU is explicitly set according to the mapping result.
   poke(c.io.startLSU(0), 1)
   poke(c.io.enqEnLSU(0), 1)
   poke(c.io.streamInLSU(0).valid, 0)
@@ -178,7 +178,7 @@ class TopModuleCompleteAdresUnitTest(c: TopModule, bitstreams: Array[BigInt], sc
 
   /** Enters data into a LSU.
    *
-   * @param numInLSU the serial number of this LSU
+   * @param numInLSU the identity number of this LSU
    * @param inData   the input data array
    */
   def enqData(numInLSU: Int, inData: Array[Int]): Unit = {
@@ -215,7 +215,7 @@ class TopModuleCompleteAdresUnitTest(c: TopModule, bitstreams: Array[BigInt], sc
   poke(c.io.en, 0)
 
   val base = 0
-  //The serial number of LSU is explicitly set according to the mapping result.
+  //The identity number of LSU is explicitly set according to the mapping result.
   val numInLSU = 3
 
   enqData(numInLSU, inData)

@@ -23,7 +23,7 @@ class ApplicationWrapperTester(c: TopModuleWrapper, appTestHelper: AppTestHelper
 
   /** Enters data into a LSU.
    *
-   * @param numInLSU the serial number of this LSU
+   * @param numInLSU the identity number of this LSU
    * @param inData   the input data array
    * @param base     the base address
    */
@@ -60,7 +60,7 @@ class ApplicationWrapperTester(c: TopModuleWrapper, appTestHelper: AppTestHelper
 
   /** Verifies data in a LSU during the post-process.
    *
-   * @param numInLSU the serial number of this LSU
+   * @param numInLSU the identity number of this LSU
    * @param refArray the expected output data array
    * @param base     the base address
    */
