@@ -74,7 +74,7 @@ object HardwareExamples {
     val arch = new ArchitctureHierarchy()
     arch.addOutPorts(Array("out_0"))
     arch.addInPorts(Array("input_0"))
-    val blockChain = new BlockChain("blockChain")
+    val blockChain = new BlockMesh("blockChain")
     arch.addBlock(blockChain)
     arch.addConnect(arch.term("input_0") -> blockChain / "in0")
     arch.addConnect(blockChain / "out0" -> arch.term("out_0"))

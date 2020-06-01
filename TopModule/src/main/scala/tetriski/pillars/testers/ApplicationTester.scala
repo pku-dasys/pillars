@@ -22,12 +22,12 @@ import tetriski.pillars.hardware.TopModule
 class AppTestHelper(bitStreams: Array[BigInt], schedules: List[Int],
                     testII: Int) {
   /** A map between a list and the input data array.
-   * The list consists of the serial number of target LSU and base address.
+   * The list consists of the identity number of target LSU and base address.
    */
   var inDataMap = Map[List[Int], Array[Int]]()
 
   /** A map between a list and the expected output data array.
-   * The list consists of the serial number of target LSU and base address.
+   * The list consists of the identity number of target LSU and base address.
    */
   var outDataMap = Map[List[Int], Array[Int]]()
 
@@ -76,7 +76,7 @@ class AppTestHelper(bitStreams: Array[BigInt], schedules: List[Int],
 
   /** Get the input data array.
    *
-   * @param numLSU serial number of target LSU
+   * @param numLSU identity number of target LSU
    * @param base   the base address
    * @return the input data array
    */
@@ -86,7 +86,7 @@ class AppTestHelper(bitStreams: Array[BigInt], schedules: List[Int],
 
   /** Add a input data array into the corresponding map.
    *
-   * @param numLSU serial number of target LSU
+   * @param numLSU identity number of target LSU
    * @param base   the base address
    * @param inData the input data array
    */
@@ -104,7 +104,7 @@ class AppTestHelper(bitStreams: Array[BigInt], schedules: List[Int],
 
   /** Get the expected output data array.
    *
-   * @param numLSU serial number of target LSU
+   * @param numLSU identity number of target LSU
    * @param base   the base address
    * @return the expected output data array
    */
@@ -114,7 +114,7 @@ class AppTestHelper(bitStreams: Array[BigInt], schedules: List[Int],
 
   /** Add a expected output data array into the corresponding map.
    *
-   * @param numLSU  serial number of target LSU
+   * @param numLSU  identity number of target LSU
    * @param base    the base address
    * @param outData the expected output data array
    */
@@ -203,7 +203,7 @@ class ApplicationTester(c: TopModule, appTestHelper: AppTestHelper) extends Peek
 
   /** Enters data into a LSU.
    *
-   * @param numInLSU the serial number of this LSU
+   * @param numInLSU the identity number of this LSU
    * @param inData   the input data array
    * @param base     the base address
    */
@@ -239,7 +239,7 @@ class ApplicationTester(c: TopModule, appTestHelper: AppTestHelper) extends Peek
 
   /** Verifies data in a LSU during the post-process.
    *
-   * @param numInLSU the serial number of this LSU
+   * @param numInLSU the identity number of this LSU
    * @param refArray the expected output data array
    * @param base     the base address
    */

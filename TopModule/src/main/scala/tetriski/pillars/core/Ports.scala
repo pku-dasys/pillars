@@ -6,11 +6,11 @@ import scala.collection.mutable.ArrayBuffer
  * we extract the 'port' array and wrap it in the Trait to be extended.
  */
 trait Ports {
-  /** A map between name and serial number of a input port.
+  /** A map between name and identity number of a input port.
    */
   var inPortMap = Map[String, Int]()
 
-  /** A map between name and serial number of a output port.
+  /** A map between name and identity number of a output port.
    */
   var outPortMap = Map[String, Int]()
 
@@ -66,10 +66,10 @@ trait Ports {
     outPorts
   }
 
-  /** Get the serial number of a port with its name.
+  /** Get the identity number of a port with its name.
    *
    * @param name the name of this port
-   * @return the serial number of this port
+   * @return the identity number of this port
    */
   def getPortID(name: String): Int = {
     if (inPortMap.contains(name)) {

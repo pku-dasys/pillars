@@ -36,11 +36,11 @@ class SimulationHelper(arch: ArchitctureHierarchy) {
    */
   val skewArray = new ArrayBuffer[Int]()
 
-  /** A class containing const values, the corresponding RCs and serial number of const units.
+  /** A class containing const values, the corresponding RCs and identity number of const units.
    */
   val constInfo = new ConstInfo()
 
-  /** The array of the serial number of the mapped output ports.
+  /** The array of the identity number of the mapped output ports.
    */
   val outPorts = new ArrayBuffer[Int]()
 
@@ -73,7 +73,7 @@ class SimulationHelper(arch: ArchitctureHierarchy) {
     if (op.contains("output") || op.contains("input")) {
       moduleArray.append(arch)
       if (op.contains("output")) {
-        //Add the serial number of the mapped output ports into outPorts.
+        //Add the identity number of the mapped output ports into outPorts.
         var tempStr = ("out_[0-9]+".r findFirstIn tempList(1)).toArray
         tempStr = ("[0-9]+".r findFirstIn tempStr(0)).toArray
         val port = tempStr(0).toInt
@@ -139,7 +139,7 @@ class SimulationHelper(arch: ArchitctureHierarchy) {
     arch.getSchedules()
   }
 
-  /** Set const values, the corresponding RC and serial number of a const unit.
+  /** Set const values, the corresponding RC and identity number of a const unit.
    *
    * @param vals   the const values
    * @param testII the target II
@@ -156,9 +156,9 @@ class SimulationHelper(arch: ArchitctureHierarchy) {
     }
   }
 
-  /** Get the class containing const values, the corresponding RC and serial number of a const unit.
+  /** Get the class containing const values, the corresponding RC and identity number of a const unit.
    *
-   * @return the class containing const values, the corresponding RC and serial number of a const unit
+   * @return the class containing const values, the corresponding RC and identity number of a const unit
    */
   def getConstInfo(): ConstInfo = {
     constInfo
@@ -173,7 +173,7 @@ class SimulationHelper(arch: ArchitctureHierarchy) {
    * @param refDataArrays the expected data arrays for the output ports
    * @return Array(the input data arrays for LSUs with corresponding address,
    *         the expected data arrays for LSUs with corresponding address,
-   *         the expected data arrays for the output ports with corresponding serial number)
+   *         the expected data arrays for the output ports with corresponding identity number)
    */
   def getDataWithAddr(dataSize: Int = 0, addrArray: Array[Int] = null, inDataArrays: Array[Array[Int]] = null,
                       outDataArrays: Array[Array[Int]] = null, refDataArrays: Array[Array[Int]] = null): Array[Any] = {
