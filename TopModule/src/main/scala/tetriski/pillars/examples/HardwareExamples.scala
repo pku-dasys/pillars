@@ -67,19 +67,20 @@ object HardwareExamples {
     }
   }
 
-  /** A example for testing a BlockChain.
+  /** A example for testing a BlockMesh.
    * A correct MRRG is generated.
    */
-  def exampleBlockChain(): Unit = {
+  def exampleBlockMesh(): Unit = {
     val arch = new ArchitctureHierarchy()
     arch.addOutPorts(Array("out_0"))
-    arch.addInPorts(Array("input_0"))
-    val blockChain = new BlockMesh("blockChain")
-    arch.addBlock(blockChain)
-    arch.addConnect(arch.term("input_0") -> blockChain / "in0")
-    arch.addConnect(blockChain / "out0" -> arch.term("out_0"))
+    arch.addInPorts(Array("input_0", "input_1"))
+    val blockMesh = new BlockMesh("blockMesh")
+    arch.addBlock(blockMesh)
+    arch.addConnect(arch.term("input_0") -> blockMesh / "in0")
+    arch.addConnect(arch.term("input_1") -> blockMesh / "in1")
+    arch.addConnect(blockMesh / "out0" -> arch.term("out_0"))
     arch.init()
-    blockChain.dumpMRRG(2, "BlockChain.txt")
+    blockMesh.dumpMRRG(2, "BlockMesh.txt")
   }
 
   /** A example for testing a 2*2 TileBlock with 2 input ports and 1 output port.
