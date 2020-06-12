@@ -1,7 +1,7 @@
 TXTs for Storing Mapping Results
 =====================
 
-##Information TXT
+## Information TXT
 
 An information TXT is a text file storing detail mapping results of modules.
 Only MRRG nodes which routes data or perform functions 
@@ -21,7 +21,7 @@ An information TXT is in the following format.
    *          "the selected opcode                       "
    *          ......
    
-##Result TXT
+## Result TXT
 
 A result TXT is a text file showing the mapping results of the origin nodes in DFG.
 

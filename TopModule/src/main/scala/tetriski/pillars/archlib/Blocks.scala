@@ -638,6 +638,8 @@ class TileLSUBlock(name: String, x: Int, y: Int, numIn: Int, numOut: Int,
  * @param numOut       the number of output ports of this tile
  * @param useMuxBypass a parameter indicating whether PEs in this tile use two additional
  *                     bypass multiplexers
+ * @param isReduceArch a parameter indicating whether the architecture should be reduced
+ * @param isFullArch   a parameter indicating whether the architecture should be full
  * @param dataWidth    the data width
  */
 class TileCompleteBlock(name: String, x: Int, y: Int, numIn: Int, numOut: Int, useMuxBypass: Boolean = true,
@@ -666,10 +668,10 @@ class TileCompleteBlock(name: String, x: Int, y: Int, numIn: Int, numOut: Int, u
 
   for (i <- 0 until numOut) {
     addConnect(ioBlock / s"out_$i" -> term(s"out_$i"))
-   }
+  }
   for (i <- 0 until numIn) {
     addConnect(term(s"input_$i") -> ioBlock / s"input_$i")
-   }
+  }
 
   /** A PE array which is generated according to parameters.
    */
@@ -766,10 +768,10 @@ class TileCompleteBlock(name: String, x: Int, y: Int, numIn: Int, numOut: Int, u
         }
         if (j != 0) {
           addConnect(peCurrent / "out_0" -> peN / "input_s")
-         }
+        }
         if (i != x - 1) {
           addConnect(peCurrent / "out_0" -> peE / "input_w")
-         }
+        }
         if (i != 0) {
           addConnect(peCurrent / "out_0" -> peW / "input_e")
         }
@@ -794,7 +796,7 @@ class TileCompleteBlock(name: String, x: Int, y: Int, numIn: Int, numOut: Int, u
 /** A subblock that performs computation between the selected input and a immediate operand.
  *
  * @constructor create an abstract block model that performs computation between the input and a immediate operand
- * @param name         the name of the model
+ * @param name the name of the model
  */
 class BlockImmediate(name: String) extends BlockTrait {
   val aluParams = List(32)
@@ -839,7 +841,7 @@ class BlockImmediate(name: String) extends BlockTrait {
 /** A parent block that consists of a simple mesh of four sub-blocks.
  *
  * @constructor create an abstract block model that consists of a simple mesh of four sub-blocks
- * @param name         the name of the model
+ * @param name the name of the model
  */
 class BlockMesh(name: String) extends BlockTrait {
   initName(name)

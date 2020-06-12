@@ -143,12 +143,12 @@
                         <a href="Block.html" title="A block.">Block</a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
-                        <a class="class" href="BlockChain.html" title="A parent block that consists of a chain of four sub-blocks."></a>
-                        <a href="BlockChain.html" title="A parent block that consists of a chain of four sub-blocks.">BlockChain</a>
+                        <a class="class" href="" title="A subblock that performs computation between the selected input and a immediate operand."></a>
+                        <a href="" title="A subblock that performs computation between the selected input and a immediate operand.">BlockImmediate</a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
-                        <a class="class" href="" title="A subblock that performs computation between the input and a immediate operand."></a>
-                        <a href="" title="A subblock that performs computation between the input and a immediate operand.">BlockImmediate</a>
+                        <a class="class" href="BlockMesh.html" title="A parent block that consists of a simple mesh of four sub-blocks."></a>
+                        <a href="BlockMesh.html" title="A parent block that consists of a simple mesh of four sub-blocks.">BlockMesh</a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
                         <a class="class" href="ElementAlu.html" title="An element corresponding arithmetic logical unit."></a>
@@ -217,7 +217,7 @@
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A subblock that performs computation between the input and a immediate operand.
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A subblock that performs computation between the selected input and a immediate operand.
 </p></div><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
@@ -602,7 +602,7 @@ and the routing capabilities of a module.
         <span class="name">alu0</span><span class="result">: <a href="ElementAlu.html" class="extype" name="tetriski.pillars.archlib.ElementAlu">ElementAlu</a></span>
       </span>
       
-      
+      <p class="shortcomment cmt">An ALU that can perform some operations.</p>
     </li><li name="tetriski.pillars.archlib.BlockImmediate#aluOpList" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="aluOpList:List[tetriski.pillars.core.OpEnum.Value]"></a><a id="aluOpList:List[core.OpEnum.Value]"></a>
       <span class="permalink">
@@ -797,7 +797,7 @@ where src and dst are lists representing ports which have a connection
         <span class="name">const0</span><span class="result">: <a href="ElementConst.html" class="extype" name="tetriski.pillars.archlib.ElementConst">ElementConst</a></span>
       </span>
       
-      
+      <p class="shortcomment cmt">A const unit connected to the port &quot;inputB&quot; of ALU.</p>
     </li><li name="tetriski.pillars.archlib.BlockImmediate#constParams" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="constParams:List[Int]"></a>
       <span class="permalink">
@@ -1131,8 +1131,8 @@ where src and dst are lists representing ports which have a connection
         <span class="name">getModuleID</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
       </span>
       
-      <p class="shortcomment cmt">Get the module serial number of the module represented by this abstract model.</p><div class="fullcomment"><div class="comment cmt"><p>Get the module serial number of the module represented by this abstract model.
-</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the module serial number of the module represented by this abstract model</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BasicTrait.html" class="extype" name="tetriski.pillars.core.BasicTrait">BasicTrait</a></dd></dl></div>
+      <p class="shortcomment cmt">Get the module identity number of the module represented by this abstract model.</p><div class="fullcomment"><div class="comment cmt"><p>Get the module identity number of the module represented by this abstract model.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the module identity number of the module represented by this abstract model</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BasicTrait.html" class="extype" name="tetriski.pillars.core.BasicTrait">BasicTrait</a></dd></dl></div>
     </li><li name="tetriski.pillars.core.BasicTrait#getName" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getName():String"></a>
       <span class="permalink">
@@ -1199,8 +1199,8 @@ where src and dst are lists representing ports which have a connection
         <span class="name">getPortID</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
       </span>
       
-      <p class="shortcomment cmt">Get the serial number of a port with its name.</p><div class="fullcomment"><div class="comment cmt"><p>Get the serial number of a port with its name.
-</p></div><dl class="paramcmts block"><dt class="param">name</dt><dd class="cmt"><p>the name of this port</p></dd><dt>returns</dt><dd class="cmt"><p>the serial number of this port</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/Ports.html" class="extype" name="tetriski.pillars.core.Ports">Ports</a></dd></dl></div>
+      <p class="shortcomment cmt">Get the identity number of a port with its name.</p><div class="fullcomment"><div class="comment cmt"><p>Get the identity number of a port with its name.
+</p></div><dl class="paramcmts block"><dt class="param">name</dt><dd class="cmt"><p>the name of this port</p></dd><dt>returns</dt><dd class="cmt"><p>the identity number of this port</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/Ports.html" class="extype" name="tetriski.pillars.core.Ports">Ports</a></dd></dl></div>
     </li><li name="tetriski.pillars.core.BasicTrait#getSchedule" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getSchedule():Array[Int]"></a>
       <span class="permalink">
@@ -1271,8 +1271,8 @@ where src and dst are lists representing ports which have a connection
         <span class="name">getTypeID</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
       </span>
       
-      <p class="shortcomment cmt">Get the type serial number of the module represented by this abstract model.</p><div class="fullcomment"><div class="comment cmt"><p>Get the type serial number of the module represented by this abstract model.
-</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the type serial number of the module represented by this abstract model</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BasicTrait.html" class="extype" name="tetriski.pillars.core.BasicTrait">BasicTrait</a></dd></dl></div>
+      <p class="shortcomment cmt">Get the type identity number of the module represented by this abstract model.</p><div class="fullcomment"><div class="comment cmt"><p>Get the type identity number of the module represented by this abstract model.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the type identity number of the module represented by this abstract model</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BasicTrait.html" class="extype" name="tetriski.pillars.core.BasicTrait">BasicTrait</a></dd></dl></div>
     </li><li name="tetriski.pillars.core.BasicTrait#getWidth" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getWidth():Int"></a>
       <span class="permalink">
@@ -1364,7 +1364,7 @@ the corresponding latency in generated MRRG.
         <span class="name">inPortMap</span><span class="result">: <span class="extype" name="scala.collection.immutable.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Int">Int</span>]</span>
       </span>
       
-      <p class="shortcomment cmt">A map between name and serial number of a input port.</p><div class="fullcomment"><div class="comment cmt"><p>A map between name and serial number of a input port.
+      <p class="shortcomment cmt">A map between name and identity number of a input port.</p><div class="fullcomment"><div class="comment cmt"><p>A map between name and identity number of a input port.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/Ports.html" class="extype" name="tetriski.pillars.core.Ports">Ports</a></dd></dl></div>
     </li><li name="tetriski.pillars.core.Ports#inPorts" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="inPorts:scala.collection.mutable.ArrayBuffer[String]"></a><a id="inPorts:ArrayBuffer[String]"></a>
@@ -1518,7 +1518,7 @@ The I/O ports of this block will generate opNodes that can perform input/output 
         <span class="name">moduleID</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
       </span>
       
-      <p class="shortcomment cmt">The module serial number of the module represented by this abstract model.</p><div class="fullcomment"><div class="comment cmt"><p>The module serial number of the module represented by this abstract model.
+      <p class="shortcomment cmt">The module identity number of the module represented by this abstract model.</p><div class="fullcomment"><div class="comment cmt"><p>The module identity number of the module represented by this abstract model.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BasicTrait.html" class="extype" name="tetriski.pillars.core.BasicTrait">BasicTrait</a></dd></dl></div>
     </li><li name="tetriski.pillars.core.ElementTrait#mrrg" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="mrrg:tetriski.pillars.core.MRRG"></a><a id="mrrg:MRRG"></a>
@@ -1537,6 +1537,38 @@ The I/O ports of this block will generate opNodes that can perform input/output 
       
       <p class="shortcomment cmt">The MRRG corresponding to this element.</p><div class="fullcomment"><div class="comment cmt"><p>The MRRG corresponding to this element.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/ElementTrait.html" class="extype" name="tetriski.pillars.core.ElementTrait">ElementTrait</a></dd></dl></div>
+    </li><li name="tetriski.pillars.archlib.BlockImmediate#mux0" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="mux0:tetriski.pillars.archlib.ElementMux"></a><a id="mux0:ElementMux"></a>
+      <span class="permalink">
+      <a href="../../../tetriski/pillars/archlib/BlockImmediate.html#mux0:tetriski.pillars.archlib.ElementMux" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">mux0</span><span class="result">: <a href="ElementMux.html" class="extype" name="tetriski.pillars.archlib.ElementMux">ElementMux</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">A multiplexer that can choose a data source for the port &quot;inputA&quot; of the ALU.</p>
+    </li><li name="tetriski.pillars.archlib.BlockImmediate#muxParams" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="muxParams:List[Int]"></a>
+      <span class="permalink">
+      <a href="../../../tetriski/pillars/archlib/BlockImmediate.html#muxParams:List[Int]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">muxParams</span><span class="result">: <span class="extype" name="scala.collection.immutable.List">List</span>[<span class="extype" name="scala.Int">Int</span>]</span>
+      </span>
+      
+      
     </li><li name="tetriski.pillars.core.BasicTrait#name" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="name:String"></a>
       <span class="permalink">
@@ -1627,7 +1659,7 @@ The I/O ports of this block will generate opNodes that can perform input/output 
         <span class="name">outPortMap</span><span class="result">: <span class="extype" name="scala.collection.immutable.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Int">Int</span>]</span>
       </span>
       
-      <p class="shortcomment cmt">A map between name and serial number of a output port.</p><div class="fullcomment"><div class="comment cmt"><p>A map between name and serial number of a output port.
+      <p class="shortcomment cmt">A map between name and identity number of a output port.</p><div class="fullcomment"><div class="comment cmt"><p>A map between name and identity number of a output port.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/Ports.html" class="extype" name="tetriski.pillars.core.Ports">Ports</a></dd></dl></div>
     </li><li name="tetriski.pillars.core.Ports#outPorts" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="outPorts:scala.collection.mutable.ArrayBuffer[String]"></a><a id="outPorts:ArrayBuffer[String]"></a>
@@ -1815,8 +1847,8 @@ Lists in Int format represent those elements.
         <span class="name">setModuleID</span><span class="params">(<span name="arg">arg: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       
-      <p class="shortcomment cmt">Set the module serial number of the module represented by this abstract model.</p><div class="fullcomment"><div class="comment cmt"><p>Set the module serial number of the module represented by this abstract model.
-</p></div><dl class="paramcmts block"><dt class="param">arg</dt><dd class="cmt"><p>the new module serial number</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BasicTrait.html" class="extype" name="tetriski.pillars.core.BasicTrait">BasicTrait</a></dd></dl></div>
+      <p class="shortcomment cmt">Set the module identity number of the module represented by this abstract model.</p><div class="fullcomment"><div class="comment cmt"><p>Set the module identity number of the module represented by this abstract model.
+</p></div><dl class="paramcmts block"><dt class="param">arg</dt><dd class="cmt"><p>the new module identity number</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BasicTrait.html" class="extype" name="tetriski.pillars.core.BasicTrait">BasicTrait</a></dd></dl></div>
     </li><li name="tetriski.pillars.core.BasicTrait#setName" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="setName(arg:String):Unit"></a><a id="setName(String):Unit"></a>
       <span class="permalink">
@@ -1904,8 +1936,8 @@ functional node and the functional capabilities of a module.
         <span class="name">setTypeID</span><span class="params">(<span name="arg">arg: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       
-      <p class="shortcomment cmt">Set the type serial number of the module represented by this abstract model.</p><div class="fullcomment"><div class="comment cmt"><p>Set the type serial number of the module represented by this abstract model.
-</p></div><dl class="paramcmts block"><dt class="param">arg</dt><dd class="cmt"><p>the new type serial number</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BasicTrait.html" class="extype" name="tetriski.pillars.core.BasicTrait">BasicTrait</a></dd></dl></div>
+      <p class="shortcomment cmt">Set the type identity number of the module represented by this abstract model.</p><div class="fullcomment"><div class="comment cmt"><p>Set the type identity number of the module represented by this abstract model.
+</p></div><dl class="paramcmts block"><dt class="param">arg</dt><dd class="cmt"><p>the new type identity number</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BasicTrait.html" class="extype" name="tetriski.pillars.core.BasicTrait">BasicTrait</a></dd></dl></div>
     </li><li name="tetriski.pillars.core.BasicTrait#setWidth" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="setWidth(arg:Int):Unit"></a><a id="setWidth(Int):Unit"></a>
       <span class="permalink">
@@ -2022,7 +2054,7 @@ It will be used for get ports of current block when designing the architecture.
         <span class="name">typeID</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
       </span>
       
-      <p class="shortcomment cmt">The type serial number of the module represented by this abstract model.</p><div class="fullcomment"><div class="comment cmt"><p>The type serial number of the module represented by this abstract model.
+      <p class="shortcomment cmt">The type identity number of the module represented by this abstract model.</p><div class="fullcomment"><div class="comment cmt"><p>The type identity number of the module represented by this abstract model.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/BasicTrait.html" class="extype" name="tetriski.pillars.core.BasicTrait">BasicTrait</a></dd></dl></div>
     </li><li name="tetriski.pillars.core.BlockTrait#typeNum" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="typeNum:Int"></a>
@@ -2076,7 +2108,7 @@ This function only is used when this module will perform a function.
       
       <p class="shortcomment cmt">Update the configuration of the module represented by this element.</p><div class="fullcomment"><div class="comment cmt"><p>Update the configuration of the module represented by this element.
 This function only is used when this module will perform routing.
-</p></div><dl class="paramcmts block"><dt class="param">fanInNums</dt><dd class="cmt"><p>a list of the serial numbers of fan-ins</p></dd><dt class="param">fanOutNums</dt><dd class="cmt"><p>a list of the serial numbers of fan-outs</p></dd><dt class="param">internalNum</dt><dd class="cmt"><p>the serial numbers of internal node that</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/ElementTrait.html" class="extype" name="tetriski.pillars.core.ElementTrait">ElementTrait</a></dd></dl></div>
+</p></div><dl class="paramcmts block"><dt class="param">fanInNums</dt><dd class="cmt"><p>a list of the identity numbers of fan-ins</p></dd><dt class="param">fanOutNums</dt><dd class="cmt"><p>a list of the identity numbers of fan-outs</p></dd><dt class="param">internalNum</dt><dd class="cmt"><p>the identity numbers of internal node that</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/ElementTrait.html" class="extype" name="tetriski.pillars.core.ElementTrait">ElementTrait</a></dd></dl></div>
     </li><li name="tetriski.pillars.core.ElementTrait#updateConfigArray" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="updateConfigArray(newConfig:BigInt):Unit"></a><a id="updateConfigArray(BigInt):Unit"></a>
       <span class="permalink">
