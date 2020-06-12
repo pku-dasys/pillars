@@ -135,8 +135,8 @@
                         <a href="Connect.html" title="A class containing the connections between ports.">Connect</a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
-                        <a class="class" href="ConstInfo.html" title="A class containing const values, the corresponding RCs and serial number of const units."></a>
-                        <a href="ConstInfo.html" title="A class containing const values, the corresponding RCs and serial number of const units.">ConstInfo</a>
+                        <a class="class" href="ConstInfo.html" title="A class containing const values, the corresponding RCs and identity number of const units."></a>
+                        <a href="ConstInfo.html" title="A class containing const values, the corresponding RCs and identity number of const units.">ConstInfo</a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
                         <a class="trait" href="ElementTrait.html" title="The trait of elements."></a>
@@ -430,7 +430,7 @@ mapped nodes in a MRRG representing this architecture, fire time and skew.
         <span class="name">constInfo</span><span class="result">: <a href="ConstInfo.html" class="extype" name="tetriski.pillars.core.ConstInfo">ConstInfo</a></span>
       </span>
       
-      <p class="shortcomment cmt">A class containing const values, the corresponding RCs and serial number of const units.</p>
+      <p class="shortcomment cmt">A class containing const values, the corresponding RCs and identity number of const units.</p>
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -515,8 +515,8 @@ mapped nodes in a MRRG representing this architecture, fire time and skew.
         <span class="name">getConstInfo</span><span class="params">()</span><span class="result">: <a href="ConstInfo.html" class="extype" name="tetriski.pillars.core.ConstInfo">ConstInfo</a></span>
       </span>
       
-      <p class="shortcomment cmt">Get the class containing const values, the corresponding RC and serial number of a const unit.</p><div class="fullcomment"><div class="comment cmt"><p>Get the class containing const values, the corresponding RC and serial number of a const unit.
-</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the class containing const values, the corresponding RC and serial number of a const unit</p></dd></dl></div>
+      <p class="shortcomment cmt">Get the class containing const values, the corresponding RC and identity number of a const unit.</p><div class="fullcomment"><div class="comment cmt"><p>Get the class containing const values, the corresponding RC and identity number of a const unit.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the class containing const values, the corresponding RC and identity number of a const unit</p></dd></dl></div>
     </li><li name="tetriski.pillars.core.SimulationHelper#getDataWithAddr" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getDataWithAddr(dataSize:Int,addrArray:Array[Int],inDataArrays:Array[Array[Int]],outDataArrays:Array[Array[Int]],refDataArrays:Array[Array[Int]]):Array[Any]"></a><a id="getDataWithAddr(Int,Array[Int],Array[Array[Int]],Array[Array[Int]],Array[Array[Int]]):Array[Any]"></a>
       <span class="permalink">
@@ -535,7 +535,7 @@ mapped nodes in a MRRG representing this architecture, fire time and skew.
       <p class="shortcomment cmt">Get data arrays with corresponding address.</p><div class="fullcomment"><div class="comment cmt"><p>Get data arrays with corresponding address.
 </p></div><dl class="paramcmts block"><dt class="param">dataSize</dt><dd class="cmt"><p>the data size of a data array</p></dd><dt class="param">addrArray</dt><dd class="cmt"><p>the address of the data arrays for LSUs</p></dd><dt class="param">inDataArrays</dt><dd class="cmt"><p>the input data arrays for LSUs</p></dd><dt class="param">outDataArrays</dt><dd class="cmt"><p>the expected data arrays for LSUs</p></dd><dt class="param">refDataArrays</dt><dd class="cmt"><p>the expected data arrays for the output ports</p></dd><dt>returns</dt><dd class="cmt"><p>Array(the input data arrays for LSUs with corresponding address,
         the expected data arrays for LSUs with corresponding address,
-        the expected data arrays for the output ports with corresponding serial number)</p></dd></dl></div>
+        the expected data arrays for the output ports with corresponding identity number)</p></dd></dl></div>
     </li><li name="tetriski.pillars.core.SimulationHelper#getOutputCycle" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getOutputCycle():Int"></a>
       <span class="permalink">
@@ -729,7 +729,7 @@ mapped nodes in a MRRG representing this architecture, fire time and skew.
         <span class="name">outPorts</span><span class="result">: <span class="extype" name="scala.collection.mutable.ArrayBuffer">ArrayBuffer</span>[<span class="extype" name="scala.Int">Int</span>]</span>
       </span>
       
-      <p class="shortcomment cmt">The array of the serial number of the mapped output ports.</p>
+      <p class="shortcomment cmt">The array of the identity number of the mapped output ports.</p>
     </li><li name="tetriski.pillars.core.SimulationHelper#outputCycle" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="outputCycle:Int"></a>
       <span class="permalink">
@@ -777,7 +777,7 @@ mapped nodes in a MRRG representing this architecture, fire time and skew.
         <span class="name">setConst</span><span class="params">(<span name="vals">vals: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Int">Int</span>]</span>, <span name="testII">testII: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       
-      <p class="shortcomment cmt">Set const values, the corresponding RC and serial number of a const unit.</p><div class="fullcomment"><div class="comment cmt"><p>Set const values, the corresponding RC and serial number of a const unit.
+      <p class="shortcomment cmt">Set const values, the corresponding RC and identity number of a const unit.</p><div class="fullcomment"><div class="comment cmt"><p>Set const values, the corresponding RC and identity number of a const unit.
 </p></div><dl class="paramcmts block"><dt class="param">vals</dt><dd class="cmt"><p>the const values</p></dd><dt class="param">testII</dt><dd class="cmt"><p>the target II</p></dd></dl></div>
     </li><li name="tetriski.pillars.core.SimulationHelper#size" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="size:Int"></a>
