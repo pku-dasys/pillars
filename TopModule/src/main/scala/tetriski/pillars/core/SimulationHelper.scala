@@ -36,13 +36,17 @@ class SimulationHelper(arch: ArchitctureHierarchy) {
    */
   val skewArray = new ArrayBuffer[Int]()
 
-  /** A class containing const values, the corresponding RCs and identity number of const units.
+  /** A class containing const values, the corresponding RCs and identification number of const units.
    */
   val constInfo = new ConstInfo()
 
-  /** The array of the identity number of the mapped output ports.
+  /** The array of the identification number of the mapped output ports.
    */
   val outPorts = new ArrayBuffer[Int]()
+
+  /** The array of the identification number of the mapped input ports.
+   */
+  val inputPorts = new ArrayBuffer[Int]()
 
   /** The cycle we can obtain the result.
    */
@@ -73,11 +77,17 @@ class SimulationHelper(arch: ArchitctureHierarchy) {
     if (op.contains("output") || op.contains("input")) {
       moduleArray.append(arch)
       if (op.contains("output")) {
-        //Add the identity number of the mapped output ports into outPorts.
+        //Add the identification number of the mapped output ports into outPorts.
         var tempStr = ("out_[0-9]+".r findFirstIn tempList(1)).toArray
         tempStr = ("[0-9]+".r findFirstIn tempStr(0)).toArray
         val port = tempStr(0).toInt
         outPorts.append(port)
+      } else if (op.contains("input")) {
+        //Add the identification number of the mapped input ports into inputPorts.
+        var tempStr = ("input_[0-9]+".r findFirstIn tempList(1)).toArray
+        tempStr = ("[0-9]+".r findFirstIn tempStr(0)).toArray
+        val port = tempStr(0).toInt
+        inputPorts.append(port)
       }
     } else {
       val module = temp.getElement(moduleName(moduleName.size - 2))
@@ -139,10 +149,10 @@ class SimulationHelper(arch: ArchitctureHierarchy) {
     arch.getSchedules()
   }
 
-  /** Set const values, the corresponding RC and identity number of a const unit.
+  /** Set const values, the corresponding RC and identification number of a const unit.
    *
    * @param vals   the const values
-   * @param testII the target II
+   * @param testII the targeted II
    */
   def setConst(vals: Array[Int], testII: Int): Unit = {
     constInfo.reset(testII)
@@ -156,9 +166,9 @@ class SimulationHelper(arch: ArchitctureHierarchy) {
     }
   }
 
-  /** Get the class containing const values, the corresponding RC and identity number of a const unit.
+  /** Get the class containing const values, the corresponding RC and identification number of a const unit.
    *
-   * @return the class containing const values, the corresponding RC and identity number of a const unit
+   * @return the class containing const values, the corresponding RC and identification number of a const unit
    */
   def getConstInfo(): ConstInfo = {
     constInfo
@@ -173,7 +183,7 @@ class SimulationHelper(arch: ArchitctureHierarchy) {
    * @param refDataArrays the expected data arrays for the output ports
    * @return Array(the input data arrays for LSUs with corresponding address,
    *         the expected data arrays for LSUs with corresponding address,
-   *         the expected data arrays for the output ports with corresponding identity number)
+   *         the expected data arrays for the output ports with corresponding identification number)
    */
   def getDataWithAddr(dataSize: Int = 0, addrArray: Array[Int] = null, inDataArrays: Array[Array[Int]] = null,
                       outDataArrays: Array[Array[Int]] = null, refDataArrays: Array[Array[Int]] = null): Array[Any] = {

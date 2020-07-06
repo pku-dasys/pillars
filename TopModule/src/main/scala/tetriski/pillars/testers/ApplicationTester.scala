@@ -9,7 +9,7 @@ import tetriski.pillars.hardware.TopModule
  * the "throughput" indicates after how many times of such repeats, a new result can be obtained.
  * For example, if II = 2 and throughput = 2, we can obtain a new result every 4 cycles.
  * However, it is not recommended to use this parameter, and we suggest users to
- * update the target architecture or mapping parameters.
+ * update the targeted architecture or mapping parameters.
  *
  * The "outputCycle" must be exactly right when the results are verified at output
  * ports of the top module during the activating process, while if only the
@@ -17,23 +17,27 @@ import tetriski.pillars.hardware.TopModule
  *
  * @param bitStreams the configurations
  * @param schedules  the schedules of modules
- * @param testII     the target II
+ * @param testII     the targeted II
  */
 class AppTestHelper(bitStreams: Array[BigInt], schedules: List[Int],
                     testII: Int) {
   /** A map between a list and the input data array.
-   * The list consists of the identity number of target LSU and base address.
+   * The list consists of the identification number of targeted LSU and base address.
    */
   var inDataMap = Map[List[Int], Array[Int]]()
 
   /** A map between a list and the expected output data array.
-   * The list consists of the identity number of target LSU and base address.
+   * The list consists of the identification number of targeted LSU and base address.
    */
   var outDataMap = Map[List[Int], Array[Int]]()
 
-  /** A map between the target output port and the expected data array.
+  /** A map between the targeted output port and the expected data array.
    */
   var outPortRefs = Map[Int, Array[Int]]()
+
+  /** A map between the targeted input port and the input data array.
+   */
+  var inputPortData = Map[Int, Array[Int]]()
 
   /** The cycle we can obtain the result.
    */
@@ -68,15 +72,21 @@ class AppTestHelper(bitStreams: Array[BigInt], schedules: List[Int],
     outputCycle = arg
   }
 
-  /** Set the map between the target output port and the expected data array.
+  /** Set the map between the targeted output port and the expected data array.
    */
   def setOutPortRefs(arg: Map[Int, Array[Int]]): Unit = {
     outPortRefs = arg
   }
 
+  /** Set the map between the targeted input port and the input data array.
+   */
+  def setInputPortData(arg: Map[Int, Array[Int]]): Unit = {
+    inputPortData = arg
+  }
+
   /** Get the input data array.
    *
-   * @param numLSU identity number of target LSU
+   * @param numLSU identification number of targeted LSU
    * @param base   the base address
    * @return the input data array
    */
@@ -86,7 +96,7 @@ class AppTestHelper(bitStreams: Array[BigInt], schedules: List[Int],
 
   /** Add a input data array into the corresponding map.
    *
-   * @param numLSU identity number of target LSU
+   * @param numLSU identification number of targeted LSU
    * @param base   the base address
    * @param inData the input data array
    */
@@ -104,7 +114,7 @@ class AppTestHelper(bitStreams: Array[BigInt], schedules: List[Int],
 
   /** Get the expected output data array.
    *
-   * @param numLSU identity number of target LSU
+   * @param numLSU identification number of targeted LSU
    * @param base   the base address
    * @return the expected output data array
    */
@@ -114,7 +124,7 @@ class AppTestHelper(bitStreams: Array[BigInt], schedules: List[Int],
 
   /** Add a expected output data array into the corresponding map.
    *
-   * @param numLSU  identity number of target LSU
+   * @param numLSU  identification number of targeted LSU
    * @param base    the base address
    * @param outData the expected output data array
    */
@@ -158,9 +168,9 @@ class AppTestHelper(bitStreams: Array[BigInt], schedules: List[Int],
     ret
   }
 
-  /** Get the target II.
+  /** Get the targeted II.
    *
-   * @return the target II
+   * @return the targeted II
    */
   def getTestII(): Int = {
     testII
@@ -174,12 +184,20 @@ class AppTestHelper(bitStreams: Array[BigInt], schedules: List[Int],
     outputCycle
   }
 
-  /** Get the map between the target output port and the expected data array.
+  /** Get the map between the targeted output port and the expected data array.
    *
-   * @return the map between the target output port and the expected data array
+   * @return the map between the targeted output port and the expected data array
    */
   def getOutPortRefs(): Map[Int, Array[Int]] = {
     outPortRefs
+  }
+
+  /** Get the map between the targeted input port and the input data array.
+   *
+   * @return the map between the targeted input port and the input data array
+   */
+  def getInputPortData(): Map[Int, Array[Int]] = {
+    inputPortData
   }
 }
 
@@ -203,7 +221,7 @@ class ApplicationTester(c: TopModule, appTestHelper: AppTestHelper) extends Peek
 
   /** Enters data into a LSU.
    *
-   * @param numInLSU the identity number of this LSU
+   * @param numInLSU the identification number of this LSU
    * @param inData   the input data array
    * @param base     the base address
    */
@@ -239,7 +257,7 @@ class ApplicationTester(c: TopModule, appTestHelper: AppTestHelper) extends Peek
 
   /** Verifies data in a LSU during the post-process.
    *
-   * @param numInLSU the identity number of this LSU
+   * @param numInLSU the identification number of this LSU
    * @param refArray the expected output data array
    * @param base     the base address
    */
@@ -281,7 +299,7 @@ class ApplicationTester(c: TopModule, appTestHelper: AppTestHelper) extends Peek
 
   /** Set the configurations and schedules in the pre-process.
    *
-   * @param testII the target II
+   * @param testII the targeted II
    */
   def inputConfig(testII: Int): Unit = {
     val schedules = appTestHelper.getSchedulesBigInt()
@@ -299,7 +317,7 @@ class ApplicationTester(c: TopModule, appTestHelper: AppTestHelper) extends Peek
 
   /** Verifies data in output ports during the activating process.
    *
-   * @param testII the target II
+   * @param testII the targeted II
    */
   def checkPortOuts(testII: Int): Unit = {
     val refs = appTestHelper.getOutPortRefs()
@@ -313,6 +331,51 @@ class ApplicationTester(c: TopModule, appTestHelper: AppTestHelper) extends Peek
         println(asUnsignedInt(i).toString + " " + peek(c.io.outs(ref._1)).toString())
         step(testII * throughput)
       }
+    }
+  }
+
+  /** Verifies data in output ports during the activating process
+   * when transferring data through the input ports.
+   * This function is correct when the latencies of the input operators are all 0
+   * and appTestHelper.getThroughput() is 1.
+   *
+   * @param testII the targeted II
+   */
+  def checkPortOutsWithInput(testII: Int): Unit = {
+    val refs = appTestHelper.getOutPortRefs()
+    val outputCycle = appTestHelper.getOutputCycle()
+    val inputData = appTestHelper.getInputPortData().toArray
+
+    //Wait till the configuration controllers are ready.
+    step(testII)
+
+    var cycle = 0
+    val T = inputData(0)._2.size + outputCycle / testII - 1
+    for (t <- 0 until T) {
+      if (t < inputData(0)._2.size) {
+        for (data <- inputData) {
+          poke(c.io.inputs(data._1), data._2(t))
+        }
+      }
+
+      if ((outputCycle - testII) <= cycle) {
+        step(outputCycle % testII)
+        for (ref <- refs) {
+          var pos = t - outputCycle / testII + 1
+          if(outputCycle % testII != 0){
+            pos -= 1
+          }
+          val value = ref._2(pos)
+          expect(c.io.outs(ref._1), asUnsignedInt(value))
+          println(asUnsignedInt(value).toString + " " + peek(c.io.outs(ref._1)).toString())
+        }
+        step(testII - outputCycle % testII)
+      }else{
+        step(testII)
+      }
+
+      cycle = cycle + testII
+
     }
   }
 
@@ -330,7 +393,7 @@ class ApplicationTester(c: TopModule, appTestHelper: AppTestHelper) extends Peek
 }
 
 /** A tester for sum.
- * The post-process is not necessary since there are no store operations in the target DFG.
+ * The post-process is not necessary since there are no store operations in the targeted DFG.
  *
  * @param c             the top design
  * @param appTestHelper the class which is helpful when creating testers

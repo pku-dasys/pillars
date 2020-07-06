@@ -85,7 +85,7 @@ object Scheduler {
   }
 
   /** This function is used to do schedule reconstruction,
-   *  we will calculate skew and fire time(beginCycle) here.
+   * we will calculate skew and fire time(beginCycle) here.
    *
    * @param dfg      the DFG we used
    * @param mrrg     the MRRG we used
@@ -122,7 +122,7 @@ object Scheduler {
       val node = queue.dequeue()
       node.visited = true
       var laten, preLaten, latenWithoutConst = node.latency
-      node.constInput = false
+      node.primaryInput = false
 
       /** Update the latency of node based on its input.
        */
@@ -140,8 +140,9 @@ object Scheduler {
             node.annulateLatency = -node.inputLatency(i)
           }
         }
-        if (node.input(i).name.indexOf("const") != -1) {
-          node.constInput = true
+        if (node.input(i).name.indexOf("const") != -1 ||
+          node.input(i).name.indexOf("input") != -1) {
+          node.primaryInput = true
         }
       }
 
@@ -228,7 +229,7 @@ object Scheduler {
           } else {
             node.skew = node.annulateLatency + II
           }
-        } else if (!node.constInput) {
+        } else if (!node.primaryInput) {
           val inLatency0 = node.input(0).latency + node.inputLatency(0)
           val inLatency1 = node.input(1).latency + node.inputLatency(1)
           node.skew = inLatency0 - inLatency1
@@ -261,7 +262,7 @@ object Scheduler {
 
     for (op <- dfg.opNodes) {
       var outLatency = op.latency + beginCycle
-      if (op.annulateLatency != 0 && op.constInput) {
+      if (op.annulateLatency != 0 && op.primaryInput) {
         outLatency = outLatency + II
       }
       println(op.name + " " + outLatency + " " + op.skew)

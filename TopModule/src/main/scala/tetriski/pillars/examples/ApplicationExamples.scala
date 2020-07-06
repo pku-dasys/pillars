@@ -3,7 +3,7 @@ package tetriski.pillars.examples
 import chisel3.iotesters
 import tetriski.pillars.archlib.TileCompleteBlock
 import tetriski.pillars.core._
-import tetriski.pillars.hardware.{TopModule, TopModuleWrapper}
+import tetriski.pillars.hardware.{TopModule, TopModuleWrapper, TopModuleWrapperSolid}
 import tetriski.pillars.testers._
 
 /** Some examples showing how to test applications with a 4*4 TileCompleteBlock.
@@ -47,17 +47,17 @@ object ApplicationExamples {
 
   val simulationHelper = new SimulationHelper(arch)
 
-  /** Dump MRRG and a description file in JSON of the target architecture.
+  /** Dump MRRG and a description file in JSON of the targeted architecture.
    *
-   * @param targetII the target II
+   * @param targetedII the targeted II
    * @param filename the file name to save MRRG
    */
-  def dumpArch(targetII: Int, filename: String = null): Unit = {
-    arch.blockMap("tile_0").dumpMRRG(targetII, filename)
+  def dumpArch(targetedII: Int, filename: String = null): Unit = {
+    arch.blockMap("tile_0").dumpMRRG(targetedII, filename)
     arch.dumpArchitecture()
   }
 
-  /** Dump generated Verilog of the target architecture.
+  /** Dump generated Verilog of the targeted architecture.
    */
   def dumpWrapperVerilog(): Unit = {
     //Verilog generation
@@ -88,7 +88,7 @@ object ApplicationExamples {
      *
      * @param resultFilename the file name of result TXT
      * @param infoFilename   the file name of information TXT
-     * @param testII         the target II
+     * @param testII         the targeted II
      * @param constVals      an array of const values
      * @param addrArray      an array of the address of input/output data
      * @param throughput     a parameter indicating the throughput of mapping result
@@ -206,7 +206,7 @@ object ApplicationExamples {
      *
      * @param resultFilename the file name of result TXT
      * @param infoFilename   the file name of information TXT
-     * @param testII         the target II
+     * @param testII         the targeted II
      * @param constVals      an array of const values
      * @param addrArray      an array of the address of input/output data
      * @param throughput     a parameter indicating the throughput of mapping result
@@ -330,7 +330,7 @@ object ApplicationExamples {
      *
      * @param resultFilename the file name of result TXT
      * @param infoFilename   the file name of information TXT
-     * @param testII         the target II
+     * @param testII         the targeted II
      * @param constVals      an array of const values
      * @param addrArray      an array of the address of input/output data
      * @param throughput     a parameter indicating the throughput of mapping result
@@ -442,7 +442,7 @@ object ApplicationExamples {
      *
      * @param resultFilename the file name of result TXT
      * @param infoFilename   the file name of information TXT
-     * @param testII         the target II
+     * @param testII         the targeted II
      * @param constVals      an array of const values
      * @param addrArray      an array of the address of input/output data
      * @param throughput     a parameter indicating the throughput of mapping result

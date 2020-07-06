@@ -48,9 +48,9 @@ trait ElementTrait extends Ports with BasicTrait {
   /** Update the configuration of the module represented by this element.
    * This function only is used when this module will perform routing.
    *
-   * @param fanInNums   a list of the identity numbers of fan-ins
-   * @param fanOutNums  a list of the identity numbers of fan-outs
-   * @param internalNum the identity numbers of internal node that
+   * @param fanInNums   a list of the identification numbers of fan-ins
+   * @param fanOutNums  a list of the identification numbers of fan-outs
+   * @param internalNum the identification numbers of internal node that
    */
   def updateConfig(fanInNums: List[Int], fanOutNums: List[Int], internalNum: Int): Unit = {
     if (internalNodes.size > 1) {

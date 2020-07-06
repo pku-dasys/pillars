@@ -21,9 +21,11 @@ object Mapping {
   //  }
   def main(args: Array[String]): Unit = {
     //    System.out.println(System.getProperty("java.library.path"))
-    val dfgFilename = "DOT/vadd/vadd.dot"
-    val mrrgFilename = "MRRG/cgra-mrrg-4m4-ii2.txt"
-    val outFilename = "app_mapping_results/vadd/ii2"
+//    val dfgFilename = "DOT/vadd/vadd.dot"
+    val dfgFilename = "tutorial/MM.dot"
+//    val mrrgFilename = "MRRG/cgra-mrrg-4m4-ii1.txt"
+    val mrrgFilename = "MRRG/cgra-mrrg-4m4-ii1.txt"
+    val outFilename = "tutorial/ii1"
     val dfg: DFG = DotReader.loadDot(dfgFilename)
     //dfg.printDFG()
     println("dfg loaded!")
@@ -31,6 +33,6 @@ object Mapping {
     mrrg.loadTXT(mrrgFilename)
     println("mrrg loaded!")
     ILPMap.mapping(dfg, mrrg, filename = outFilename)
-    Scheduler.schedule(dfg, mrrg, filename = outFilename, II = 2)
+    Scheduler.schedule(dfg, mrrg, filename = outFilename, II = 1)
   }
 }
