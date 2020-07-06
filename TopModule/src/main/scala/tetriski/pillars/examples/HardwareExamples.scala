@@ -231,9 +231,9 @@ object HardwareExamples {
 
     arch.init()
 
-    val targetII = 3
+    val targetedII = 3
 
-    arch.blockMap("tile_0").dumpMRRG(targetII)
+    arch.blockMap("tile_0").dumpMRRG(targetedII)
 
     arch.dumpArchitecture()
 
@@ -251,12 +251,12 @@ object HardwareExamples {
       () => new TopModule(hardwareGenerator.pillarsModuleInfo, hardwareGenerator.connectMap,
         hardwareGenerator.regionList, dataWidth))
 
-    val constInfo = new ConstInfo(targetII)
+    val constInfo = new ConstInfo(targetedII)
     constInfo.addConst(arch("tile_0")("pe_0_3").getElement("const0").getModuleID(), 0, 1)
     constInfo.addConst(arch("tile_0")("pe_3_1").getElement("const0").getModuleID(), 1, 1)
 
     val bitStreams = arch.genConfig("app_mapping_results/hardware_test/internalNodeinfo_complete.txt",
-      targetII, constInfo)
+      targetedII, constInfo)
 
     arch("tile_0")("pe_3_0").getElement("alu0").setFireTime(4, 1)
 

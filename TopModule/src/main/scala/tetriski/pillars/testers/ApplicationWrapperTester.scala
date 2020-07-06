@@ -23,7 +23,7 @@ class ApplicationWrapperTester(c: TopModuleWrapper, appTestHelper: AppTestHelper
 
   /** Enters data into a LSU.
    *
-   * @param numInLSU the identity number of this LSU
+   * @param numInLSU the identification number of this LSU
    * @param inData   the input data array
    * @param base     the base address
    */
@@ -60,7 +60,7 @@ class ApplicationWrapperTester(c: TopModuleWrapper, appTestHelper: AppTestHelper
 
   /** Verifies data in a LSU during the post-process.
    *
-   * @param numInLSU the identity number of this LSU
+   * @param numInLSU the identification number of this LSU
    * @param refArray the expected output data array
    * @param base     the base address
    */
@@ -104,7 +104,7 @@ class ApplicationWrapperTester(c: TopModuleWrapper, appTestHelper: AppTestHelper
 
   /** Verifies data in output ports during the activating process.
    *
-   * @param testII the target II
+   * @param testII the targeted II
    */
   def checkPortOuts(testII: Int): Unit = {
     val refs = appTestHelper.getOutPortRefs()
@@ -134,7 +134,7 @@ class ApplicationWrapperTester(c: TopModuleWrapper, appTestHelper: AppTestHelper
   }
 
   /** Set the configurations and schedules in the pre-process.
-   * The target II is 1.
+   * The targeted II is 1.
    */
   def inputConfig(): Unit = {
     /** Get a single bit of a input data at a given position.

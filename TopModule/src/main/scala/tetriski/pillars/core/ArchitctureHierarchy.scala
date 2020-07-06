@@ -176,8 +176,8 @@ class ArchitctureHierarchy extends BlockTrait {
    *          should perform the opcode "8" (i.e. ADD).
    *          So its configuration should be 0, seen in OpcodeTranslator.
    * @param filename  the file name of information TXT
-   * @param II        the target initiation interval (II)
-   * @param constInfo the class containing const values, the corresponding RCs and identity number of const units
+   * @param II        the targeted initiation interval (II)
+   * @param constInfo the class containing const values, the corresponding RCs and identification number of const units
    */
   def genConfig(filename: String, II: Int, constInfo: ConstInfo = null): Array[BigInt] = {
     val retBitstreams = new ArrayBuffer[BigInt]()

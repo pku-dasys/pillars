@@ -13,6 +13,9 @@ run:
 mapping:
 	sbt 'test:runMain tetriski.pillars.mapping.Mapping'
 
+end2end:
+	sbt 'test:runMain tetriski.pillars.examples.Tutorial'
+
 clean:
 	rm -f *.json *.fir *.v
 	rm -rf test_run_dir/

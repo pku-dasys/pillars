@@ -3,6 +3,7 @@ package tetriski.pillars.core
 import java.io.{File, PrintWriter}
 
 import tetriski.pillars.core.MRRGMode._
+import tetriski.pillars.core.OpEnum.OpEnum
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -261,12 +262,12 @@ trait BlockTrait extends ElementTrait {
    *          "opcode nOp                    "
    *          ......
    * @param writer     the JAVA PrintWriter
-   * @param targetMRRG this MRRG
+   * @param targetedMRRG this MRRG
    */
-  def dumpMRRGAsTXT(writer: PrintWriter, targetMRRG: MRRG): Unit = {
+  def dumpMRRGAsTXT(writer: PrintWriter, targetedMRRG: MRRG): Unit = {
     writer.flush()
-    val noOpSet = targetMRRG.getNoOpSet()
-    val funSet = targetMRRG.nodes.toSet &~ (noOpSet)
+    val noOpSet = targetedMRRG.getNoOpSet()
+    val funSet = targetedMRRG.nodes.toSet &~ (noOpSet)
     writer.println(noOpSet.size)
     for (node <- noOpSet.toArray.sortBy(x => x.getName())) {
       writer.println("<" + node.getName() + ">")
@@ -354,7 +355,7 @@ trait BlockTrait extends ElementTrait {
    * the corresponding latency in generated MRRG.
    *
    * @param oriMRRG the origin MRRG
-   * @param II      the target II
+   * @param II      the targeted II
    * @return unrolled MRRG
    */
   def graphUnroll(oriMRRG: MRRG, II: Int): MRRG = {
@@ -367,14 +368,21 @@ trait BlockTrait extends ElementTrait {
       (i + 1) % II
     }
 
-    val targetMRRG = new MRRG()
+    val targetedMRRG = new MRRG()
     for (i <- 0 until II) {
       val tempMRRG = oriMRRG.clone()
       for (node <- tempMRRG.nodeMap) {
         val name = node._1
         tempMRRG.update(name, i.toString + ":" + name)
+        //Make sure the input operators only appear in the first reconfiguration cycle.
+        if(i > 0){
+          val tempNode = tempMRRG.nodes(node._2)
+          if(tempNode.ops.contains(OpEnum.INPUT)){
+            tempNode.ops.clear()
+          }
+        }
       }
-      targetMRRG.merge(tempMRRG)
+      targetedMRRG.merge(tempMRRG)
     }
     //Add edges between copies of internal routing nodes,
     //which modeling the storage function of registers.
@@ -384,15 +392,15 @@ trait BlockTrait extends ElementTrait {
       val source = undeterminedInConnect(0).getName()
       val sink = undeterminedInConnect(1).getName()
       if (II == 1) {
-        targetMRRG.addConnect("0:" + source, "0:" + sink)
+        targetedMRRG.addConnect("0:" + source, "0:" + sink)
       } else {
         val sinkNode = undeterminedInConnect(1)
         for (i <- 0 until II) {
           //The latency between input ports and inner nodes.
           if (sinkNode.mode == REG_MODE) {
-            targetMRRG.addConnect(i.toString + ":" + source, incModII(i).toString + ":" + sink)
+            targetedMRRG.addConnect(i.toString + ":" + source, incModII(i).toString + ":" + sink)
           } else {
-            targetMRRG.addConnect(i.toString + ":" + source, i.toString + ":" + sink)
+            targetedMRRG.addConnect(i.toString + ":" + source, i.toString + ":" + sink)
           }
         }
       }
@@ -402,17 +410,17 @@ trait BlockTrait extends ElementTrait {
       val source = undeterminedOutConnect(0).getName()
       val sink = undeterminedOutConnect(1).getName()
       if (II == 1) {
-        targetMRRG.addConnect("0:" + source, "0:" + sink)
+        targetedMRRG.addConnect("0:" + source, "0:" + sink)
       } else {
         val sourceNode = undeterminedOutConnect(0)
         for (i <- 0 until II) {
           //The latency between inner nodes and output ports.
           if (sourceNode.mode == MEM_MODE) {
-            targetMRRG.addConnect(i.toString + ":" + source, incModII(i).toString + ":" + sink)
+            targetedMRRG.addConnect(i.toString + ":" + source, incModII(i).toString + ":" + sink)
           } else if (sourceNode.mode == NORMAL_MODE) {
-            targetMRRG.addConnect(i.toString + ":" + source, i.toString + ":" + sink)
+            targetedMRRG.addConnect(i.toString + ":" + source, i.toString + ":" + sink)
           } else if (sourceNode.mode == REG_MODE) {
-            targetMRRG.addConnect(i.toString + ":" + source, i.toString + ":" + sink)
+            targetedMRRG.addConnect(i.toString + ":" + source, i.toString + ":" + sink)
             regSourceSet = regSourceSet + source
           }
         }
@@ -424,34 +432,36 @@ trait BlockTrait extends ElementTrait {
     //which modeling the storage function of registers.
     for (source <- regSourceSet) {
       for (i <- 0 until II) {
-        targetMRRG.addConnect(i.toString + ":" + source, incModII(i).toString + ":" + source)
+        targetedMRRG.addConnect(i.toString + ":" + source, incModII(i).toString + ":" + source)
       }
     }
-    targetMRRG
+    targetedMRRG
   }
 
   /** Get the MRRG of this block with II.
    *
-   * @param II the target II
+   * @param II the targeted II
    */
-  def getMRRG(II: Int): MRRG = graphUnroll(mrrg, II)
+  def getMRRG(II: Int): MRRG = {
+    initialization()
+    graphUnroll(mrrg, II)
+  }
 
   /** Dump the MRRG of this block with II.
    *
-   * @param II       the target II
+   * @param II       the targeted II
    * @param filename the name of file for dumping
    */
   def dumpMRRG(II: Int, filename: String = null): Unit = {
 
-    initialization()
-    val targetMRRG = getMRRG(II)
+    val targetedMRRG = getMRRG(II)
 
     var outFilename = filename
     if (filename == null) {
       outFilename = hierarchyName.map(str => str + ".").reverse.reduce(_ + _) + "mrrg.txt"
     }
     val writer = new PrintWriter(new File(outFilename))
-    dumpMRRGAsTXT(writer, targetMRRG)
+    dumpMRRGAsTXT(writer, targetedMRRG)
   }
 
   /** Get all sub-blocks belonging to this block as a array.
