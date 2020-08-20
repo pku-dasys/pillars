@@ -103,6 +103,11 @@ public class gurobiMapJava {
     Map<String, Integer> DFGskewMap;
     Map<String, Integer> DFGlatencyMap;
     Map<List<String>, Integer> MRRGdistence;
+    Map<Integer, Integer> regMap;
+    Map<Integer, List<Integer>> regConnect;
+    Map<Integer, List<Integer>> func2regMap;
+    Map<Integer, List<List<Integer>>> reg2funcMap;
+    Map<Integer, List<List<Integer>>> funcDirect2funcMap;
     int II = 1;
     int numDfgVals = 0;
     int numDfgOps = 0;
@@ -156,6 +161,11 @@ public class gurobiMapJava {
         DFGskewMap = new HashMap<>();
         DFGlatencyMap = new HashMap<>();
         MRRGdistence = new HashMap<>();
+        regMap = new HashMap<>();
+        regConnect = new HashMap<>();
+        func2regMap = new HashMap<>();
+        reg2funcMap = new HashMap<>();
+        funcDirect2funcMap = new HashMap<>();
     }
 
     /**
@@ -387,6 +397,7 @@ public class gurobiMapJava {
 //            }
             /****Debug****/
 
+            Map<Integer, Integer> mappedOp2MrrgMap = new HashMap();
 
             for (int val = 0; val < numDfgVals; val++) {
                 for (int r = 0; r < numMrrgR; r++)
@@ -408,6 +419,7 @@ public class gurobiMapJava {
                         resultFile.write(DFGopNodeName.get(op) + " " + MRRGfunctionName.get(f) + "\n");
                         f_mapped[f] = DFGopNodeOpcode.get(op).intValue() + 1;
                         f_result[f] = op;
+                        mappedOp2MrrgMap.put(op, f);
                     }
             resultFile.flush();
             resultFile.close();
@@ -450,6 +462,86 @@ public class gurobiMapJava {
             infoFile.flush();
             infoFile.close();
 
+            if (ringCheckPass) {
+                int regCount = 0;
+                for (int val = 0; val < numDfgVals; val++) {
+                    for (int fanout = 0; fanout < DFGvalNodeOut.get(val).size(); fanout++) {
+                        Map<Integer, List<Integer>> graph = getGraph(modelR, val, fanout);
+                        int op = DFGvalB2opMap.get(DFGvalNodeName.get(val));
+                        int mappedMrrgNode = mappedOp2MrrgMap.get(op);
+                        List<Integer> functionFanout = MRRGfunctionFanout.get(mappedMrrgNode);
+                        List<Integer> roots = new ArrayList<>();
+                        for (Integer root : functionFanout) {
+                            if (graph.containsKey(root)) {
+                                roots.add(root);
+                            }
+                        }
+                        if (roots.size() == 1) {
+                            int root = roots.get(0);
+                            int currentNode = root;
+                            int previousReg = -1;
+                            while (graph.get(currentNode).size() != 0) {
+                                if (MRRGlatency.containsKey(MRRGroutingName.get(currentNode))) {
+                                    if (!regMap.containsKey(currentNode)) {
+                                        regMap.put(currentNode, regCount++);
+                                    }
+                                    if (previousReg == -1) {
+                                        if (func2regMap.containsKey(op)) {
+                                            if (!func2regMap.get(op).contains(regMap.get(currentNode))) {
+                                                func2regMap.get(op).add(regMap.get(currentNode));
+                                            }
+                                        } else {
+                                            List<Integer> regList = new ArrayList<>();
+                                            regList.add(regMap.get(currentNode));
+                                            func2regMap.put(op, regList);
+                                        }
+                                    } else {
+                                        if (regConnect.containsKey(previousReg)) {
+                                            regConnect.get(previousReg).add(regMap.get(currentNode));
+                                        } else {
+                                            List<Integer> regList = new ArrayList<>();
+                                            regList.add(regMap.get(currentNode));
+                                            regConnect.put(previousReg, regList);
+                                        }
+                                    }
+                                    previousReg = regMap.get(currentNode);
+                                }
+                                if (graph.get(currentNode).size() == 1) {
+                                    currentNode = graph.get(currentNode).get(0);
+
+                                } else {
+                                    System.out.println("\033[31;4m" + "Fanout is not a chain." + "\033[0m");
+                                }
+                            }
+                            int outOp = DFGvalNodeOut.get(val).get(fanout);
+                            int outOpOperand = DFGvalNodeOutputOperand.get(val).get(fanout);
+                            List<Integer> outOpPair = new LinkedList<>();
+                            outOpPair.add(outOp);
+                            outOpPair.add(outOpOperand);
+                            if (previousReg == -1) {
+                                if (funcDirect2funcMap.containsKey(op)) {
+                                    funcDirect2funcMap.get(op).add(outOpPair);
+                                } else {
+                                    List<List<Integer>> funcList = new ArrayList<>();
+                                    funcList.add(outOpPair);
+                                    funcDirect2funcMap.put(op, funcList);
+                                }
+                            } else {
+                                if (reg2funcMap.containsKey(previousReg)) {
+                                    reg2funcMap.get(previousReg).add(outOpPair);
+                                } else {
+                                    List<List<Integer>> funcList = new ArrayList<>();
+                                    funcList.add(outOpPair);
+                                    reg2funcMap.put(previousReg, funcList);
+                                }
+                            }
+                        } else {
+                            System.out.println("\033[31;4m" + "Find root fail." + "\033[0m");
+                        }
+                    }
+                }
+            }
+
             List<Integer>[] result = new List[2];
             result[0] = new ArrayList<>();
             result[1] = new ArrayList<>();
@@ -480,33 +572,41 @@ public class gurobiMapJava {
 
     }
 
+    Map<Integer, List<Integer>> getGraph(GRBModel model, Integer val, Integer fanout) throws GRBException {
+        Set<Integer> mappedRoutingNodes = new HashSet<>();
+        int fanouts = DFGvalNodeOut.get(val).size();
+        for (int r = 0; r < numMrrgR; r++) {
+            String valueName = "R_" + r + "_" + val;
+            if (fanouts > 1) {
+                valueName = "R_" + r + "_" + val + "_" + fanout;
+            }
+            if (model.getVarByName(valueName).get(GRB.DoubleAttr.X) == 1) {
+                mappedRoutingNodes.add(r);
+            }
+        }
+        Map<Integer, List<Integer>> graph = new HashMap<>();
+        for (Integer mappedRoutingNode : mappedRoutingNodes) {
+            List<Integer> mappedOutNodes = new ArrayList<>();
+            List<Integer> outNodes = MRRGroutingFanout.get(mappedRoutingNode);
+            for (int i = 0; i < outNodes.size(); i++) {
+                if (MRRGroutingFanoutType.get(mappedRoutingNode).get(i) == 0) {
+                    int outNode = outNodes.get(i);
+                    if (mappedRoutingNodes.contains(outNode)) {
+                        mappedOutNodes.add(outNode);
+                    }
+                }
+            }
+            graph.put(mappedRoutingNode, mappedOutNodes);
+        }
+        return graph;
+    }
+
     Boolean checkRoutingWithoutUselessRing(GRBModel model) throws GRBException {
         List<Map<Integer, List<Integer>>> testedGraphs = new ArrayList<>();
         for (int val = 0; val < numDfgVals; val++) {
             int fanouts = DFGvalNodeOut.get(val).size();
             for (int fanout = 0; fanout < fanouts; fanout++) {
-                Set<Integer> mappedRoutingNodes = new HashSet<>();
-                for (int r = 0; r < numMrrgR; r++) {
-                    String valueName = "R_" + r + "_" + val;
-                    if (fanouts > 1) {
-                        valueName = "R_" + r + "_" + val + "_" + fanout;
-                    }
-                    if (model.getVarByName(valueName).get(GRB.DoubleAttr.X) == 1) {
-//                        System.out.println(valueName + ": " + DFGvalNodeName.get(val) + " " + MRRGroutingName.get(r));
-                        mappedRoutingNodes.add(r);
-                    }
-                }
-                Map<Integer, List<Integer>> graph = new HashMap<>();
-                for (Integer mappedRoutingNode : mappedRoutingNodes) {
-                    List<Integer> mappedOutNodes = new ArrayList<>();
-                    List<Integer> outNodes = MRRGroutingFanout.get(mappedRoutingNode);
-                    for (Integer outNode : outNodes) {
-                        if (mappedRoutingNodes.contains(outNode)) {
-                            mappedOutNodes.add(outNode);
-                        }
-                    }
-                    graph.put(mappedRoutingNode, mappedOutNodes);
-                }
+                Map<Integer, List<Integer>> graph = getGraph(model, val, fanout);
                 testedGraphs.add(graph);
             }
         }

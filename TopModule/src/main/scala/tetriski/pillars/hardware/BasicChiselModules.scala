@@ -262,45 +262,6 @@ class Alu(funSelect: Int, w: Int) extends Module {
 }
 
 
-/** A simple adder.
- *
- * @deprecated
- * @param w the data width
- */
-class Adder(w: Int) extends Module {
-  val io = IO(new Bundle {
-    //port sequnces outs: 0: out
-    //port sequnces inputs: 0: input_a, 1: input_b
-    val inputs = Input(MixedVec(Seq(UInt(w.W), UInt(w.W))))
-    val outs = Output(MixedVec(Seq(UInt(w.W))))
-  })
-  val input_a = io.inputs(0)
-  val input_b = io.inputs(1)
-  val out = io.outs(0)
-
-  out := input_a + input_b
-}
-
-/** A simple multiplier.
- *
- * @deprecated
- * @param w the data width
- */
-class Multiplier(w: Int) extends Module {
-  val io = IO(new Bundle {
-    //port sequnces outs: 0: out
-    //port sequnces inputs: 0: input_a, 1: input_b
-    val inputs = Input(MixedVec(Seq(UInt(w.W), UInt(w.W))))
-    val outs = Output(MixedVec(Seq(UInt((2 * w).W))))
-  })
-
-  val input_a = io.inputs(0)
-  val input_b = io.inputs(1)
-  val out = io.outs(0)
-
-  out := input_a * input_b
-}
-
 
 /** A register file which can perform an arbitrary subset of optional operations.
  *
