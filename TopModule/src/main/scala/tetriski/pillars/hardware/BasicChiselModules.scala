@@ -94,7 +94,7 @@ class ConfigController(configWidth: Int) extends Module {
 
   val s_read_write :: s_read_only :: Nil = Enum(2)
   val state = RegInit(s_read_write)
-  val cycleReg = Reg(UInt(LOG_II_UPPER_BOUND.W))
+  val cycleReg = RegInit(0.U(LOG_II_UPPER_BOUND.W))
 
   val configRegs = RegInit(VecInit(Seq.fill(II_UPPER_BOUND)(0.U(configWidth.W))))
 

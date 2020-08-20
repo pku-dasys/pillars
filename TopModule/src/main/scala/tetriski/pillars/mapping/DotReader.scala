@@ -27,7 +27,7 @@ object DotReader {
     if (op == "and") return 12
     if (op == "or") return 13
     if (op == "xor") return 14
-    if (op == "shl") return 15
+    if (op == "shll") return 15
     if (op == "shra") return 16
     if (op == "shrl") return 17
     if (op == "load") return 18
@@ -37,15 +37,16 @@ object DotReader {
     if (op == "shr") return 22
     if (op == "slt") return 23
     if (op == "sltu") return 24
-    if (op == "shll") return 25
+    if (op == "shla") return 25
     -1
   }
 
   /** Load DFG(IR) from a Dot file.
    *
-   * @param filename the name of DOT file
+   * @param filename   the name of DOT file
+   * @param targetedII the targeted II
    */
-  def loadDot(filename: String): DFG = {
+  def loadDot(filename: String, targetedII: Int = 1): DFG = {
     import scala.io.Source
 
     val buffer = Source.fromFile(filename)
@@ -53,6 +54,8 @@ object DotReader {
     val name = file(0).substring(8, file(0).length - 2)
     val dfg = new DFG(name)
     val lines = file.length
+
+    dfg.II = targetedII
 
     for (i <- 1 until lines) {
       val index0 = file(i).indexOf("->")
@@ -81,6 +84,7 @@ object DotReader {
         }
       }
     }
+    dfg.checkPrimaryInput()
     dfg
   }
 }

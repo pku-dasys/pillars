@@ -6,6 +6,8 @@ import scala.collection.mutable.ArrayBuffer
 import MRRGMode._
 import tetriski.pillars.mapping.NodeDFG
 
+import scala.collection.mutable
+
 /** A node of MRRG.
  * The function clone is overridden for MRRG unrolling.
  *
@@ -91,6 +93,10 @@ class MRRG extends Cloneable {
    * When II > 1, it may be connected across cycles.
    */
   var undeterminedInConnects = List[List[NodeMRRG]]()
+
+  /** A map between a pair of source/sink opNode and their distance.
+   */
+  var shortestDistanceMap = scala.collection.mutable.Map[(String, String), Int]()
 
   /** The function clone is overridden for MRRG unrolling.
    */
@@ -322,6 +328,65 @@ class MRRG extends Cloneable {
       var opSize = Integer.parseInt(file(now))
       now += opSize
     }
+  }
+
+  /** Floyd-Warshall shortest path algorithm.
+   *
+   * @param neighboringDistance initial search depth between nodes supporting opcodes
+   */
+  def shortestPath(neighboringDistance: Int): Map[(String, String), Int] = {
+    val opNodes = (nodes.toSet -- getNoOpSet()).toArray
+    val nodeNum = opNodes.size
+    val MAX_DISTENCE = 9999999
+    for (i <- 0 until nodeNum) {
+      for (j <- i until nodeNum) {
+        val sourceName = opNodes(i).name
+        val sinkName = opNodes(j).name
+        if (i == j) {
+          shortestDistanceMap += ((sourceName, sinkName) -> 0)
+        } else {
+          shortestDistanceMap += ((sourceName, sinkName) -> MAX_DISTENCE)
+          shortestDistanceMap += ((sinkName, sourceName) -> MAX_DISTENCE)
+        }
+      }
+    }
+
+    for (i <- 0 until nodeNum) {
+      val sourceNode = opNodes(i)
+      val tempNodesArray = new ArrayBuffer[Set[NodeMRRG]]()
+      tempNodesArray.append(Set[NodeMRRG](sourceNode))
+      for (depth <- 0 until neighboringDistance) {
+        var nextDepthNodeSet = Set[NodeMRRG]()
+        for (tempNode <- tempNodesArray(depth)) {
+          for (fanout <- tempNode.fanOut) {
+            nextDepthNodeSet += fanout
+          }
+        }
+        tempNodesArray.append(nextDepthNodeSet)
+      }
+      for (depth <- 1 to neighboringDistance) {
+        for (sinkNode <- tempNodesArray(depth)) {
+          if (sinkNode.ops.size > 0) {
+            shortestDistanceMap((sourceNode.name, sinkNode.name)) = Math.min(depth,
+              shortestDistanceMap((sourceNode.name, sinkNode.name)))
+          }
+        }
+      }
+    }
+
+    for (k <- 0 until nodeNum) {
+      for (i <- 0 until nodeNum) {
+        for (j <- 0 until nodeNum) {
+          val sourceName = opNodes(i).name
+          val sinkName = opNodes(j).name
+          val tempName = opNodes(k).name
+          shortestDistanceMap((sourceName, sinkName)) = Math.min(shortestDistanceMap(sourceName, sinkName),
+            shortestDistanceMap((sourceName, tempName)) + shortestDistanceMap((tempName, sinkName)))
+        }
+      }
+    }
+
+    shortestDistanceMap.toMap
   }
 }
 
