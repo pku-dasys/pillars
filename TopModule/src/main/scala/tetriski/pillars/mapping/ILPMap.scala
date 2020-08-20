@@ -214,6 +214,13 @@ object ILPMap {
 
       if (scheduleControl && mapper.ringCheckPass) {
         dfg.updateSchedule(filename + "_r.txt", mapper.DFGlatencyMap, mapper.DFGskewMap, filename + "_r.txt")
+
+        dfg.func2regMap = JavaConverters.mapAsScalaMap(mapper.func2regMap)
+        dfg.funcDirect2funcMap = JavaConverters.mapAsScalaMap(mapper.funcDirect2funcMap)
+        dfg.reg2funcMap = JavaConverters.mapAsScalaMap(mapper.reg2funcMap)
+        dfg.regConnect = JavaConverters.mapAsScalaMap(mapper.regConnect)
+        dfg.synthesizable = true
+        dfg.regNum = mapper.regMap.size()
       }
       else {
         Scheduler.schedule(dfg, mrrg, filename = filename, II = dfg.II)

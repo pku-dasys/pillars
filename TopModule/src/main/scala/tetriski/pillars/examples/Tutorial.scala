@@ -2,12 +2,13 @@ package tetriski.pillars.examples
 
 import chisel3.iotesters
 import tetriski.pillars.archlib.TileLSUBlock
-import tetriski.pillars.core.{ArchitctureHierarchy, Connect, HardwareGenerator, SimulationHelper}
-import tetriski.pillars.hardware.TopModule
+import tetriski.pillars.core.{ArchitctureHierarchy, Connect, HardwareGenerator, OpEnum, SimulationHelper}
+import tetriski.pillars.hardware.{SynthesizedModule, TopModule}
 import tetriski.pillars.mapping.{DotReader, ILPMap, Scheduler}
 import tetriski.pillars.testers.{AppTestHelper, ApplicationTester}
 
 import scala.collection.mutable.ArrayBuffer
+import chisel3.iotesters.PeekPokeTester
 
 /** An end2end tutorial of Pillars.
  * Example: matrix multiplication: C = A X B, where A is a M * 2 matrix, and B is a 2 * N matrix.
@@ -19,7 +20,7 @@ object Tutorial {
     val colNum = 6
     val inputPort = 6
     val outputPort = 6
-    val dataWidth = 32
+    val dataWidth = 16
 
     //Initialize the top block.
     val arch = new ArchitctureHierarchy()
@@ -41,7 +42,7 @@ object Tutorial {
     // and use loadTXT(mrrgFilename) to load the MRRG.
     val II = 1
     val MRRG = arch.getMRRG(II)
-    //        val dfgFilename = "DOT/cap/cap.dot"
+    //    val dfgFilename = "DOT/sum/sum.dot"
     val dfgFilename = "tutorial/MM.dot"
     val DFG = DotReader.loadDot(dfgFilename, II)
     val mappingResultFilename = s"tutorial/ii$II"
@@ -59,7 +60,7 @@ object Tutorial {
       hardwareGenerator.connectMap, hardwareGenerator.regionList, dataWidth)
 
     //Generate the RTL codes.
-    chisel3.Driver.execute(Array("-td", "tutorial/RTL/"), topDesign)
+    //    chisel3.Driver.execute(Array("-td", "tutorial/RTL/"), topDesign)
 
     //Simulate with the mapping result.
 
@@ -154,9 +155,42 @@ object Tutorial {
     appTestHelper.setInputPortData(Map(portI -> inputI.toArray, portJ -> inputJ.toArray))
     appTestHelper.setOutPortRefs(Map(portResult -> outResult.toArray))
 
+    val loaderNum = DFG.opNodes.map(node => if (node.opcode == OpEnum.LOAD) {
+      1
+    } else {
+      0
+    }).sum
+    val synthesizedDesign = () =>
+      new SynthesizedModule(DFG, constInfo, (0 until loaderNum).map(t => flattenedAB).toArray, dataWidth)
+
+    chisel3.Driver.execute(Array("-td", "tutorial/RTL/"), synthesizedDesign)
+    iotesters.Driver.execute(Array("-tgvo", "on", "-tbn", "verilator"), synthesizedDesign) {
+      c =>
+        new SynthesizedModuleTester(c, inputI.toArray, inputJ.toArray,
+          outResult.toArray, appTestHelper.getOutputCycle())
+    }
+
     iotesters.Driver.execute(Array("-tgvo", "on", "-tbn", "verilator"), topDesign) {
       c => new MatrixMulTester(c, appTestHelper)
     }
+  }
+}
+
+class SynthesizedModuleTester(c: SynthesizedModule, inputI: Array[Int], inputJ: Array[Int],
+                              outResult: Array[Int], outputCycle: Int) extends PeekPokeTester(c) {
+
+  val dataSize = inputI.size
+  val T = dataSize + outputCycle
+  for (t <- 0 until T) {
+    if (t < dataSize) {
+      poke(c.io.inputs(0), inputI(t))
+      poke(c.io.inputs(1), inputJ(t))
+    }
+    if (t >= outputCycle) {
+      expect(c.io.outs(0), outResult(t - outputCycle))
+      println(outResult(t - outputCycle).toString + " " + peek(c.io.outs(0)).toString())
+    }
+    step(1)
   }
 }
 

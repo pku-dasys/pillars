@@ -2,10 +2,12 @@ package tetriski.pillars.mapping
 
 import java.io.FileWriter
 import java.util
+import java.util.{List}
 
 import tetriski.pillars.core.OpEnum
 import tetriski.pillars.core.OpEnum.OpEnum
 
+//import scala.collection
 import scala.collection.mutable.ArrayBuffer
 import scala.io.Source
 
@@ -109,6 +111,13 @@ class DFG(var name: String) {
   /** A map between valNodes and a identification number.
    */
   var valNodesMap = Map[String, Int]()
+
+  var regConnect = scala.collection.mutable.Map[Integer, List[Integer]]()
+  var func2regMap = scala.collection.mutable.Map[Integer, List[Integer]]()
+  var reg2funcMap = scala.collection.mutable.Map[Integer, List[List[Integer]]]()
+  var funcDirect2funcMap = scala.collection.mutable.Map[Integer, List[List[Integer]]]()
+  var regNum = -1
+  var synthesizable = false
 
   /** Get the num of opNodes.
    */

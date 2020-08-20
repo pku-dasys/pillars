@@ -347,8 +347,7 @@ class ApplicationTester(c: TopModule, appTestHelper: AppTestHelper) extends Peek
 
   /** Verifies data in output ports during the activating process
    * when transferring data through the input ports.
-   * This function is correct when II = 1
-   * and appTestHelper.getThroughput() is 1.
+   * This function is correct when appTestHelper.getThroughput() is 1.
    *
    * @param testII the targeted II
    */
@@ -364,7 +363,7 @@ class ApplicationTester(c: TopModule, appTestHelper: AppTestHelper) extends Peek
     step(testII + 1)
 
     val dataSize = refs.toArray.last._2.size
-    val T = (dataSize + outputCycle / testII - 1) * testII
+    val T = (dataSize + outputCycle / testII) * testII
     for (t <- 0 until T) {
       for (port <- inputDataMap.keys) {
         val data = inputDataMap(port)
