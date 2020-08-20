@@ -41,11 +41,16 @@ object Tutorial {
     // and use loadTXT(mrrgFilename) to load the MRRG.
     val II = 1
     val MRRG = arch.getMRRG(II)
+    //        val dfgFilename = "DOT/cap/cap.dot"
     val dfgFilename = "tutorial/MM.dot"
-    val DFG = DotReader.loadDot(dfgFilename)
+    val DFG = DotReader.loadDot(dfgFilename, II)
     val mappingResultFilename = s"tutorial/ii$II"
-    ILPMap.mapping(DFG, MRRG, filename = mappingResultFilename)
-    Scheduler.schedule(DFG, MRRG, filename = mappingResultFilename, II = II)
+    val scheduleControl = true
+    ILPMap.mapping(DFG, MRRG, filename = mappingResultFilename, separatedPR = true,
+      scheduleControl = scheduleControl, skewLimit = 1, latencyLimit = 16)
+    //    if (!scheduleControl) {
+    //      Scheduler.schedule(DFG, MRRG, filename = mappingResultFilename, II = II)
+    //    }
 
     //Generate the top design.
     val connect = new Connect(arch.connectArray)
@@ -124,10 +129,9 @@ object Tutorial {
       inputDataMap = inputDataMap + (List(i, a_base) -> flattenedAB))
     appTestHelper.addInData(inputDataMap)
 
-    //The output cycle is when we can get the result from the output ports,
+    //Set cycles when we can put data through the input ports or get the result from the output ports,
     // which can be obtained from "*_r.txt"
-    val outputCycle = simulationHelper.getOutputCycle()
-    appTestHelper.setOutputCycle(outputCycle)
+    appTestHelper.setPortCycle(simulationHelper)
 
     //Input i, j in the corresponding input ports,
     //and verify C(i, j) in the corresponding output port.
@@ -170,5 +174,6 @@ class MatrixMulTester(c: TopModule, appTestHelper: AppTestHelper)
   inputConfig(testII)
   poke(c.io.en, 1)
   checkPortOutsWithInput(testII)
+
 }
 

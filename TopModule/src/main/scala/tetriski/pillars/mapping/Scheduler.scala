@@ -64,8 +64,8 @@ object Scheduler {
 
             if (in.ops.size != 0) {
               val inputNode = in.mapNode.asInstanceOf[OpNode]
-              println(mapNode.name + " " + inputNode.name + " " + mapNode.input(0).name + " " +
-                mapNode.input.size + " " + cycle(mrrg.nodeMap(in.name)))
+              //              println(mapNode.name + " " + inputNode.name + " " + mapNode.input(0).name + " " +
+              //                mapNode.input.size + " " + cycle(mrrg.nodeMap(in.name)))
               val inputLatency = cycle(mrrg.nodeMap(in.name)) + 1
               if (inputNode.name == mapNode.input(0).name) {
                 mapNode.inputLatency(0) = inputLatency
@@ -121,17 +121,17 @@ object Scheduler {
     while (!queue.isEmpty) {
       val node = queue.dequeue()
       node.visited = true
-      var laten, preLaten, latenWithoutConst = node.latency
-      node.primaryInput = false
+      var latency, preLatency, latencyWithoutConst = node.latency
+      //      node.primaryInput = false
 
       /** Update the latency of node based on its input.
        */
       for (i <- 0 until node.input.size) {
-        println(node.name + " " + node.input(i).name + " " + node.input(i).latency + " " + node.inputLatency(i))
+        println(node.input(i).name  + " " + node.name + " " + node.inputLatency(i))
         if (node.input(i).name != node.name) {
-          laten = max(laten, node.input(i).latency + node.inputLatency(i))
+          latency = max(latency, node.input(i).latency + node.inputLatency(i))
           if (node.input(i).input.size != 0) {
-            latenWithoutConst = max(latenWithoutConst, node.input(i).latency + node.inputLatency(i))
+            latencyWithoutConst = max(latencyWithoutConst, node.input(i).latency + node.inputLatency(i))
           }
         } else {
           if (i == 0) {
@@ -140,10 +140,10 @@ object Scheduler {
             node.annulateLatency = -node.inputLatency(i)
           }
         }
-        if (node.input(i).name.indexOf("const") != -1 ||
-          node.input(i).name.indexOf("input") != -1) {
-          node.primaryInput = true
-        }
+        //        if (node.input(i).name.indexOf("const") != -1 ||
+        //          node.input(i).name.indexOf("input") != -1) {
+        //          node.primaryInput = true
+        //        }
       }
 
       if (node.output != null) {
@@ -157,19 +157,19 @@ object Scheduler {
           }
         }
         if (temp > tempMin) {
-          laten = temp
+          latency = temp
         }
       }
 
-      if (latenWithoutConst != preLaten) {
-        node.setLatency(latenWithoutConst)
+      if (latencyWithoutConst != preLatency) {
+        node.setLatency(latencyWithoutConst)
       } else {
-        node.setLatency(laten)
+        node.setLatency(latency)
       }
 
       /** Reschedule an input chain with incorrect latency.
        */
-      if (preLaten != node.latency && node.latency != 0) {
+      if (preLatency != node.latency && node.latency != 0) {
         for (i <- 0 until node.input.size) {
           val inNode = node.input(i)
           var pushBack = false
@@ -237,39 +237,41 @@ object Scheduler {
       }
     }
 
+    dfg.updateSchedule(filename + "_r.txt")
 
-    val unscheduledArray = Source.fromFile(filename + "_r.txt").getLines().toArray
-    val scheduleFile = new FileWriter(filename + "_r.txt")
-    var i = 0
-    var beginCycle = 0
-    val pattern = "[0-9]+:".r
 
-    val minLatency = dfg.opNodes.map(op => op.latency).min
-    dfg.opNodes.foreach(op => op.setLatency(op.latency - minLatency))
-
-    /** Calculate fire time of each opNods in DFG.
-     */
-    for (j <- 0 until dfg.opNodes.size) {
-      val op = dfg.opNodes(j)
-      val tempResult = unscheduledArray(j).split(" ").toList
-      val mrrgName = tempResult(1)
-      val tempStr = (pattern findFirstIn mrrgName).toArray
-      val rc = tempStr(0).replace(":", "").toInt
-      if (op.latency == 0 && op.annulateLatency == 0) {
-        beginCycle = rc
-      }
-    }
-
-    for (op <- dfg.opNodes) {
-      var outLatency = op.latency + beginCycle
-      if (op.annulateLatency != 0 && op.primaryInput) {
-        outLatency = outLatency + II
-      }
-      println(op.name + " " + outLatency + " " + op.skew)
-      scheduleFile.write(unscheduledArray(i) + " " + outLatency + " " + op.skew + "\n")
-      i = i + 1
-    }
-    scheduleFile.flush()
-    scheduleFile.close()
+    //    val unscheduledArray = Source.fromFile(filename + "_r.txt").getLines().toArray
+    //    val scheduleFile = new FileWriter(filename + "_r.txt")
+    //    var i = 0
+    //    var beginCycle = 0
+    //    val pattern = "[0-9]+:".r
+    //
+    //    val minLatency = dfg.opNodes.map(op => op.latency).min
+    //    dfg.opNodes.foreach(op => op.setLatency(op.latency - minLatency))
+    //
+    //    /** Calculate fire time of each opNodes in DFG.
+    //     */
+    //    for (j <- 0 until dfg.opNodes.size) {
+    //      val op = dfg.opNodes(j)
+    //      val tempResult = unscheduledArray(j).split(" ").toList
+    //      val mrrgName = tempResult(1)
+    //      val tempStr = (pattern findFirstIn mrrgName).toArray
+    //      val rc = tempStr(0).replace(":", "").toInt
+    //      if (op.latency == 0 && op.annulateLatency == 0) {
+    //        beginCycle = rc
+    //      }
+    //    }
+    //
+    //    for (op <- dfg.opNodes) {
+    //      var outLatency = op.latency + beginCycle
+    //      if (op.annulateLatency != 0 && op.primaryInput) {
+    //        outLatency = outLatency + II
+    //      }
+    //      println(op.name + " " + outLatency + " " + op.skew)
+    //      scheduleFile.write(unscheduledArray(i) + " " + outLatency + " " + op.skew + "\n")
+    //      i = i + 1
+    //    }
+    //    scheduleFile.flush()
+    //    scheduleFile.close()
   }
 }

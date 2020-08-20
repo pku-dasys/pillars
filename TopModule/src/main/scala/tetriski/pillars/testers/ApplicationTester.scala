@@ -1,6 +1,7 @@
 package tetriski.pillars.testers
 
 import chisel3.iotesters.PeekPokeTester
+import tetriski.pillars.core.SimulationHelper
 import tetriski.pillars.hardware.PillarsConfig._
 import tetriski.pillars.hardware.TopModule
 
@@ -43,10 +44,20 @@ class AppTestHelper(bitStreams: Array[BigInt], schedules: List[Int],
    */
   var outputCycle = testII + 1
 
+  var outputPortCycleMap = Map[Int, Int]()
+
+  var inputPortCycleMap = Map[Int, Int]()
+
   /** A parameter indicating the throughput of mapping result.
    * The default value is 1, and it is not recommended to use this parameter.
    */
   var throughput = 1
+
+  def setPortCycle(simulationHelper: SimulationHelper): Unit = {
+    outputPortCycleMap = simulationHelper.outputPortCycleMap
+    inputPortCycleMap = simulationHelper.inputPortCycleMap
+    outputCycle = simulationHelper.outputCycle
+  }
 
   /** Set the parameter indicating the throughput of mapping result.
    *
@@ -336,7 +347,7 @@ class ApplicationTester(c: TopModule, appTestHelper: AppTestHelper) extends Peek
 
   /** Verifies data in output ports during the activating process
    * when transferring data through the input ports.
-   * This function is correct when the latencies of the input operators are all 0
+   * This function is correct when II = 1
    * and appTestHelper.getThroughput() is 1.
    *
    * @param testII the targeted II
@@ -344,38 +355,37 @@ class ApplicationTester(c: TopModule, appTestHelper: AppTestHelper) extends Peek
   def checkPortOutsWithInput(testII: Int): Unit = {
     val refs = appTestHelper.getOutPortRefs()
     val outputCycle = appTestHelper.getOutputCycle()
-    val inputData = appTestHelper.getInputPortData().toArray
+    val inputDataMap = appTestHelper.getInputPortData()
+    val outputPortCycleMap = appTestHelper.outputPortCycleMap
+    val inputPortCycleMap = appTestHelper.inputPortCycleMap
+
 
     //Wait till the configuration controllers are ready.
-    step(testII)
+    step(testII + 1)
 
-    var cycle = 0
-    val T = inputData(0)._2.size + outputCycle / testII - 1
+    val dataSize = refs.toArray.last._2.size
+    val T = (dataSize + outputCycle / testII - 1) * testII
     for (t <- 0 until T) {
-      if (t < inputData(0)._2.size) {
-        for (data <- inputData) {
-          poke(c.io.inputs(data._1), data._2(t))
-        }
-      }
-
-      if ((outputCycle - testII) <= cycle) {
-        step(outputCycle % testII)
-        for (ref <- refs) {
-          var pos = t - outputCycle / testII + 1
-          if(outputCycle % testII != 0){
-            pos -= 1
+      for (port <- inputDataMap.keys) {
+        val data = inputDataMap(port)
+        val cycle = inputPortCycleMap(port)
+        if (t >= cycle && t < cycle + dataSize * testII) {
+          if (cycle % testII == t % testII) {
+            poke(c.io.inputs(port), data((t - cycle)/testII))
           }
-          val value = ref._2(pos)
-          expect(c.io.outs(ref._1), asUnsignedInt(value))
-          println(asUnsignedInt(value).toString + " " + peek(c.io.outs(ref._1)).toString())
         }
-        step(testII - outputCycle % testII)
-      }else{
-        step(testII)
       }
-
-      cycle = cycle + testII
-
+      for (port <- refs.keys) {
+        val data = refs(port)
+        val cycle = outputPortCycleMap(port)
+        if (t >= cycle && t < cycle + dataSize * testII) {
+          if (cycle % testII == t % testII) {
+            expect(c.io.outs(port), asUnsignedInt(data((t - cycle)/testII)))
+            println(asUnsignedInt(data((t - cycle)/testII)).toString + " " + peek(c.io.outs(port)).toString())
+          }
+        }
+      }
+      step(1)
     }
   }
 

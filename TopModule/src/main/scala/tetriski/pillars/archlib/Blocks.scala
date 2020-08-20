@@ -115,9 +115,9 @@ class AdresPEBlock(name: String, useMuxBypass: Boolean, opList: List[OpEnum] = n
 
   /** A multiplexer that can choose a data source for input_b of the ALU.
    */
-  val mux1 = new ElementMux("mux1", List(neighborSize + 1, dataWidth))
+  val mux1 = new ElementMux("mux1", List(neighborSize + 2, dataWidth))
   mux1.addOutPorts(Array("out_0"))
-  mux1.addInPorts((0 until neighborSize + 1).map(i => "input_" + i.toString).toArray)
+  mux1.addInPorts((0 until neighborSize + 2).map(i => "input_" + i.toString).toArray)
   addElement(mux1)
 
   /** A 2-RF with one input port and two output ports.
@@ -144,6 +144,7 @@ class AdresPEBlock(name: String, useMuxBypass: Boolean, opList: List[OpEnum] = n
   addConnect(const0 / "out_0" -> mux0 / s"input_$neighborSize")
   addConnect(const0 / "out_0" -> mux1 / s"input_$neighborSize")
   addConnect(rf0 / "out_0" -> mux0 / ("input_" + (neighborSize + 1).toString))
+  addConnect(rf0 / "out_0" -> mux1 / ("input_" + (neighborSize + 1).toString))
   addConnect(mux0 / "out_0" -> alu0 / "input_a")
   addConnect(mux1 / "out_0" -> alu0 / "input_b")
   addConnect(alu0 / "out_0" -> rf0 / "input_0")
@@ -229,9 +230,9 @@ class AdresVLIWPEBlock(name: String, useMuxBypass: Boolean, opList: List[OpEnum]
 
   /** A multiplexer that can choose a data source for input_b of the ALU.
    */
-  val mux1 = new ElementMux("mux1", List(neighborSize + 2, dataWidth))
+  val mux1 = new ElementMux("mux1", List(neighborSize + 3, dataWidth))
   mux1.addOutPorts(Array("out_0"))
-  mux1.addInPorts((0 until neighborSize + 2).map(i => "input_" + i.toString).toArray)
+  mux1.addInPorts((0 until neighborSize + 3).map(i => "input_" + i.toString).toArray)
   addElement(mux1)
 
   /** A const unit connected to the multiplexers.
@@ -249,6 +250,7 @@ class AdresVLIWPEBlock(name: String, useMuxBypass: Boolean, opList: List[OpEnum]
   addConnect(List("const0", "out_0"), List("mux0", "input_" + (neighborSize + 1).toString))
   addConnect(List("const0", "out_0"), List("mux1", "input_" + (neighborSize + 1).toString))
   addConnect(List("input_rf_mux0"), List("mux0", "input_" + (neighborSize + 2).toString))
+  addConnect(List("input_rf_mux0"), List("mux1", "input_" + (neighborSize + 2).toString))
   addConnect(List("mux0", "out_0"), List("alu0", "input_a"))
   addConnect(List("mux1", "out_0"), List("alu0", "input_b"))
   addConnect(List("alu0", "out_0"), List("rf_out"))
@@ -567,7 +569,7 @@ class TileLSUBlock(name: String, x: Int, y: Int, numIn: Int, numOut: Int,
   for (j <- 0 until y) {
     for (i <- 0 until x) {
       val inPortsNeighbor = Array("input_w", "input_e", "input_n", "input_s", "input_lsu")
-      val opList = List(OpEnum.ADD, OpEnum.MUL)
+      val opList = List(OpEnum.ADD, OpEnum.MUL, OpEnum.SUB, OpEnum.SHLL, OpEnum.SHRL)
       val pe = new AdresPEBlock("pe_" + j.toString + "_" + i.toString, opList = opList,
         useMuxBypass = useMuxBypass, inPortsNeighbor = inPortsNeighbor, dataWidth = dataWidth)
       peMap = peMap + ((i + j * x) -> pe)

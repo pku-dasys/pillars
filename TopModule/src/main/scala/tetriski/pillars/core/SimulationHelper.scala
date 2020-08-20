@@ -52,6 +52,10 @@ class SimulationHelper(arch: ArchitctureHierarchy) {
    */
   var outputCycle = 0
 
+  var outputPortCycleMap = Map[Int, Int]()
+
+  var inputPortCycleMap = Map[Int, Int]()
+
   /** Add the mapping result of a mapped DFG node.
    *
    * @example If the input is "add0 0:cgra.tile_0.pe_3_3.alu0.internalNode_0 1 0",
@@ -104,8 +108,9 @@ class SimulationHelper(arch: ArchitctureHierarchy) {
     val fireTime = tempList(2).toInt
     fireTimeArray.append(fireTime)
     if (op.contains("output")) {
-      //Set the cycle we can obtain the result.
-      outputCycle = fireTime + 1
+      outputPortCycleMap += outPorts.last -> fireTime
+    } else if (op.contains("input")) {
+      inputPortCycleMap += inputPorts.last -> fireTime
     }
 
     //Add the skew of the mapped MRRG node into skewArray.
@@ -134,6 +139,9 @@ class SimulationHelper(arch: ArchitctureHierarchy) {
     val resultArray = Source.fromFile(resultFilename).getLines().toArray
     resultArray.map(r => addResult(r))
     size = opArray.size
+    //Set the cycle we can obtain the last result.
+    outputCycle = outputPortCycleMap.map(t => t._2)
+      .reduce((t1, t2) => Math.max(t1, t2)) + 1
   }
 
   /** Get the schedules of the mapping result.

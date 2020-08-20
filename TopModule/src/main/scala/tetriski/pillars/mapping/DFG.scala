@@ -1,9 +1,13 @@
 package tetriski.pillars.mapping
 
+import java.io.FileWriter
+import java.util
+
 import tetriski.pillars.core.OpEnum
 import tetriski.pillars.core.OpEnum.OpEnum
 
 import scala.collection.mutable.ArrayBuffer
+import scala.io.Source
 
 /** An abstract class of nodes in DFG（IR).
  *
@@ -86,6 +90,10 @@ class ValNode(var name: String) extends NodeDFG {
  * @param name the name of this DFG
  */
 class DFG(var name: String) {
+  /** The the targeted II.
+   */
+  var II = 1
+
   /** Operators and primary I/O in a DFG.
    */
   var opNodes = ArrayBuffer[OpNode]()
@@ -150,12 +158,15 @@ class DFG(var name: String) {
 
   /** Load a DFG from a TXT file, not used in real process.
    *
-   * @param Filename the file name of TXT file
+   * @param filename   the file name of TXT file
+   * @param targetedII the targeted II
    */
-  def loadTXT(Filename: String): Unit = {
+  def loadTXT(filename: String, targetedII: Int = 1): Unit = {
     import scala.io.Source
 
-    val buffer = Source.fromFile(Filename)
+    II = targetedII
+
+    val buffer = Source.fromFile(filename)
     val file = buffer.getLines().toArray
     var now: Int = 0
     val valSize: Int = Integer.parseInt(file(now))
@@ -198,6 +209,8 @@ class DFG(var name: String) {
       }
       now += (outputSize + 2)
     }
+
+    checkPrimaryInput()
   }
 
   /** Debug Function to print DFG into screen.
@@ -222,5 +235,94 @@ class DFG(var name: String) {
       println(op.output.name)
       println(op.opcode.id)
     }
+  }
+
+  /** Check whether a node has primary input.
+   *
+   */
+  def checkPrimaryInput(): Unit = {
+    for (node <- opNodes) {
+      for (input <- node.input.values) {
+        if (input.name.indexOf("const") != -1 ||
+          input.name.indexOf("input") != -1) {
+          node.primaryInput = true
+        }
+      }
+    }
+  }
+
+  /** Update a unscheduled result TXT file with latency and skew.
+   *
+   * @param filename    the file name of result TXT file
+   * @param latencyMap  a map between the name of a opNode and its latency
+   * @param skewMap     a map between the name of a opNode and its skew
+   * @param outFilename the file name of output file
+   */
+  def updateSchedule(filename: String, latencyMap: util.Map[String, Integer] = null,
+                     skewMap: util.Map[String, Integer] = null, outFilename: String = null): Unit = {
+    import scala.collection.JavaConverters
+
+
+    if (latencyMap != null) {
+      val scalaLatencyMap = JavaConverters.mapAsScalaMap(latencyMap)
+      for (item <- scalaLatencyMap) {
+        applyOp(item._1).latency = item._2
+      }
+    }
+    if (skewMap != null) {
+      val scalaSkewMap = JavaConverters.mapAsScalaMap(skewMap)
+      for (item <- scalaSkewMap) {
+        applyOp(item._1).skew = item._2
+      }
+      for (node <- opNodes) {
+        if (node.output != null) {
+          if (node.output.output.contains(node)) {
+            if (node.input(0) == node) {
+              node.annulateLatency = node.skew + II
+            } else if (node.input(1) == node) {
+              node.annulateLatency = node.skew - II
+            }
+          }
+        }
+      }
+    }
+
+    val unscheduledArray = Source.fromFile(filename).getLines().toArray
+    var scheduleFilename = outFilename
+    if (scheduleFilename == null) {
+      scheduleFilename = filename
+    }
+    val scheduleFile = new FileWriter(scheduleFilename)
+    var i = 0
+    var beginCycle = 0
+    val pattern = "[0-9]+:".r
+
+    val minLatency = opNodes.map(op => op.latency).min
+    opNodes.foreach(op => op.setLatency(op.latency - minLatency))
+
+    /** Calculate fire time of each opNodes in DFG.
+     */
+    for (j <- 0 until opNodes.size) {
+      val op = opNodes(j)
+      val tempResult = unscheduledArray(j).split(" ").toList
+      val mrrgName = tempResult(1)
+      val tempStr = (pattern findFirstIn mrrgName).toArray
+      val rc = tempStr(0).replace(":", "").toInt
+      if (op.latency == 0 && op.annulateLatency == 0) {
+        beginCycle = rc
+      }
+    }
+
+    for (op <- opNodes) {
+      var outLatency = op.latency + beginCycle
+      if (op.annulateLatency != 0 && op.primaryInput) {
+        outLatency = outLatency + II
+      }
+      println(op.name + " " + outLatency + " " + op.skew)
+      scheduleFile.write(unscheduledArray(i) + " " + outLatency + " " + op.skew + "\n")
+      i = i + 1
+    }
+    scheduleFile.flush()
+    scheduleFile.close()
   }
 }
