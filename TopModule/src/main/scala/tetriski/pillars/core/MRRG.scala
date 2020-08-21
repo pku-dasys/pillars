@@ -275,6 +275,12 @@ class MRRG extends Cloneable {
       now += 1
       val name: String = file(now).substring(1, file(now).length - 1)
       addNode(new NodeMRRG(name))
+      if((name.indexOf("rf0.internalNode") != -1) ||
+        (name.indexOf("global_rf.internalNode") != -1)){
+        nodes(i + numRoutingNodes).mode == REG_MODE
+      }else if(name.indexOf("loadStoreUnit.internalNode") != -1){
+        nodes(i + numRoutingNodes).mode = MEM_MODE
+      }
       now += 1
       val fanInSize = Integer.parseInt(file(now))
       now += (fanInSize + 1)

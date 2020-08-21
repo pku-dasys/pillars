@@ -205,7 +205,7 @@ class DFG(var name: String) {
         opNodes(i).output = applyVal(file(now))
       }
       now += 1
-      opNodes(i).opcode = OpEnum(Integer.parseInt(file(now)));
+      opNodes(i).opcode = OpEnum(Integer.parseInt(file(now)))
     }
 
     now = 1

@@ -122,7 +122,7 @@ public class gurobiMapJava {
     int skewLimit = 2;
     Boolean ringCheckPass = false;
     int ringCheckCount = 0;
-    int ringCheckLimit = 0;
+    int ringCheckLimit = 5;
     Random RNG = new Random(1);
 
     /**
@@ -713,15 +713,15 @@ public class gurobiMapJava {
     }
 
     /**
-     * Constraint: Latency Range.
+     * Set Latency Range.
      */
-    void constrLatencyRange(GRBModel model, GRBVar[] Latencies, int maxLatency) throws GRBException {
-        int constrcount = 0;
+    void setLatencyRange(GRBModel model, GRBVar[] Latencies, int maxLatency) throws GRBException {
+//        int constrcount = 0;
         int minLatency = 0;
         for (int op = 0; op < numDfgOps; op++) {
             Latencies[op].set(GRB.StringAttr.VarName, "Latency_" + op);
-            Latencies[constrcount].set(GRB.DoubleAttr.LB, minLatency);
-            Latencies[constrcount].set(GRB.DoubleAttr.UB, maxLatency);
+            Latencies[op].set(GRB.DoubleAttr.LB, minLatency);
+            Latencies[op].set(GRB.DoubleAttr.UB, maxLatency);
 //            GRBLinExpr minConstraint = new GRBLinExpr();
 //            minConstraint.addTerm(1, Latencies[op]);
 //            model.addConstr(minConstraint, GRB.GREATER_EQUAL, minLatency, "minLatency_" + (constrcount));
@@ -1157,7 +1157,7 @@ public class gurobiMapJava {
                 constrDelay(modelR, R, S, Delays, Latencies, WaitSkews, F, true);
             }
 
-            constrLatencyRange(modelR, Latencies, maxLatency);
+            setLatencyRange(modelR, Latencies, maxLatency);
             constrRelativeSkew(modelR, RelativeSkews, WaitSkews,
                     SkewDirection, skewLimit);
         }

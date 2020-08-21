@@ -28,7 +28,7 @@ object Tutorial {
     arch.addOutPorts((0 until outputPort).map(i => s"out_$i").toArray)
 
     val tile = new TileLSUBlock("tile_0", colNum, rowNum, inputPort, outputPort,
-      useMuxBypass = false, dataWidth = dataWidth)
+      useMuxBypass = false, complex = false, dataWidth = dataWidth)
     arch.addBlock(tile)
 
     (0 until inputPort).foreach(i =>
@@ -48,7 +48,7 @@ object Tutorial {
     val mappingResultFilename = s"tutorial/ii$II"
     val scheduleControl = true
     ILPMap.mapping(DFG, MRRG, filename = mappingResultFilename, separatedPR = true,
-      scheduleControl = scheduleControl, skewLimit = 1, latencyLimit = 16)
+      scheduleControl = scheduleControl, skewLimit = 4, latencyLimit = 15)
     //    if (!scheduleControl) {
     //      Scheduler.schedule(DFG, MRRG, filename = mappingResultFilename, II = II)
     //    }
