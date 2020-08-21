@@ -2,13 +2,9 @@ package tetriski.pillars.hardware
 
 import chisel3.util._
 import chisel3.{Bundle, Input, Module, Output, UInt, _}
-import org.scalacheck.Prop.True
 import tetriski.pillars.core.OpEnum.OpEnum
 import tetriski.pillars.core.{ConstInfo, OpEnum}
 import tetriski.pillars.mapping.{DFG, OpNode}
-import tetriski.pillars.util.{SimpleDualPortMem, SimpleDualPortSram, SinglePortSram}
-
-import scala.collection.mutable.ArrayBuffer
 
 /** A simple adder.
  *
@@ -83,29 +79,41 @@ class Registers(num: Int, w: Int) extends Module {
  */
 class SynthesizedLoadUnit(memData: Array[Int], w: Int) extends Module {
   val io = IO(new Bundle {
-    //    val aDin = Input(UInt(w.W))
-    //    val aAddr = Input(UInt(w.W))
-    //    val aWe = Output(Bool())
-
     val inputs = Input(MixedVec(Seq(UInt(w.W))))
     val outs = Output(MixedVec(Seq(UInt(w.W))))
   })
 
-  //  val mem = Module(new SimpleDualPortSram(PillarsConfig.MEM_DEPTH, w))
-  //  mem.io.b.en := true.B
-  //  mem.io.b.addr := io.inputs(0)
-  //  mem.io.a.din := io.aDin
-  //  mem.io.a.we := io.aWe
-  //  mem.io.a.addr := io.aAddr
-
   val mem = Mem(memData.size, UInt(w.W))
-  for(i <- 0 until memData.size){
+  for (i <- 0 until memData.size) {
     mem.write(i.U(w.W), memData(i).U(w.W))
   }
   val dout = RegInit(0.U(w.W))
 
   dout := mem.read(io.inputs(0))
   io.outs(0) := dout
+}
+
+/** A simple store unit.
+ *
+ * @param w the data width
+ */
+class SynthesizedStoreUnit(w: Int) extends Module {
+  val io = IO(new Bundle {
+    val bAddr = Input(UInt(w.W))
+    val bDout = Output(UInt(w.W))
+
+    val inputs = Input(MixedVec(Seq(UInt(w.W), UInt(w.W))))
+    val outs = Output(MixedVec(Seq(UInt(w.W))))
+  })
+
+  val mem = Mem(PillarsConfig.MEM_DEPTH, UInt(w.W))
+  val dout = RegInit(0.U(w.W))
+
+  mem.write(io.inputs(0), io.inputs(1))
+
+  dout := mem.read(io.bAddr)
+  io.bDout := dout
+
 }
 
 class SynthesizedModule(dfg: DFG, constInfo: ConstInfo, memDatas: Array[Array[Int]], w: Int) extends Module {
@@ -140,9 +148,9 @@ class SynthesizedModule(dfg: DFG, constInfo: ConstInfo, memDatas: Array[Array[In
       return outputs(index)
     } else if (op == OpEnum.LOAD) {
       if (isInput) {
-        return loaders(index).io.inputs(0)
+        return loadUnits(index).io.inputs(0)
       } else {
-        return loaders(index).io.outs(0)
+        return loadUnits(index).io.outs(0)
       }
     } else if (op == OpEnum.CONST) {
       return constUnits(index).io.outs(0)
@@ -153,6 +161,9 @@ class SynthesizedModule(dfg: DFG, constInfo: ConstInfo, memDatas: Array[Array[In
       } else {
         return adders(index).io.outs(0)
       }
+    } else if (op == OpEnum.STORE) {
+      val port = storeUnits(index).io.inputs(operand)
+      return skewCheck(node, port)
     } else {
       if (op != OpEnum.MUL) {
         throw new Exception("Opcode of " + node.name + " is not undefined during synthesizing!")
@@ -175,9 +186,13 @@ class SynthesizedModule(dfg: DFG, constInfo: ConstInfo, memDatas: Array[Array[In
   val addNum = getNum(OpEnum.ADD)
   val mulNum = getNum(OpEnum.MUL)
   val loadNum = getNum(OpEnum.LOAD)
+  val storeNum = getNum(OpEnum.STORE)
   val constNum = getNum(OpEnum.CONST)
 
   val io = IO(new Bundle {
+    val storeUnitMemAddrs = Input(MixedVec((1 to storeNum) map { i => UInt(w.W) }))
+    val storeUnitMemDatas = Output(MixedVec((1 to storeNum) map { i => UInt(w.W) }))
+
     val inputs = Input(MixedVec((1 to inputNum) map { i => UInt(w.W) }))
     val outs = Output(MixedVec((1 to outputNum) map { i => UInt(w.W) }))
   })
@@ -185,12 +200,14 @@ class SynthesizedModule(dfg: DFG, constInfo: ConstInfo, memDatas: Array[Array[In
   var adders = Map[Int, Adder]()
   var multipliers = Map[Int, Multiplier]()
   var constUnits = Map[Int, SynthesizedConstUnit]()
-  var loaders = Map[Int, SynthesizedLoadUnit]()
+  var loadUnits = Map[Int, SynthesizedLoadUnit]()
+  var storeUnits = Map[Int, SynthesizedStoreUnit]()
   var inputs = Map[Int, Data]()
   var outputs = Map[Int, Data]()
 
   var constCount = 0
-  var loaderCount = 0
+  var loadUnitCount = 0
+  var storeUnitCount = 0
   var inputCount = 0
   var outputCount = 0
   for (i <- 0 until dfg.opNodes.size) {
@@ -201,10 +218,16 @@ class SynthesizedModule(dfg: DFG, constInfo: ConstInfo, memDatas: Array[Array[In
       constUnits += (i -> module)
       constCount += 1
     } else if (node.opcode == OpEnum.LOAD) {
-      val memData = memDatas(loaderCount)
+      val memData = memDatas(loadUnitCount)
       val module = Module(new SynthesizedLoadUnit(memData, w))
-      loaders += (i -> module)
-      loaderCount += 1
+      loadUnits += (i -> module)
+      loadUnitCount += 1
+    } else if (node.opcode == OpEnum.STORE) {
+      val module = Module(new SynthesizedStoreUnit(w))
+      module.io.bAddr := io.storeUnitMemAddrs(storeUnitCount)
+      io.storeUnitMemDatas(storeUnitCount) := module.io.bDout
+      storeUnits += (i -> module)
+      storeUnitCount += 1
     } else if (node.opcode == OpEnum.ADD) {
       val module = Module(new Adder(w))
       adders += (i -> module)
@@ -267,7 +290,7 @@ class SynthesizedModule(dfg: DFG, constInfo: ConstInfo, memDatas: Array[Array[In
     }
   }
 
-  for(connect <- dfg.funcDirect2funcMap){
+  for (connect <- dfg.funcDirect2funcMap) {
     val source = connect._1
     for (i <- 0 until connect._2.size()) {
       val sink = connect._2.get(i).get(0)
