@@ -462,7 +462,7 @@ public class gurobiMapJava {
             infoFile.flush();
             infoFile.close();
 
-            if (ringCheckPass) {
+//            if (ringCheckPass) {
                 int regCount = 0;
                 for (int val = 0; val < numDfgVals; val++) {
                     for (int fanout = 0; fanout < DFGvalNodeOut.get(val).size(); fanout++) {
@@ -540,7 +540,7 @@ public class gurobiMapJava {
                         }
                     }
                 }
-            }
+//            }
 
             List<Integer>[] result = new List[2];
             result[0] = new ArrayList<>();

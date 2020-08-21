@@ -46,7 +46,7 @@ object Tutorial {
     val dfgFilename = "tutorial/MM.dot"
     val DFG = DotReader.loadDot(dfgFilename, II)
     val mappingResultFilename = s"tutorial/ii$II"
-    val scheduleControl = true
+      val scheduleControl = true
     ILPMap.mapping(DFG, MRRG, filename = mappingResultFilename, separatedPR = true,
       scheduleControl = scheduleControl, skewLimit = 4, latencyLimit = 15)
     //    if (!scheduleControl) {
