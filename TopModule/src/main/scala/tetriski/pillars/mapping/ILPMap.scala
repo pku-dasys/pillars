@@ -190,7 +190,7 @@ object ILPMap {
     } else {
       if (scheduleControl) {
         mapper.skewLimit = skewLimit
-        mapper.maxLatency = latencyLimit - 1
+        mapper.maxLatency = latencyLimit
       }
       val result = mapper.ILPMap(separatedPR, scheduleControl)
       val end_time = new Date().getTime

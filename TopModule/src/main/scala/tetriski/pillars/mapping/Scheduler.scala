@@ -1,12 +1,10 @@
 package tetriski.pillars.mapping
 
-import java.io.FileWriter
-
 import tetriski.pillars.core._
 
 import scala.collection.mutable.ArrayBuffer
-import scala.io.Source
 import scala.math.max
+import MRRGMode._
 
 /** This object is used to determine when each opNode will fire.
  *
@@ -53,9 +51,7 @@ object Scheduler {
         if (in.mapNode != null && cycle(mrrg.nodeMap(in.name)) == -1) {
           if (checkConnect(node, in) == 1) {
             //TODO: get delay with MRRG mode.
-            if ((node.name.indexOf("rf0.internalNode") != -1) ||
-              node.name.indexOf("global_rf.internalNode") != -1 ||
-              (in.name.indexOf("loadStoreUnit.internalNode") != -1)) {
+            if (node.mode ==REG_MODE || in.mode == MEM_MODE) {
               cycle(mrrg.nodeMap(in.name)) = cycle(mrrg.nodeMap(node.name)) + 1
             } else {
               cycle(mrrg.nodeMap(in.name)) = cycle(mrrg.nodeMap(node.name))
