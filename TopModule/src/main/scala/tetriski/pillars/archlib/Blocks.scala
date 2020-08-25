@@ -576,7 +576,7 @@ class TileLSUBlock(name: String, x: Int, y: Int, numIn: Int, numOut: Int,
         inPortsNeighbor = Array("input_w", "input_e", "input_n", "input_s",
           "input_wn", "input_ws", "input_en", "input_es", "input_lsu")
       }
-      val opList = List(OpEnum.ADD, OpEnum.MUL, OpEnum.SUB, OpEnum.SHLL, OpEnum.SHRL)
+      val opList = List(OpEnum.ADD, OpEnum.MUL, OpEnum.SUB, OpEnum.SHLL, OpEnum.SHRA)
       val pe = new AdresPEBlock("pe_" + j.toString + "_" + i.toString, opList = opList,
         useMuxBypass = useMuxBypass, inPortsNeighbor = inPortsNeighbor, dataWidth = dataWidth)
       peMap = peMap + ((i + j * x) -> pe)

@@ -140,8 +140,12 @@ class SimulationHelper(arch: ArchitctureHierarchy) {
     resultArray.map(r => addResult(r))
     size = opArray.size
     //Set the cycle we can obtain the last result.
-    outputCycle = outputPortCycleMap.map(t => t._2)
-      .reduce((t1, t2) => Math.max(t1, t2))
+    if(outputPortCycleMap.size>0) {
+      outputCycle = outputPortCycleMap.map(t => t._2)
+        .reduce((t1, t2) => Math.max(t1, t2))
+    }else{
+      outputCycle = 0
+    }
   }
 
   /** Get the schedules of the mapping result.

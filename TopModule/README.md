@@ -13,7 +13,7 @@ programming (ILP) CAD tool can map data-flow graph (DFG)
 onto the specified CGRA, generating contexts for CGRA RTL level
 simulation.
 
-
+![avatar](overview.png)
 
 ## Installing Necessary Dependencies
 
@@ -52,7 +52,7 @@ to activate your Gurobi, detailed in [Gurobi installation guide](https://www.gur
 After Gurobi is activated, please run
 ``` shell
 mkdir lib
-ln $GUROBI_HOME$/linux64/lib/gurobi.jar lib/
+ln $GUROBI_HOME/linux64/lib/gurobi.jar lib/
 ``` 
 in this directory to use the Gurobi library in this project.
 
