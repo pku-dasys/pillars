@@ -416,8 +416,9 @@ class SumTester(c: TopModule, appTestHelper: AppTestHelper)
   poke(c.io.en, 1)
 
   val outputCycle = appTestHelper.getOutputCycle()
-  step(outputCycle)
+  step(outputCycle + 1)
 
+//  checkPortOutsWithInput(testII)
   checkPortOuts(testII)
   //  checkLSUData()
 }
@@ -437,7 +438,7 @@ class AccumTester(c: TopModule, appTestHelper: AppTestHelper)
   poke(c.io.en, 1)
 
   val outputCycle = appTestHelper.getOutputCycle()
-  step(outputCycle)
+  step(outputCycle + 1)
 
   checkPortOuts(testII)
   checkLSUData()
@@ -459,7 +460,7 @@ class VaddTester(c: TopModule, appTestHelper: AppTestHelper)
   poke(c.io.en, 1)
 
   val outputCycle = appTestHelper.getOutputCycle()
-  step(outputCycle)
+  step(outputCycle + 1)
 
   checkPortOuts(testII)
   checkLSUData()
@@ -481,7 +482,7 @@ class CapTester(c: TopModule, appTestHelper: AppTestHelper)
   poke(c.io.en, 1)
 
   val outputCycle = appTestHelper.getOutputCycle()
-  step(outputCycle)
+  step(outputCycle + 1)
 
   checkLSUData()
 }

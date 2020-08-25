@@ -232,8 +232,10 @@ object ApplicationExamples {
 
       appTestHelper.addInData(inDatas)
       appTestHelper.setOutPortRefs(outPortRefs)
-      appTestHelper.setOutputCycle(outputCycle)
+//      appTestHelper.setOutputCycle(outputCycle)
       appTestHelper.setThroughput(throughput)
+
+      appTestHelper.setPortCycle(simulationHelper)
 
 
       if (useWrapper) {
@@ -262,7 +264,7 @@ object ApplicationExamples {
     var addrVals = Array(a_base)
     var throughput = 1
 
-    //    testSum(resultFilename, infoFilename, testII, constVals, addrVals, throughput, useWrapper = true)
+//        testSum(resultFilename, infoFilename, testII, constVals, addrVals, throughput, useWrapper = true)
     testSum(resultFilename, infoFilename, testII, constVals, addrVals, throughput)
     //********     II = 1     ********
 
