@@ -42,16 +42,13 @@ object Tutorial {
     // and use loadTXT(mrrgFilename) to load the MRRG.
     val II = 1
     val MRRG = arch.getMRRG(II)
-        val dfgFilename = "DOT/cap/cap.dot"
-//    val dfgFilename = "tutorial/MM.dot"
+    //        val dfgFilename = "DOT/cap/cap.dot"
+    val dfgFilename = "tutorial/MM.dot"
     val DFG = DotReader.loadDot(dfgFilename, II)
     val mappingResultFilename = s"tutorial/ii$II"
-      val scheduleControl = true
+    val scheduleControl = true
     ILPMap.mapping(DFG, MRRG, filename = mappingResultFilename, separatedPR = true,
       scheduleControl = scheduleControl, skewLimit = 4, latencyLimit = 15)
-    //    if (!scheduleControl) {
-    //      Scheduler.schedule(DFG, MRRG, filename = mappingResultFilename, II = II)
-    //    }
 
     //Generate the top design.
     val connect = new Connect(arch.connectArray)
@@ -60,7 +57,7 @@ object Tutorial {
       hardwareGenerator.connectMap, hardwareGenerator.regionList, dataWidth)
 
     //Generate the RTL codes.
-    //    chisel3.Driver.execute(Array("-td", "tutorial/RTL/"), topDesign)
+    chisel3.Driver.execute(Array("-td", "tutorial/RTL/"), topDesign)
 
     //Simulate with the mapping result.
 
@@ -176,6 +173,14 @@ object Tutorial {
   }
 }
 
+/** A tester for synthesized design of matrix multiplication.
+ *
+ * @param c           the synthesized design
+ * @param inputI      the input data in input port I
+ * @param inputJ      the input data in input port J
+ * @param outResult   the expected data in output port
+ * @param outputCycle the cycle we can obtain the last result
+ */
 class SynthesizedModuleTester(c: SynthesizedModule, inputI: Array[Int], inputJ: Array[Int],
                               outResult: Array[Int], outputCycle: Int) extends PeekPokeTester(c) {
 

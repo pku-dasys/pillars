@@ -15,6 +15,8 @@ object ILPMap {
   /** Map given DFG(IR) to given MRRG,
    * and write result to file which name is related to filename using FileWriter fw.
    *
+   * @example If the file name is "dir/test", this mapper will produce "dir/test_i.txt" (Information TXT)
+   *          and "dir/test_r.txt" (Result TXT) when mapping is successful.
    * @param dfg             the given DFG
    * @param mrrg            the given MRRG
    * @param filename        the name we will used to write result
@@ -23,6 +25,7 @@ object ILPMap {
    * @param scheduleControl a parameter indicating whether the latency and skew should be controlled and obtained in ILP
    * @param skewLimit       the limit of skew which only is used when latencyControl is ture
    * @param latencyLimit    the limit of latency which only is used when latencyControl is ture
+   * @return the run time of mapper
    */
   def mapping(dfg: DFG, mrrg: MRRG, filename: String = null, fw: FileWriter = null,
               separatedPR: Boolean = false, scheduleControl: Boolean = false,
@@ -218,14 +221,13 @@ object ILPMap {
       else {
         Scheduler.schedule(dfg, mrrg, filename = filename, II = dfg.II)
       }
-//      if(mapper.ringCheckPass){
-        dfg.func2regMap = JavaConverters.mapAsScalaMap(mapper.func2regMap)
-        dfg.funcDirect2funcMap = JavaConverters.mapAsScalaMap(mapper.funcDirect2funcMap)
-        dfg.reg2funcMap = JavaConverters.mapAsScalaMap(mapper.reg2funcMap)
-        dfg.regConnect = JavaConverters.mapAsScalaMap(mapper.regConnect)
-        dfg.synthesizable = true
-        dfg.regNum = mapper.regMap.size()
-//      }
+      dfg.func2regMap = JavaConverters.mapAsScalaMap(mapper.func2regMap)
+      dfg.funcDirect2funcMap = JavaConverters.mapAsScalaMap(mapper.funcDirect2funcMap)
+      dfg.reg2funcMap = JavaConverters.mapAsScalaMap(mapper.reg2funcMap)
+      dfg.regConnect = JavaConverters.mapAsScalaMap(mapper.regConnect)
+      dfg.synthesizable = true
+      dfg.regNum = mapper.regMap.size()
+      return elapsedTime
     }
     -1
   }

@@ -135,8 +135,8 @@
                         <a href="Connect.html" title="A class containing the connections between ports.">Connect</a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
-                        <a class="class" href="ConstInfo.html" title="A class containing const values, the corresponding RCs and identity number of const units."></a>
-                        <a href="ConstInfo.html" title="A class containing const values, the corresponding RCs and identity number of const units.">ConstInfo</a>
+                        <a class="class" href="ConstInfo.html" title="A class containing const values, the corresponding RCs and identification number of const units."></a>
+                        <a href="ConstInfo.html" title="A class containing const values, the corresponding RCs and identification number of const units.">ConstInfo</a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
                         <a class="trait" href="ElementTrait.html" title="The trait of elements."></a>
@@ -430,7 +430,7 @@ mapped nodes in a MRRG representing this architecture, fire time and skew.
         <span class="name">constInfo</span><span class="result">: <a href="ConstInfo.html" class="extype" name="tetriski.pillars.core.ConstInfo">ConstInfo</a></span>
       </span>
       
-      <p class="shortcomment cmt">A class containing const values, the corresponding RCs and identity number of const units.</p>
+      <p class="shortcomment cmt">A class containing const values, the corresponding RCs and identification number of const units.</p>
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -515,8 +515,8 @@ mapped nodes in a MRRG representing this architecture, fire time and skew.
         <span class="name">getConstInfo</span><span class="params">()</span><span class="result">: <a href="ConstInfo.html" class="extype" name="tetriski.pillars.core.ConstInfo">ConstInfo</a></span>
       </span>
       
-      <p class="shortcomment cmt">Get the class containing const values, the corresponding RC and identity number of a const unit.</p><div class="fullcomment"><div class="comment cmt"><p>Get the class containing const values, the corresponding RC and identity number of a const unit.
-</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the class containing const values, the corresponding RC and identity number of a const unit</p></dd></dl></div>
+      <p class="shortcomment cmt">Get the class containing const values, the corresponding RC and identification number of a const unit.</p><div class="fullcomment"><div class="comment cmt"><p>Get the class containing const values, the corresponding RC and identification number of a const unit.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the class containing const values, the corresponding RC and identification number of a const unit</p></dd></dl></div>
     </li><li name="tetriski.pillars.core.SimulationHelper#getDataWithAddr" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getDataWithAddr(dataSize:Int,addrArray:Array[Int],inDataArrays:Array[Array[Int]],outDataArrays:Array[Array[Int]],refDataArrays:Array[Array[Int]]):Array[Any]"></a><a id="getDataWithAddr(Int,Array[Int],Array[Array[Int]],Array[Array[Int]],Array[Array[Int]]):Array[Any]"></a>
       <span class="permalink">
@@ -535,7 +535,7 @@ mapped nodes in a MRRG representing this architecture, fire time and skew.
       <p class="shortcomment cmt">Get data arrays with corresponding address.</p><div class="fullcomment"><div class="comment cmt"><p>Get data arrays with corresponding address.
 </p></div><dl class="paramcmts block"><dt class="param">dataSize</dt><dd class="cmt"><p>the data size of a data array</p></dd><dt class="param">addrArray</dt><dd class="cmt"><p>the address of the data arrays for LSUs</p></dd><dt class="param">inDataArrays</dt><dd class="cmt"><p>the input data arrays for LSUs</p></dd><dt class="param">outDataArrays</dt><dd class="cmt"><p>the expected data arrays for LSUs</p></dd><dt class="param">refDataArrays</dt><dd class="cmt"><p>the expected data arrays for the output ports</p></dd><dt>returns</dt><dd class="cmt"><p>Array(the input data arrays for LSUs with corresponding address,
         the expected data arrays for LSUs with corresponding address,
-        the expected data arrays for the output ports with corresponding identity number)</p></dd></dl></div>
+        the expected data arrays for the output ports with corresponding identification number)</p></dd></dl></div>
     </li><li name="tetriski.pillars.core.SimulationHelper#getOutputCycle" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getOutputCycle():Int"></a>
       <span class="permalink">
@@ -608,6 +608,38 @@ mapped nodes in a MRRG representing this architecture, fire time and skew.
       
       <p class="shortcomment cmt">Initialize values in this class according to a result TXT.</p><div class="fullcomment"><div class="comment cmt"><p>Initialize values in this class according to a result TXT.
 </p></div><dl class="paramcmts block"><dt class="param">resultFilename</dt><dd class="cmt"><p>the file name of the result TXT</p></dd></dl></div>
+    </li><li name="tetriski.pillars.core.SimulationHelper#inputPortCycleMap" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="inputPortCycleMap:scala.collection.immutable.Map[Int,Int]"></a><a id="inputPortCycleMap:Map[Int,Int]"></a>
+      <span class="permalink">
+      <a href="../../../tetriski/pillars/core/SimulationHelper.html#inputPortCycleMap:scala.collection.immutable.Map[Int,Int]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">var</span>
+      </span>
+      <span class="symbol">
+        <span class="name">inputPortCycleMap</span><span class="result">: <span class="extype" name="scala.collection.immutable.Map">Map</span>[<span class="extype" name="scala.Int">Int</span>, <span class="extype" name="scala.Int">Int</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">A map between the index of a opNode with &quot;input&quot; opcode and the ID of input port.</p>
+    </li><li name="tetriski.pillars.core.SimulationHelper#inputPorts" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="inputPorts:scala.collection.mutable.ArrayBuffer[Int]"></a><a id="inputPorts:ArrayBuffer[Int]"></a>
+      <span class="permalink">
+      <a href="../../../tetriski/pillars/core/SimulationHelper.html#inputPorts:scala.collection.mutable.ArrayBuffer[Int]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">inputPorts</span><span class="result">: <span class="extype" name="scala.collection.mutable.ArrayBuffer">ArrayBuffer</span>[<span class="extype" name="scala.Int">Int</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">The array of the identification number of the mapped input ports.</p>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <span class="permalink">
@@ -729,7 +761,7 @@ mapped nodes in a MRRG representing this architecture, fire time and skew.
         <span class="name">outPorts</span><span class="result">: <span class="extype" name="scala.collection.mutable.ArrayBuffer">ArrayBuffer</span>[<span class="extype" name="scala.Int">Int</span>]</span>
       </span>
       
-      <p class="shortcomment cmt">The array of the identity number of the mapped output ports.</p>
+      <p class="shortcomment cmt">The array of the identification number of the mapped output ports.</p>
     </li><li name="tetriski.pillars.core.SimulationHelper#outputCycle" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="outputCycle:Int"></a>
       <span class="permalink">
@@ -746,6 +778,22 @@ mapped nodes in a MRRG representing this architecture, fire time and skew.
       </span>
       
       <p class="shortcomment cmt">The cycle we can obtain the result.</p>
+    </li><li name="tetriski.pillars.core.SimulationHelper#outputPortCycleMap" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="outputPortCycleMap:scala.collection.immutable.Map[Int,Int]"></a><a id="outputPortCycleMap:Map[Int,Int]"></a>
+      <span class="permalink">
+      <a href="../../../tetriski/pillars/core/SimulationHelper.html#outputPortCycleMap:scala.collection.immutable.Map[Int,Int]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">var</span>
+      </span>
+      <span class="symbol">
+        <span class="name">outputPortCycleMap</span><span class="result">: <span class="extype" name="scala.collection.immutable.Map">Map</span>[<span class="extype" name="scala.Int">Int</span>, <span class="extype" name="scala.Int">Int</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">A map between the index of a opNode with &quot;output&quot; opcode and the ID of output port.</p>
     </li><li name="tetriski.pillars.core.SimulationHelper#reset" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="reset():Unit"></a>
       <span class="permalink">
@@ -777,8 +825,8 @@ mapped nodes in a MRRG representing this architecture, fire time and skew.
         <span class="name">setConst</span><span class="params">(<span name="vals">vals: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Int">Int</span>]</span>, <span name="testII">testII: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       
-      <p class="shortcomment cmt">Set const values, the corresponding RC and identity number of a const unit.</p><div class="fullcomment"><div class="comment cmt"><p>Set const values, the corresponding RC and identity number of a const unit.
-</p></div><dl class="paramcmts block"><dt class="param">vals</dt><dd class="cmt"><p>the const values</p></dd><dt class="param">testII</dt><dd class="cmt"><p>the target II</p></dd></dl></div>
+      <p class="shortcomment cmt">Set const values, the corresponding RC and identification number of a const unit.</p><div class="fullcomment"><div class="comment cmt"><p>Set const values, the corresponding RC and identification number of a const unit.
+</p></div><dl class="paramcmts block"><dt class="param">vals</dt><dd class="cmt"><p>the const values</p></dd><dt class="param">testII</dt><dd class="cmt"><p>the targeted II</p></dd></dl></div>
     </li><li name="tetriski.pillars.core.SimulationHelper#size" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="size:Int"></a>
       <span class="permalink">

@@ -274,7 +274,7 @@
 
       
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A tester for sum.
-The post-process is not necessary since there are no store operations in the target DFG.
+The post-process is not necessary since there are no store operations in the targeted DFG.
 </p></div><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
@@ -515,7 +515,27 @@ a translation is needed in some test cases.
       </span>
       
       <p class="shortcomment cmt">Verifies data in output ports during the activating process.</p><div class="fullcomment"><div class="comment cmt"><p>Verifies data in output ports during the activating process.
-</p></div><dl class="paramcmts block"><dt class="param">testII</dt><dd class="cmt"><p>the target II</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="ApplicationTester.html" class="extype" name="tetriski.pillars.testers.ApplicationTester">ApplicationTester</a></dd></dl></div>
+</p></div><dl class="paramcmts block"><dt class="param">testII</dt><dd class="cmt"><p>the targeted II</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="ApplicationTester.html" class="extype" name="tetriski.pillars.testers.ApplicationTester">ApplicationTester</a></dd></dl></div>
+    </li><li name="tetriski.pillars.testers.ApplicationTester#checkPortOutsWithInput" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="checkPortOutsWithInput(testII:Int):Unit"></a><a id="checkPortOutsWithInput(Int):Unit"></a>
+      <span class="permalink">
+      <a href="../../../tetriski/pillars/testers/SumTester.html#checkPortOutsWithInput(testII:Int):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">checkPortOutsWithInput</span><span class="params">(<span name="testII">testII: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Verifies data in output ports during the activating process
+when transferring data through the input ports.</p><div class="fullcomment"><div class="comment cmt"><p>Verifies data in output ports during the activating process
+when transferring data through the input ports.
+This function is correct when appTestHelper.getThroughput() is 1.
+</p></div><dl class="paramcmts block"><dt class="param">testII</dt><dd class="cmt"><p>the targeted II</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="ApplicationTester.html" class="extype" name="tetriski.pillars.testers.ApplicationTester">ApplicationTester</a></dd></dl></div>
     </li><li name="scala.AnyRef#clone" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a><a id="clone():AnyRef"></a>
       <span class="permalink">
@@ -558,7 +578,7 @@ a translation is needed in some test cases.
       </span>
       
       <p class="shortcomment cmt">Verifies data in a LSU during the post-process.</p><div class="fullcomment"><div class="comment cmt"><p>Verifies data in a LSU during the post-process.
-</p></div><dl class="paramcmts block"><dt class="param">numInLSU</dt><dd class="cmt"><p>the identity number of this LSU</p></dd><dt class="param">refArray</dt><dd class="cmt"><p>the expected output data array</p></dd><dt class="param">base</dt><dd class="cmt"><p>the base address</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="ApplicationTester.html" class="extype" name="tetriski.pillars.testers.ApplicationTester">ApplicationTester</a></dd></dl></div>
+</p></div><dl class="paramcmts block"><dt class="param">numInLSU</dt><dd class="cmt"><p>the identification number of this LSU</p></dd><dt class="param">refArray</dt><dd class="cmt"><p>the expected output data array</p></dd><dt class="param">base</dt><dd class="cmt"><p>the base address</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="ApplicationTester.html" class="extype" name="tetriski.pillars.testers.ApplicationTester">ApplicationTester</a></dd></dl></div>
     </li><li name="chisel3.iotesters.PeekPokeTester#dut" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="dut:T"></a><a id="dut:TopModule"></a>
       <span class="permalink">
@@ -591,7 +611,7 @@ a translation is needed in some test cases.
       </span>
       
       <p class="shortcomment cmt">Enters data into a LSU.</p><div class="fullcomment"><div class="comment cmt"><p>Enters data into a LSU.
-</p></div><dl class="paramcmts block"><dt class="param">numInLSU</dt><dd class="cmt"><p>the identity number of this LSU</p></dd><dt class="param">inData</dt><dd class="cmt"><p>the input data array</p></dd><dt class="param">base</dt><dd class="cmt"><p>the base address</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="ApplicationTester.html" class="extype" name="tetriski.pillars.testers.ApplicationTester">ApplicationTester</a></dd></dl></div>
+</p></div><dl class="paramcmts block"><dt class="param">numInLSU</dt><dd class="cmt"><p>the identification number of this LSU</p></dd><dt class="param">inData</dt><dd class="cmt"><p>the input data array</p></dd><dt class="param">base</dt><dd class="cmt"><p>the base address</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="ApplicationTester.html" class="extype" name="tetriski.pillars.testers.ApplicationTester">ApplicationTester</a></dd></dl></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -826,7 +846,7 @@ a translation is needed in some test cases.
       </span>
       
       <p class="shortcomment cmt">Set the configurations and schedules in the pre-process.</p><div class="fullcomment"><div class="comment cmt"><p>Set the configurations and schedules in the pre-process.
-</p></div><dl class="paramcmts block"><dt class="param">testII</dt><dd class="cmt"><p>the target II</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="ApplicationTester.html" class="extype" name="tetriski.pillars.testers.ApplicationTester">ApplicationTester</a></dd></dl></div>
+</p></div><dl class="paramcmts block"><dt class="param">testII</dt><dd class="cmt"><p>the targeted II</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="ApplicationTester.html" class="extype" name="tetriski.pillars.testers.ApplicationTester">ApplicationTester</a></dd></dl></div>
     </li><li name="tetriski.pillars.testers.ApplicationTester#inputData" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="inputData():Unit"></a>
       <span class="permalink">

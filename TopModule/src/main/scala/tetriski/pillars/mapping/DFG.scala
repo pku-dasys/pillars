@@ -112,11 +112,29 @@ class DFG(var name: String) {
    */
   var valNodesMap = Map[String, Int]()
 
+  /** A map between the ID of a register and the IDs of its fan-out registers.
+   */
   var regConnect = scala.collection.mutable.Map[Integer, List[Integer]]()
+
+  /** A map between the ID of the module corresponding a funcNode and the IDs of its fan-out registers.
+   */
   var func2regMap = scala.collection.mutable.Map[Integer, List[Integer]]()
+
+  /** A map between the ID of a register and the IDs of its fan-out modules corresponding funcNodes.
+   */
   var reg2funcMap = scala.collection.mutable.Map[Integer, List[List[Integer]]]()
+
+  /** A map between the ID of the module corresponding a funcNode
+   * and the IDs of its fan-out modules corresponding funcNodes.
+   */
   var funcDirect2funcMap = scala.collection.mutable.Map[Integer, List[List[Integer]]]()
+
+  /** The number of registers.
+   */
   var regNum = -1
+
+  /** A parameter indicating whether this DFG is synthesizable.
+   */
   var synthesizable = false
 
   /** Get the num of opNodes.

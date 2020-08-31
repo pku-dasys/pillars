@@ -151,8 +151,8 @@
                         <a href="ValNode.html" title="Class describing valNodes in DFG.">ValNode</a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
-                        <a class="class" href="gurobimap_java.html" title="A class doing core mapping process using Gurobi"></a>
-                        <a href="gurobimap_java.html" title="A class doing core mapping process using Gurobi">gurobimap_java</a>
+                        <a class="class" href="gurobiMapJava.html" title="A class doing core mapping process using Gurobi"></a>
+                        <a href="gurobiMapJava.html" title="A class doing core mapping process using Gurobi">gurobiMapJava</a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
                         <a class="object" href="testILP$.html" title="This object is used for experimental study."></a>
@@ -371,22 +371,6 @@ This variable is only used for annulated DFG.
                 <span class="name">@HotSpotIntrinsicCandidate</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="tetriski.pillars.mapping.OpNode#constInput" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="constInput:Boolean"></a>
-      <span class="permalink">
-      <a href="../../../tetriski/pillars/mapping/OpNode.html#constInput:Boolean" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">var</span>
-      </span>
-      <span class="symbol">
-        <span class="name">constInput</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
-      </span>
-      
-      <p class="shortcomment cmt">A variable indicating whether this opNode has a const input.</p>
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -476,7 +460,7 @@ This variable is only used for annulated DFG.
         <span class="name">input</span><span class="result">: <span class="extype" name="scala.collection.immutable.Map">Map</span>[<span class="extype" name="scala.Int">Int</span>, <a href="" class="extype" name="tetriski.pillars.mapping.OpNode">OpNode</a>]</span>
       </span>
       
-      <p class="shortcomment cmt">A map between the identity number of inputs and corresponding opNode.</p>
+      <p class="shortcomment cmt">A map between the identification number of inputs and corresponding opNode.</p>
     </li><li name="tetriski.pillars.mapping.OpNode#inputLatency" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="inputLatency:scala.collection.mutable.ArrayBuffer[Int]"></a><a id="inputLatency:ArrayBuffer[Int]"></a>
       <span class="permalink">
@@ -631,6 +615,22 @@ This variable is only used for annulated DFG.
       </span>
       
       <p class="shortcomment cmt">The output valNode of this opNode.</p>
+    </li><li name="tetriski.pillars.mapping.OpNode#primaryInput" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="primaryInput:Boolean"></a>
+      <span class="permalink">
+      <a href="../../../tetriski/pillars/mapping/OpNode.html#primaryInput:Boolean" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">var</span>
+      </span>
+      <span class="symbol">
+        <span class="name">primaryInput</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">A variable indicating whether this opNode has a primary input.</p>
     </li><li name="tetriski.pillars.mapping.OpNode#setLatency" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="setLatency(arg:Int):Unit"></a><a id="setLatency(Int):Unit"></a>
       <span class="permalink">

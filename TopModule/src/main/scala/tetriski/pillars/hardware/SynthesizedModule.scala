@@ -116,7 +116,22 @@ class SynthesizedStoreUnit(w: Int) extends Module {
 
 }
 
+/** The synthesized design for a mapped DFG.
+ * When using this module, the origin CGRA architecture plays the role of virtual overlay.
+ * Some may call it "soft CGRA", which is used for quick and high-quality compiler.
+ *
+ * This Module is only tested when II = 1.
+ *
+ * @param dfg       a mapped DFG
+ * @param constInfo the const values of each const unit
+ * @param memDatas  the data arrays in the memory of each load unit
+ * @param w         the data width
+ */
 class SynthesizedModule(dfg: DFG, constInfo: ConstInfo, memDatas: Array[Array[Int]], w: Int) extends Module {
+  /** Get the number of nodes with a opcode in the DFG.
+   *
+   * @param op the opcode
+   */
   def getNum(op: OpEnum): Int = {
     dfg.opNodes.map(node => if (node.opcode == op) {
       1
@@ -125,7 +140,21 @@ class SynthesizedModule(dfg: DFG, constInfo: ConstInfo, memDatas: Array[Array[In
     }).sum
   }
 
+  /** Get a specified port of the module corresponding a specified node.
+   *
+   * @param index   the index of the node
+   * @param operand the operand of the port
+   * @param isInput a parameter indicating whether this port is a input port
+   * @return the port
+   */
   def getPort(index: Int, operand: Int = 0, isInput: Boolean = false): Data = {
+    /** Add necessary registers if skew of a mapped node is not 0,
+     * and get the port should be used for connection.
+     *
+     * @param node the node
+     * @param port the original port
+     * @return the port should be used for connection
+     */
     def skewCheck(node: OpNode, port: Data): Data = {
       if (node.skew < 0 && operand == 0) {
         val skewReg = Module(new Registers(-node.skew, w))

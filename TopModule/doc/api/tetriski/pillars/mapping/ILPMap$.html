@@ -151,8 +151,8 @@
                         <a href="ValNode.html" title="Class describing valNodes in DFG.">ValNode</a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
-                        <a class="class" href="gurobimap_java.html" title="A class doing core mapping process using Gurobi"></a>
-                        <a href="gurobimap_java.html" title="A class doing core mapping process using Gurobi">gurobimap_java</a>
+                        <a class="class" href="gurobiMapJava.html" title="A class doing core mapping process using Gurobi"></a>
+                        <a href="gurobiMapJava.html" title="A class doing core mapping process using Gurobi">gurobiMapJava</a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
                         <a class="object" href="testILP$.html" title="This object is used for experimental study."></a>
@@ -424,9 +424,9 @@
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li name="tetriski.pillars.mapping.ILPMap#mapping" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="mapping(dfg:tetriski.pillars.mapping.DFG,mrrg:tetriski.pillars.core.MRRG,filename:String,fw:java.io.FileWriter):Double"></a><a id="mapping(DFG,MRRG,String,FileWriter):Double"></a>
+      <a id="mapping(dfg:tetriski.pillars.mapping.DFG,mrrg:tetriski.pillars.core.MRRG,filename:String,fw:java.io.FileWriter,separatedPR:Boolean,scheduleControl:Boolean,skewLimit:Int,latencyLimit:Int):Double"></a><a id="mapping(DFG,MRRG,String,FileWriter,Boolean,Boolean,Int,Int):Double"></a>
       <span class="permalink">
-      <a href="../../../tetriski/pillars/mapping/ILPMap$.html#mapping(dfg:tetriski.pillars.mapping.DFG,mrrg:tetriski.pillars.core.MRRG,filename:String,fw:java.io.FileWriter):Double" title="Permalink">
+      <a href="../../../tetriski/pillars/mapping/ILPMap$.html#mapping(dfg:tetriski.pillars.mapping.DFG,mrrg:tetriski.pillars.core.MRRG,filename:String,fw:java.io.FileWriter,separatedPR:Boolean,scheduleControl:Boolean,skewLimit:Int,latencyLimit:Int):Double" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -435,13 +435,16 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">mapping</span><span class="params">(<span name="dfg">dfg: <a href="DFG.html" class="extype" name="tetriski.pillars.mapping.DFG">DFG</a></span>, <span name="mrrg">mrrg: <a href="../core/MRRG.html" class="extype" name="tetriski.pillars.core.MRRG">MRRG</a></span>, <span name="filename">filename: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">null</span></span>, <span name="fw">fw: <span class="extype" name="java.io.FileWriter">FileWriter</span> = <span class="symbol">null</span></span>)</span><span class="result">: <span class="extype" name="scala.Double">Double</span></span>
+        <span class="name">mapping</span><span class="params">(<span name="dfg">dfg: <a href="DFG.html" class="extype" name="tetriski.pillars.mapping.DFG">DFG</a></span>, <span name="mrrg">mrrg: <a href="../core/MRRG.html" class="extype" name="tetriski.pillars.core.MRRG">MRRG</a></span>, <span name="filename">filename: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">null</span></span>, <span name="fw">fw: <span class="extype" name="java.io.FileWriter">FileWriter</span> = <span class="symbol">null</span></span>, <span name="separatedPR">separatedPR: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="scheduleControl">scheduleControl: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="skewLimit">skewLimit: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">2</span></span>, <span name="latencyLimit">latencyLimit: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">32</span></span>)</span><span class="result">: <span class="extype" name="scala.Double">Double</span></span>
       </span>
       
       <p class="shortcomment cmt">Map given DFG(IR) to given MRRG,
 and write result to file which name is related to filename using FileWriter fw.</p><div class="fullcomment"><div class="comment cmt"><p>Map given DFG(IR) to given MRRG,
 and write result to file which name is related to filename using FileWriter fw.
-</p></div><dl class="paramcmts block"><dt class="param">dfg</dt><dd class="cmt"><p>the given DFG</p></dd><dt class="param">mrrg</dt><dd class="cmt"><p>the given MRRG</p></dd><dt class="param">filename</dt><dd class="cmt"><p>the name we will used to write result</p></dd><dt class="param">fw</dt><dd class="cmt"><p>the FileWriter we used</p></dd></dl></div>
+</p></div><dl class="paramcmts block"><dt class="param">dfg</dt><dd class="cmt"><p>the given DFG</p></dd><dt class="param">mrrg</dt><dd class="cmt"><p>the given MRRG</p></dd><dt class="param">filename</dt><dd class="cmt"><p>the name we will used to write result</p></dd><dt class="param">fw</dt><dd class="cmt"><p>the FileWriter we used</p></dd><dt class="param">separatedPR</dt><dd class="cmt"><p>a parameter indicating whether ILP placement and routing should be separated</p></dd><dt class="param">scheduleControl</dt><dd class="cmt"><p>a parameter indicating whether the latency and skew should be controlled and obtained in ILP</p></dd><dt class="param">skewLimit</dt><dd class="cmt"><p>the limit of skew which only is used when latencyControl is ture</p></dd><dt class="param">latencyLimit</dt><dd class="cmt"><p>the limit of latency which only is used when latencyControl is ture</p></dd><dt>returns</dt><dd class="cmt"><p>the run time of mapper</p></dd></dl><dl class="attributes block"> <div class="block">Example:
+               <ol><li class="cmt"><p>If the file name is &quot;dir/test&quot;, this mapper will produce &quot;dir/test_i.txt&quot; (Information TXT)
+         and &quot;dir/test_r.txt&quot; (Result TXT) when mapping is successful.</p></li></ol>
+            </div></dl></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">
