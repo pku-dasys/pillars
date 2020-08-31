@@ -44,8 +44,12 @@ class AppTestHelper(bitStreams: Array[BigInt], schedules: List[Int],
    */
   var outputCycle = testII + 1
 
+  /** A map between the index of a opNode with "output" opcode and the ID of output port.
+   */
   var outputPortCycleMap = Map[Int, Int]()
 
+  /** A map between the index of a opNode with "input" opcode and the ID of input port.
+   */
   var inputPortCycleMap = Map[Int, Int]()
 
   /** A parameter indicating the throughput of mapping result.

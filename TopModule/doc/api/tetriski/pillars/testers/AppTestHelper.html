@@ -278,7 +278,7 @@ Since configuration controllers can repeat stored configurations every II cycles
 the &quot;throughput&quot; indicates after how many times of such repeats, a new result can be obtained.
 For example, if II = 2 and throughput = 2, we can obtain a new result every 4 cycles.
 However, it is not recommended to use this parameter, and we suggest users to
-update the target architecture or mapping parameters.</p><p>The &quot;outputCycle&quot; must be exactly right when the results are verified at output
+update the targeted architecture or mapping parameters.</p><p>The &quot;outputCycle&quot; must be exactly right when the results are verified at output
 ports of the top module during the activating process, while if only the
 data obtained from LSUs is needed to be verified, it should be large enough.
 </p></div><div class="toggleContainer block">
@@ -346,7 +346,7 @@ data obtained from LSUs is needed to be verified, it should be large enough.
         <span class="name">AppTestHelper</span><span class="params">(<span name="bitStreams">bitStreams: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.BigInt">BigInt</span>]</span>, <span name="schedules">schedules: <span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Int">Int</span>]</span>, <span name="testII">testII: <span class="extype" name="scala.Int">Int</span></span>)</span>
       </span>
       
-      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">bitStreams</dt><dd class="cmt"><p>the configurations</p></dd><dt class="param">schedules</dt><dd class="cmt"><p>the schedules of modules</p></dd><dt class="param">testII</dt><dd class="cmt"><p>the target II</p></dd></dl></div>
+      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">bitStreams</dt><dd class="cmt"><p>the configurations</p></dd><dt class="param">schedules</dt><dd class="cmt"><p>the schedules of modules</p></dd><dt class="param">testII</dt><dd class="cmt"><p>the targeted II</p></dd></dl></div>
     </li></ol>
             </div>
 
@@ -438,7 +438,7 @@ data obtained from LSUs is needed to be verified, it should be large enough.
       </span>
       
       <p class="shortcomment cmt">Add a input data array into the corresponding map.</p><div class="fullcomment"><div class="comment cmt"><p>Add a input data array into the corresponding map.
-</p></div><dl class="paramcmts block"><dt class="param">numLSU</dt><dd class="cmt"><p>identity number of target LSU</p></dd><dt class="param">base</dt><dd class="cmt"><p>the base address</p></dd><dt class="param">inData</dt><dd class="cmt"><p>the input data array</p></dd></dl></div>
+</p></div><dl class="paramcmts block"><dt class="param">numLSU</dt><dd class="cmt"><p>identification number of targeted LSU</p></dd><dt class="param">base</dt><dd class="cmt"><p>the base address</p></dd><dt class="param">inData</dt><dd class="cmt"><p>the input data array</p></dd></dl></div>
     </li><li name="tetriski.pillars.testers.AppTestHelper#addOutData" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="addOutData(outDatas:Map[List[Int],Array[Int]]):Unit"></a><a id="addOutData(Map[List[Int],Array[Int]]):Unit"></a>
       <span class="permalink">
@@ -472,7 +472,7 @@ data obtained from LSUs is needed to be verified, it should be large enough.
       </span>
       
       <p class="shortcomment cmt">Add a expected output data array into the corresponding map.</p><div class="fullcomment"><div class="comment cmt"><p>Add a expected output data array into the corresponding map.
-</p></div><dl class="paramcmts block"><dt class="param">numLSU</dt><dd class="cmt"><p>identity number of target LSU</p></dd><dt class="param">base</dt><dd class="cmt"><p>the base address</p></dd><dt class="param">outData</dt><dd class="cmt"><p>the expected output data array</p></dd></dl></div>
+</p></div><dl class="paramcmts block"><dt class="param">numLSU</dt><dd class="cmt"><p>identification number of targeted LSU</p></dd><dt class="param">base</dt><dd class="cmt"><p>the base address</p></dd><dt class="param">outData</dt><dd class="cmt"><p>the expected output data array</p></dd></dl></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <span class="permalink">
@@ -601,7 +601,24 @@ data obtained from LSUs is needed to be verified, it should be large enough.
       </span>
       
       <p class="shortcomment cmt">Get the input data array.</p><div class="fullcomment"><div class="comment cmt"><p>Get the input data array.
-</p></div><dl class="paramcmts block"><dt class="param">numLSU</dt><dd class="cmt"><p>identity number of target LSU</p></dd><dt class="param">base</dt><dd class="cmt"><p>the base address</p></dd><dt>returns</dt><dd class="cmt"><p>the input data array</p></dd></dl></div>
+</p></div><dl class="paramcmts block"><dt class="param">numLSU</dt><dd class="cmt"><p>identification number of targeted LSU</p></dd><dt class="param">base</dt><dd class="cmt"><p>the base address</p></dd><dt>returns</dt><dd class="cmt"><p>the input data array</p></dd></dl></div>
+    </li><li name="tetriski.pillars.testers.AppTestHelper#getInputPortData" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getInputPortData():Map[Int,Array[Int]]"></a>
+      <span class="permalink">
+      <a href="../../../tetriski/pillars/testers/AppTestHelper.html#getInputPortData():Map[Int,Array[Int]]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getInputPortData</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Int">Int</span>, <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Int">Int</span>]]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Get the map between the targeted input port and the input data array.</p><div class="fullcomment"><div class="comment cmt"><p>Get the map between the targeted input port and the input data array.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the map between the targeted input port and the input data array</p></dd></dl></div>
     </li><li name="tetriski.pillars.testers.AppTestHelper#getOutData" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getOutData(numLSU:Int,base:Int):Array[Int]"></a><a id="getOutData(Int,Int):Array[Int]"></a>
       <span class="permalink">
@@ -618,7 +635,7 @@ data obtained from LSUs is needed to be verified, it should be large enough.
       </span>
       
       <p class="shortcomment cmt">Get the expected output data array.</p><div class="fullcomment"><div class="comment cmt"><p>Get the expected output data array.
-</p></div><dl class="paramcmts block"><dt class="param">numLSU</dt><dd class="cmt"><p>identity number of target LSU</p></dd><dt class="param">base</dt><dd class="cmt"><p>the base address</p></dd><dt>returns</dt><dd class="cmt"><p>the expected output data array</p></dd></dl></div>
+</p></div><dl class="paramcmts block"><dt class="param">numLSU</dt><dd class="cmt"><p>identification number of targeted LSU</p></dd><dt class="param">base</dt><dd class="cmt"><p>the base address</p></dd><dt>returns</dt><dd class="cmt"><p>the expected output data array</p></dd></dl></div>
     </li><li name="tetriski.pillars.testers.AppTestHelper#getOutPortRefs" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getOutPortRefs():Map[Int,Array[Int]]"></a>
       <span class="permalink">
@@ -634,8 +651,8 @@ data obtained from LSUs is needed to be verified, it should be large enough.
         <span class="name">getOutPortRefs</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Int">Int</span>, <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Int">Int</span>]]</span>
       </span>
       
-      <p class="shortcomment cmt">Get the map between the target output port and the expected data array.</p><div class="fullcomment"><div class="comment cmt"><p>Get the map between the target output port and the expected data array.
-</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the map between the target output port and the expected data array</p></dd></dl></div>
+      <p class="shortcomment cmt">Get the map between the targeted output port and the expected data array.</p><div class="fullcomment"><div class="comment cmt"><p>Get the map between the targeted output port and the expected data array.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the map between the targeted output port and the expected data array</p></dd></dl></div>
     </li><li name="tetriski.pillars.testers.AppTestHelper#getOutputCycle" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getOutputCycle():Int"></a>
       <span class="permalink">
@@ -702,8 +719,8 @@ data obtained from LSUs is needed to be verified, it should be large enough.
         <span class="name">getTestII</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
       </span>
       
-      <p class="shortcomment cmt">Get the target II.</p><div class="fullcomment"><div class="comment cmt"><p>Get the target II.
-</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the target II</p></dd></dl></div>
+      <p class="shortcomment cmt">Get the targeted II.</p><div class="fullcomment"><div class="comment cmt"><p>Get the targeted II.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the targeted II</p></dd></dl></div>
     </li><li name="tetriski.pillars.testers.AppTestHelper#getThroughput" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getThroughput():Int"></a>
       <span class="permalink">
@@ -758,8 +775,40 @@ data obtained from LSUs is needed to be verified, it should be large enough.
       </span>
       
       <p class="shortcomment cmt">A map between a list and the input data array.</p><div class="fullcomment"><div class="comment cmt"><p>A map between a list and the input data array.
-The list consists of the identity number of target LSU and base address.
+The list consists of the identification number of targeted LSU and base address.
 </p></div></div>
+    </li><li name="tetriski.pillars.testers.AppTestHelper#inputPortCycleMap" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="inputPortCycleMap:scala.collection.immutable.Map[Int,Int]"></a><a id="inputPortCycleMap:Map[Int,Int]"></a>
+      <span class="permalink">
+      <a href="../../../tetriski/pillars/testers/AppTestHelper.html#inputPortCycleMap:scala.collection.immutable.Map[Int,Int]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">var</span>
+      </span>
+      <span class="symbol">
+        <span class="name">inputPortCycleMap</span><span class="result">: <span class="extype" name="scala.collection.immutable.Map">Map</span>[<span class="extype" name="scala.Int">Int</span>, <span class="extype" name="scala.Int">Int</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">A map between the index of a opNode with &quot;input&quot; opcode and the ID of input port.</p>
+    </li><li name="tetriski.pillars.testers.AppTestHelper#inputPortData" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="inputPortData:scala.collection.immutable.Map[Int,Array[Int]]"></a><a id="inputPortData:Map[Int,Array[Int]]"></a>
+      <span class="permalink">
+      <a href="../../../tetriski/pillars/testers/AppTestHelper.html#inputPortData:scala.collection.immutable.Map[Int,Array[Int]]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">var</span>
+      </span>
+      <span class="symbol">
+        <span class="name">inputPortData</span><span class="result">: <span class="extype" name="scala.collection.immutable.Map">Map</span>[<span class="extype" name="scala.Int">Int</span>, <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Int">Int</span>]]</span>
+      </span>
+      
+      <p class="shortcomment cmt">A map between the targeted input port and the input data array.</p>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <span class="permalink">
@@ -850,7 +899,7 @@ The list consists of the identity number of target LSU and base address.
       </span>
       
       <p class="shortcomment cmt">A map between a list and the expected output data array.</p><div class="fullcomment"><div class="comment cmt"><p>A map between a list and the expected output data array.
-The list consists of the identity number of target LSU and base address.
+The list consists of the identification number of targeted LSU and base address.
 </p></div></div>
     </li><li name="tetriski.pillars.testers.AppTestHelper#outPortRefs" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="outPortRefs:scala.collection.immutable.Map[Int,Array[Int]]"></a><a id="outPortRefs:Map[Int,Array[Int]]"></a>
@@ -867,7 +916,7 @@ The list consists of the identity number of target LSU and base address.
         <span class="name">outPortRefs</span><span class="result">: <span class="extype" name="scala.collection.immutable.Map">Map</span>[<span class="extype" name="scala.Int">Int</span>, <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Int">Int</span>]]</span>
       </span>
       
-      <p class="shortcomment cmt">A map between the target output port and the expected data array.</p>
+      <p class="shortcomment cmt">A map between the targeted output port and the expected data array.</p>
     </li><li name="tetriski.pillars.testers.AppTestHelper#outputCycle" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="outputCycle:Int"></a>
       <span class="permalink">
@@ -884,6 +933,38 @@ The list consists of the identity number of target LSU and base address.
       </span>
       
       <p class="shortcomment cmt">The cycle we can obtain the result.</p>
+    </li><li name="tetriski.pillars.testers.AppTestHelper#outputPortCycleMap" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="outputPortCycleMap:scala.collection.immutable.Map[Int,Int]"></a><a id="outputPortCycleMap:Map[Int,Int]"></a>
+      <span class="permalink">
+      <a href="../../../tetriski/pillars/testers/AppTestHelper.html#outputPortCycleMap:scala.collection.immutable.Map[Int,Int]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">var</span>
+      </span>
+      <span class="symbol">
+        <span class="name">outputPortCycleMap</span><span class="result">: <span class="extype" name="scala.collection.immutable.Map">Map</span>[<span class="extype" name="scala.Int">Int</span>, <span class="extype" name="scala.Int">Int</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">A map between the index of a opNode with &quot;output&quot; opcode and the ID of output port.</p>
+    </li><li name="tetriski.pillars.testers.AppTestHelper#setInputPortData" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="setInputPortData(arg:Map[Int,Array[Int]]):Unit"></a><a id="setInputPortData(Map[Int,Array[Int]]):Unit"></a>
+      <span class="permalink">
+      <a href="../../../tetriski/pillars/testers/AppTestHelper.html#setInputPortData(arg:Map[Int,Array[Int]]):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">setInputPortData</span><span class="params">(<span name="arg">arg: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Int">Int</span>, <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Int">Int</span>]]</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Set the map between the targeted input port and the input data array.</p>
     </li><li name="tetriski.pillars.testers.AppTestHelper#setOutPortRefs" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="setOutPortRefs(arg:Map[Int,Array[Int]]):Unit"></a><a id="setOutPortRefs(Map[Int,Array[Int]]):Unit"></a>
       <span class="permalink">
@@ -899,7 +980,7 @@ The list consists of the identity number of target LSU and base address.
         <span class="name">setOutPortRefs</span><span class="params">(<span name="arg">arg: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Int">Int</span>, <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Int">Int</span>]]</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       
-      <p class="shortcomment cmt">Set the map between the target output port and the expected data array.</p>
+      <p class="shortcomment cmt">Set the map between the targeted output port and the expected data array.</p>
     </li><li name="tetriski.pillars.testers.AppTestHelper#setOutputCycle" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="setOutputCycle(arg:Int):Unit"></a><a id="setOutputCycle(Int):Unit"></a>
       <span class="permalink">
@@ -917,6 +998,22 @@ The list consists of the identity number of target LSU and base address.
       
       <p class="shortcomment cmt">Set the cycle we can obtain the result.</p><div class="fullcomment"><div class="comment cmt"><p>Set the cycle we can obtain the result.
 </p></div><dl class="paramcmts block"><dt class="param">arg</dt><dd class="cmt"><p>the cycle we can obtain the result</p></dd></dl></div>
+    </li><li name="tetriski.pillars.testers.AppTestHelper#setPortCycle" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="setPortCycle(simulationHelper:tetriski.pillars.core.SimulationHelper):Unit"></a><a id="setPortCycle(SimulationHelper):Unit"></a>
+      <span class="permalink">
+      <a href="../../../tetriski/pillars/testers/AppTestHelper.html#setPortCycle(simulationHelper:tetriski.pillars.core.SimulationHelper):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">setPortCycle</span><span class="params">(<span name="simulationHelper">simulationHelper: <a href="../core/SimulationHelper.html" class="extype" name="tetriski.pillars.core.SimulationHelper">SimulationHelper</a></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      
     </li><li name="tetriski.pillars.testers.AppTestHelper#setThroughput" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="setThroughput(arg:Int):Unit"></a><a id="setThroughput(Int):Unit"></a>
       <span class="permalink">

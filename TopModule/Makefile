@@ -10,9 +10,6 @@ doc:
 run:
 	sbt 'test:runMain tetriski.pillars.Pillars'
 
-mapping:
-	sbt 'test:runMain tetriski.pillars.mapping.Mapping'
-
 end2end:
 	sbt 'test:runMain tetriski.pillars.examples.Tutorial'
 

@@ -231,12 +231,32 @@
                         <a href="RegisterFile.html" title="A register file which can perform an arbitrary subset of optional operations.">RegisterFile</a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
+                        <a class="class" href="Registers.html" title="A chain of registers."></a>
+                        <a href="Registers.html" title="A chain of registers.">Registers</a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
                         <a class="class" href="ScheduleController.html" title=""></a>
                         <a href="ScheduleController.html" title="">ScheduleController</a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
                         <a class="class" href="Synchronizer.html" title="A module which achieves synchronization of &quot;input0&quot; and &quot;input1&quot; with &quot;skewing&quot;."></a>
                         <a href="Synchronizer.html" title="A module which achieves synchronization of &quot;input0&quot; and &quot;input1&quot; with &quot;skewing&quot;.">Synchronizer</a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
+                        <a class="class" href="SynthesizedConstUnit.html" title="A simple const unit."></a>
+                        <a href="SynthesizedConstUnit.html" title="A simple const unit.">SynthesizedConstUnit</a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
+                        <a class="class" href="SynthesizedLoadUnit.html" title="A simple load unit."></a>
+                        <a href="SynthesizedLoadUnit.html" title="A simple load unit.">SynthesizedLoadUnit</a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
+                        <a class="class" href="SynthesizedModule.html" title="The synthesized design for a mapped DFG."></a>
+                        <a href="SynthesizedModule.html" title="The synthesized design for a mapped DFG.">SynthesizedModule</a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
+                        <a class="class" href="SynthesizedStoreUnit.html" title="A simple store unit."></a>
+                        <a href="SynthesizedStoreUnit.html" title="A simple store unit.">SynthesizedStoreUnit</a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
                         <a class="class" href="TopModule.html" title="The top design of CGRA."></a>
@@ -360,7 +380,23 @@
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="tetriski.pillars.hardware.Alu" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+              <ol><li name="tetriski.pillars.hardware.Adder" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Adderextendschisel3.Module"></a><a id="Adder:Adder"></a>
+      <span class="permalink">
+      <a href="../../../tetriski/pillars/hardware/Adder.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="A simple adder." href="Adder.html"><span class="name">Adder</span></a><span class="result"> extends <span class="extype" name="chisel3.Module">Module</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">A simple adder.</p>
+    </li><li name="tetriski.pillars.hardware.Alu" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Aluextendschisel3.Module"></a><a id="Alu:Alu"></a>
       <span class="permalink">
       <a href="../../../tetriski/pillars/hardware/Alu.html" title="Permalink">
@@ -495,6 +531,22 @@ It also dispatchs &quot;skewing&quot; to modules.</p></div></div>
       </span>
       
       <p class="shortcomment cmt">A single output multiplexer.</p>
+    </li><li name="tetriski.pillars.hardware.Multiplier" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Multiplierextendschisel3.Module"></a><a id="Multiplier:Multiplier"></a>
+      <span class="permalink">
+      <a href="../../../tetriski/pillars/hardware/Multiplier.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="A simple multiplier." href="Multiplier.html"><span class="name">Multiplier</span></a><span class="result"> extends <span class="extype" name="chisel3.Module">Module</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">A simple multiplier.</p>
     </li><li name="tetriski.pillars.hardware.PillarsModuleInfo" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="PillarsModuleInfoextendsAnyRef"></a><a id="PillarsModuleInfo:PillarsModuleInfo"></a>
       <span class="permalink">
@@ -545,6 +597,22 @@ It should be guaranteed that &quot;configBits&quot; is the last param of the par
       </span>
       
       <p class="shortcomment cmt">A register file which can perform an arbitrary subset of optional operations.</p>
+    </li><li name="tetriski.pillars.hardware.Registers" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Registersextendschisel3.Module"></a><a id="Registers:Registers"></a>
+      <span class="permalink">
+      <a href="../../../tetriski/pillars/hardware/Registers.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="A chain of registers." href="Registers.html"><span class="name">Registers</span></a><span class="result"> extends <span class="extype" name="chisel3.Module">Module</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">A chain of registers.</p>
     </li><li name="tetriski.pillars.hardware.ScheduleController" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ScheduleControllerextendschisel3.Module"></a><a id="ScheduleController:ScheduleController"></a>
       <span class="permalink">
@@ -577,6 +645,73 @@ It should be guaranteed that &quot;configBits&quot; is the last param of the par
       </span>
       
       <p class="shortcomment cmt">A module which achieves synchronization of &quot;input0&quot; and &quot;input1&quot; with &quot;skewing&quot;.</p>
+    </li><li name="tetriski.pillars.hardware.SynthesizedConstUnit" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SynthesizedConstUnitextendschisel3.Module"></a><a id="SynthesizedConstUnit:SynthesizedConstUnit"></a>
+      <span class="permalink">
+      <a href="../../../tetriski/pillars/hardware/SynthesizedConstUnit.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="A simple const unit." href="SynthesizedConstUnit.html"><span class="name">SynthesizedConstUnit</span></a><span class="result"> extends <span class="extype" name="chisel3.Module">Module</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">A simple const unit.</p>
+    </li><li name="tetriski.pillars.hardware.SynthesizedLoadUnit" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SynthesizedLoadUnitextendschisel3.Module"></a><a id="SynthesizedLoadUnit:SynthesizedLoadUnit"></a>
+      <span class="permalink">
+      <a href="../../../tetriski/pillars/hardware/SynthesizedLoadUnit.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="A simple load unit." href="SynthesizedLoadUnit.html"><span class="name">SynthesizedLoadUnit</span></a><span class="result"> extends <span class="extype" name="chisel3.Module">Module</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">A simple load unit.</p>
+    </li><li name="tetriski.pillars.hardware.SynthesizedModule" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="SynthesizedModuleextendschisel3.Module"></a><a id="SynthesizedModule:SynthesizedModule"></a>
+      <span class="permalink">
+      <a href="../../../tetriski/pillars/hardware/SynthesizedModule.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="The synthesized design for a mapped DFG." href="SynthesizedModule.html"><span class="name">SynthesizedModule</span></a><span class="result"> extends <span class="extype" name="chisel3.Module">Module</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">The synthesized design for a mapped DFG.</p><div class="fullcomment"><div class="comment cmt"><p>The synthesized design for a mapped DFG.
+When using this module, the origin CGRA architecture plays the role of virtual overlay.
+Some may call it &quot;soft CGRA&quot;, which is used for quick and high-quality compiler.</p><p>This Module is only tested when II = 1.
+</p></div></div>
+    </li><li name="tetriski.pillars.hardware.SynthesizedStoreUnit" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SynthesizedStoreUnitextendschisel3.Module"></a><a id="SynthesizedStoreUnit:SynthesizedStoreUnit"></a>
+      <span class="permalink">
+      <a href="../../../tetriski/pillars/hardware/SynthesizedStoreUnit.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="A simple store unit." href="SynthesizedStoreUnit.html"><span class="name">SynthesizedStoreUnit</span></a><span class="result"> extends <span class="extype" name="chisel3.Module">Module</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">A simple store unit.</p>
     </li><li name="tetriski.pillars.hardware.TopModule" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="TopModuleextendschisel3.Module"></a><a id="TopModule:TopModule"></a>
       <span class="permalink">
@@ -611,7 +746,7 @@ It should be guaranteed that the type ID of each element should be the same with
       </span>
       
       <p class="shortcomment cmt">Makeshift facilities for context transmission within the limitation of I/O ports in FPGA.</p>
-    </li><li name="tetriski.pillars.hardware.TopModuleWrapperSolid" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="tetriski.pillars.hardware.TopModuleWrapperSolid" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="TopModuleWrapperSolidextendschisel3.Module"></a><a id="TopModuleWrapperSolid:TopModuleWrapperSolid"></a>
       <span class="permalink">
       <a href="../../../tetriski/pillars/hardware/TopModuleWrapperSolid.html" title="Permalink">
@@ -626,9 +761,7 @@ It should be guaranteed that the type ID of each element should be the same with
         <a title="A wrapper with solid configurations and schedules." href="TopModuleWrapperSolid.html"><span class="name">TopModuleWrapperSolid</span></a><span class="result"> extends <span class="extype" name="chisel3.Module">Module</span></span>
       </span>
       
-      <p class="shortcomment cmt">A wrapper with solid configurations and schedules.</p><div class="fullcomment"><div class="comment cmt"><p>A wrapper with solid configurations and schedules.
-Some may call it &quot;soft CGRA&quot;, which is used for quick compiler.
-</p></div></div>
+      <p class="shortcomment cmt">A wrapper with solid configurations and schedules.</p>
     </li><li name="tetriski.pillars.hardware.ADRESPE" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ADRESPEextendschisel3.Module"></a><a id="ADRESPE:ADRESPE"></a>
       <span class="permalink">
@@ -646,23 +779,6 @@ Some may call it &quot;soft CGRA&quot;, which is used for quick compiler.
       
       <p class="shortcomment cmt">A Chisel ADRES PE.</p><div class="fullcomment"><div class="comment cmt"><p>A Chisel ADRES PE.
 </p></div><dl class="attributes block"> <dt>Deprecated</dt><dd class="cmt"></dd></dl></div>
-    </li><li name="tetriski.pillars.hardware.Adder" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="Adderextendschisel3.Module"></a><a id="Adder:Adder"></a>
-      <span class="permalink">
-      <a href="../../../tetriski/pillars/hardware/Adder.html" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a title="A simple adder." href="Adder.html"><span class="name deprecated" title="Deprecated: ">Adder</span></a><span class="result"> extends <span class="extype" name="chisel3.Module">Module</span></span>
-      </span>
-      
-      <p class="shortcomment cmt">A simple adder.</p><div class="fullcomment"><div class="comment cmt"><p>A simple adder.
-</p></div><dl class="attributes block"> <dt>Deprecated</dt><dd class="cmt"></dd></dl></div>
     </li><li name="tetriski.pillars.hardware.DispatchT" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="DispatchTextendschisel3.Module"></a><a id="DispatchT:DispatchT"></a>
       <span class="permalink">
@@ -679,23 +795,6 @@ Some may call it &quot;soft CGRA&quot;, which is used for quick compiler.
       </span>
       
       <p class="shortcomment cmt">A dispatch for testing.</p><div class="fullcomment"><div class="comment cmt"><p>A dispatch for testing.
-</p></div><dl class="attributes block"> <dt>Deprecated</dt><dd class="cmt"></dd></dl></div>
-    </li><li name="tetriski.pillars.hardware.Multiplier" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="Multiplierextendschisel3.Module"></a><a id="Multiplier:Multiplier"></a>
-      <span class="permalink">
-      <a href="../../../tetriski/pillars/hardware/Multiplier.html" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a title="A simple multiplier." href="Multiplier.html"><span class="name deprecated" title="Deprecated: ">Multiplier</span></a><span class="result"> extends <span class="extype" name="chisel3.Module">Module</span></span>
-      </span>
-      
-      <p class="shortcomment cmt">A simple multiplier.</p><div class="fullcomment"><div class="comment cmt"><p>A simple multiplier.
 </p></div><dl class="attributes block"> <dt>Deprecated</dt><dd class="cmt"></dd></dl></div>
     </li></ol>
             </div>

@@ -151,8 +151,8 @@
                         <a href="ValNode.html" title="Class describing valNodes in DFG.">ValNode</a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
-                        <a class="class" href="gurobimap_java.html" title="A class doing core mapping process using Gurobi"></a>
-                        <a href="gurobimap_java.html" title="A class doing core mapping process using Gurobi">gurobimap_java</a>
+                        <a class="class" href="gurobiMapJava.html" title="A class doing core mapping process using Gurobi"></a>
+                        <a href="gurobiMapJava.html" title="A class doing core mapping process using Gurobi">gurobiMapJava</a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
                         <a class="object" href="testILP$.html" title="This object is used for experimental study."></a>
@@ -310,6 +310,22 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="tetriski.pillars.mapping.DFG#II" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="II:Int"></a>
+      <span class="permalink">
+      <a href="../../../tetriski/pillars/mapping/DFG.html#II:Int" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">var</span>
+      </span>
+      <span class="symbol">
+        <span class="name">II</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">The the targeted II.</p>
     </li><li name="tetriski.pillars.mapping.DFG#addOpNode" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="addOpNode(node:tetriski.pillars.mapping.OpNode):Unit"></a><a id="addOpNode(OpNode):Unit"></a>
       <span class="permalink">
@@ -394,6 +410,22 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="tetriski.pillars.mapping.DFG#checkPrimaryInput" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="checkPrimaryInput():Unit"></a>
+      <span class="permalink">
+      <a href="../../../tetriski/pillars/mapping/DFG.html#checkPrimaryInput():Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">checkPrimaryInput</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Check whether a node has primary input.</p>
     </li><li name="scala.AnyRef#clone" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a><a id="clone():AnyRef"></a>
       <span class="permalink">
@@ -452,6 +484,39 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="tetriski.pillars.mapping.DFG#func2regMap" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="func2regMap:scala.collection.mutable.Map[Integer,java.util.List[Integer]]"></a><a id="func2regMap:Map[Integer,List[Integer]]"></a>
+      <span class="permalink">
+      <a href="../../../tetriski/pillars/mapping/DFG.html#func2regMap:scala.collection.mutable.Map[Integer,java.util.List[Integer]]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">var</span>
+      </span>
+      <span class="symbol">
+        <span class="name">func2regMap</span><span class="result">: <span class="extype" name="scala.collection.mutable.Map">Map</span>[<span class="extype" name="java.lang.Integer">Integer</span>, <span class="extype" name="java.util.List">List</span>[<span class="extype" name="java.lang.Integer">Integer</span>]]</span>
+      </span>
+      
+      <p class="shortcomment cmt">A map between the ID of the module corresponding a funcNode and the IDs of its fan-out registers.</p>
+    </li><li name="tetriski.pillars.mapping.DFG#funcDirect2funcMap" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="funcDirect2funcMap:scala.collection.mutable.Map[Integer,java.util.List[java.util.List[Integer]]]"></a><a id="funcDirect2funcMap:Map[Integer,List[List[Integer]]]"></a>
+      <span class="permalink">
+      <a href="../../../tetriski/pillars/mapping/DFG.html#funcDirect2funcMap:scala.collection.mutable.Map[Integer,java.util.List[java.util.List[Integer]]]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">var</span>
+      </span>
+      <span class="symbol">
+        <span class="name">funcDirect2funcMap</span><span class="result">: <span class="extype" name="scala.collection.mutable.Map">Map</span>[<span class="extype" name="java.lang.Integer">Integer</span>, <span class="extype" name="java.util.List">List</span>[<span class="extype" name="java.util.List">List</span>[<span class="extype" name="java.lang.Integer">Integer</span>]]]</span>
+      </span>
+      
+      <p class="shortcomment cmt">A map between the ID of the module corresponding a funcNode
+and the IDs of its fan-out modules corresponding funcNodes.</p>
     </li><li name="scala.AnyRef#getClass" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <span class="permalink">
@@ -543,9 +608,9 @@
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li name="tetriski.pillars.mapping.DFG#loadTXT" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="loadTXT(Filename:String):Unit"></a><a id="loadTXT(String):Unit"></a>
+      <a id="loadTXT(filename:String,targetedII:Int):Unit"></a><a id="loadTXT(String,Int):Unit"></a>
       <span class="permalink">
-      <a href="../../../tetriski/pillars/mapping/DFG.html#loadTXT(Filename:String):Unit" title="Permalink">
+      <a href="../../../tetriski/pillars/mapping/DFG.html#loadTXT(filename:String,targetedII:Int):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -554,11 +619,11 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">loadTXT</span><span class="params">(<span name="Filename">Filename: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="name">loadTXT</span><span class="params">(<span name="filename">filename: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="targetedII">targetedII: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">1</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       
       <p class="shortcomment cmt">Load a DFG from a TXT file, not used in real process.</p><div class="fullcomment"><div class="comment cmt"><p>Load a DFG from a TXT file, not used in real process.
-</p></div><dl class="paramcmts block"><dt class="param">Filename</dt><dd class="cmt"><p>the file name of TXT file</p></dd></dl></div>
+</p></div><dl class="paramcmts block"><dt class="param">filename</dt><dd class="cmt"><p>the file name of TXT file</p></dd><dt class="param">targetedII</dt><dd class="cmt"><p>the targeted II</p></dd></dl></div>
     </li><li name="tetriski.pillars.mapping.DFG#name" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="name:String"></a>
       <span class="permalink">
@@ -664,7 +729,7 @@
         <span class="name">opNodesMap</span><span class="result">: <span class="extype" name="scala.collection.immutable.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Int">Int</span>]</span>
       </span>
       
-      <p class="shortcomment cmt">A map between opNodes and a identity number.</p>
+      <p class="shortcomment cmt">A map between opNodes and a identification number.</p>
     </li><li name="tetriski.pillars.mapping.DFG#printDFG" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="printDFG():Unit"></a>
       <span class="permalink">
@@ -681,6 +746,54 @@
       </span>
       
       <p class="shortcomment cmt">Debug Function to print DFG into screen.</p>
+    </li><li name="tetriski.pillars.mapping.DFG#reg2funcMap" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="reg2funcMap:scala.collection.mutable.Map[Integer,java.util.List[java.util.List[Integer]]]"></a><a id="reg2funcMap:Map[Integer,List[List[Integer]]]"></a>
+      <span class="permalink">
+      <a href="../../../tetriski/pillars/mapping/DFG.html#reg2funcMap:scala.collection.mutable.Map[Integer,java.util.List[java.util.List[Integer]]]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">var</span>
+      </span>
+      <span class="symbol">
+        <span class="name">reg2funcMap</span><span class="result">: <span class="extype" name="scala.collection.mutable.Map">Map</span>[<span class="extype" name="java.lang.Integer">Integer</span>, <span class="extype" name="java.util.List">List</span>[<span class="extype" name="java.util.List">List</span>[<span class="extype" name="java.lang.Integer">Integer</span>]]]</span>
+      </span>
+      
+      <p class="shortcomment cmt">A map between the ID of a register and the IDs of its fan-out modules corresponding funcNodes.</p>
+    </li><li name="tetriski.pillars.mapping.DFG#regConnect" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="regConnect:scala.collection.mutable.Map[Integer,java.util.List[Integer]]"></a><a id="regConnect:Map[Integer,List[Integer]]"></a>
+      <span class="permalink">
+      <a href="../../../tetriski/pillars/mapping/DFG.html#regConnect:scala.collection.mutable.Map[Integer,java.util.List[Integer]]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">var</span>
+      </span>
+      <span class="symbol">
+        <span class="name">regConnect</span><span class="result">: <span class="extype" name="scala.collection.mutable.Map">Map</span>[<span class="extype" name="java.lang.Integer">Integer</span>, <span class="extype" name="java.util.List">List</span>[<span class="extype" name="java.lang.Integer">Integer</span>]]</span>
+      </span>
+      
+      <p class="shortcomment cmt">A map between the ID of a register and the IDs of its fan-out registers.</p>
+    </li><li name="tetriski.pillars.mapping.DFG#regNum" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="regNum:Int"></a>
+      <span class="permalink">
+      <a href="../../../tetriski/pillars/mapping/DFG.html#regNum:Int" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">var</span>
+      </span>
+      <span class="symbol">
+        <span class="name">regNum</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">The number of registers.</p>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">
@@ -697,6 +810,22 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="tetriski.pillars.mapping.DFG#synthesizable" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="synthesizable:Boolean"></a>
+      <span class="permalink">
+      <a href="../../../tetriski/pillars/mapping/DFG.html#synthesizable:Boolean" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">var</span>
+      </span>
+      <span class="symbol">
+        <span class="name">synthesizable</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">A parameter indicating whether this DFG is synthesizable.</p>
     </li><li name="scala.AnyRef#toString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="toString():String"></a>
       <span class="permalink">
@@ -713,6 +842,23 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="tetriski.pillars.mapping.DFG#updateSchedule" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="updateSchedule(filename:String,latencyMap:java.util.Map[String,Integer],skewMap:java.util.Map[String,Integer],outFilename:String):Unit"></a><a id="updateSchedule(String,Map[String,Integer],Map[String,Integer],String):Unit"></a>
+      <span class="permalink">
+      <a href="../../../tetriski/pillars/mapping/DFG.html#updateSchedule(filename:String,latencyMap:java.util.Map[String,Integer],skewMap:java.util.Map[String,Integer],outFilename:String):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">updateSchedule</span><span class="params">(<span name="filename">filename: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="latencyMap">latencyMap: <span class="extype" name="java.util.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="java.lang.Integer">Integer</span>] = <span class="symbol">null</span></span>, <span name="skewMap">skewMap: <span class="extype" name="java.util.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="java.lang.Integer">Integer</span>] = <span class="symbol">null</span></span>, <span name="outFilename">outFilename: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">null</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Update a unscheduled result TXT file with latency and skew.</p><div class="fullcomment"><div class="comment cmt"><p>Update a unscheduled result TXT file with latency and skew.
+</p></div><dl class="paramcmts block"><dt class="param">filename</dt><dd class="cmt"><p>the file name of result TXT file</p></dd><dt class="param">latencyMap</dt><dd class="cmt"><p>a map between the name of a opNode and its latency</p></dd><dt class="param">skewMap</dt><dd class="cmt"><p>a map between the name of a opNode and its skew</p></dd><dt class="param">outFilename</dt><dd class="cmt"><p>the file name of output file</p></dd></dl></div>
     </li><li name="tetriski.pillars.mapping.DFG#valNodes" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="valNodes:scala.collection.mutable.ArrayBuffer[tetriski.pillars.mapping.ValNode]"></a><a id="valNodes:ArrayBuffer[ValNode]"></a>
       <span class="permalink">
@@ -744,7 +890,7 @@
         <span class="name">valNodesMap</span><span class="result">: <span class="extype" name="scala.collection.immutable.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Int">Int</span>]</span>
       </span>
       
-      <p class="shortcomment cmt">A map between valNodes and a identity number.</p>
+      <p class="shortcomment cmt">A map between valNodes and a identification number.</p>
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait(x$1:Long,x$2:Int):Unit"></a><a id="wait(Long,Int):Unit"></a>
       <span class="permalink">

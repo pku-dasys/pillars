@@ -52,8 +52,12 @@ class SimulationHelper(arch: ArchitctureHierarchy) {
    */
   var outputCycle = 0
 
+  /** A map between the index of a opNode with "output" opcode and the ID of output port.
+   */
   var outputPortCycleMap = Map[Int, Int]()
 
+  /** A map between the index of a opNode with "input" opcode and the ID of input port.
+   */
   var inputPortCycleMap = Map[Int, Int]()
 
   /** Add the mapping result of a mapped DFG node.

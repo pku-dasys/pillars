@@ -411,7 +411,6 @@ class TopModuleWrapper(val moduleInfos: PillarsModuleInfo, val connect: Map[List
 }
 
 /** A wrapper with solid configurations and schedules.
- * Some may call it "soft CGRA", which is used for quick compiler.
  *
  * @param moduleInfos a class containing the parameters of modules and the port number of top design.
  * @param connect     a map showing the connections between modules

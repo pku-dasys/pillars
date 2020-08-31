@@ -11,13 +11,28 @@ import java.util.*;
 
 import static java.lang.Math.abs;
 
+
+/**
+ * This class based on disjoint set is used to check whether there are useless rings in some direction graphs.
+ */
 class checkWithoutRing {
     List<Map<Integer, List<Integer>>> directionGraphs;
 
+    /**
+     * Constructed function.
+     *
+     * @param testedGraphs a list of direction graphs
+     */
     checkWithoutRing(List<Map<Integer, List<Integer>>> testedGraphs) {
         directionGraphs = testedGraphs;
     }
 
+    /**
+     * check whether there are useless rings in targeted direction graphs.
+     *
+     * @return if all graphs pass simply connected checking, return true,
+     * meaning there are not useless rings in targeted direction graphs.
+     */
     Boolean check() {
         for (Map<Integer, List<Integer>> graph : directionGraphs) {
             if (!checkSimplyConnected(graph)) {
@@ -27,12 +42,25 @@ class checkWithoutRing {
         return true;
     }
 
+    /**
+     * Connect two nodes (sharing the same root).
+     *
+     * @param unionMap the union map
+     * @param sourceID the ID of source node
+     * @param sinkID the ID of sink node
+     */
     void connect(Map<Integer, Integer> unionMap, Integer sourceID, Integer sinkID) {
         int rootSink = find(unionMap, sinkID);
         int rootSource = find(unionMap, sourceID);
         unionMap.put(Math.min(rootSink, rootSource), Math.max(rootSink, rootSource));
     }
 
+    /**
+     * Find root of a node.
+     *
+     * @param unionMap the union map
+     * @param nodeID the ID of node
+     */
     int find(Map<Integer, Integer> unionMap, Integer nodeID) {
         if (!unionMap.containsKey(nodeID)) {
             unionMap.put(nodeID, nodeID);
@@ -46,6 +74,13 @@ class checkWithoutRing {
         return father;
     }
 
+    /**
+     * check whether there are useless rings in a targeted direction graph.
+     *
+     * @param  nodeConnects the direction graph
+     * @return if the graph passes simply connected checking, return true,
+     * meaning there are not useless rings in targeted direction graphs.
+     */
     Boolean checkSimplyConnected(Map<Integer, List<Integer>> nodeConnects) {
         Map<Integer, Integer> unionMap = new HashMap();
         for (int sourceID : nodeConnects.keySet()) {
@@ -462,85 +497,83 @@ public class gurobiMapJava {
             infoFile.flush();
             infoFile.close();
 
-//            if (ringCheckPass) {
-                int regCount = 0;
-                for (int val = 0; val < numDfgVals; val++) {
-                    for (int fanout = 0; fanout < DFGvalNodeOut.get(val).size(); fanout++) {
-                        Map<Integer, List<Integer>> graph = getGraph(modelR, val, fanout);
-                        int op = DFGvalB2opMap.get(DFGvalNodeName.get(val));
-                        int mappedMrrgNode = mappedOp2MrrgMap.get(op);
-                        List<Integer> functionFanout = MRRGfunctionFanout.get(mappedMrrgNode);
-                        List<Integer> roots = new ArrayList<>();
-                        for (Integer root : functionFanout) {
-                            if (graph.containsKey(root)) {
-                                roots.add(root);
-                            }
-                        }
-                        if (roots.size() == 1) {
-                            int root = roots.get(0);
-                            int currentNode = root;
-                            int previousReg = -1;
-                            while (graph.get(currentNode).size() != 0) {
-                                if (MRRGlatency.containsKey(MRRGroutingName.get(currentNode))) {
-                                    if (!regMap.containsKey(currentNode)) {
-                                        regMap.put(currentNode, regCount++);
-                                    }
-                                    if (previousReg == -1) {
-                                        if (func2regMap.containsKey(op)) {
-                                            if (!func2regMap.get(op).contains(regMap.get(currentNode))) {
-                                                func2regMap.get(op).add(regMap.get(currentNode));
-                                            }
-                                        } else {
-                                            List<Integer> regList = new ArrayList<>();
-                                            regList.add(regMap.get(currentNode));
-                                            func2regMap.put(op, regList);
-                                        }
-                                    } else {
-                                        if (regConnect.containsKey(previousReg)) {
-                                            regConnect.get(previousReg).add(regMap.get(currentNode));
-                                        } else {
-                                            List<Integer> regList = new ArrayList<>();
-                                            regList.add(regMap.get(currentNode));
-                                            regConnect.put(previousReg, regList);
-                                        }
-                                    }
-                                    previousReg = regMap.get(currentNode);
-                                }
-                                if (graph.get(currentNode).size() == 1) {
-                                    currentNode = graph.get(currentNode).get(0);
-
-                                } else {
-                                    System.out.println("\033[31;4m" + "Fanout is not a chain." + "\033[0m");
-                                }
-                            }
-                            int outOp = DFGvalNodeOut.get(val).get(fanout);
-                            int outOpOperand = DFGvalNodeOutputOperand.get(val).get(fanout);
-                            List<Integer> outOpPair = new LinkedList<>();
-                            outOpPair.add(outOp);
-                            outOpPair.add(outOpOperand);
-                            if (previousReg == -1) {
-                                if (funcDirect2funcMap.containsKey(op)) {
-                                    funcDirect2funcMap.get(op).add(outOpPair);
-                                } else {
-                                    List<List<Integer>> funcList = new ArrayList<>();
-                                    funcList.add(outOpPair);
-                                    funcDirect2funcMap.put(op, funcList);
-                                }
-                            } else {
-                                if (reg2funcMap.containsKey(previousReg)) {
-                                    reg2funcMap.get(previousReg).add(outOpPair);
-                                } else {
-                                    List<List<Integer>> funcList = new ArrayList<>();
-                                    funcList.add(outOpPair);
-                                    reg2funcMap.put(previousReg, funcList);
-                                }
-                            }
-                        } else {
-                            System.out.println("\033[31;4m" + "Find root fail." + "\033[0m");
+            int regCount = 0;
+            for (int val = 0; val < numDfgVals; val++) {
+                for (int fanout = 0; fanout < DFGvalNodeOut.get(val).size(); fanout++) {
+                    Map<Integer, List<Integer>> graph = getGraph(modelR, val, fanout);
+                    int op = DFGvalB2opMap.get(DFGvalNodeName.get(val));
+                    int mappedMrrgNode = mappedOp2MrrgMap.get(op);
+                    List<Integer> functionFanout = MRRGfunctionFanout.get(mappedMrrgNode);
+                    List<Integer> roots = new ArrayList<>();
+                    for (Integer root : functionFanout) {
+                        if (graph.containsKey(root)) {
+                            roots.add(root);
                         }
                     }
+                    if (roots.size() == 1) {
+                        int root = roots.get(0);
+                        int currentNode = root;
+                        int previousReg = -1;
+                        while (graph.get(currentNode).size() != 0) {
+                            if (MRRGlatency.containsKey(MRRGroutingName.get(currentNode))) {
+                                if (!regMap.containsKey(currentNode)) {
+                                    regMap.put(currentNode, regCount++);
+                                }
+                                if (previousReg == -1) {
+                                    if (func2regMap.containsKey(op)) {
+                                        if (!func2regMap.get(op).contains(regMap.get(currentNode))) {
+                                            func2regMap.get(op).add(regMap.get(currentNode));
+                                        }
+                                    } else {
+                                        List<Integer> regList = new ArrayList<>();
+                                        regList.add(regMap.get(currentNode));
+                                        func2regMap.put(op, regList);
+                                    }
+                                } else {
+                                    if (regConnect.containsKey(previousReg)) {
+                                        regConnect.get(previousReg).add(regMap.get(currentNode));
+                                    } else {
+                                        List<Integer> regList = new ArrayList<>();
+                                        regList.add(regMap.get(currentNode));
+                                        regConnect.put(previousReg, regList);
+                                    }
+                                }
+                                previousReg = regMap.get(currentNode);
+                            }
+                            if (graph.get(currentNode).size() == 1) {
+                                currentNode = graph.get(currentNode).get(0);
+
+                            } else {
+                                System.out.println("\033[31;4m" + "Fanout is not a chain." + "\033[0m");
+                            }
+                        }
+                        int outOp = DFGvalNodeOut.get(val).get(fanout);
+                        int outOpOperand = DFGvalNodeOutputOperand.get(val).get(fanout);
+                        List<Integer> outOpPair = new LinkedList<>();
+                        outOpPair.add(outOp);
+                        outOpPair.add(outOpOperand);
+                        if (previousReg == -1) {
+                            if (funcDirect2funcMap.containsKey(op)) {
+                                funcDirect2funcMap.get(op).add(outOpPair);
+                            } else {
+                                List<List<Integer>> funcList = new ArrayList<>();
+                                funcList.add(outOpPair);
+                                funcDirect2funcMap.put(op, funcList);
+                            }
+                        } else {
+                            if (reg2funcMap.containsKey(previousReg)) {
+                                reg2funcMap.get(previousReg).add(outOpPair);
+                            } else {
+                                List<List<Integer>> funcList = new ArrayList<>();
+                                funcList.add(outOpPair);
+                                reg2funcMap.put(previousReg, funcList);
+                            }
+                        }
+                    } else {
+                        System.out.println("\033[31;4m" + "Find root fail." + "\033[0m");
+                    }
                 }
-//            }
+            }
 
             List<Integer>[] result = new List[2];
             result[0] = new ArrayList<>();
@@ -572,6 +605,9 @@ public class gurobiMapJava {
 
     }
 
+    /**
+     * Get the mapping result of a valNode as a directed graph.
+     */
     Map<Integer, List<Integer>> getGraph(GRBModel model, Integer val, Integer fanout) throws GRBException {
         Set<Integer> mappedRoutingNodes = new HashSet<>();
         int fanouts = DFGvalNodeOut.get(val).size();
@@ -601,6 +637,9 @@ public class gurobiMapJava {
         return graph;
     }
 
+    /**
+     * Check whether the mapping results contain useless rings.
+     */
     Boolean checkRoutingWithoutUselessRing(GRBModel model) throws GRBException {
         List<Map<Integer, List<Integer>>> testedGraphs = new ArrayList<>();
         for (int val = 0; val < numDfgVals; val++) {
@@ -617,8 +656,6 @@ public class gurobiMapJava {
      * Constraint: Routing Resource Usage.
      */
     void constrRoutingResource(GRBModel model, GRBVar[] R, List<GRBVar[]> S) throws GRBException {
-        /** Constraint (5) in our paper
-         */
         int constrcount = 0;
         for (int val = 0; val < numDfgVals; val++)
             for (int r = 0; r < numMrrgR; r++) {
@@ -641,6 +678,7 @@ public class gurobiMapJava {
      */
     <T> void constrDelay(GRBModel model, GRBVar[] R, List<GRBVar[]> S, GRBVar[] Delays,
                          GRBVar[] Latencies, GRBVar[] WaitSkews, T[] F, Boolean VariableF) throws GRBException {
+
         int constrcount = 0;
         for (int val = 0; val < numDfgVals; val++) {
             for (int fanOut = 0; fanOut < DFGvalNodeOut.get(val).size(); fanOut++) {
@@ -715,19 +753,12 @@ public class gurobiMapJava {
     /**
      * Set Latency Range.
      */
-    void setLatencyRange(GRBModel model, GRBVar[] Latencies, int maxLatency) throws GRBException {
-//        int constrcount = 0;
+    void setLatencyRange(GRBVar[] Latencies, int maxLatency) throws GRBException {
         int minLatency = 0;
         for (int op = 0; op < numDfgOps; op++) {
             Latencies[op].set(GRB.StringAttr.VarName, "Latency_" + op);
             Latencies[op].set(GRB.DoubleAttr.LB, minLatency);
             Latencies[op].set(GRB.DoubleAttr.UB, maxLatency);
-//            GRBLinExpr minConstraint = new GRBLinExpr();
-//            minConstraint.addTerm(1, Latencies[op]);
-//            model.addConstr(minConstraint, GRB.GREATER_EQUAL, minLatency, "minLatency_" + (constrcount));
-//            GRBLinExpr maxConstraint = new GRBLinExpr();
-//            maxConstraint.addTerm(1, Latencies[op]);
-//            model.addConstr(maxConstraint, GRB.LESS_EQUAL, maxLatency, "maxLatency_" + (constrcount++));
         }
     }
 
@@ -792,7 +823,6 @@ public class gurobiMapJava {
                             .get("WaitSkew_" + sourceNodeNames.get(1) + "_" + sinkNodeName)];
                     relativeConstraint.addTerm(-1, waitSkew0);
                     relativeConstraint.addTerm(1, waitSkew1);
-//                System.out.println("WaitSkew_" + sourceNodeNames.get(1) + "_" + sinkNodeName);
 
                     model.addConstr(relativeConstraint, GRB.EQUAL,
                             RelativeSkews[constrcount], "relativeSkew_" + constrcount);
@@ -844,7 +874,6 @@ public class gurobiMapJava {
                                 MRRGfunctionSupportOpcode.get(pSource).contains(DFGopNodeOpcode.get(qSource)) &&
                                 MRRGfunctionSupportOpcode.get(pSink).contains(DFGopNodeOpcode.get(qSink))) {
                             String varName = "concurrentF_" + pSource + "_" + qSource + "_" + pSink + "_" + qSink;
-//                            concurrentF[count].set(GRB.StringAttr.VarName, varName);
                             GRBVar concurrentF = model.addVar(0, 1, 1, 'B', varName);
                             String sourceMRRGName = MRRGfunctionName.get(pSource);
                             String sinkMRRGName = MRRGfunctionName.get(pSink);
@@ -871,8 +900,6 @@ public class gurobiMapJava {
      * Constraint: Routing Exclusivity.
      */
     void constrRoutingExclusivity(GRBModel model, GRBVar[] R) throws GRBException {
-        /** Constraint (4) in our paper
-         */
         int constrcount = 0;
         for (int r = 0; r < numMrrgR; r++) {
             GRBLinExpr constraint = new GRBLinExpr();
@@ -886,8 +913,6 @@ public class gurobiMapJava {
      * Constraint: Functional Unit Exclusivity.
      */
     void constrFunctionExclusivity(GRBModel model, GRBVar[] F) throws GRBException {
-        /** Constraint (1) in our paper
-         */
         int constrcount = 0;
         for (int p = 0; p < numMrrgF; p++) {
             GRBLinExpr constraint = new GRBLinExpr();
@@ -901,8 +926,6 @@ public class gurobiMapJava {
      * Constraint: All Operation Placement.
      */
     void constrOperationPlacement(GRBModel model, GRBVar[] F) throws GRBException {
-        /** Constraint (2) in our paper
-         */
         int constrcount = 0;
         for (int q = 0; q < numDfgOps; q++) {
             GRBLinExpr constraint = new GRBLinExpr();
@@ -916,8 +939,6 @@ public class gurobiMapJava {
      * Constraint: Fanout_Routing.
      */
     <T> void constrFanoutRouting(GRBModel model, List<GRBVar[]> S, T[] F, Boolean VariableF) throws GRBException {
-        /** Constraint (6) & (8) in our paper
-         */
         int constrcount = 0;
         int MRRG_NODE_ROUTING = 0;
         int MRRG_NODE_FUNCTION = 1;
@@ -958,8 +979,6 @@ public class gurobiMapJava {
      * Constraint: Multiplexer Input Exclusivity.
      */
     void constrMultiplexerExclusivity(GRBModel model, GRBVar[] R) throws GRBException {
-        /** Constraint (9) & (10) in our paper
-         */
         int constrcount = 0;
         int MRRG_NODE_ROUTING = 0;
         for (int val = 0; val < numDfgVals; val++)
@@ -983,8 +1002,6 @@ public class gurobiMapJava {
      * Constraint: Initial Fanout.
      */
     <T> void constrInitialFanout(GRBModel model, List<GRBVar[]> S, T[] F, Boolean VariableF) throws GRBException {
-        /** Constraint (7) in our paper
-         */
         int constrcount = 0;
         for (int op = 0; op < numDfgOps; op++)
             for (int f = 0; f < numMrrgF; f++) {
@@ -1012,8 +1029,6 @@ public class gurobiMapJava {
      * Constraint: Functional Unit Legality.
      */
     void constrFunctionalLegality(GRBModel model, GRBVar[] F) throws GRBException {
-        /** Constraint (3) in our paper
-         */
         int constrcount = 0;
         for (int op = 0; op < numDfgOps; op++)
             for (int f = 0; f < numMrrgF; f++) {
@@ -1157,7 +1172,7 @@ public class gurobiMapJava {
                 constrDelay(modelR, R, S, Delays, Latencies, WaitSkews, F, true);
             }
 
-            setLatencyRange(modelR, Latencies, maxLatency);
+            setLatencyRange(Latencies, maxLatency);
             constrRelativeSkew(modelR, RelativeSkews, WaitSkews,
                     SkewDirection, skewLimit);
         }
