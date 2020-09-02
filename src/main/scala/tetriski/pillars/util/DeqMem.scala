@@ -6,8 +6,11 @@ import chisel3.util._
 
 abstract class DeqMemProcess {
   def out: DecoupledIO[UInt]
+
   def idle(): Bool
+
   def start(base: UInt, len: UInt): Unit
+
   def run(): Unit
 }
 
@@ -98,9 +101,11 @@ class DeqMem(mem_io: TraitMemReadIO, out_width: Int) extends Module {
   val remain = Reg(UInt(io.mem.addr.getWidth.W))
 
   val iaddr_hs = Module(new Handshake(UInt(io.mem.addr.getWidth.W)))
+
   def iaddr = iaddr_hs.io.enq
 
   val odata_hs = Module(new Handshake(UInt(io.mem.dout.getWidth.W)))
+
   def odata = odata_hs.io.deq
 
   val imo = EnqAddrDeqMem(iaddr_hs.io.deq, io.mem, odata_hs.io.enq)
@@ -116,24 +121,24 @@ class DeqMem(mem_io: TraitMemReadIO, out_width: Int) extends Module {
 
   imo.run()
 
-  when (io.en) {
+  when(io.en) {
 
-    when (io.idle && io.start) {
+    when(io.idle && io.start) {
       state := s_fetch
       mem_index := io.base
       word_index := 0.U
       remain := io.len
     }
 
-    when (state === s_fetch) {
+    when(state === s_fetch) {
       fetch()
     }
 
     manip.mode match {
       case SplitOrConcat.Normal =>
-        when (state === s_exec) {
+        when(state === s_exec) {
           io.out.enq(mem_data)
-          when (io.out.fire()) {
+          when(io.out.fire()) {
             fetch()
           }
         }
@@ -142,12 +147,12 @@ class DeqMem(mem_io: TraitMemReadIO, out_width: Int) extends Module {
         val multi_word = Wire(Vec(manip.factor, UInt(io.out.bits.getWidth.W)))
         multi_word := mem_data.asTypeOf(multi_word)
 
-        when (state === s_exec) {
+        when(state === s_exec) {
           io.out.enq(multi_word(word_index))
-          when (io.out.fire()) {
+          when(io.out.fire()) {
             val next_word_index = word_index + 1.U
             word_index := next_word_index
-            when (next_word_index === manip.factor.U) {
+            when(next_word_index === manip.factor.U) {
               fetch()
               word_index := 0.U
             }
@@ -157,18 +162,19 @@ class DeqMem(mem_io: TraitMemReadIO, out_width: Int) extends Module {
       case SplitOrConcat.Concat =>
         val multi_word = Reg(Vec(manip.factor, UInt(io.mem.dout.getWidth.W)))
 
-        when (state === s_exec) {
+        when(state === s_exec) {
           val next_word_index = word_index + 1.U
-          when (next_word_index === manip.factor.U) {
+          when(next_word_index === manip.factor.U) {
             val next_multi_word = WireInit(multi_word)
             next_multi_word(word_index) := mem_data
             io.out.enq(next_multi_word.asUInt)
-            when (io.out.fire()) {
-              printf("[DeqMem] %x %x = mem[%d] %d\n", next_multi_word.asUInt, multi_word.asUInt, mem_index-manip.factor.U, manip.factor.U)
+            when(io.out.fire()) {
+              printf("[DeqMem] %x %x = mem[%d] %d\n", next_multi_word.asUInt, multi_word.asUInt,
+                mem_index - manip.factor.U, manip.factor.U)
               fetch()
               word_index := 0.U
             }
-          } .otherwise {
+          }.otherwise {
             multi_word(word_index) := mem_data
             word_index := next_word_index
             fetch()
@@ -180,20 +186,20 @@ class DeqMem(mem_io: TraitMemReadIO, out_width: Int) extends Module {
 
   def fetch() {
     // enq addr
-    when (remain > 0.U) {
+    when(remain > 0.U) {
       iaddr.enq(mem_index)
-      when (iaddr.fire()) {
+      when(iaddr.fire()) {
         mem_index := mem_index + 1.U
         remain := remain - 1.U
       }
     }
     // deq data
     mem_data := odata.deq()
-    when (odata.fire()) {
+    when(odata.fire()) {
       state := s_exec
-    } .elsewhen (imo.idle() === false.B) {
+    }.elsewhen(imo.idle() === false.B) {
       state := s_fetch
-    } .otherwise {
+    }.otherwise {
       state := s_idle
     }
   }
@@ -218,19 +224,20 @@ class EnqAddrDeqMem(mem_io: TraitMemReadIO) extends Module {
 
   next_token := token
 
-  //printf("[imo] %x (%x %x %x) (%x %x %x)\n", token, io.iaddr.valid, io.iaddr.ready, io.iaddr.bits, io.odata.valid, io.odata.ready, io.odata.bits)
+  //printf("[imo] %x (%x %x %x) (%x %x %x)\n", token, io.iaddr.valid,
+  // io.iaddr.ready, io.iaddr.bits, io.odata.valid, io.odata.ready, io.odata.bits)
 
-  when (token) {
+  when(token) {
     io.odata.enq(io.mem.dout)
-    when (io.odata.fire()) {
+    when(io.odata.fire()) {
       token := false.B
       next_token := false.B
     }
   }
 
-  when (next_token === false.B) {
+  when(next_token === false.B) {
     val addr = io.iaddr.deq()
-    when (io.iaddr.fire()) {
+    when(io.iaddr.fire()) {
       token := true.B
       io.mem.enable()
       io.mem.addr := addr

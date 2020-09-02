@@ -135,8 +135,8 @@ object ApplicationExamples {
     var testII = 1
     var outputCycle = dataSize * (testII + 3)
 
-    var infoFilename = "app_mapping_results/vadd/ii1_i.txt"
-    var resultFilename = "app_mapping_results/vadd/ii1_r.txt"
+    var infoFilename = "app-mapping-results/vadd/ii1_i.txt"
+    var resultFilename = "app-mapping-results/vadd/ii1_r.txt"
 
     var a_base, b_base, c_base = 0
     var constVals = Array(a_base, b_base, c_base, 1)
@@ -150,8 +150,8 @@ object ApplicationExamples {
     testII = 2
     outputCycle = dataSize * (testII + 3)
 
-    infoFilename = "app_mapping_results/vadd/ii2_i.txt"
-    resultFilename = "app_mapping_results/vadd/ii2_r.txt"
+    infoFilename = "app-mapping-results/vadd/ii2_i.txt"
+    resultFilename = "app-mapping-results/vadd/ii2_r.txt"
 
     a_base = 0
     b_base = 0
@@ -168,8 +168,8 @@ object ApplicationExamples {
     testII = 3
     outputCycle = dataSize * (testII + 3)
 
-    infoFilename = "app_mapping_results/vadd/ii3_i.txt"
-    resultFilename = "app_mapping_results/vadd/ii3_r.txt"
+    infoFilename = "app-mapping-results/vadd/ii3_i.txt"
+    resultFilename = "app-mapping-results/vadd/ii3_r.txt"
 
     a_base = 0
     //Since a & b are both use the same LSU, the storage space of them cannot overlap.
@@ -256,8 +256,8 @@ object ApplicationExamples {
     //********     II = 1     ********
     var testII = 1
 
-    var infoFilename = "app_mapping_results/sum/ii1_i.txt"
-    var resultFilename = "app_mapping_results/sum/ii1_r.txt"
+    var infoFilename = "app-mapping-results/sum/ii1_i.txt"
+    var resultFilename = "app-mapping-results/sum/ii1_r.txt"
 
     var a_base = 0
     var constVals = Array(a_base, 1)
@@ -271,8 +271,8 @@ object ApplicationExamples {
     //********     II = 2     ********
     testII = 2
 
-    infoFilename = "app_mapping_results/sum/ii2_i.txt"
-    resultFilename = "app_mapping_results/sum/ii2_r.txt"
+    infoFilename = "app-mapping-results/sum/ii2_i.txt"
+    resultFilename = "app-mapping-results/sum/ii2_r.txt"
 
     a_base = 0
     constVals = Array(a_base, 1)
@@ -285,8 +285,8 @@ object ApplicationExamples {
     //********     II = 3     ********
     testII = 3
 
-    infoFilename = "app_mapping_results/sum/ii3_i.txt"
-    resultFilename = "app_mapping_results/sum/ii3_r.txt"
+    infoFilename = "app-mapping-results/sum/ii3_i.txt"
+    resultFilename = "app-mapping-results/sum/ii3_r.txt"
 
     a_base = 0
     constVals = Array(a_base, 1)
@@ -307,9 +307,9 @@ object ApplicationExamples {
     val inDataB = (0 until dataSize).map(i => scala.util.Random.nextInt()).toArray
     val inDataC = (0 until dataSize).map(i => scala.util.Random.nextInt()).toArray
 
-    //        var inDataA = (2 until dataSize + 2).toArray
-    //        var inDataB = (2 until dataSize + 2).toArray
-    //        var inDataC = (2 until dataSize + 2).toArray
+//    var inDataA = (2 until dataSize + 2).toArray
+//    var inDataB = (10 until dataSize + 10).toArray
+//    var inDataC = (20 until dataSize + 20).toArray
 
     var refArray = Array[Int]()
     var outPortRefArray = Array[Int]()
@@ -373,8 +373,8 @@ object ApplicationExamples {
     //********     II = 1     ********
     var testII = 1
 
-    var infoFilename = "app_mapping_results/accum/ii1_i.txt"
-    var resultFilename = "app_mapping_results/accum/ii1_r.txt"
+    var infoFilename = "app-mapping-results/accum/ii1_i.txt"
+    var resultFilename = "app-mapping-results/accum/ii1_r.txt"
     var a_base, b_base, c_base = 0
     var constVals = Array(1, a_base, b_base, 1, c_base)
     var addrVals = Array(a_base, b_base, c_base, c_base)
@@ -386,8 +386,8 @@ object ApplicationExamples {
     //********     II = 2     ********
     testII = 2
 
-    infoFilename = "app_mapping_results/accum/ii2_i.txt"
-    resultFilename = "app_mapping_results/accum/ii2_r.txt"
+    infoFilename = "app-mapping-results/accum/ii2_i.txt"
+    resultFilename = "app-mapping-results/accum/ii2_r.txt"
     a_base = 0
     b_base = 0
     //Since a & c are both use the same LSU, the storage space of them cannot overlap.
@@ -402,8 +402,8 @@ object ApplicationExamples {
     //********     II = 3     ********
     testII = 3
 
-    infoFilename = "app_mapping_results/accum/ii3_i.txt"
-    resultFilename = "app_mapping_results/accum/ii3_r.txt"
+    infoFilename = "app-mapping-results/accum/ii3_i.txt"
+    resultFilename = "app-mapping-results/accum/ii3_r.txt"
     a_base = 0
     b_base = 0
     //Since a & c are both use the same LSU, the storage space of them cannot overlap.
@@ -484,8 +484,8 @@ object ApplicationExamples {
     var testII = 1
     var outputCycle = dataSize * (testII + 2)
 
-    var infoFilename = "app_mapping_results/cap/ii1_i.txt"
-    var resultFilename = "app_mapping_results/cap/ii1_r.txt"
+    var infoFilename = "app-mapping-results/cap/ii1_i.txt"
+    var resultFilename = "app-mapping-results/cap/ii1_r.txt"
     var a_base, m_base, c1_addr, b_base = 0
     var constVals = Array(a_base, 3, c1_addr, 2, m_base, 2, b_base, 1)
     var addrVals = Array(a_base, c1_addr, m_base, b_base)
@@ -498,8 +498,8 @@ object ApplicationExamples {
     testII = 2
     outputCycle = dataSize * (testII + 2)
 
-    infoFilename = "app_mapping_results/cap/ii2_i.txt"
-    resultFilename = "app_mapping_results/cap/ii2_r.txt"
+    infoFilename = "app-mapping-results/cap/ii2_i.txt"
+    resultFilename = "app-mapping-results/cap/ii2_r.txt"
 
     a_base = 0
     c1_addr = 0
@@ -517,8 +517,8 @@ object ApplicationExamples {
     testII = 3
     outputCycle = dataSize * (testII + 2)
 
-    infoFilename = "app_mapping_results/cap/ii3_i.txt"
-    resultFilename = "app_mapping_results/cap/ii3_r.txt"
+    infoFilename = "app-mapping-results/cap/ii3_i.txt"
+    resultFilename = "app-mapping-results/cap/ii3_r.txt"
 
     a_base = 0
     c1_addr = 0

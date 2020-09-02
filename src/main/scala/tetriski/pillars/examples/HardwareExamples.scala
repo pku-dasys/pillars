@@ -126,7 +126,7 @@ object HardwareExamples {
     constInfo.addConst(arch("tile_0")("pe_0_0").getElement("const0").getModuleID(), 0, 4)
     constInfo.addConst(arch("tile_0")("pe_1_0").getElement("const0").getModuleID(), 0, 5)
 
-    val bitStreams = arch.genConfig("app_mapping_results/hardware_test/internalNodeinfo_simple.txt",
+    val bitStreams = arch.genConfig("app-mapping-results/hardware-test/internalNodeinfo_simple.txt",
       1, constInfo)
 
     val bitStream = bitStreams(0)
@@ -183,7 +183,7 @@ object HardwareExamples {
     constInfo.addConst(arch("tile_0")("pe_0_1").getElement("const0").getModuleID(), 0, 1)
     constInfo.addConst(arch("tile_0")("pe_1_1").getElement("const0").getModuleID(), 0, 1)
 
-    val bitStreams = arch.genConfig("app_mapping_results/hardware_test/internalNodeinfo_lsu.txt",
+    val bitStreams = arch.genConfig("app-mapping-results/hardware-test/internalNodeinfo_lsu.txt",
       1, constInfo)
 
     val bitStream = bitStreams(0)
@@ -255,7 +255,7 @@ object HardwareExamples {
     constInfo.addConst(arch("tile_0")("pe_0_3").getElement("const0").getModuleID(), 0, 1)
     constInfo.addConst(arch("tile_0")("pe_3_1").getElement("const0").getModuleID(), 1, 1)
 
-    val bitStreams = arch.genConfig("app_mapping_results/hardware_test/internalNodeinfo_complete.txt",
+    val bitStreams = arch.genConfig("app-mapping-results/hardware-test/internalNodeinfo_complete.txt",
       targetedII, constInfo)
 
     arch("tile_0")("pe_3_0").getElement("alu0").setFireTime(4, 1)

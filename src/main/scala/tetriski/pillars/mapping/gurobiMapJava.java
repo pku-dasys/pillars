@@ -1053,7 +1053,7 @@ public class gurobiMapJava {
         GRBEnv env = new GRBEnv();
         int timelimit = 7200;
         double grb_mipgap = 0.2;
-        int grb_solnlimit = 5;
+        int grb_solnlimit = 2;
 
         env.set(GRB.IntParam.Seed, abs(RNG.nextInt()));
         env.set(GRB.DoubleParam.MIPGap, grb_mipgap);

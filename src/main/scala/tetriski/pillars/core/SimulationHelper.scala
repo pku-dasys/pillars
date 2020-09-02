@@ -132,6 +132,8 @@ class SimulationHelper(arch: ArchitctureHierarchy) {
     fireTimeArray.clear()
     skewArray.clear()
     outPorts.clear()
+    outputPortCycleMap = Map[Int, Int]()
+    inputPortCycleMap = Map[Int, Int]()
   }
 
   /** Initialize values in this class according to a result TXT.

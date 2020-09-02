@@ -4,6 +4,8 @@ import tetriski.pillars.core._
 import java.io._
 
 /** This object is used for experimental study.
+ *
+ * @deprecated
  */
 object testILP {
   var dfgnames = Array("accum", "cap", "conv2", "conv3", "mac", "mac2",
@@ -46,8 +48,8 @@ object testILP {
         for (mrrgname <- mrrgnames) {
           val mrrg_p = new MRRG()
           val mrrg_c = new MRRG()
-          mrrg_p.loadTXT("MRRG/cgra-mrrg-4m4-ii" + i + "-" + mrrgname + ".txt")
-          mrrg_c.loadTXT("MRRG_CGRAME/cgra-mrrg-4m4-ii" + i + "-" + mrrgname + ".txt")
+          mrrg_p.loadTXT("mrrg/cgra-mrrg-4m4-ii" + i + "-" + mrrgname + ".txt")
+          mrrg_c.loadTXT("mrrg-cgrame/cgra-mrrg-4m4-ii" + i + "-" + mrrgname + ".txt")
           val time_p = ILPMap.mapping(dfg, mrrg_p, fw = fw_p)
           if (time_p == -1) {
             fw_p.write(mrrgname + " ii = " + i + " dfg = " + dfgname + " fail")
