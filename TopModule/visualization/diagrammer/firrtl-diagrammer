@@ -1,6 +1,0 @@
-#!/usr/bin/env amm
-import $cp.`diagrammer.jar`
-import dotvisualizer.FirrtlDiagrammer
-
-@main
-def main(args: String*) = FirrtlDiagrammer.main(args.toArray)

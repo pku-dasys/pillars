@@ -1,2 +1,0 @@
-
-sbt "runMain dotvisualizer.FirrtlDiagrammer $*"
