@@ -67,13 +67,13 @@ sudo apt-get install verilator
 
 ```
 .
-├── app_mapping_results             //some pre-generated mapping results
+├── app-mapping-results             //some pre-generated mapping results
 ├── build.sbt                       //the library dependencies in sbt
 ├── doc                             //documents of APIs in Pillars
-├── DOT                             //some DFGs in DOT format
+├── dfg                             //some DFGs in DOT format
 ├── fig                             //some figures in README
 ├── Makefile                        
-├── MRRG                            //some MRRGs
+├── mrrg                            //some MRRGs
 ├── README.md 
 ├── scalastyle-config.xml           //the scalastyle file
 ├── scalastyle-test-config.xml      //the scalastyle file

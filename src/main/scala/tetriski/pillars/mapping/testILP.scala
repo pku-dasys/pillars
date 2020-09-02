@@ -44,7 +44,7 @@ object testILP {
 
     for (i <- 1 to 2) {
       for (dfgname <- dfgnames) {
-        val dfg = DotReader.loadDot("DOT_CGRAME/" + dfgname + ".dot")
+        val dfg = DotReader.loadDot("dfg_cgrame/" + dfgname + ".dot")
         for (mrrgname <- mrrgnames) {
           val mrrg_p = new MRRG()
           val mrrg_c = new MRRG()
