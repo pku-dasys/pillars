@@ -1054,6 +1054,9 @@ public class gurobiMapJava {
         int timelimit = 7200;
         double grb_mipgap = 0.2;
         int grb_solnlimit = 2;
+        if (separatedPR) {
+            grb_solnlimit = 5;
+        }
 
         env.set(GRB.IntParam.Seed, abs(RNG.nextInt()));
         env.set(GRB.DoubleParam.MIPGap, grb_mipgap);
@@ -1069,8 +1072,6 @@ public class gurobiMapJava {
         GRBModel modelP = new GRBModel(env);
         GRBModel modelR = modelP;
         if (separatedPR) {
-            int grb_solnlimit_R = 5;
-            env.set(GRB.IntParam.SolutionLimit, grb_solnlimit_R);
             modelR = new GRBModel(env);
         }
 
