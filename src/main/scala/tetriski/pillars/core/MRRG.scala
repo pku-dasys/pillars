@@ -246,7 +246,6 @@ class MRRG extends Cloneable {
    * @param filename the name of this file
    */
   def loadTXT(filename: String): Unit = {
-    //TODO: update the format of MRRG text file to store the mode of MRRG node
     import scala.io.Source
 
     val buffer = Source.fromFile(filename)

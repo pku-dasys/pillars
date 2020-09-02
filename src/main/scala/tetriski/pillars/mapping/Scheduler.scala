@@ -50,7 +50,6 @@ object Scheduler {
       for (in <- node.fanIn) {
         if (in.mapNode != null && cycle(mrrg.nodeMap(in.name)) == -1) {
           if (checkConnect(node, in) == 1) {
-            //TODO: get delay with MRRG mode.
             if (node.mode ==REG_MODE || in.mode == MEM_MODE) {
               cycle(mrrg.nodeMap(in.name)) = cycle(mrrg.nodeMap(node.name)) + 1
             } else {
@@ -235,39 +234,5 @@ object Scheduler {
 
     dfg.updateSchedule(filename + "_r.txt")
 
-
-    //    val unscheduledArray = Source.fromFile(filename + "_r.txt").getLines().toArray
-    //    val scheduleFile = new FileWriter(filename + "_r.txt")
-    //    var i = 0
-    //    var beginCycle = 0
-    //    val pattern = "[0-9]+:".r
-    //
-    //    val minLatency = dfg.opNodes.map(op => op.latency).min
-    //    dfg.opNodes.foreach(op => op.setLatency(op.latency - minLatency))
-    //
-    //    /** Calculate fire time of each opNodes in DFG.
-    //     */
-    //    for (j <- 0 until dfg.opNodes.size) {
-    //      val op = dfg.opNodes(j)
-    //      val tempResult = unscheduledArray(j).split(" ").toList
-    //      val mrrgName = tempResult(1)
-    //      val tempStr = (pattern findFirstIn mrrgName).toArray
-    //      val rc = tempStr(0).replace(":", "").toInt
-    //      if (op.latency == 0 && op.annulateLatency == 0) {
-    //        beginCycle = rc
-    //      }
-    //    }
-    //
-    //    for (op <- dfg.opNodes) {
-    //      var outLatency = op.latency + beginCycle
-    //      if (op.annulateLatency != 0 && op.primaryInput) {
-    //        outLatency = outLatency + II
-    //      }
-    //      println(op.name + " " + outLatency + " " + op.skew)
-    //      scheduleFile.write(unscheduledArray(i) + " " + outLatency + " " + op.skew + "\n")
-    //      i = i + 1
-    //    }
-    //    scheduleFile.flush()
-    //    scheduleFile.close()
   }
 }
