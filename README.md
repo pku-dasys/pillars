@@ -106,7 +106,7 @@ make run
 
 If everything is setup correctly, all tests will be passed.
 
-### Running End2end tutorial
+### Running End2end Tutorial
 
 You can study the end2end tutorial in the examples subdirectory.
 To test it, run
@@ -188,7 +188,7 @@ Users can also use
  ``` 
  to view simulating waveform.
  
-### Synthesize (developing)
+### Synthesize (Developing)
  
  Pillars also allows users to employ CGRA as virtual overlay 
  to produce high-quality custom hardware, which is called "soft-CGRA".
