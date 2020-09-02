@@ -709,7 +709,7 @@ public class gurobiMapJava {
                     if (VariableF) {
                         constraint.addTerm(coeff, (GRBVar) F[FIndex(DFGvalB2opMap.get(valName), f)]);
                     } else {
-                        constraint.addConstant(coeff * (int) F[FIndex(DFGvalB2opMap.get(valName), f)]);
+                        constraint.addConstant(coeff * Integer.class.cast(F[FIndex(DFGvalB2opMap.get(valName), f)]));
                     }
 
                 }
@@ -962,8 +962,8 @@ public class gurobiMapJava {
                                     sum_of_fanouts.addTerm(1.0,
                                             (GRBVar) F[FIndex(op, MRRGroutingFanout.get(r).get(mrrg_fanout))]);
                                 } else {
-                                    sum_of_fanouts.addConstant((int) F[FIndex(op,
-                                            MRRGroutingFanout.get(r).get(mrrg_fanout))]);
+                                    sum_of_fanouts.addConstant(Integer.class.cast(F[FIndex(op,
+                                            MRRGroutingFanout.get(r).get(mrrg_fanout))]));
                                 }
                             }
                         }
@@ -1016,7 +1016,7 @@ public class gurobiMapJava {
                                         S.get(RIndex(val, MRRGfunctionFanout.get(f).get(r)))[i],
                                         "function_unit_fanout_" + (constrcount++));
                             } else {
-                                model.addConstr((int) F[FIndex(op, f)], GRB.EQUAL,
+                                model.addConstr(Integer.class.cast(F[FIndex(op, f)]), GRB.EQUAL,
                                         S.get(RIndex(val, MRRGfunctionFanout.get(f).get(r)))[i],
                                         "function_unit_fanout_" + (constrcount++));
                             }
