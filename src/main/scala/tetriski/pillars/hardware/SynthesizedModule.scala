@@ -3,11 +3,12 @@ package tetriski.pillars.hardware
 import chisel3.util._
 import chisel3.{Bundle, Input, Module, Output, UInt, _}
 import tetriski.pillars.core.OpEnum.OpEnum
-import tetriski.pillars.core.{ConstInfo, OpEnum}
+import tetriski.pillars.core.{ConstInfo, OpEnum, OpcodeTranslator}
 import tetriski.pillars.mapping.{DFG, OpNode}
 
 /** A simple adder.
  *
+ * @deprecated
  * @param w the data width
  */
 class Adder(w: Int) extends Module {
@@ -24,6 +25,7 @@ class Adder(w: Int) extends Module {
 
 /** A simple multiplier.
  *
+ * @deprecated
  * @param w the data width
  */
 class Multiplier(w: Int) extends Module {
@@ -37,6 +39,39 @@ class Multiplier(w: Int) extends Module {
   val out = io.outs(0)
 
   out := input_a * input_b
+}
+
+/** A simple dual-input module.
+ *
+ * @param w      the data width
+ * @param opEnum opcode of this module
+ */
+class DualInputModule(w: Int, opEnum: OpEnum) extends Module {
+  val io = IO(new Bundle {
+    val inputs = Input(MixedVec(Seq(UInt(w.W), UInt(w.W))))
+    val outs = Output(MixedVec(Seq(UInt((w).W))))
+  })
+
+  val input_a = io.inputs(0)
+  val input_b = io.inputs(1)
+  val out = io.outs(0)
+
+  val logic = opEnum match {
+    case OpEnum.ADD => input_a + input_b
+    case OpEnum.SUB => input_a - input_b
+    case OpEnum.AND => input_a & input_b
+    case OpEnum.OR => input_a | input_b
+    case OpEnum.XOR => input_a ^ input_b
+    case OpEnum.MUL => input_a * input_b
+    case OpEnum.SLT => input_a.asSInt < input_b.asSInt
+    case OpEnum.SHLL => (input_a << input_b(log2Up(w), 0).asUInt).asUInt()
+    case OpEnum.SLTU => input_a < input_b
+    case OpEnum.SHRL => (input_a >> input_b(log2Up(w), 0).asUInt).asUInt()
+    case OpEnum.SHRA => (input_a.asSInt >> input_b(log2Up(w), 0).asUInt).asUInt
+    case OpEnum.DIV => input_a / input_b
+  }
+
+  out := logic
 }
 
 /** A simple const unit.
@@ -183,25 +218,18 @@ class SynthesizedModule(dfg: DFG, constInfo: ConstInfo, memDatas: Array[Array[In
       }
     } else if (op == OpEnum.CONST) {
       return constUnits(index).io.outs(0)
-    } else if (op == OpEnum.ADD) {
-      if (isInput) {
-        val port = adders(index).io.inputs(operand)
-        return skewCheck(node, port)
-      } else {
-        return adders(index).io.outs(0)
-      }
     } else if (op == OpEnum.STORE) {
       val port = storeUnits(index).io.inputs(operand)
       return skewCheck(node, port)
     } else {
-      if (op != OpEnum.MUL) {
+      if (!OpcodeTranslator.aluOpcodeList.contains(op)) {
         throw new Exception("Opcode of " + node.name + " is not undefined during synthesizing!")
       }
       if (isInput) {
-        val port = multipliers(index).io.inputs(operand)
+        val port = dualInputModule(index).io.inputs(operand)
         return skewCheck(node, port)
       } else {
-        return multipliers(index).io.outs(0)
+        return dualInputModule(index).io.outs(0)
       }
     }
   }
@@ -226,8 +254,7 @@ class SynthesizedModule(dfg: DFG, constInfo: ConstInfo, memDatas: Array[Array[In
     val outs = Output(MixedVec((1 to outputNum) map { i => UInt(w.W) }))
   })
 
-  var adders = Map[Int, Adder]()
-  var multipliers = Map[Int, Multiplier]()
+  var dualInputModule = Map[Int, DualInputModule]()
   var constUnits = Map[Int, SynthesizedConstUnit]()
   var loadUnits = Map[Int, SynthesizedLoadUnit]()
   var storeUnits = Map[Int, SynthesizedStoreUnit]()
@@ -257,12 +284,9 @@ class SynthesizedModule(dfg: DFG, constInfo: ConstInfo, memDatas: Array[Array[In
       io.storeUnitMemDatas(storeUnitCount) := module.io.bDout
       storeUnits += (i -> module)
       storeUnitCount += 1
-    } else if (node.opcode == OpEnum.ADD) {
-      val module = Module(new Adder(w))
-      adders += (i -> module)
-    } else if (node.opcode == OpEnum.MUL) {
-      val module = Module(new Multiplier(w))
-      multipliers += (i -> module)
+    } else if (OpcodeTranslator.aluOpcodeList.contains(node.opcode)) {
+      val module = Module(new DualInputModule(w, node.opcode))
+      dualInputModule += (i -> module)
     } else if (node.opcode == OpEnum.INPUT) {
       val latency = node.latency
       if (latency > 0) {

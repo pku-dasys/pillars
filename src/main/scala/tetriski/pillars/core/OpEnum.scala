@@ -38,6 +38,20 @@ object OpEnum extends Enumeration {
 /** A object translating opcodes in elements into the set of configuration of modules.
  */
 object OpcodeTranslator {
+
+  val aluOpcodeList = List(OpEnum.ADD,
+    OpEnum.SUB,
+    OpEnum.AND,
+    OpEnum.OR,
+    OpEnum.XOR,
+    OpEnum.MUL,
+    OpEnum.SLT,
+    OpEnum.SHLL,
+    OpEnum.SLTU,
+    OpEnum.SHRL,
+    OpEnum.SHRA,
+    OpEnum.DIV)
+
   /** Get the subset of optional operations of an ALU with a list of opcodes.
    *
    * @param opEnums   a list of opcodes

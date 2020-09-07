@@ -42,7 +42,7 @@ object Tutorial {
     // and use loadTXT(mrrgFilename) to load the MRRG.
     val II = 1
     val MRRG = arch.getMRRG(II)
-    //        val dfgFilename = "dfg/cap/cap.dot"
+//            val dfgFilename = "dfg/sum/sum.dot"
     val dfgFilename = "tutorial/MM.dot"
     val DFG = DotReader.loadDot(dfgFilename, II)
     val mappingResultFilename = s"tutorial/ii$II"
