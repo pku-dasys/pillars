@@ -2,7 +2,7 @@ package tetriski.pillars.testers
 
 import chisel3.{assert, iotesters}
 import chisel3.iotesters.PeekPokeTester
-import tetriski.pillars.hardware.PillarsConfig.LOG_SCHEDULE_SIZE
+import tetriski.pillars.hardware.PillarsConfig._
 import tetriski.pillars.hardware._
 import tetriski.pillars.util.SplitOrConcat
 
@@ -149,7 +149,7 @@ class TopModuleLSUAdresUnitTest(c: TopModule, bitstream: BigInt, schedules: List
 
   var schedulesBigInt: BigInt = 0
   for (sche <- schedules.reverse) {
-    schedulesBigInt = (schedulesBigInt << LOG_SCHEDULE_SIZE * 2 + 1) + sche
+    schedulesBigInt = (schedulesBigInt << LOG_SCHEDULE_SIZE + LOG_SKEW_LENGTH + 1) + sche
   }
 
   poke(c.io.schedules, schedulesBigInt)
@@ -227,7 +227,7 @@ class TopModuleCompleteAdresUnitTest(c: TopModule, bitstreams: Array[BigInt], sc
 
   var schedulesBigInt: BigInt = 0
   for (sche <- schedules.reverse) {
-    schedulesBigInt = (schedulesBigInt << LOG_SCHEDULE_SIZE * 2 + 1) + sche
+    schedulesBigInt = (schedulesBigInt << LOG_SCHEDULE_SIZE + LOG_SKEW_LENGTH + 1) + sche
   }
 
   poke(c.io.schedules, schedulesBigInt)

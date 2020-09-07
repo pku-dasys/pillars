@@ -33,12 +33,12 @@ import scala.collection.mutable.ArrayBuffer
  */
 class RegNextN(w: Int) extends Module {
   val io = IO(new Bundle {
-    val latency = Input(UInt((LOG_SCHEDULE_SIZE).W))
+    val latency = Input(UInt((LOG_SKEW_LENGTH).W))
     val input = Input(UInt(w.W))
     val out = Output(UInt(w.W))
   })
-  val regArray = RegInit(VecInit(Seq.fill((1 << LOG_SCHEDULE_SIZE))(0.U(w.W))))
-  val posReg = RegInit(0.U(LOG_SCHEDULE_SIZE.W))
+  val regArray = RegInit(VecInit(Seq.fill((1 << LOG_SKEW_LENGTH))(0.U(w.W))))
+  val posReg = RegInit(0.U(LOG_SKEW_LENGTH.W))
 
   when(io.latency > 0.U) {
     io.out := regArray(posReg - io.latency)
@@ -56,7 +56,7 @@ class RegNextN(w: Int) extends Module {
  */
 class Synchronizer(w: Int) extends Module {
   val io = IO(new Bundle {
-    val skewing = Input(UInt((LOG_SCHEDULE_SIZE + 1).W))
+    val skewing = Input(UInt((LOG_SKEW_LENGTH + 1).W))
     val input0 = Input(UInt(w.W))
     val input1 = Input(UInt(w.W))
     val skewedInput0 = Output(UInt(w.W))
@@ -64,8 +64,8 @@ class Synchronizer(w: Int) extends Module {
   })
 
   val regNextN = Module(new RegNextN(w))
-  val latency = io.skewing(LOG_SCHEDULE_SIZE - 1, 0)
-  val signal = io.skewing(LOG_SCHEDULE_SIZE, LOG_SCHEDULE_SIZE)
+  val latency = io.skewing(LOG_SKEW_LENGTH - 1, 0)
+  val signal = io.skewing(LOG_SKEW_LENGTH, LOG_SKEW_LENGTH)
   regNextN.io.latency := latency
 
   when(signal === 1.U) {
@@ -162,10 +162,10 @@ class ScheduleController extends Module {
 class MultiIIScheduleController extends Module {
   val io = IO(new Bundle {
     val en = Input(Bool())
-    val schedules = Input(Vec(II_UPPER_BOUND, UInt((LOG_SCHEDULE_SIZE + LOG_SCHEDULE_SIZE + 1).W)))
+    val schedules = Input(Vec(II_UPPER_BOUND, UInt((LOG_SCHEDULE_SIZE + LOG_SKEW_LENGTH + 1).W)))
     val II = Input(UInt(LOG_II_UPPER_BOUND.W))
     val valid = Output(Bool())
-    val skewing = Output(UInt((LOG_SCHEDULE_SIZE + 1).W))
+    val skewing = Output(UInt((LOG_SKEW_LENGTH + 1).W))
   })
   val scheduleControllers = (0 until II_UPPER_BOUND).toArray.map(t => Module(new ScheduleController))
   val validRegs = RegInit(VecInit(Seq.fill(II_UPPER_BOUND)(false.B)))
@@ -179,7 +179,7 @@ class MultiIIScheduleController extends Module {
   }
 
   io.valid := validRegs(cycleReg)
-  io.skewing := io.schedules(cycleReg)(LOG_SCHEDULE_SIZE + LOG_SCHEDULE_SIZE, LOG_SCHEDULE_SIZE)
+  io.skewing := io.schedules(cycleReg)(LOG_SCHEDULE_SIZE + LOG_SKEW_LENGTH, LOG_SCHEDULE_SIZE)
 
   when(io.en === true.B) {
     when(cycleReg === io.II - 1.U) {
@@ -199,7 +199,7 @@ class MultiIIScheduleController extends Module {
 class Alu(funSelect: Int, w: Int) extends Module {
   val io = IO(new Bundle {
     val en = Input(Bool())
-    val skewing = Input(UInt((LOG_SCHEDULE_SIZE + 1).W))
+    val skewing = Input(UInt((LOG_SKEW_LENGTH + 1).W))
     //port sequnces outs: 0: out
     //port sequnces inputs: 0: input_a, 1: input_b
     val configuration = Input(UInt(4.W))
@@ -560,7 +560,7 @@ class LoadStoreUnit(w: Int) extends Module {
     //0 for load, 1 for store
     val configuration = Input(UInt(1.W))
     val en = Input(Bool())
-    val skewing = Input(UInt((LOG_SCHEDULE_SIZE + 1).W))
+    val skewing = Input(UInt((LOG_SKEW_LENGTH + 1).W))
 
     val streamIn = Flipped(EnqIO(UInt(MEM_IN_WIDTH.W)))
     val len = Input(UInt(log2Ceil(MEM_DEPTH).W))

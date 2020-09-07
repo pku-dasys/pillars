@@ -95,7 +95,7 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
     val enConfig = Input(Bool())
     val en = Input(Bool())
     val schedules = Input(UInt((((aluNum + LSUnitNum) * II_UPPER_BOUND) *
-      (LOG_SCHEDULE_SIZE + LOG_SCHEDULE_SIZE + 1)).W))
+      (LOG_SCHEDULE_SIZE + LOG_SKEW_LENGTH + 1)).W))
     val II = Input(UInt(LOG_II_UPPER_BOUND.W))
 
     val configuration = Input(UInt(moduleInfos.getTotalBits().W))
@@ -113,8 +113,8 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
   //To control the cycle modules should fire, we employ the schedule controllers
   //to fire ALUs and LSUs when functional nodes are mapped onto them.
   val moduleScheduleBits = (0 until aluNum * II_UPPER_BOUND)
-    .map(i => LOG_SCHEDULE_SIZE * 2 + 1).toList ::: (0 until LSUnitNum * II_UPPER_BOUND)
-    .map(i => LOG_SCHEDULE_SIZE * 2 + 1).toList
+    .map(i => LOG_SCHEDULE_SIZE + LOG_SKEW_LENGTH + 1).toList ::: (0 until LSUnitNum * II_UPPER_BOUND)
+    .map(i => LOG_SCHEDULE_SIZE + LOG_SKEW_LENGTH + 1).toList
   val totalScheduleBits = moduleScheduleBits.reduce(_ + _)
   val scheduleDispatch = Module(new Dispatch(totalScheduleBits, moduleScheduleBits))
   scheduleDispatch.io.configuration := io.schedules

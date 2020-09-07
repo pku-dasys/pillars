@@ -21,6 +21,11 @@ object PillarsConfig {
   //for verilator test
   val LOG_SCHEDULE_SIZE = 5
 
+  //for TopModuleWrapper generation
+  //  val LOG_SKEW_LENGTH = 2
+  //for verilator test
+  val LOG_SKEW_LENGTH = 4
+
   val ALU_ADD = 0.U(4.W)
   val ALU_SUB = 1.U(4.W)
   val ALU_AND = 2.U(4.W)

@@ -215,8 +215,8 @@ trait BasicTrait {
   /** Get the schedule of the module represented by this abstract model in Int format.
    *
    * @example If II_UPPER_BOUND = 1, only schedule at reconfiguration cycle 0 will be got.
-   *          If skew = 2, fire time = 3 and LOG_SCHEDULE_SIZE = 3, the result is Array(19).
-   *          If skew = -2, fire time = 3 and LOG_SCHEDULE_SIZE = 3, the result is Array(83).
+   *          If skew = 2, fire time = 3, LOG_SKEW_LENGTH = 2 and LOG_SCHEDULE_SIZE = 3, the result is Array(19).
+   *          If skew = -2, fire time = 3, LOG_SKEW_LENGTH = 2 and LOG_SCHEDULE_SIZE = 3, the result is Array(51).
    * @return the schedule of the module represented by this abstract model
    */
   def getSchedule(): Array[Int] = {
@@ -224,7 +224,7 @@ trait BasicTrait {
     for (i <- 0 until II_UPPER_BOUND) {
       var skew = skews(i)
       if (skew < 0) {
-        skew = Math.pow(2, LOG_SCHEDULE_SIZE).toInt - skew
+        skew = Math.pow(2, LOG_SKEW_LENGTH).toInt - skew
       }
       val fireTime = fireTimes(i)
       val sche = (skew << LOG_SCHEDULE_SIZE) + fireTime
