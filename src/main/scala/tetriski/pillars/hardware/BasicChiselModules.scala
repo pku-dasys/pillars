@@ -179,7 +179,11 @@ class MultiIIScheduleController extends Module {
   }
 
   io.valid := validRegs(cycleReg)
-  io.skewing := io.schedules(cycleReg)(LOG_SCHEDULE_SIZE + LOG_SKEW_LENGTH, LOG_SCHEDULE_SIZE)
+  if (LOG_SKEW_LENGTH > 0) {
+    io.skewing := io.schedules(cycleReg)(LOG_SCHEDULE_SIZE + LOG_SKEW_LENGTH, LOG_SCHEDULE_SIZE)
+  }else{
+    io.skewing := DontCare
+  }
 
   when(io.en === true.B) {
     when(cycleReg === io.II - 1.U) {
@@ -239,14 +243,20 @@ class Alu(funSelect: Int, w: Int) extends Module {
     funSeq
   }
 
-  val synchronizer = Module(new Synchronizer(w))
-  synchronizer.io.input0 := io.inputs(0)
-  synchronizer.io.input1 := io.inputs(1)
+  var input_a = io.inputs(0)
+  var input_b = io.inputs(1)
 
-  synchronizer.io.skewing := io.skewing
+  if (LOG_SKEW_LENGTH > 0) {
+    val synchronizer = Module(new Synchronizer(w))
+    synchronizer.io.input0 := input_a
+    synchronizer.io.input1 := input_b
 
-  val input_a = synchronizer.io.skewedInput0
-  val input_b = synchronizer.io.skewedInput1
+    synchronizer.io.skewing := io.skewing
+
+    input_a = synchronizer.io.skewedInput0
+    input_b = synchronizer.io.skewedInput1
+  }
+
   val out = io.outs(0)
   val shamt = input_b(log2Up(w), 0).asUInt
 
@@ -260,7 +270,6 @@ class Alu(funSelect: Int, w: Int) extends Module {
     }
   }
 }
-
 
 
 /** A register file which can perform an arbitrary subset of optional operations.
@@ -586,18 +595,23 @@ class LoadStoreUnit(w: Int) extends Module {
   memWrapper.io.out <> io.streamOut
   memWrapper.io.workEn <> io.en
 
-  val synchronizer = Module(new Synchronizer(w))
-  synchronizer.io.input0 := io.inputs(0)
-  synchronizer.io.input1 := io.inputs(1)
-
-  synchronizer.io.skewing := io.skewing
-
   /** The address where to load/store data.
    */
-  val addr = synchronizer.io.skewedInput0
+  var addr = io.inputs(0)
   /** The input data which is only used for storing.
    */
-  val dataIn = synchronizer.io.skewedInput1
+  var dataIn = io.inputs(1)
+
+  if (LOG_SKEW_LENGTH > 0) {
+    val synchronizer = Module(new Synchronizer(w))
+    synchronizer.io.input0 := addr
+    synchronizer.io.input1 := dataIn
+
+    synchronizer.io.skewing := io.skewing
+
+    addr = synchronizer.io.skewedInput0
+    dataIn = synchronizer.io.skewedInput1
+  }
   val out = io.outs(0)
 
   val readMem = memWrapper.io.readMem

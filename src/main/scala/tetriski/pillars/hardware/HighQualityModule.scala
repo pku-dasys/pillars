@@ -140,7 +140,7 @@ class HighQualityAdderTester(c: HighQualityAdder)
   poke(c.io.inputs(1), 13)
 
   println("The result of 13 + 14 with " + c.getWidth().toString
-    + " bit adder is: " + peek(c.io.outs(0)).toString())
+    + "-bit adder is: " + peek(c.io.outs(0)).toString())
 
   expect(c.io.outs(0), 27)
 }

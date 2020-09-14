@@ -6,24 +6,36 @@ import chisel3._
  * limitation of II and the schedule length.
  */
 object PillarsConfig {
-  //for TopModuleWrapper generation
-  //  val LOG_II_UPPER_BOUND = 1
-  //for verilator test
+  /** The limitation of the initiation interval.
+   * 1 for TopModuleWrapper generation and 2 for verilator test of examples.
+   *
+   * @example If LOG_II_UPPER_BOUND = 2, the compliant II of the CGRA architecture is 1 ~ 3.
+   *
+   */
   val LOG_II_UPPER_BOUND = 2
   val II_UPPER_BOUND = Math.pow(2, LOG_II_UPPER_BOUND).toInt
 
+  /** Memory depth in Load/Store unit.
+   */
   val MEM_DEPTH = 256
   val MEM_IN_WIDTH = 32
   val MEM_OUT_WIDTH = 32
 
-  //for TopModuleWrapper generation
-  //  val LOG_SCHEDULE_SIZE = 3
-  //for verilator test
+  /** The limitation of the schedule length.
+   * 3 for TopModuleWrapper generation and 5 for verilator test of examples.
+   *
+   * @example If LOG_SCHEDULE_SIZE = 5, the compliant schedule of the CGRA architecture is 0 ~ 31.
+   *
+   */
   val LOG_SCHEDULE_SIZE = 5
 
-  //for TopModuleWrapper generation
-  //  val LOG_SKEW_LENGTH = 2
-  //for verilator test
+  /** The limitation of the skew.
+   * 2 for TopModuleWrapper generation and 4 for verilator test of examples.
+   *
+   * @example If LOG_SCHEDULE_SIZE = 4, the compliant skew of the CGRA architecture is 0 ~ 16.
+   * @example If LOG_SCHEDULE_SIZE = -1, the synchronizers will not be employed in the architecture.
+   *
+   */
   val LOG_SKEW_LENGTH = 4
 
   val ALU_ADD = 0.U(4.W)

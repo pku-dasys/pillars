@@ -222,12 +222,17 @@ trait BasicTrait {
   def getSchedule(): Array[Int] = {
     val ret = new Array[Int](II_UPPER_BOUND)
     for (i <- 0 until II_UPPER_BOUND) {
-      var skew = skews(i)
-      if (skew < 0) {
-        skew = Math.pow(2, LOG_SKEW_LENGTH).toInt - skew
-      }
+
       val fireTime = fireTimes(i)
-      val sche = (skew << LOG_SCHEDULE_SIZE) + fireTime
+      var sche = fireTime
+
+      if (LOG_SKEW_LENGTH > 0) {
+        var skew = skews(i)
+        if (skew < 0) {
+          skew = Math.pow(2, LOG_SKEW_LENGTH).toInt - skew
+        }
+        sche += (skew << LOG_SCHEDULE_SIZE)
+      }
       ret(i) = sche
     }
     ret
