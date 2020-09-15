@@ -288,8 +288,8 @@ class ArchitctureHierarchy extends BlockTrait {
    * @return the schedules of ALUs and LSUs
    */
   def getSchedules(): List[Int] = {
-    var schedules = ALUsArray.map(alu => alu.asInstanceOf[ElementTrait].getSchedule().toList).reduce(_ ++ _)
-    schedules = schedules ++ LSUsArray.map(lsu => lsu.asInstanceOf[ElementTrait].getSchedule().toList).reduce(_ ++ _)
+    var schedules = ALUsArray.map(alu => alu.getSchedule().toList).reduce(_ ++ _)
+    schedules = schedules ++ LSUsArray.map(lsu => lsu.getSchedule().toList).reduce(_ ++ _)
     schedules
   }
 }

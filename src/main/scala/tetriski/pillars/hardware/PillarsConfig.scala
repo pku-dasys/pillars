@@ -33,10 +33,26 @@ object PillarsConfig {
    * 2 for TopModuleWrapper generation and 4 for verilator test of examples.
    *
    * @example If LOG_SCHEDULE_SIZE = 4, the compliant skew of the CGRA architecture is 0 ~ 16.
-   * @example If LOG_SCHEDULE_SIZE = -1, the synchronizers will not be employed in the architecture.
+   * @example If LOG_SCHEDULE_SIZE = -1, the Synchronizers will not be employed in the architecture.
    *
    */
   val LOG_SKEW_LENGTH = 4
+
+  /** A parameter indicating we use relative skew or wait skew in the schedule.
+   *
+   * @example If USE_RELATIVE_SKEW = true, the relative skew will be used to perform synchronization,
+   *          and Synchronizers will be employed for synchronization of 2-input module.
+   * @example If USE_RELATIVE_SKEW = false, the wait skew will be used to perform synchronization,
+   *          and RegNextN will be employed for postponing each input date of 2-input module.
+   *
+   */
+  val USE_RELATIVE_SKEW = true
+
+  val SKEW_WIDTH = if (USE_RELATIVE_SKEW) {
+    LOG_SKEW_LENGTH + 1
+  } else {
+    LOG_SKEW_LENGTH * 2
+  }
 
   val ALU_ADD = 0.U(4.W)
   val ALU_SUB = 1.U(4.W)

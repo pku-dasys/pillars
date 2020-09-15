@@ -6,6 +6,7 @@ import java.util.{ArrayList, Date}
 
 import scala.collection.JavaConverters
 import tetriski.pillars.core.{MRRG, MRRGMode, NodeMRRG}
+import tetriski.pillars.hardware.PillarsConfig._
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -34,8 +35,9 @@ object ILPMap {
     val mapper = new gurobiMapJava(filename)
 
     mapper.II = dfg.II
+    mapper.useRelativeSkew = USE_RELATIVE_SKEW
     mrrg.shortestPath(20).foreach(t =>
-      mapper.MRRGdistence.put(JavaConverters.seqAsJavaList(List(t._1._1, t._1._2)), t._2))
+      mapper.MRRGDistance.put(JavaConverters.seqAsJavaList(List(t._1._1, t._1._2)), t._2))
 
     val num_dfg_op = dfg.getOpSize()
     val num_dfg_val = dfg.getValSize()
@@ -54,21 +56,21 @@ object ILPMap {
         mapper.DFGMultipleInputMap.put(dfgNode.name, inputs)
       }
 
-      mapper.DFGopNodeName.add(dfgNode.name)
-      mapper.DFGopNodeOpcode.add(Integer.valueOf(dfgNode.opcode.id))
+      mapper.DFGOpNodeName.add(dfgNode.name)
+      mapper.DFGOpNodeOpcode.add(Integer.valueOf(dfgNode.opcode.id))
       if (dfgNode.output != null) {
-        mapper.DFGopNodeOut.add(Integer.valueOf(dfg.valNodesMap(dfgNode.output.name)))
-        mapper.DFGvalB2opMap.put(dfgNode.name + "OUT", i)
+        mapper.DFGOpNodeOut.add(Integer.valueOf(dfg.valNodesMap(dfgNode.output.name)))
+        mapper.DFGValB2opMap.put(dfgNode.name + "OUT", i)
       } else {
-        mapper.DFGopNodeOut.add(Integer.valueOf(-1))
+        mapper.DFGOpNodeOut.add(Integer.valueOf(-1))
       }
     }
     for (i <- 0 until num_dfg_val) {
-      mapper.DFGvalNodeName.add(dfg.valNodes(i).name)
+      mapper.DFGValNodeName.add(dfg.valNodes(i).name)
 
       for (outNode <- dfg.valNodes(i).output) {
         val connect = new ArrayList[String]()
-        connect.add(dfg.opNodes(mapper.DFGvalB2opMap.get(dfg.valNodes(i).name)).name)
+        connect.add(dfg.opNodes(mapper.DFGValB2opMap.get(dfg.valNodes(i).name)).name)
         connect.add(outNode.name)
         mapper.connectList.add(connect)
       }
@@ -80,8 +82,8 @@ object ILPMap {
         out.add(Integer.valueOf(dfg.opNodesMap(dfg.valNodes(i).output(j).name)))
         operand.add(Integer.valueOf(dfg.valNodes(i).outputOperand(j)))
       }
-      mapper.DFGvalNodeOut.add(out)
-      mapper.DFGvalNodeOutputOperand.add(operand)
+      mapper.DFGValNodeOut.add(out)
+      mapper.DFGValNodeOutputOperand.add(operand)
     }
 
     var num_mrrg_r = 0
@@ -96,10 +98,10 @@ object ILPMap {
       val node = mrrg.nodes(i)
       val mode = node.mode
       if (mode == MRRGMode.MEM_MODE) {
-        mapper.MRRGlatency.put(node.name, 1)
+        mapper.MRRGLatency.put(node.name, 1)
       } else if (mode == MRRGMode.REG_MODE) {
         for (fanIn <- node.fanIn) {
-          mapper.MRRGlatency.put(fanIn.name, 1)
+          mapper.MRRGLatency.put(fanIn.name, 1)
         }
       }
 
@@ -112,7 +114,7 @@ object ILPMap {
         for (j <- 0 until opSize) {
           opcodes.add(Integer.valueOf(mrrg.nodes(i).ops(j).id))
         }
-        mapper.MRRGfunctionSupportOpcode.add(opcodes)
+        mapper.MRRGFunctionSupportOpcode.add(opcodes)
         num_mrrg_f += 1
       }
       else {
@@ -123,7 +125,7 @@ object ILPMap {
     }
 
     for (i <- 0 until num_mrrg_f) {
-      mapper.MRRGfunctionName.add(functionNodes(i).name)
+      mapper.MRRGFunctionName.add(functionNodes(i).name)
       val faninsize = functionNodes(i).fanIn.size
       val fanin = new ArrayList[Integer]()
       val fanintype = new ArrayList[Integer]()
@@ -135,8 +137,8 @@ object ILPMap {
           fanintype.add(Integer.valueOf(1))
         }
       }
-      mapper.MRRGfunctionFanin.add(fanin)
-      mapper.MRRGfunctionFaninType.add(fanintype)
+      mapper.MRRGFunctionFanin.add(fanin)
+      mapper.MRRGFunctionFaninType.add(fanintype)
 
       val fanoutsize = functionNodes(i).fanOut.size
       val fanout = new ArrayList[Integer]()
@@ -149,12 +151,12 @@ object ILPMap {
           fanouttype.add(Integer.valueOf(1))
         }
       }
-      mapper.MRRGfunctionFanout.add(fanout)
-      mapper.MRRGfunctionFanoutType.add(fanouttype)
+      mapper.MRRGFunctionFanout.add(fanout)
+      mapper.MRRGFunctionFanoutType.add(fanouttype)
     }
 
     for (i <- 0 until num_mrrg_r) {
-      mapper.MRRGroutingName.add(routingNodes(i).name)
+      mapper.MRRGRoutingName.add(routingNodes(i).name)
       val fanInSize = routingNodes(i).fanIn.size
       val fanIn = new ArrayList[Integer]()
       val fanInType = new ArrayList[Integer]()
@@ -166,8 +168,8 @@ object ILPMap {
           fanInType.add(Integer.valueOf(1))
         }
       }
-      mapper.MRRGroutingFanin.add(fanIn)
-      mapper.MRRGroutingFaninType.add(fanInType)
+      mapper.MRRGRoutingFanin.add(fanIn)
+      mapper.MRRGRoutingFaninType.add(fanInType)
 
       val fanOutSize = routingNodes(i).fanOut.size
       val fanOut = new ArrayList[Integer]()
@@ -180,8 +182,8 @@ object ILPMap {
           fanOutType.add(Integer.valueOf(1))
         }
       }
-      mapper.MRRGroutingFanout.add(fanOut)
-      mapper.MRRGroutingFanoutType.add(fanOutType)
+      mapper.MRRGRoutingFanout.add(fanOut)
+      mapper.MRRGRoutingFanoutType.add(fanOutType)
     }
 
     if (fw != null) {
@@ -216,7 +218,25 @@ object ILPMap {
       }
 
       if (scheduleControl && mapper.ringCheckPass) {
-        dfg.updateSchedule(filename + "_r.txt", mapper.DFGlatencyMap, mapper.DFGskewMap, filename + "_r.txt")
+        var skewMap = mapper.DFGRelativeSkewMap
+        if(!USE_RELATIVE_SKEW){
+          skewMap.clear()
+          for(node <- dfg.opNodes) {
+            if(mapper.DFGMultipleInputMap.containsKey(node.name)){
+              val sinkName = node.name
+              val inputs = mapper.DFGMultipleInputMap.get(node.name)
+              val sourceName0 =  inputs.get(0)
+              val sourceName1 =  inputs.get(1)
+              val name0 = "WaitSkew_" + sourceName0 + "_" + sinkName
+              val name1 = "WaitSkew_" + sourceName1 + "_" + sinkName
+              val waitSkew0 = mapper.waitSkewMap.get(name0)
+              val waitSkew1 = mapper.waitSkewMap.get(name1)
+              val skew = (waitSkew1 << LOG_SKEW_LENGTH) + waitSkew0
+              skewMap.put(node.name, skew)
+            }
+          }
+        }
+        dfg.updateSchedule(filename + "_r.txt", mapper.DFGLatencyMap, skewMap, filename + "_r.txt")
       }
       else {
         Scheduler.schedule(dfg, mrrg, filename = filename, II = dfg.II)

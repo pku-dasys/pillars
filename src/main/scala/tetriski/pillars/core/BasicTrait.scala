@@ -228,7 +228,7 @@ trait BasicTrait {
 
       if (LOG_SKEW_LENGTH > 0) {
         var skew = skews(i)
-        if (skew < 0) {
+        if (skew < 0 && USE_RELATIVE_SKEW) {
           skew = Math.pow(2, LOG_SKEW_LENGTH).toInt - skew
         }
         sche += (skew << LOG_SCHEDULE_SIZE)

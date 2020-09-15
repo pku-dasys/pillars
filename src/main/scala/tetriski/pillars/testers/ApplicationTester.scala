@@ -178,7 +178,7 @@ class AppTestHelper(bitStreams: Array[BigInt], schedules: List[Int],
   def getSchedulesBigInt(): BigInt = {
     var ret: BigInt = 0
     for (sche <- schedules.reverse) {
-      ret = (ret << LOG_SCHEDULE_SIZE + LOG_SKEW_LENGTH + 1) + sche
+      ret = (ret << LOG_SCHEDULE_SIZE + SKEW_WIDTH) + sche
     }
     ret
   }

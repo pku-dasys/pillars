@@ -162,10 +162,10 @@ class ScheduleController extends Module {
 class MultiIIScheduleController extends Module {
   val io = IO(new Bundle {
     val en = Input(Bool())
-    val schedules = Input(Vec(II_UPPER_BOUND, UInt((LOG_SCHEDULE_SIZE + LOG_SKEW_LENGTH + 1).W)))
+    val schedules = Input(Vec(II_UPPER_BOUND, UInt((LOG_SCHEDULE_SIZE + SKEW_WIDTH).W)))
     val II = Input(UInt(LOG_II_UPPER_BOUND.W))
     val valid = Output(Bool())
-    val skewing = Output(UInt((LOG_SKEW_LENGTH + 1).W))
+    val skewing = Output(UInt((SKEW_WIDTH).W))
   })
   val scheduleControllers = (0 until II_UPPER_BOUND).toArray.map(t => Module(new ScheduleController))
   val validRegs = RegInit(VecInit(Seq.fill(II_UPPER_BOUND)(false.B)))
@@ -180,8 +180,8 @@ class MultiIIScheduleController extends Module {
 
   io.valid := validRegs(cycleReg)
   if (LOG_SKEW_LENGTH > 0) {
-    io.skewing := io.schedules(cycleReg)(LOG_SCHEDULE_SIZE + LOG_SKEW_LENGTH, LOG_SCHEDULE_SIZE)
-  }else{
+    io.skewing := io.schedules(cycleReg)(LOG_SCHEDULE_SIZE + SKEW_WIDTH - 1, LOG_SCHEDULE_SIZE)
+  } else {
     io.skewing := DontCare
   }
 
@@ -203,7 +203,7 @@ class MultiIIScheduleController extends Module {
 class Alu(funSelect: Int, w: Int) extends Module {
   val io = IO(new Bundle {
     val en = Input(Bool())
-    val skewing = Input(UInt((LOG_SKEW_LENGTH + 1).W))
+    val skewing = Input(UInt((SKEW_WIDTH).W))
     //port sequnces outs: 0: out
     //port sequnces inputs: 0: input_a, 1: input_b
     val configuration = Input(UInt(4.W))
@@ -247,14 +247,26 @@ class Alu(funSelect: Int, w: Int) extends Module {
   var input_b = io.inputs(1)
 
   if (LOG_SKEW_LENGTH > 0) {
-    val synchronizer = Module(new Synchronizer(w))
-    synchronizer.io.input0 := input_a
-    synchronizer.io.input1 := input_b
+    if (USE_RELATIVE_SKEW) {
+      val synchronizer = Module(new Synchronizer(w))
+      synchronizer.io.input0 := input_a
+      synchronizer.io.input1 := input_b
 
-    synchronizer.io.skewing := io.skewing
+      synchronizer.io.skewing := io.skewing
 
-    input_a = synchronizer.io.skewedInput0
-    input_b = synchronizer.io.skewedInput1
+      input_a = synchronizer.io.skewedInput0
+      input_b = synchronizer.io.skewedInput1
+    } else {
+      val regNextNa = Module(new RegNextN(w))
+      val regNextNb = Module(new RegNextN(w))
+      regNextNa.io.input := input_a
+      regNextNa.io.latency := io.skewing(LOG_SKEW_LENGTH - 1, 0)
+      regNextNb.io.input := input_b
+      regNextNb.io.latency := io.skewing(2 * LOG_SKEW_LENGTH - 1, LOG_SKEW_LENGTH)
+
+      input_a = regNextNa.io.out
+      input_b = regNextNb.io.out
+    }
   }
 
   val out = io.outs(0)
@@ -569,7 +581,7 @@ class LoadStoreUnit(w: Int) extends Module {
     //0 for load, 1 for store
     val configuration = Input(UInt(1.W))
     val en = Input(Bool())
-    val skewing = Input(UInt((LOG_SKEW_LENGTH + 1).W))
+    val skewing = Input(UInt((SKEW_WIDTH).W))
 
     val streamIn = Flipped(EnqIO(UInt(MEM_IN_WIDTH.W)))
     val len = Input(UInt(log2Ceil(MEM_DEPTH).W))
@@ -603,14 +615,26 @@ class LoadStoreUnit(w: Int) extends Module {
   var dataIn = io.inputs(1)
 
   if (LOG_SKEW_LENGTH > 0) {
-    val synchronizer = Module(new Synchronizer(w))
-    synchronizer.io.input0 := addr
-    synchronizer.io.input1 := dataIn
+    if(USE_RELATIVE_SKEW) {
+      val synchronizer = Module(new Synchronizer(w))
+      synchronizer.io.input0 := addr
+      synchronizer.io.input1 := dataIn
 
-    synchronizer.io.skewing := io.skewing
+      synchronizer.io.skewing := io.skewing
 
-    addr = synchronizer.io.skewedInput0
-    dataIn = synchronizer.io.skewedInput1
+      addr = synchronizer.io.skewedInput0
+      dataIn = synchronizer.io.skewedInput1
+    } else {
+      val regNextNaddr = Module(new RegNextN(w))
+      val regNextNdataIn = Module(new RegNextN(w))
+      regNextNaddr.io.input := addr
+      regNextNaddr.io.latency := io.skewing(LOG_SKEW_LENGTH - 1, 0)
+      regNextNdataIn.io.input := dataIn
+      regNextNdataIn.io.latency := io.skewing(2 * LOG_SKEW_LENGTH - 1, LOG_SKEW_LENGTH)
+
+      addr = regNextNaddr.io.out
+      dataIn = regNextNdataIn.io.out
+    }
   }
   val out = io.outs(0)
 

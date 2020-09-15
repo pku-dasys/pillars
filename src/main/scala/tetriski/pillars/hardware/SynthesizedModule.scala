@@ -5,6 +5,7 @@ import chisel3.{Bundle, Input, Module, Output, UInt, _}
 import tetriski.pillars.core.OpEnum.OpEnum
 import tetriski.pillars.core.{ConstInfo, OpEnum, OpcodeTranslator}
 import tetriski.pillars.mapping.{DFG, OpNode}
+import tetriski.pillars.hardware.PillarsConfig._
 
 /** A simple adder.
  *
@@ -191,16 +192,41 @@ class SynthesizedModule(dfg: DFG, constInfo: ConstInfo, memDatas: Array[Array[In
      * @return the port should be used for connection
      */
     def skewCheck(node: OpNode, port: Data): Data = {
-      if (node.skew < 0 && operand == 0) {
-        val skewReg = Module(new Registers(-node.skew, w))
-        port := skewReg.io.outs(0)
-        skewReg.io.inputs(0)
-      } else if (node.skew > 0 && operand == 1) {
-        val skewReg = Module(new Registers(node.skew, w))
-        port := skewReg.io.outs(0)
-        skewReg.io.inputs(0)
-      } else {
-        port
+      if(USE_RELATIVE_SKEW) {
+        if (node.skew < 0 && operand == 0) {
+          val skewReg = Module(new Registers(-node.skew, w))
+          port := skewReg.io.outs(0)
+          skewReg.io.inputs(0)
+        } else if (node.skew > 0 && operand == 1) {
+          val skewReg = Module(new Registers(node.skew, w))
+          port := skewReg.io.outs(0)
+          skewReg.io.inputs(0)
+        } else {
+          port
+        }
+      }else{
+        val mod = 1 << LOG_SKEW_LENGTH
+        val skew0 = node.skew % mod
+        val skew1 = (node.skew - skew0) /mod
+        if(operand == 0){
+          if(skew0 == 0){
+            port
+          }else{
+            val skewReg = Module(new Registers(skew0, w))
+            port := skewReg.io.outs(0)
+            skewReg.io.inputs(0)
+          }
+        }else if(operand == 1){
+          if(skew1 == 0){
+            port
+          }else{
+            val skewReg = Module(new Registers(skew1, w))
+            port := skewReg.io.outs(0)
+            skewReg.io.inputs(0)
+          }
+        }else{
+          port
+        }
       }
     }
 

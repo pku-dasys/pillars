@@ -47,7 +47,7 @@ class checkWithoutRing {
      *
      * @param unionMap the union map
      * @param sourceID the ID of source node
-     * @param sinkID the ID of sink node
+     * @param sinkID   the ID of sink node
      */
     void connect(Map<Integer, Integer> unionMap, Integer sourceID, Integer sinkID) {
         int rootSink = find(unionMap, sinkID);
@@ -59,7 +59,7 @@ class checkWithoutRing {
      * Find root of a node.
      *
      * @param unionMap the union map
-     * @param nodeID the ID of node
+     * @param nodeID   the ID of node
      */
     int find(Map<Integer, Integer> unionMap, Integer nodeID) {
         if (!unionMap.containsKey(nodeID)) {
@@ -77,7 +77,7 @@ class checkWithoutRing {
     /**
      * check whether there are useless rings in a targeted direction graph.
      *
-     * @param  nodeConnects the direction graph
+     * @param nodeConnects the direction graph
      * @return if the graph passes simply connected checking, return true,
      * meaning there are not useless rings in targeted direction graphs.
      */
@@ -110,34 +110,34 @@ class checkWithoutRing {
 public class gurobiMapJava {
     String filename;
 
-    List<Integer> DFGopNodeOut;
-    List<Integer> DFGopNodeOpcode;
-    List<String> DFGopNodeName;
-    List<List<Integer>> DFGvalNodeOut;
-    List<List<Integer>> DFGvalNodeOutputOperand;
-    List<String> DFGvalNodeName;
+    List<Integer> DFGOpNodeOut;
+    List<Integer> DFGOpNodeOpcode;
+    List<String> DFGOpNodeName;
+    List<List<Integer>> DFGValNodeOut;
+    List<List<Integer>> DFGValNodeOutputOperand;
+    List<String> DFGValNodeName;
 
-    List<String> MRRGfunctionName;
-    List<String> MRRGroutingName;
-    List<List<Integer>> MRRGfunctionFanin;
-    List<List<Integer>> MRRGfunctionFaninType;
-    List<List<Integer>> MRRGroutingFanin;
-    List<List<Integer>> MRRGroutingFaninType;
-    List<List<Integer>> MRRGfunctionFanout;
-    List<List<Integer>> MRRGfunctionFanoutType;
-    List<List<Integer>> MRRGroutingFanout;
-    List<List<Integer>> MRRGroutingFanoutType;
-    List<List<Integer>> MRRGfunctionSupportOpcode;
+    List<String> MRRGFunctionName;
+    List<String> MRRGRoutingName;
+    List<List<Integer>> MRRGFunctionFanin;
+    List<List<Integer>> MRRGFunctionFaninType;
+    List<List<Integer>> MRRGRoutingFanin;
+    List<List<Integer>> MRRGRoutingFaninType;
+    List<List<Integer>> MRRGFunctionFanout;
+    List<List<Integer>> MRRGFunctionFanoutType;
+    List<List<Integer>> MRRGRoutingFanout;
+    List<List<Integer>> MRRGRoutingFanoutType;
+    List<List<Integer>> MRRGFunctionSupportOpcode;
 
-    Map<String, Integer> MRRGlatency;
-    Map<String, Integer> DFGvalB2opMap;
+    Map<String, Integer> MRRGLatency;
+    Map<String, Integer> DFGValB2opMap;
     List<List<String>> connectList;
     Map<String, List<String>> DFGMultipleInputMap;
     Map<String, Integer> DFGSelfJoinMap;
     Map<String, Integer> waitSkewMap;
-    Map<String, Integer> DFGskewMap;
-    Map<String, Integer> DFGlatencyMap;
-    Map<List<String>, Integer> MRRGdistence;
+    Map<String, Integer> DFGRelativeSkewMap;
+    Map<String, Integer> DFGLatencyMap;
+    Map<List<String>, Integer> MRRGDistance;
     Map<Integer, Integer> regMap;
     Map<Integer, List<Integer>> regConnect;
     Map<Integer, List<Integer>> func2regMap;
@@ -156,6 +156,7 @@ public class gurobiMapJava {
     int maxLatency = 15;
     int skewLimit = 2;
     Boolean ringCheckPass = false;
+    Boolean useRelativeSkew = true;
     int ringCheckCount = 0;
     int ringCheckLimit = 5;
     Random RNG = new Random(1);
@@ -168,34 +169,34 @@ public class gurobiMapJava {
     gurobiMapJava(String filename) {
         this.filename = filename;
 
-        DFGopNodeName = new ArrayList<>();
-        DFGopNodeOpcode = new ArrayList<>();
-        DFGopNodeOut = new ArrayList<>();
-        DFGvalNodeName = new ArrayList<>();
-        DFGvalNodeOut = new ArrayList<>();
-        DFGvalNodeOutputOperand = new ArrayList<>();
+        DFGOpNodeName = new ArrayList<>();
+        DFGOpNodeOpcode = new ArrayList<>();
+        DFGOpNodeOut = new ArrayList<>();
+        DFGValNodeName = new ArrayList<>();
+        DFGValNodeOut = new ArrayList<>();
+        DFGValNodeOutputOperand = new ArrayList<>();
 
-        MRRGfunctionName = new ArrayList<>();
-        MRRGfunctionFanin = new ArrayList<>();
-        MRRGfunctionFaninType = new ArrayList<>();
-        MRRGfunctionFanout = new ArrayList<>();
-        MRRGfunctionFanoutType = new ArrayList<>();
-        MRRGfunctionSupportOpcode = new ArrayList<>();
-        MRRGroutingName = new ArrayList<>();
-        MRRGroutingFanin = new ArrayList<>();
-        MRRGroutingFaninType = new ArrayList<>();
-        MRRGroutingFanout = new ArrayList<>();
-        MRRGroutingFanoutType = new ArrayList<>();
+        MRRGFunctionName = new ArrayList<>();
+        MRRGFunctionFanin = new ArrayList<>();
+        MRRGFunctionFaninType = new ArrayList<>();
+        MRRGFunctionFanout = new ArrayList<>();
+        MRRGFunctionFanoutType = new ArrayList<>();
+        MRRGFunctionSupportOpcode = new ArrayList<>();
+        MRRGRoutingName = new ArrayList<>();
+        MRRGRoutingFanin = new ArrayList<>();
+        MRRGRoutingFaninType = new ArrayList<>();
+        MRRGRoutingFanout = new ArrayList<>();
+        MRRGRoutingFanoutType = new ArrayList<>();
 
-        MRRGlatency = new HashMap<>();
-        DFGvalB2opMap = new HashMap<>();
+        MRRGLatency = new HashMap<>();
+        DFGValB2opMap = new HashMap<>();
         connectList = new ArrayList<>();
         DFGMultipleInputMap = new HashMap<>();
         DFGSelfJoinMap = new HashMap<>();
         waitSkewMap = new HashMap<>();
-        DFGskewMap = new HashMap<>();
-        DFGlatencyMap = new HashMap<>();
-        MRRGdistence = new HashMap<>();
+        DFGRelativeSkewMap = new HashMap<>();
+        DFGLatencyMap = new HashMap<>();
+        MRRGDistance = new HashMap<>();
         regMap = new HashMap<>();
         regConnect = new HashMap<>();
         func2regMap = new HashMap<>();
@@ -211,44 +212,44 @@ public class gurobiMapJava {
      * @throws IOException
      */
     gurobiMapJava(String DFGFile, String MRRGFile) throws IOException {
-        DFGopNodeName = new ArrayList<>();
-        DFGopNodeOpcode = new ArrayList<>();
-        DFGopNodeOut = new ArrayList<>();
-        DFGvalNodeName = new ArrayList<>();
-        DFGvalNodeOut = new ArrayList<>();
-        DFGvalNodeOutputOperand = new ArrayList<>();
+        DFGOpNodeName = new ArrayList<>();
+        DFGOpNodeOpcode = new ArrayList<>();
+        DFGOpNodeOut = new ArrayList<>();
+        DFGValNodeName = new ArrayList<>();
+        DFGValNodeOut = new ArrayList<>();
+        DFGValNodeOutputOperand = new ArrayList<>();
 
-        MRRGfunctionName = new ArrayList<>();
-        MRRGfunctionFanin = new ArrayList<>();
-        MRRGfunctionFaninType = new ArrayList<>();
-        MRRGfunctionFanout = new ArrayList<>();
-        MRRGfunctionFanoutType = new ArrayList<>();
-        MRRGfunctionSupportOpcode = new ArrayList<>();
-        MRRGroutingName = new ArrayList<>();
-        MRRGroutingFanin = new ArrayList<>();
-        MRRGroutingFaninType = new ArrayList<>();
-        MRRGroutingFanout = new ArrayList<>();
-        MRRGroutingFanoutType = new ArrayList<>();
+        MRRGFunctionName = new ArrayList<>();
+        MRRGFunctionFanin = new ArrayList<>();
+        MRRGFunctionFaninType = new ArrayList<>();
+        MRRGFunctionFanout = new ArrayList<>();
+        MRRGFunctionFanoutType = new ArrayList<>();
+        MRRGFunctionSupportOpcode = new ArrayList<>();
+        MRRGRoutingName = new ArrayList<>();
+        MRRGRoutingFanin = new ArrayList<>();
+        MRRGRoutingFaninType = new ArrayList<>();
+        MRRGRoutingFanout = new ArrayList<>();
+        MRRGRoutingFanoutType = new ArrayList<>();
 
         BufferedReader DFGReader = new BufferedReader(new FileReader(DFGFile));
         int opnum = Integer.parseInt(DFGReader.readLine());
         for (int i = 0; i < opnum; i++) {
-            DFGopNodeName.add(DFGReader.readLine());
-            DFGopNodeOut.add(Integer.valueOf(DFGReader.readLine()));
-            DFGopNodeOpcode.add(Integer.valueOf(DFGReader.readLine()));
+            DFGOpNodeName.add(DFGReader.readLine());
+            DFGOpNodeOut.add(Integer.valueOf(DFGReader.readLine()));
+            DFGOpNodeOpcode.add(Integer.valueOf(DFGReader.readLine()));
         }
         int valnum = Integer.parseInt(DFGReader.readLine());
         for (int i = 0; i < valnum; i++) {
-            DFGvalNodeName.add(DFGReader.readLine());
+            DFGValNodeName.add(DFGReader.readLine());
             int outsize = Integer.parseInt(DFGReader.readLine());
             List<Integer> valout = new ArrayList<>();
             for (int j = 0; j < outsize; j++)
                 valout.add(Integer.valueOf(DFGReader.readLine()));
-            DFGvalNodeOut.add(valout);
+            DFGValNodeOut.add(valout);
             List<Integer> valoperand = new ArrayList<>();
             for (int j = 0; j < outsize; j++)
                 valoperand.add(Integer.valueOf(DFGReader.readLine()));
-            DFGvalNodeOutputOperand.add(valoperand);
+            DFGValNodeOutputOperand.add(valoperand);
         }
         DFGReader.close();
 
@@ -256,7 +257,7 @@ public class gurobiMapJava {
 
         int fnum = Integer.parseInt(MRRGReader.readLine());
         for (int i = 0; i < fnum; i++) {
-            MRRGfunctionName.add(MRRGReader.readLine());
+            MRRGFunctionName.add(MRRGReader.readLine());
             int faninsize = Integer.parseInt(MRRGReader.readLine());
             List<Integer> fanin = new ArrayList<>();
             List<Integer> fanintype = new ArrayList<>();
@@ -264,8 +265,8 @@ public class gurobiMapJava {
                 fanin.add(Integer.valueOf(MRRGReader.readLine()));
                 fanintype.add(Integer.valueOf(MRRGReader.readLine()));
             }
-            MRRGfunctionFanin.add(fanin);
-            MRRGfunctionFaninType.add(fanintype);
+            MRRGFunctionFanin.add(fanin);
+            MRRGFunctionFaninType.add(fanintype);
 
             int fanoutsize = Integer.parseInt(MRRGReader.readLine());
             List<Integer> fanout = new ArrayList<>();
@@ -274,20 +275,20 @@ public class gurobiMapJava {
                 fanout.add(Integer.valueOf(MRRGReader.readLine()));
                 fanouttype.add(Integer.valueOf(MRRGReader.readLine()));
             }
-            MRRGfunctionFanout.add(fanout);
-            MRRGfunctionFanoutType.add(fanouttype);
+            MRRGFunctionFanout.add(fanout);
+            MRRGFunctionFanoutType.add(fanouttype);
 
             int sopsize = Integer.parseInt(MRRGReader.readLine());
             List<Integer> sop = new ArrayList<>();
             for (int j = 0; j < sopsize; j++) {
                 sop.add(Integer.valueOf(MRRGReader.readLine()));
             }
-            MRRGfunctionSupportOpcode.add(sop);
+            MRRGFunctionSupportOpcode.add(sop);
         }
 
         int rnum = Integer.parseInt(MRRGReader.readLine());
         for (int i = 0; i < rnum; i++) {
-            MRRGroutingName.add(MRRGReader.readLine());
+            MRRGRoutingName.add(MRRGReader.readLine());
             int faninsize = Integer.parseInt(MRRGReader.readLine());
             List<Integer> fanin = new ArrayList<>();
             List<Integer> fanintype = new ArrayList<>();
@@ -295,8 +296,8 @@ public class gurobiMapJava {
                 fanin.add(Integer.valueOf(MRRGReader.readLine()));
                 fanintype.add(Integer.valueOf(MRRGReader.readLine()));
             }
-            MRRGroutingFanin.add(fanin);
-            MRRGroutingFaninType.add(fanintype);
+            MRRGRoutingFanin.add(fanin);
+            MRRGRoutingFaninType.add(fanintype);
 
             int fanoutsize = Integer.parseInt(MRRGReader.readLine());
             List<Integer> fanout = new ArrayList<>();
@@ -305,8 +306,8 @@ public class gurobiMapJava {
                 fanout.add(Integer.valueOf(MRRGReader.readLine()));
                 fanouttype.add(Integer.valueOf(MRRGReader.readLine()));
             }
-            MRRGroutingFanout.add(fanout);
-            MRRGroutingFanoutType.add(fanouttype);
+            MRRGRoutingFanout.add(fanout);
+            MRRGRoutingFanoutType.add(fanouttype);
         }
         MRRGReader.close();
 
@@ -323,7 +324,7 @@ public class gurobiMapJava {
      * @param routingIndex the index of routingNode
      */
     int RIndex(int valIndex, int routingIndex) {
-        return valIndex * MRRGroutingName.size() + routingIndex;
+        return valIndex * MRRGRoutingName.size() + routingIndex;
     }
 
     /**
@@ -333,7 +334,7 @@ public class gurobiMapJava {
      * @param functionIndex the index of functionalNode
      */
     int FIndex(int opIndex, int functionIndex) {
-        return opIndex * MRRGfunctionName.size() + functionIndex;
+        return opIndex * MRRGFunctionName.size() + functionIndex;
     }
 
     /**
@@ -383,12 +384,17 @@ public class gurobiMapJava {
 
             if (scheduleControl) {
                 for (int i = 0; i < numDfgOps; i++) {
-                    DFGlatencyMap.put(DFGopNodeName.get(i),
+                    DFGLatencyMap.put(DFGOpNodeName.get(i),
                             (int) modelR.getVarByName("Latency_" + i).get(GRB.DoubleAttr.X));
                 }
-                for (String key : DFGMultipleInputMap.keySet()) {
-                    DFGskewMap.put(key,
-                            (int) modelR.getVarByName("Skew_" + key).get(GRB.DoubleAttr.X));
+                if (useRelativeSkew) {
+                    for (String key : DFGMultipleInputMap.keySet()) {
+                        DFGRelativeSkewMap.put(key,
+                                (int) modelR.getVarByName("Skew_" + key).get(GRB.DoubleAttr.X));
+                    }
+                }
+                for (String key : waitSkewMap.keySet()) {
+                    waitSkewMap.replace(key, (int) modelR.getVarByName(key).get(GRB.DoubleAttr.X));
                 }
             }
 
@@ -400,14 +406,15 @@ public class gurobiMapJava {
                 }
 
                 for (int i = 0; i < numDfgOps; i++) {
-                    System.out.println("Latency " + DFGopNodeName.get(i) + ": " +
+                    System.out.println("Latency " + DFGOpNodeName.get(i) + ": " +
                             modelR.getVarByName("Latency_" + i).get(GRB.DoubleAttr.X));
                 }
 
-
-                for (String key : DFGMultipleInputMap.keySet()) {
-                    System.out.println("Skew " + key + ": " +
-                            modelR.getVarByName("Skew_" + key).get(GRB.DoubleAttr.X));
+                if (useRelativeSkew) {
+                    for (String key : DFGMultipleInputMap.keySet()) {
+                        System.out.println("Skew " + key + ": " +
+                                modelR.getVarByName("Skew_" + key).get(GRB.DoubleAttr.X));
+                    }
                 }
 
                 for (String key : waitSkewMap.keySet()) {
@@ -450,9 +457,9 @@ public class gurobiMapJava {
             for (int op = 0; op < numDfgOps; op++)
                 for (int f = 0; f < numMrrgF; f++)
                     if (F[FIndex(op, f)].get(GRB.DoubleAttr.X) == 1.0) {
-                        System.out.printf("%s->%s\n", DFGopNodeName.get(op), MRRGfunctionName.get(f));
-                        resultFile.write(DFGopNodeName.get(op) + " " + MRRGfunctionName.get(f) + "\n");
-                        f_mapped[f] = DFGopNodeOpcode.get(op).intValue() + 1;
+                        System.out.printf("%s->%s\n", DFGOpNodeName.get(op), MRRGFunctionName.get(f));
+                        resultFile.write(DFGOpNodeName.get(op) + " " + MRRGFunctionName.get(f) + "\n");
+                        f_mapped[f] = DFGOpNodeOpcode.get(op).intValue() + 1;
                         f_result[f] = op;
                         mappedOp2MrrgMap.put(op, f);
                     }
@@ -462,24 +469,24 @@ public class gurobiMapJava {
 
             FileWriter infoFile = new FileWriter(filename + "_i.txt");
             for (int r = 0; r < numMrrgR; r++)
-                if (r_mapped[r] == 1 && MRRGroutingName.get(r).indexOf("internalNode") != -1) {
+                if (r_mapped[r] == 1 && MRRGRoutingName.get(r).indexOf("internalNode") != -1) {
                     List<Integer> fanin = new ArrayList<>();
                     List<Integer> fanout = new ArrayList<>();
-                    for (int i = 0; i < MRRGroutingFanin.get(r).size(); i++) {
-                        if (r_mapped[MRRGroutingFanin.get(r).get(i)] == 1 &&
-                                r_result[MRRGroutingFanin.get(r).get(i)] == r_result[r])
+                    for (int i = 0; i < MRRGRoutingFanin.get(r).size(); i++) {
+                        if (r_mapped[MRRGRoutingFanin.get(r).get(i)] == 1 &&
+                                r_result[MRRGRoutingFanin.get(r).get(i)] == r_result[r])
                             fanin.add(Integer.valueOf(i));
                     }
-                    for (int i = 0; i < MRRGroutingFanout.get(r).size(); i++) {
-                        if (r_mapped[MRRGroutingFanout.get(r).get(i)] == 1 &&
-                                r_result[MRRGroutingFanout.get(r).get(i)] == r_result[r])
+                    for (int i = 0; i < MRRGRoutingFanout.get(r).size(); i++) {
+                        if (r_mapped[MRRGRoutingFanout.get(r).get(i)] == 1 &&
+                                r_result[MRRGRoutingFanout.get(r).get(i)] == r_result[r])
                             fanout.add(Integer.valueOf(i));
                     }
                     if (fanin.size() > 1) {
-                        System.out.println("   " + MRRGroutingName.get(r) + "<-" + DFGvalNodeName.get(r_mapped[r]));
+                        System.out.println("   " + MRRGRoutingName.get(r) + "<-" + DFGValNodeName.get(r_mapped[r]));
                     }
                     if (fanin.size() > 0 && fanout.size() > 0) {
-                        infoFile.write("<" + MRRGroutingName.get(r) + ">\n");
+                        infoFile.write("<" + MRRGRoutingName.get(r) + ">\n");
                         for (int i = 0; i < fanin.size(); i++)
                             infoFile.write(fanin.get(i).toString() + " ");
                         infoFile.write("\n");
@@ -489,8 +496,8 @@ public class gurobiMapJava {
                     }
                 }
             for (int f = 0; f < numMrrgF; f++) {
-                if (f_mapped[f] > 0 && MRRGfunctionName.get(f).indexOf("internalNode") != -1) {
-                    infoFile.write("<" + MRRGfunctionName.get(f) + ">\nSELECTED_OP\n");
+                if (f_mapped[f] > 0 && MRRGFunctionName.get(f).indexOf("internalNode") != -1) {
+                    infoFile.write("<" + MRRGFunctionName.get(f) + ">\nSELECTED_OP\n");
                     infoFile.write("" + (f_mapped[f] - 1) + "\n");
                 }
             }
@@ -499,11 +506,11 @@ public class gurobiMapJava {
 
             int regCount = 0;
             for (int val = 0; val < numDfgVals; val++) {
-                for (int fanout = 0; fanout < DFGvalNodeOut.get(val).size(); fanout++) {
+                for (int fanout = 0; fanout < DFGValNodeOut.get(val).size(); fanout++) {
                     Map<Integer, List<Integer>> graph = getGraph(modelR, val, fanout);
-                    int op = DFGvalB2opMap.get(DFGvalNodeName.get(val));
+                    int op = DFGValB2opMap.get(DFGValNodeName.get(val));
                     int mappedMrrgNode = mappedOp2MrrgMap.get(op);
-                    List<Integer> functionFanout = MRRGfunctionFanout.get(mappedMrrgNode);
+                    List<Integer> functionFanout = MRRGFunctionFanout.get(mappedMrrgNode);
                     List<Integer> roots = new ArrayList<>();
                     for (Integer root : functionFanout) {
                         if (graph.containsKey(root)) {
@@ -515,7 +522,7 @@ public class gurobiMapJava {
                         int currentNode = root;
                         int previousReg = -1;
                         while (graph.get(currentNode).size() != 0) {
-                            if (MRRGlatency.containsKey(MRRGroutingName.get(currentNode))) {
+                            if (MRRGLatency.containsKey(MRRGRoutingName.get(currentNode))) {
                                 if (!regMap.containsKey(currentNode)) {
                                     regMap.put(currentNode, regCount++);
                                 }
@@ -547,8 +554,8 @@ public class gurobiMapJava {
                                 System.out.println("\033[31;4m" + "Fanout is not a chain." + "\033[0m");
                             }
                         }
-                        int outOp = DFGvalNodeOut.get(val).get(fanout);
-                        int outOpOperand = DFGvalNodeOutputOperand.get(val).get(fanout);
+                        int outOp = DFGValNodeOut.get(val).get(fanout);
+                        int outOpOperand = DFGValNodeOutputOperand.get(val).get(fanout);
                         List<Integer> outOpPair = new LinkedList<>();
                         outOpPair.add(outOp);
                         outOpPair.add(outOpOperand);
@@ -610,7 +617,7 @@ public class gurobiMapJava {
      */
     Map<Integer, List<Integer>> getGraph(GRBModel model, Integer val, Integer fanout) throws GRBException {
         Set<Integer> mappedRoutingNodes = new HashSet<>();
-        int fanouts = DFGvalNodeOut.get(val).size();
+        int fanouts = DFGValNodeOut.get(val).size();
         for (int r = 0; r < numMrrgR; r++) {
             String valueName = "R_" + r + "_" + val;
             if (fanouts > 1) {
@@ -623,9 +630,9 @@ public class gurobiMapJava {
         Map<Integer, List<Integer>> graph = new HashMap<>();
         for (Integer mappedRoutingNode : mappedRoutingNodes) {
             List<Integer> mappedOutNodes = new ArrayList<>();
-            List<Integer> outNodes = MRRGroutingFanout.get(mappedRoutingNode);
+            List<Integer> outNodes = MRRGRoutingFanout.get(mappedRoutingNode);
             for (int i = 0; i < outNodes.size(); i++) {
-                if (MRRGroutingFanoutType.get(mappedRoutingNode).get(i) == 0) {
+                if (MRRGRoutingFanoutType.get(mappedRoutingNode).get(i) == 0) {
                     int outNode = outNodes.get(i);
                     if (mappedRoutingNodes.contains(outNode)) {
                         mappedOutNodes.add(outNode);
@@ -643,7 +650,7 @@ public class gurobiMapJava {
     Boolean checkRoutingWithoutUselessRing(GRBModel model) throws GRBException {
         List<Map<Integer, List<Integer>>> testedGraphs = new ArrayList<>();
         for (int val = 0; val < numDfgVals; val++) {
-            int fanouts = DFGvalNodeOut.get(val).size();
+            int fanouts = DFGValNodeOut.get(val).size();
             for (int fanout = 0; fanout < fanouts; fanout++) {
                 Map<Integer, List<Integer>> graph = getGraph(model, val, fanout);
                 testedGraphs.add(graph);
@@ -681,35 +688,35 @@ public class gurobiMapJava {
 
         int constrcount = 0;
         for (int val = 0; val < numDfgVals; val++) {
-            for (int fanOut = 0; fanOut < DFGvalNodeOut.get(val).size(); fanOut++) {
+            for (int fanOut = 0; fanOut < DFGValNodeOut.get(val).size(); fanOut++) {
                 GRBLinExpr constraint = new GRBLinExpr();
-                String valName = DFGvalNodeName.get(val);
-                if (DFGvalNodeOut.get(val).size() > 1) {
+                String valName = DFGValNodeName.get(val);
+                if (DFGValNodeOut.get(val).size() > 1) {
                     for (int r = 0; r < numMrrgR; r++) {
                         int coeff = 0;
-                        if (MRRGlatency.containsKey(MRRGroutingName.get(r))) {
-                            coeff = MRRGlatency.get(MRRGroutingName.get(r));
+                        if (MRRGLatency.containsKey(MRRGRoutingName.get(r))) {
+                            coeff = MRRGLatency.get(MRRGRoutingName.get(r));
                         }
                         constraint.addTerm(coeff, S.get(RIndex(val, r))[fanOut]);
                     }
                 } else {
                     for (int r = 0; r < numMrrgR; r++) {
                         int coeff = 0;
-                        if (MRRGlatency.containsKey(MRRGroutingName.get(r))) {
-                            coeff = MRRGlatency.get(MRRGroutingName.get(r));
+                        if (MRRGLatency.containsKey(MRRGRoutingName.get(r))) {
+                            coeff = MRRGLatency.get(MRRGRoutingName.get(r));
                         }
                         constraint.addTerm(coeff, R[RIndex(val, r)]);
                     }
                 }
                 for (int f = 0; f < numMrrgF; f++) {
                     int coeff = 0;
-                    if (MRRGlatency.containsKey(MRRGfunctionName.get(f))) {
-                        coeff = MRRGlatency.get(MRRGfunctionName.get(f));
+                    if (MRRGLatency.containsKey(MRRGFunctionName.get(f))) {
+                        coeff = MRRGLatency.get(MRRGFunctionName.get(f));
                     }
                     if (VariableF) {
-                        constraint.addTerm(coeff, (GRBVar) F[FIndex(DFGvalB2opMap.get(valName), f)]);
+                        constraint.addTerm(coeff, (GRBVar) F[FIndex(DFGValB2opMap.get(valName), f)]);
                     } else {
-                        constraint.addConstant(coeff * Integer.class.cast(F[FIndex(DFGvalB2opMap.get(valName), f)]));
+                        constraint.addConstant(coeff * Integer.class.cast(F[FIndex(DFGValB2opMap.get(valName), f)]));
                     }
 
                 }
@@ -721,11 +728,11 @@ public class gurobiMapJava {
                 /** Constraint delay and wait skew
                  */
 
-                int sourceID = DFGvalB2opMap.get(valName);
-                int sinkID = DFGvalNodeOut.get(val).get(fanOut);
+                int sourceID = DFGValB2opMap.get(valName);
+                int sinkID = DFGValNodeOut.get(val).get(fanOut);
 
-                String sourceName = DFGopNodeName.get(sourceID);
-                String sinkName = DFGopNodeName.get(sinkID);
+                String sourceName = DFGOpNodeName.get(sourceID);
+                String sinkName = DFGOpNodeName.get(sinkID);
                 GRBLinExpr waitSkewConstraint = new GRBLinExpr();
                 waitSkewConstraint.addTerm(1, Latencies[sourceID]);
                 waitSkewConstraint.addTerm(1, Delays[constrcount]);
@@ -735,6 +742,9 @@ public class gurobiMapJava {
 
                     WaitSkews[constrcount].set(GRB.StringAttr.VarName, "WaitSkew_" + sourceName + "_" + sinkName);
                     waitSkewMap.put("WaitSkew_" + sourceName + "_" + sinkName, constrcount);
+                    if (!useRelativeSkew) {
+                        WaitSkews[constrcount].set(GRB.DoubleAttr.UB, skewLimit);
+                    }
 
                     if (sourceID == sinkID) {
                         model.addConstr(WaitSkews[constrcount], GRB.EQUAL, Delays[constrcount], "waitSkew_" + constrcount);
@@ -862,22 +872,22 @@ public class gurobiMapJava {
         GRBLinExpr objective = new GRBLinExpr();
         for (int pSource = 0; pSource < numMrrgF; pSource++) {
             for (int qSource = 0; qSource < numDfgOps; qSource++) {
-                String sourceDFGName = DFGopNodeName.get(qSource);
+                String sourceDFGName = DFGOpNodeName.get(qSource);
                 for (int pSink = 0; pSink < numMrrgF; pSink++) {
                     for (int qSink = 0; qSink < numDfgOps; qSink++) {
-                        String sinkDFGName = DFGopNodeName.get(qSink);
+                        String sinkDFGName = DFGOpNodeName.get(qSink);
                         List<String> namePair = new LinkedList<String>() {{
                             add(sourceDFGName);
                             add(sinkDFGName);
                         }};
                         if (connectList.contains(namePair) &&
-                                MRRGfunctionSupportOpcode.get(pSource).contains(DFGopNodeOpcode.get(qSource)) &&
-                                MRRGfunctionSupportOpcode.get(pSink).contains(DFGopNodeOpcode.get(qSink))) {
+                                MRRGFunctionSupportOpcode.get(pSource).contains(DFGOpNodeOpcode.get(qSource)) &&
+                                MRRGFunctionSupportOpcode.get(pSink).contains(DFGOpNodeOpcode.get(qSink))) {
                             String varName = "concurrentF_" + pSource + "_" + qSource + "_" + pSink + "_" + qSink;
                             GRBVar concurrentF = model.addVar(0, 1, 1, 'B', varName);
-                            String sourceMRRGName = MRRGfunctionName.get(pSource);
-                            String sinkMRRGName = MRRGfunctionName.get(pSink);
-                            int distence = MRRGdistence.get(new LinkedList<String>() {{
+                            String sourceMRRGName = MRRGFunctionName.get(pSource);
+                            String sinkMRRGName = MRRGFunctionName.get(pSink);
+                            int distence = MRRGDistance.get(new LinkedList<String>() {{
                                 add(sourceMRRGName);
                                 add(sinkMRRGName);
                             }});
@@ -944,26 +954,26 @@ public class gurobiMapJava {
         int MRRG_NODE_FUNCTION = 1;
         for (int val = 0; val < numDfgVals; val++)
             for (int r = 0; r < numMrrgR; r++) {
-                int val_fanouts = DFGvalNodeOut.get(val).size();
+                int val_fanouts = DFGValNodeOut.get(val).size();
 
                 for (int i = 0; i < val_fanouts; i++) {
                     GRBLinExpr sum_of_fanouts = new GRBLinExpr();
-                    int fanoutsize = MRRGroutingFanout.get(r).size();
+                    int fanoutsize = MRRGRoutingFanout.get(r).size();
                     for (int mrrg_fanout = 0; mrrg_fanout < fanoutsize; mrrg_fanout++) {
-                        if (MRRGroutingFanoutType.get(r).get(mrrg_fanout) == MRRG_NODE_ROUTING) {
-                            sum_of_fanouts.addTerm(1.0, S.get(RIndex(val, MRRGroutingFanout.get(r).
+                        if (MRRGRoutingFanoutType.get(r).get(mrrg_fanout) == MRRG_NODE_ROUTING) {
+                            sum_of_fanouts.addTerm(1.0, S.get(RIndex(val, MRRGRoutingFanout.get(r).
                                     get(mrrg_fanout)))[i]);
-                        } else if (MRRGroutingFanoutType.get(r).get(mrrg_fanout) == MRRG_NODE_FUNCTION) {
-                            int op = DFGvalNodeOut.get(val).get(i).intValue(), operand =
-                                    DFGvalNodeOutputOperand.get(val).get(i).intValue();
-                            if (MRRGfunctionFanin.get(MRRGroutingFanout.get(r).get(mrrg_fanout)).size() > operand &&
-                                    MRRGfunctionFanin.get(MRRGroutingFanout.get(r).get(mrrg_fanout)).get(operand) == r) {
+                        } else if (MRRGRoutingFanoutType.get(r).get(mrrg_fanout) == MRRG_NODE_FUNCTION) {
+                            int op = DFGValNodeOut.get(val).get(i).intValue(), operand =
+                                    DFGValNodeOutputOperand.get(val).get(i).intValue();
+                            if (MRRGFunctionFanin.get(MRRGRoutingFanout.get(r).get(mrrg_fanout)).size() > operand &&
+                                    MRRGFunctionFanin.get(MRRGRoutingFanout.get(r).get(mrrg_fanout)).get(operand) == r) {
                                 if (VariableF) {
                                     sum_of_fanouts.addTerm(1.0,
-                                            (GRBVar) F[FIndex(op, MRRGroutingFanout.get(r).get(mrrg_fanout))]);
+                                            (GRBVar) F[FIndex(op, MRRGRoutingFanout.get(r).get(mrrg_fanout))]);
                                 } else {
                                     sum_of_fanouts.addConstant(Integer.class.cast(F[FIndex(op,
-                                            MRRGroutingFanout.get(r).get(mrrg_fanout))]));
+                                            MRRGRoutingFanout.get(r).get(mrrg_fanout))]));
                                 }
                             }
                         }
@@ -984,11 +994,11 @@ public class gurobiMapJava {
         for (int val = 0; val < numDfgVals; val++)
             for (int r = 0; r < numMrrgR; r++) {
                 GRBLinExpr sum_of_fanins = new GRBLinExpr();
-                int fanin_count = MRRGroutingFanin.get(r).size();
+                int fanin_count = MRRGRoutingFanin.get(r).size();
                 if (fanin_count > 1) {
                     for (int fanin = 0; fanin < fanin_count; fanin++) {
-                        if (MRRGroutingFaninType.get(r).get(fanin) == MRRG_NODE_ROUTING)
-                            sum_of_fanins.addTerm(1.0, R[RIndex(val, MRRGroutingFanin.get(r).get(fanin))]);
+                        if (MRRGRoutingFaninType.get(r).get(fanin) == MRRG_NODE_ROUTING)
+                            sum_of_fanins.addTerm(1.0, R[RIndex(val, MRRGRoutingFanin.get(r).get(fanin))]);
                     }
                     model.addConstr(sum_of_fanins, GRB.GREATER_EQUAL, R[RIndex(val, r)],
                             "mux_exclusivity_lower_" + (constrcount++));
@@ -1005,19 +1015,19 @@ public class gurobiMapJava {
         int constrcount = 0;
         for (int op = 0; op < numDfgOps; op++)
             for (int f = 0; f < numMrrgF; f++) {
-                if (DFGopNodeOut.get(op).intValue() != -1) {
-                    int val = DFGopNodeOut.get(op).intValue();
-                    int f_fanouts = MRRGfunctionFanout.get(f).size();
+                if (DFGOpNodeOut.get(op).intValue() != -1) {
+                    int val = DFGOpNodeOut.get(op).intValue();
+                    int f_fanouts = MRRGFunctionFanout.get(f).size();
                     for (int r = 0; r < f_fanouts; r++) {
-                        int val_fanouts = DFGvalNodeOut.get(val).size();
+                        int val_fanouts = DFGValNodeOut.get(val).size();
                         for (int i = 0; i < val_fanouts; i++)
                             if (VariableF) {
                                 model.addConstr((GRBVar) F[FIndex(op, f)], GRB.EQUAL,
-                                        S.get(RIndex(val, MRRGfunctionFanout.get(f).get(r)))[i],
+                                        S.get(RIndex(val, MRRGFunctionFanout.get(f).get(r)))[i],
                                         "function_unit_fanout_" + (constrcount++));
                             } else {
                                 model.addConstr(Integer.class.cast(F[FIndex(op, f)]), GRB.EQUAL,
-                                        S.get(RIndex(val, MRRGfunctionFanout.get(f).get(r)))[i],
+                                        S.get(RIndex(val, MRRGFunctionFanout.get(f).get(r)))[i],
                                         "function_unit_fanout_" + (constrcount++));
                             }
                     }
@@ -1033,8 +1043,8 @@ public class gurobiMapJava {
         for (int op = 0; op < numDfgOps; op++)
             for (int f = 0; f < numMrrgF; f++) {
                 int flag = 0;
-                for (int i = 0; i < MRRGfunctionSupportOpcode.get(f).size(); i++)
-                    if (MRRGfunctionSupportOpcode.get(f).get(i) == DFGopNodeOpcode.get(op)) {
+                for (int i = 0; i < MRRGFunctionSupportOpcode.get(f).size(); i++)
+                    if (MRRGFunctionSupportOpcode.get(f).get(i) == DFGOpNodeOpcode.get(op)) {
                         flag = 1;
                         break;
                     }
@@ -1075,10 +1085,10 @@ public class gurobiMapJava {
             modelR = new GRBModel(env);
         }
 
-        numDfgVals = DFGvalNodeName.size();
-        numDfgOps = DFGopNodeName.size();
-        numMrrgR = MRRGroutingName.size();
-        numMrrgF = MRRGfunctionName.size();
+        numDfgVals = DFGValNodeName.size();
+        numDfgOps = DFGOpNodeName.size();
+        numMrrgR = MRRGRoutingName.size();
+        numMrrgF = MRRGFunctionName.size();
         connectSize = connectList.size();
         countR = numDfgVals * numMrrgR;
         countF = numDfgOps * numMrrgF;
@@ -1091,7 +1101,7 @@ public class gurobiMapJava {
         List<GRBVar[]> S = new ArrayList<>();
         for (int val = 0; val < numDfgVals; val++)
             for (int r = 0; r < numMrrgR; r++) {
-                int num_fanouts = DFGvalNodeOut.get(val).size();
+                int num_fanouts = DFGValNodeOut.get(val).size();
                 if (num_fanouts > 1) {
                     S.add(modelR.addVars(num_fanouts, 'B'));
                 } else {
@@ -1174,8 +1184,10 @@ public class gurobiMapJava {
             }
 
             setLatencyRange(Latencies, maxLatency);
-            constrRelativeSkew(modelR, RelativeSkews, WaitSkews,
-                    SkewDirection, skewLimit);
+            if (useRelativeSkew) {
+                constrRelativeSkew(modelR, RelativeSkews, WaitSkews,
+                        SkewDirection, skewLimit);
+            }
         }
 
         /** Set objective.
