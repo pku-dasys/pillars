@@ -195,7 +195,7 @@ Users can also use
  Some tested synthesized hardware can significantly
   reduce the resource usages compared with HLS. 
   
-### Publication
+## Publication
 
 For more detailed information and paper reference, please refer to the following publication.
 
