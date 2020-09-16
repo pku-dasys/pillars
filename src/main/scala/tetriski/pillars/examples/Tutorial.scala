@@ -18,8 +18,8 @@ object Tutorial {
   def main(args: Array[String]): Unit = {
     val rowNum = 4
     val colNum = 6
-    val inputPort = 6
-    val outputPort = 6
+    val inputPort = 2
+    val outputPort = 2
     val dataWidth = 16
 
     //Initialize the top block.
@@ -28,7 +28,7 @@ object Tutorial {
     arch.addOutPorts((0 until outputPort).map(i => s"out_$i").toArray)
 
     val tile = new TileLSUBlock("tile_0", colNum, rowNum, inputPort, outputPort,
-      useMuxBypass = false, complex = false, dataWidth = dataWidth)
+      useMuxBypass = false, complex = true, dataWidth = dataWidth)
     arch.addBlock(tile)
 
     (0 until inputPort).foreach(i =>
@@ -42,7 +42,7 @@ object Tutorial {
     // and use loadTXT(mrrgFilename) to load the MRRG.
     val II = 1
     val MRRG = arch.getMRRG(II)
-//            val dfgFilename = "dfg/sum/sum.dot"
+//            val dfgFilename = "dfg/cap/cap.dot"
     val dfgFilename = "tutorial/MM.dot"
     val DFG = DotReader.loadDot(dfgFilename, II)
     val mappingResultFilename = s"tutorial/ii$II"

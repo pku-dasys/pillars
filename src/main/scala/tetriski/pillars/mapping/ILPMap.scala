@@ -38,6 +38,8 @@ object ILPMap {
     mapper.useRelativeSkew = USE_RELATIVE_SKEW
     mrrg.shortestPath(20).foreach(t =>
       mapper.MRRGDistance.put(JavaConverters.seqAsJavaList(List(t._1._1, t._1._2)), t._2))
+    mrrg.neighboringNodeMap.map(pair => mapper.MRRGNeighboringNode
+      .put(pair._1,JavaConverters.setAsJavaSet(pair._2)))
 
     val num_dfg_op = dfg.getOpSize()
     val num_dfg_val = dfg.getValSize()

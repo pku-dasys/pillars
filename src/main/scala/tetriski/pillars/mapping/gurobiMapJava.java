@@ -138,6 +138,7 @@ public class gurobiMapJava {
     Map<String, Integer> DFGRelativeSkewMap;
     Map<String, Integer> DFGLatencyMap;
     Map<List<String>, Integer> MRRGDistance;
+    Map<String, Set<String>> MRRGNeighboringNode;
     Map<Integer, Integer> regMap;
     Map<Integer, List<Integer>> regConnect;
     Map<Integer, List<Integer>> func2regMap;
@@ -197,11 +198,13 @@ public class gurobiMapJava {
         DFGRelativeSkewMap = new HashMap<>();
         DFGLatencyMap = new HashMap<>();
         MRRGDistance = new HashMap<>();
+        MRRGNeighboringNode = new HashMap<>();
         regMap = new HashMap<>();
         regConnect = new HashMap<>();
         func2regMap = new HashMap<>();
         reg2funcMap = new HashMap<>();
         funcDirect2funcMap = new HashMap<>();
+
     }
 
     /**
@@ -868,7 +871,7 @@ public class gurobiMapJava {
     /**
      * Set objective for placement.
      */
-    void setPlacementObjective(GRBModel model, GRBVar[] F) throws GRBException {
+    void setPlacementObjective(GRBModel model, GRBVar[] F, boolean routingDriven) throws GRBException {
         GRBLinExpr objective = new GRBLinExpr();
         for (int pSource = 0; pSource < numMrrgF; pSource++) {
             for (int qSource = 0; qSource < numDfgOps; qSource++) {
@@ -900,6 +903,15 @@ public class gurobiMapJava {
                     }
                 }
 
+            }
+        }
+
+        if(routingDriven){
+            for (int p = 0; p < numMrrgF; p++) {
+                for (int q = 0; q < numDfgOps; q++)
+                    objective.addTerm(MRRGNeighboringNode.get(MRRGFunctionName.get(p)).size()
+                            * iterationNum / 20.0
+                            , F[FIndex(q, p)]);
             }
         }
 
@@ -1134,7 +1146,7 @@ public class gurobiMapJava {
 
         if (separatedPR) {
 //            GRBVar[] concurrentF = modelP.addVars(num_mrrg_f * num_mrrg_f * connectSize, 'B');
-            setPlacementObjective(modelP, F);
+            setPlacementObjective(modelP, F, true);
             modelP.update();
             modelP.write("problem_java_P.lp");
             modelP.optimize();

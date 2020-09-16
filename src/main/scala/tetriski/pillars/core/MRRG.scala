@@ -98,6 +98,8 @@ class MRRG extends Cloneable {
    */
   var shortestDistanceMap = scala.collection.mutable.Map[(String, String), Int]()
 
+  var neighboringNodeMap = scala.collection.mutable.Map[String, Set[String]]()
+
   /** The function clone is overridden for MRRG unrolling.
    */
   override def clone: MRRG = {
@@ -359,6 +361,7 @@ class MRRG extends Cloneable {
 
     for (i <- 0 until nodeNum) {
       val sourceNode = opNodes(i)
+      neighboringNodeMap += sourceNode.name -> Set[String]()
       val tempNodesArray = new ArrayBuffer[Set[NodeMRRG]]()
       tempNodesArray.append(Set[NodeMRRG](sourceNode))
       for (depth <- 0 until neighboringDistance) {
@@ -375,6 +378,7 @@ class MRRG extends Cloneable {
           if (sinkNode.ops.size > 0) {
             shortestDistanceMap((sourceNode.name, sinkNode.name)) = Math.min(depth,
               shortestDistanceMap((sourceNode.name, sinkNode.name)))
+            neighboringNodeMap(sourceNode.name) += sinkNode.name
           }
         }
       }
