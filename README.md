@@ -194,3 +194,9 @@ Users can also use
  to produce high-quality custom hardware, which is called "soft-CGRA".
  Some tested synthesized hardware can significantly
   reduce the resource usages compared with HLS. 
+  
+### Publication
+
+For more detailed information and paper reference, please refer to the following publication.
+
+1.Pillars: An Integrated CGRA Design Framework, Yijiang Guo, and Guojie Luo. Third Workshop on Open-Source EDA Technology (WOSET), November 2020.
