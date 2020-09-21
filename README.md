@@ -188,7 +188,7 @@ Users can also use
  ``` 
  to view simulating waveform.
  
-### Synthesize (Developing)
+### Synthesis (Under Development)
  
  Pillars also allows users to employ CGRA as virtual overlay 
  to produce high-quality custom hardware, which is called "soft-CGRA".
