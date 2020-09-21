@@ -197,6 +197,14 @@ Users can also use
   
 ## Publication
 
-For more detailed information and paper reference, please refer to the following publication.
-
-1.Pillars: An Integrated CGRA Design Framework, Yijiang Guo, and Guojie Luo. Third Workshop on Open-Source EDA Technology (WOSET), November 2020.
+For more detailed information and paper reference, please refer to the following paper:
+`Yijiang Guo and Guojie Luo, "Pillars: An Integrated CGRA Design Framework," Third Workshop on Open-Source EDA Technology (WOSET), November 2020.`
+```
+@article{guo-pillars-woset2020,
+  title   = "{Pillars: An Integrated CGRA Design Framework}",
+  author  = {Yijiang Guo and Guojie Luo}
+  journal = {Third Workshop on Open-Source EDA Technology (WOSET)},
+  month   = {November},
+  year    = {2020},
+} 
+```
