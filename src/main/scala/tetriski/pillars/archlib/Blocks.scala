@@ -545,10 +545,12 @@ class TileBlock(name: String, x: Int, y: Int, numIn: Int, numOut: Int,
  * @param useMuxBypass a parameter indicating whether PEs in this tile use two additional
  *                     bypass multiplexers
  * @param complex      a parameter indicating whether using more routable connections
+ * @param alternation  a parameter indicating whether using alternate opLists
  * @param dataWidth    the data width
  */
 class TileLSUBlock(name: String, x: Int, y: Int, numIn: Int, numOut: Int,
-                   useMuxBypass: Boolean = true, complex: Boolean = false, dataWidth: Int = 32)
+                   useMuxBypass: Boolean = true, complex: Boolean = false,
+                   alternation: Boolean = false, dataWidth: Int = 32)
   extends BlockTrait {
   initName(name)
 
@@ -576,7 +578,10 @@ class TileLSUBlock(name: String, x: Int, y: Int, numIn: Int, numOut: Int,
         inPortsNeighbor = Array("input_w", "input_e", "input_n", "input_s",
           "input_wn", "input_ws", "input_en", "input_es", "input_lsu")
       }
-      val opList = List(OpEnum.ADD, OpEnum.MUL, OpEnum.SUB, OpEnum.SHLL, OpEnum.SHRA)
+      var opList = List(OpEnum.ADD, OpEnum.MUL, OpEnum.SUB, OpEnum.SHLL, OpEnum.SHRA)
+      if (alternation && (i + j) % 2 == 1) {
+        opList = List(OpEnum.ADD, OpEnum.SUB)
+      }
       val pe = new AdresPEBlock("pe_" + j.toString + "_" + i.toString, opList = opList,
         useMuxBypass = useMuxBypass, inPortsNeighbor = inPortsNeighbor, dataWidth = dataWidth)
       peMap = peMap + ((i + j * x) -> pe)
@@ -596,19 +601,13 @@ class TileLSUBlock(name: String, x: Int, y: Int, numIn: Int, numOut: Int,
       val peEN = peMap((i + 1) % x + ((j - 1 + y) % y) * x)
       val peES = peMap((i + 1) % x + ((j + 1) % y) * x)
       if (j != y - 1) {
-        //connectArray.append(List(List(peCurrent.getName() + "/", "out_0"), List(peS.getName() + "/", "input_n")))
-        addConnect(peCurrent / "out_0" -> peS / "input_n")
+         addConnect(peCurrent / "out_0" -> peS / "input_n")
 
         if (complex) {
           addConnect(peCurrent / "out_0" -> peWS / "input_en")
           addConnect(peCurrent / "out_0" -> peES / "input_wn")
         }
       } else {
-        //        connectArray.append(List(List(ioBlock.getName() + "/", "neighbour_out_" + i.toString),
-        //          List(peS.getName() + "/", "input_n")))
-        //        connectArray.append(List(List(peS.getName() + "/", "out_0"),
-        //          List(ioBlock.getName() + "/", "neighbour_input_" + i.toString)))
-
         addConnect(ioBlock / s"neighbour_out_$i" -> peS / "input_n")
         addConnect(peS / "out_0" -> ioBlock / s"neighbour_input_$i")
 
@@ -617,9 +616,6 @@ class TileLSUBlock(name: String, x: Int, y: Int, numIn: Int, numOut: Int,
           addConnect(ioBlock / s"neighbour_out_$i" -> peES / "input_wn")
         }
       }
-      //      connectArray.append(List(List(peCurrent.getName() + "/", "out_0"), List(peN.getName() + "/", "input_s")))
-      //      connectArray.append(List(List(peCurrent.getName() + "/", "out_0"), List(peE.getName() + "/", "input_w")))
-      //      connectArray.append(List(List(peCurrent.getName() + "/", "out_0"), List(peW.getName() + "/", "input_e")))
 
       addConnect(peCurrent / "out_0" -> peN / "input_s")
       addConnect(peCurrent / "out_0" -> peE / "input_w")
