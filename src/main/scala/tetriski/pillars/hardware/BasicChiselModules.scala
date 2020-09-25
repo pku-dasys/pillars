@@ -246,7 +246,7 @@ class Alu(funSelect: Int, w: Int) extends Module {
   var input_a = io.inputs(0)
   var input_b = io.inputs(1)
 
-  if (LOG_SKEW_LENGTH > 0) {
+  if (LOG_SKEW_LENGTH > 0 && USE_AUXILIARY_SCHEDULER) {
     if (USE_RELATIVE_SKEW) {
       val synchronizer = Module(new Synchronizer(w))
       synchronizer.io.input0 := input_a
@@ -614,7 +614,7 @@ class LoadStoreUnit(w: Int) extends Module {
    */
   var dataIn = io.inputs(1)
 
-  if (LOG_SKEW_LENGTH > 0) {
+  if (LOG_SKEW_LENGTH > 0 && USE_AUXILIARY_SCHEDULER) {
     if(USE_RELATIVE_SKEW) {
       val synchronizer = Module(new Synchronizer(w))
       synchronizer.io.input0 := addr

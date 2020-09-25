@@ -114,28 +114,43 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
 
   //To control the cycle modules should fire, we employ the schedule controllers
   //to fire ALUs and LSUs when functional nodes are mapped onto them.
-  val moduleScheduleBits = (0 until aluNum * II_UPPER_BOUND)
-    .map(i => LOG_SCHEDULE_SIZE + SKEW_WIDTH).toList ::: (0 until LSUnitNum * II_UPPER_BOUND)
-    .map(i => LOG_SCHEDULE_SIZE + SKEW_WIDTH).toList
-  val totalScheduleBits = moduleScheduleBits.reduce(_ + _)
-  val scheduleDispatch = Module(new Dispatch(totalScheduleBits, moduleScheduleBits))
-  scheduleDispatch.io.configuration := io.schedules
-  scheduleDispatch.io.en := io.en
+  val scheduleDispatchPorts = new ArrayBuffer[Data]()
+  if (USE_AUXILIARY_SCHEDULER) {
+    val moduleScheduleBits = (0 until aluNum * II_UPPER_BOUND)
+      .map(i => LOG_SCHEDULE_SIZE + SKEW_WIDTH).toList ::: (0 until LSUnitNum * II_UPPER_BOUND)
+      .map(i => LOG_SCHEDULE_SIZE + SKEW_WIDTH).toList
+    val totalScheduleBits = moduleScheduleBits.reduce(_ + _)
+    val scheduleDispatch = Module(new Dispatch(totalScheduleBits, moduleScheduleBits))
+    scheduleDispatch.io.configuration := io.schedules
+    scheduleDispatch.io.en := io.en
+    for(i <- 0 until (aluNum + LSUnitNum)* II_UPPER_BOUND){
+      scheduleDispatchPorts.append(scheduleDispatch.io.outs(i))
+    }
+  }
 
   //ALUs have type ID = 0, and they will be fired by schedule controllers.
   val alus = (0 until aluNum).toArray.map(t => Module(new Alu(moduleInfos.getParams(t + currentNum)(0),
     moduleInfos.getParams(t + currentNum)(1))))
-  val aluScheduleControllers = (0 until aluNum).toArray.map(t => Module(new MultiIIScheduleController))
-  for (i <- 0 until aluNum) {
-    val alu = alus(i)
-    val aluScheduleController = aluScheduleControllers(i)
-    aluScheduleController.io.en <> io.en
-    aluScheduleController.io.II <> io.II
-    for (j <- 0 until II_UPPER_BOUND) {
-      aluScheduleController.io.schedules(j) <> scheduleDispatch.io.outs(i * II_UPPER_BOUND + j)
+  if (USE_AUXILIARY_SCHEDULER) {
+    val aluScheduleControllers = (0 until aluNum).toArray
+      .map(t => Module(new MultiIIScheduleController))
+    for (i <- 0 until aluNum) {
+      val alu = alus(i)
+      val aluScheduleController = aluScheduleControllers(i)
+      aluScheduleController.io.en <> io.en
+      aluScheduleController.io.II <> io.II
+      for (j <- 0 until II_UPPER_BOUND) {
+        aluScheduleController.io.schedules(j) <> scheduleDispatchPorts(i * II_UPPER_BOUND + j)
+      }
+      alu.io.en <> aluScheduleController.io.valid
+      alu.io.skewing <> aluScheduleController.io.skewing
     }
-    alu.io.en <> aluScheduleController.io.valid
-    alu.io.skewing <> aluScheduleController.io.skewing
+  } else {
+    for (i <- 0 until aluNum) {
+      val alu = alus(i)
+      alu.io.en <> io.en
+      alu.io.skewing <> DontCare
+    }
   }
   currentNum += aluNum
 
@@ -170,7 +185,6 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
   //They are connected with some ports of top design to perform DMA.
   val LSUs = (0 until LSUnitNum).toArray
     .map(t => Module(new LoadStoreUnit(moduleInfos.getParams(t + currentNum)(0))))
-  val LSUnitScheduleControllers = (0 until LSUnitNum).toArray.map(t => Module(new MultiIIScheduleController))
   for (i <- 0 until LSUnitNum) {
     val lsu = LSUs(i)
     lsu.io.base <> io.baseLSU(i)
@@ -181,15 +195,28 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
     lsu.io.deqEn <> io.deqEnLSU(i)
     lsu.io.streamIn <> io.streamInLSU(i)
     lsu.io.streamOut <> io.streamOutLSU(i)
+  }
+  if (USE_AUXILIARY_SCHEDULER) {
+    val LSUnitScheduleControllers = (0 until LSUnitNum).toArray
+      .map(t => Module(new MultiIIScheduleController))
+    for (i <- 0 until LSUnitNum) {
+      val lsu = LSUs(i)
 
-    val LSUnitScheduleController = LSUnitScheduleControllers(i)
-    LSUnitScheduleController.io.en <> io.en
-    LSUnitScheduleController.io.II <> io.II
-    for (j <- 0 until II_UPPER_BOUND) {
-      LSUnitScheduleController.io.schedules(j) <> scheduleDispatch.io.outs((i + aluNum) * II_UPPER_BOUND + j)
+      val LSUnitScheduleController = LSUnitScheduleControllers(i)
+      LSUnitScheduleController.io.en <> io.en
+      LSUnitScheduleController.io.II <> io.II
+      for (j <- 0 until II_UPPER_BOUND) {
+        LSUnitScheduleController.io.schedules(j) <> scheduleDispatchPorts((i + aluNum) * II_UPPER_BOUND + j)
+      }
+      lsu.io.en <> LSUnitScheduleController.io.valid
+      lsu.io.skewing <> LSUnitScheduleController.io.skewing
     }
-    lsu.io.en <> LSUnitScheduleController.io.valid
-    lsu.io.skewing <> LSUnitScheduleController.io.skewing
+  } else {
+    for (i <- 0 until LSUnitNum) {
+      val lsu = LSUs(i)
+      lsu.io.en <> io.en
+      lsu.io.skewing <> DontCare
+    }
   }
   currentNum += LSUnitNum
 

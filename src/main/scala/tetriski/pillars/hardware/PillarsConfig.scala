@@ -27,7 +27,7 @@ object PillarsConfig {
    * @example If LOG_SCHEDULE_SIZE = 5, the compliant schedule of the CGRA architecture is 0 ~ 31.
    *
    */
-  val LOG_SCHEDULE_SIZE = 5
+  var LOG_SCHEDULE_SIZE = 5
 
   /** The limitation of the skew.
    * 2 for TopModuleWrapper generation and 4 for verilator test of examples.
@@ -48,10 +48,17 @@ object PillarsConfig {
    */
   val USE_RELATIVE_SKEW = true
 
-  val SKEW_WIDTH = if (USE_RELATIVE_SKEW) {
+  var SKEW_WIDTH = if (USE_RELATIVE_SKEW) {
     LOG_SKEW_LENGTH + 1
   } else {
     LOG_SKEW_LENGTH * 2
+  }
+
+  val USE_AUXILIARY_SCHEDULER = true
+
+  if(!USE_AUXILIARY_SCHEDULER){
+    SKEW_WIDTH = 0
+    LOG_SCHEDULE_SIZE = 0
   }
 
   val ALU_ADD = 0.U(4.W)
