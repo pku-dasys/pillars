@@ -25,7 +25,7 @@ object PillarsConfig {
    * 3 for TopModuleWrapper generation and 5 for verilator test of examples.
    *
    * @example If LOG_SCHEDULE_SIZE = 5, the compliant schedule of the CGRA architecture is 0 ~ 31.
-   *
+   * @example If LOG_SCHEDULE_SIZE = 0, the schedule controller will not drive modules.
    */
   var LOG_SCHEDULE_SIZE = 5
 
@@ -33,7 +33,8 @@ object PillarsConfig {
    * 2 for TopModuleWrapper generation and 4 for verilator test of examples.
    *
    * @example If LOG_SCHEDULE_SIZE = 4, the compliant skew of the CGRA architecture is 0 ~ 16.
-   * @example If LOG_SCHEDULE_SIZE = -1, the Synchronizers will not be employed in the architecture.
+   * @example If LOG_SCHEDULE_SIZE = -1 and USE_RELATIVE_SKEW = true, which means SKEW_WIDTH = 0,
+   *          the Synchronizers will not be employed in the architecture.
    *
    */
   val LOG_SKEW_LENGTH = 4
@@ -54,12 +55,7 @@ object PillarsConfig {
     LOG_SKEW_LENGTH * 2
   }
 
-  val USE_AUXILIARY_SCHEDULER = true
-
-  if(!USE_AUXILIARY_SCHEDULER){
-    SKEW_WIDTH = 0
-    LOG_SCHEDULE_SIZE = 0
-  }
+  val USE_AUXILIARY_SCHEDULER = (SKEW_WIDTH != 0) || (LOG_SCHEDULE_SIZE != 0)
 
   val ALU_ADD = 0.U(4.W)
   val ALU_SUB = 1.U(4.W)

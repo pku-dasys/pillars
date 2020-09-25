@@ -167,18 +167,24 @@ class MultiIIScheduleController extends Module {
     val valid = Output(Bool())
     val skewing = Output(UInt((SKEW_WIDTH).W))
   })
-  val scheduleControllers = (0 until II_UPPER_BOUND).toArray.map(t => Module(new ScheduleController))
-  val validRegs = RegInit(VecInit(Seq.fill(II_UPPER_BOUND)(false.B)))
+
   val cycleReg = RegInit((II_UPPER_BOUND - 1).U(LOG_II_UPPER_BOUND.W))
 
-  for (i <- 0 until II_UPPER_BOUND) {
-    val scheduleController = scheduleControllers(i)
-    scheduleController.io.en := io.en
-    scheduleController.io.waitCycle := io.schedules(i)(LOG_SCHEDULE_SIZE - 1, 0)
-    validRegs(i) := scheduleController.io.valid
+  if (LOG_SCHEDULE_SIZE > 0) {
+    val scheduleControllers = (0 until II_UPPER_BOUND).toArray.map(t => Module(new ScheduleController))
+    val validRegs = RegInit(VecInit(Seq.fill(II_UPPER_BOUND)(false.B)))
+    for (i <- 0 until II_UPPER_BOUND) {
+      val scheduleController = scheduleControllers(i)
+      scheduleController.io.en := io.en
+      scheduleController.io.waitCycle := io.schedules(i)(LOG_SCHEDULE_SIZE - 1, 0)
+      validRegs(i) := scheduleController.io.valid
+    }
+    io.valid := validRegs(cycleReg)
+  } else {
+    io.valid := io.en
   }
 
-  io.valid := validRegs(cycleReg)
+
   if (LOG_SKEW_LENGTH > 0) {
     io.skewing := io.schedules(cycleReg)(LOG_SCHEDULE_SIZE + SKEW_WIDTH - 1, LOG_SCHEDULE_SIZE)
   } else {
@@ -246,7 +252,7 @@ class Alu(funSelect: Int, w: Int) extends Module {
   var input_a = io.inputs(0)
   var input_b = io.inputs(1)
 
-  if (LOG_SKEW_LENGTH > 0 && USE_AUXILIARY_SCHEDULER) {
+  if (LOG_SKEW_LENGTH > 0) {
     if (USE_RELATIVE_SKEW) {
       val synchronizer = Module(new Synchronizer(w))
       synchronizer.io.input0 := input_a
@@ -614,8 +620,8 @@ class LoadStoreUnit(w: Int) extends Module {
    */
   var dataIn = io.inputs(1)
 
-  if (LOG_SKEW_LENGTH > 0 && USE_AUXILIARY_SCHEDULER) {
-    if(USE_RELATIVE_SKEW) {
+  if (LOG_SKEW_LENGTH > 0) {
+    if (USE_RELATIVE_SKEW) {
       val synchronizer = Module(new Synchronizer(w))
       synchronizer.io.input0 := addr
       synchronizer.io.input1 := dataIn

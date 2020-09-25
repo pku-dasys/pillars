@@ -116,14 +116,13 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
   //to fire ALUs and LSUs when functional nodes are mapped onto them.
   val scheduleDispatchPorts = new ArrayBuffer[Data]()
   if (USE_AUXILIARY_SCHEDULER) {
-    val moduleScheduleBits = (0 until aluNum * II_UPPER_BOUND)
-      .map(i => LOG_SCHEDULE_SIZE + SKEW_WIDTH).toList ::: (0 until LSUnitNum * II_UPPER_BOUND)
+    val moduleScheduleBits = (0 until (aluNum + LSUnitNum) * II_UPPER_BOUND)
       .map(i => LOG_SCHEDULE_SIZE + SKEW_WIDTH).toList
     val totalScheduleBits = moduleScheduleBits.reduce(_ + _)
     val scheduleDispatch = Module(new Dispatch(totalScheduleBits, moduleScheduleBits))
     scheduleDispatch.io.configuration := io.schedules
     scheduleDispatch.io.en := io.en
-    for(i <- 0 until (aluNum + LSUnitNum)* II_UPPER_BOUND){
+    for (i <- 0 until (aluNum + LSUnitNum) * II_UPPER_BOUND) {
       scheduleDispatchPorts.append(scheduleDispatch.io.outs(i))
     }
   }

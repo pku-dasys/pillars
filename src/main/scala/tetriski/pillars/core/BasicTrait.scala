@@ -224,7 +224,11 @@ trait BasicTrait {
     for (i <- 0 until II_UPPER_BOUND) {
 
       val fireTime = fireTimes(i)
-      var sche = fireTime
+      var mask = 0
+      for(m <- 0 until LOG_SCHEDULE_SIZE){
+        mask += 1 << m
+      }
+      var sche = fireTime & mask
 
       if (LOG_SKEW_LENGTH > 0) {
         var skew = skews(i)
