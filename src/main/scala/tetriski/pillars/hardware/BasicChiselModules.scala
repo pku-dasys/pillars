@@ -206,7 +206,8 @@ class MultiIIScheduleController extends Module {
  * @param funSelect the subset of optional operations
  * @param w         the data width
  */
-class Alu(funSelect: Int, w: Int) extends Module {
+/*
+class Alu_(funSelect: Int, w: Int) extends Module {
   val io = IO(new Bundle {
     val en = Input(Bool())
     val skewing = Input(UInt((SKEW_WIDTH).W))
@@ -279,7 +280,7 @@ class Alu(funSelect: Int, w: Int) extends Module {
   val shamt = input_b(log2Up(w), 0).asUInt
 
   val funSeq = getFunSeq(shamt)
-
+  println("funSeq:" + funSeq)
   when(io.en) {
     out := MuxLookup(io.configuration, input_b, funSeq)
   }.otherwise {
@@ -288,7 +289,112 @@ class Alu(funSelect: Int, w: Int) extends Module {
     }
   }
 }
+*/
 
+/** An arithmetic logical unit with predicate support which can perform an arbitrary subset of optional operations.
+ *
+ * @param funSelect the subset of optional operations
+ * @param w         the data width
+ */
+
+class Alu(funSelect: Int, w: Int) extends Module {
+  val io = IO(new Bundle {
+    val en = Input(Bool())
+    val skewing = Input(UInt((SKEW_WIDTH).W))
+    //port sequnces outs: 0: out
+    //port sequnces inputs: 0: input_a, 1: input_b
+    val configuration = Input(UInt(5.W))
+//    val negated_predicate = Input(Bool())
+    val inputs = Input(MixedVec(Seq(UInt(w.W), UInt(w.W), UInt(w.W))))
+    val outs = Output(MixedVec(Seq(UInt(w.W))))
+  })
+
+  /** Translates the subset of optional operations into hardware.
+   *
+   * @param shamt the bottom log2Up(w) bits of "input_b"
+   */
+  def getFunSeq(shamt: UInt = null): Seq[(UInt, UInt)] = {
+    val funSeq = new ArrayBuffer[(UInt, UInt)]()
+
+    for (i <- 0 until ALU_FUN_NUM) {
+      if ((funSelect & (1 << i)) > 0) {
+        i match {
+          case 0 => funSeq.append(ALU_ADD -> (input_a + input_b))
+          case 1 => funSeq.append(ALU_SUB -> (input_a - input_b))
+          case 2 => funSeq.append(ALU_AND -> (input_a & input_b))
+          case 3 => funSeq.append(ALU_OR -> (input_a | input_b))
+          case 4 => funSeq.append(ALU_XOR -> (input_a ^ input_b))
+          case 5 => funSeq.append(ALU_MUL -> (input_a * input_b))
+          case 6 => funSeq.append(ALU_SLT -> (input_a.asSInt < input_b.asSInt))
+          case 7 => funSeq.append(ALU_SHLL -> (input_a << shamt).asUInt())
+          //          case 7 => funSeq.append(ALU_SHLL -> (input_a << input_b).asUInt())
+          case 8 => funSeq.append(ALU_SLTU -> (input_a < input_b))
+          case 9 => funSeq.append(ALU_SHRL -> (input_a >> shamt).asUInt())
+          //          case 9 => funSeq.append(ALU_SHRL -> (input_a >> input_b).asUInt())
+          case 10 => funSeq.append(ALU_SHRA -> (input_a.asSInt >> shamt).asUInt)
+          case 11 => funSeq.append(ALU_DIV -> input_a / input_b)
+//          case 12 => funSeq.append(ALU_COPY_A -> input_a)
+//          case 13 => funSeq.append(ALU_COPY_B -> input_b)
+          case 12 => funSeq.append(ALU_CMP -> (input_a === input_b))
+          case 13 => funSeq.append(ALU_CGT -> (input_a > input_b))
+          case 14 => funSeq.append(ALU_SELECT -> Mux(input_a(w-1),input_a,Mux(input_b(w-1),input_b,0.U)))
+          //(input_a(w) ? input_a : (input_b(w) ? input_b : 0.asUInt)))
+          case 15 => funSeq.append(ALU_CMERGE -> input_b) // should be Mux(constvalid,input_b,input_a)
+        }
+      }
+    }
+    funSeq
+  }
+
+  var input_a = io.inputs(0)
+  var input_b = io.inputs(1)
+  var negated_predicate = io.configuration(4)
+  var input_p = Mux(negated_predicate,Cat(io.inputs(2)(w-1,1),~io.inputs(2)(0)),io.inputs(2))
+
+  if (LOG_SKEW_LENGTH > 0) {
+    if (USE_RELATIVE_SKEW) {
+      val synchronizer = Module(new Synchronizer(w))
+      synchronizer.io.input0 := input_a
+      synchronizer.io.input1 := input_b
+
+      synchronizer.io.skewing := io.skewing
+
+      input_a = synchronizer.io.skewedInput0
+      input_b = synchronizer.io.skewedInput1
+    } else {
+      val regNextNa = Module(new RegNextN(w))
+      val regNextNb = Module(new RegNextN(w))
+      regNextNa.io.input := input_a
+      regNextNa.io.latency := io.skewing(LOG_SKEW_LENGTH - 1, 0)
+      regNextNb.io.input := input_b
+      regNextNb.io.latency := io.skewing(2 * LOG_SKEW_LENGTH - 1, LOG_SKEW_LENGTH)
+
+      input_a = regNextNa.io.out
+      input_b = regNextNb.io.out
+    }
+  }
+
+  val out = io.outs(0)
+  val shamt = input_b(log2Up(w), 0).asUInt
+  val not_to_exec_all = (input_a(w-1)=== 0.B || input_b(w-1)=== 0.B || (input_p(w-1)===0.B || input_p === 0.U))
+  //missing router configs
+  val not_to_exec_select = ((input_a(w-1)=== 0.B && input_b(w-1)=== 0.B) || (input_p(w-1)===0.B || input_p === 0.U))
+  //missing router configs
+  val funSeq = getFunSeq(shamt)
+
+  val out_data =  MuxLookup(io.configuration(3,0), input_b, funSeq)
+  val out_valid = Mux(io.configuration(3,0)===ALU_SELECT, ~not_to_exec_select, ~not_to_exec_all)
+
+  when(io.en) {
+//    out(w-2,0) := MuxLookup(io.configuration, input_b, funSeq)
+//    out(w) := Mux(io.configuration===ALU_SELECT, ~not_to_exec_select, ~not_to_exec_all)
+     out := Cat(out_valid,out_data(w-2,0))
+  }.otherwise {
+    for (out <- io.outs) {
+      out := 0.U
+    }
+  }
+}
 
 /** A register file which can perform an arbitrary subset of optional operations.
  *
@@ -672,4 +778,166 @@ class LoadStoreUnit(w: Int) extends Module {
   }
 }
 
+/** A load/store unit which can perform load/store during the runtime of CGRA,
+ * and direct memory access (DMA) for transferring data during pre-process and post-process.
+ *
+ * @param w the data width
+ */
+class LoadStoreUnit2(w: Int) extends Module {
+  val io = IO(new Bundle {
+    //0 for load, 1 for store
+    // 0:2 load,loadh,loadb, store,storeh,storeb
+    val configuration = Input(UInt(3.W))
+    val en = Input(Bool())
+    val skewing = Input(UInt((SKEW_WIDTH).W))
 
+    val streamIn = Flipped(EnqIO(UInt(MEM_IN_WIDTH.W)))
+    val len = Input(UInt(log2Ceil(MEM_DEPTH).W))
+    val streamOut = Flipped(DeqIO(UInt(MEM_OUT_WIDTH.W)))
+    val base = Input(UInt(log2Ceil(MEM_DEPTH).W))
+
+    val start = Input(Bool())
+    val enqEn = Input(Bool())
+    val deqEn = Input(Bool())
+    val idle = Output(Bool())
+
+    val inputs = Input(MixedVec(UInt((log2Ceil(MEM_DEPTH) + 2).W), UInt(w.W)))
+    val outs = Output(MixedVec((1 to 1) map { i => UInt(w.W) }))
+  })
+  val memWrapper = Module(new LSMemWrapper(w))
+  memWrapper.io.base <> io.base
+  memWrapper.io.start <> io.start
+  memWrapper.io.idle <> io.idle
+  memWrapper.io.enqEn <> io.enqEn
+  memWrapper.io.deqEn <> io.deqEn
+  memWrapper.io.len <> io.len
+  memWrapper.io.in <> io.streamIn
+  memWrapper.io.out <> io.streamOut
+  memWrapper.io.workEn <> io.en
+
+  /** The address where to load/store data.
+   */
+  var addr = io.inputs(0)
+  /** The input data which is only used for storing.
+   */
+  var dataIn = io.inputs(1)
+
+//  if (LOG_SKEW_LENGTH > 0) {
+//    if (USE_RELATIVE_SKEW) {
+//      val synchronizer = Module(new Synchronizer(w))
+//      synchronizer.io.input0 := addr
+//      synchronizer.io.input1 := dataIn
+//
+//      synchronizer.io.skewing := io.skewing
+//
+//      addr = synchronizer.io.skewedInput0
+//      dataIn = synchronizer.io.skewedInput1
+//    } else {
+//      val regNextNaddr = Module(new RegNextN(w))
+//      val regNextNdataIn = Module(new RegNextN(w))
+//      regNextNaddr.io.input := addr
+//      regNextNaddr.io.latency := io.skewing(LOG_SKEW_LENGTH - 1, 0)
+//      regNextNdataIn.io.input := dataIn
+//      regNextNdataIn.io.latency := io.skewing(2 * LOG_SKEW_LENGTH - 1, LOG_SKEW_LENGTH)
+//
+//      addr = regNextNaddr.io.out
+//      dataIn = regNextNdataIn.io.out
+//    }
+//  }
+  val out = io.outs(0)
+
+  val readMem = memWrapper.io.readMem
+  val writeMem = memWrapper.io.writeMem
+
+
+
+  when(io.en) {
+    readMem.addr := addr((log2Ceil(MEM_DEPTH) + 2 - 1),2)
+    writeMem.addr := addr((log2Ceil(MEM_DEPTH) + 2 - 1),2)
+//    writeMem.din := dataIn
+    when(io.configuration(2,0) === LSU_LOAD) {
+      readMem.en := true.B
+      writeMem.en := false.B
+      writeMem.we := false.B
+      writeMem.din := dataIn
+      io.outs(0) := readMem.dout
+    }.elsewhen(io.configuration(2,0) === LSU_STORE) {
+      readMem.en := false.B
+      writeMem.en := true.B
+      writeMem.we := true.B
+      writeMem.din := dataIn
+      io.outs(0) :=  0.U(w.W)
+    }.elsewhen(io.configuration(2,0) === LSU_LOADH) {
+      readMem.en := false.B
+      writeMem.en := true.B
+      writeMem.we := true.B
+      writeMem.din := dataIn
+      when(addr(1,0)===0.U(2.W)) {
+        io.outs(0) := Cat(0.U((w/2).W),readMem.dout(w/2-1,0))
+      }.elsewhen(addr(1,0)===2.U(2.W)){
+        io.outs(0) := Cat(0.U((w/2).W),readMem.dout(w-1,w/2))
+      }.otherwise{
+        io.outs(0) := 0.U(w.W)
+      }
+    }.elsewhen(io.configuration(2,0) === LSU_STOREH) {
+      readMem.en := false.B
+      writeMem.en := true.B
+      writeMem.we := true.B
+      io.outs(0) :=  0.U(w.W)
+
+      when(addr(1,0)===0.U(2.W)) {
+        writeMem.din := Cat(0.U((w/2).W),dataIn(w/2-1,0))
+      }.elsewhen(addr(1,0)===2.U(2.W)){
+        writeMem.din := Cat(dataIn(w/2-1,0),0.U((w/2).W))
+      }.otherwise{
+        writeMem.din := Cat(0.U((w/2).W),dataIn(w/2-1,0))
+      }
+    }.elsewhen(io.configuration(2,0) === LSU_LOADB) {
+      readMem.en := false.B
+      writeMem.en := true.B
+      writeMem.we := true.B
+      writeMem.din := dataIn
+      when(addr(1,0)===0.U(2.W)) {
+        io.outs(0) := Cat(0.U((3*w/4).W),readMem.dout(w/4-1,0))
+      }.elsewhen(addr(1,0)===1.U(2.W)){
+        io.outs(0) := Cat(0.U((3*w/4).W),readMem.dout(w/2-1,w/4))
+      }.elsewhen(addr(1,0)===0.U(2.W)) {
+        io.outs(0) := Cat(0.U((3*w/4).W),readMem.dout(3*w/4-1,w/2))
+      }.elsewhen(addr(1,0)===2.U(2.W)){
+        io.outs(0) := Cat(0.U((3*w/4).W),readMem.dout(w-1,3*w/4))
+      }.otherwise{
+        io.outs(0) := 0.U(w.W)
+      }
+    }.elsewhen(io.configuration(2,0) === LSU_STOREB) {
+      readMem.en := false.B
+      writeMem.en := true.B
+      writeMem.we := true.B
+      io.outs(0) :=  0.U(w.W)
+      when(addr(1,0)===0.U(2.W)) {
+        writeMem.din := Cat(0.U((3*w/4).W),dataIn(w/4-1,0))
+      }.elsewhen(addr(1,0)===1.U(2.W)){
+        writeMem.din := Cat(0.U((w/2).W),dataIn(w/4-1,0),0.U((w/4).W))
+      }.elsewhen(addr(1,0)===0.U(2.W)) {
+        writeMem.din := Cat(0.U((w/4).W),dataIn(w/4-1,0),0.U((w/2).W))
+      }.elsewhen(addr(1,0)===2.U(2.W)){
+        writeMem.din := Cat(dataIn(w/4-1,0),0.U((3*w/4).W))
+      }.otherwise{
+        writeMem.din := Cat(0.U((3*w/4).W),dataIn(w/4-1,0))
+      }
+    }.otherwise {
+      readMem.en := false.B
+      writeMem.en := true.B
+      writeMem.we := true.B
+      writeMem.din := dataIn
+      io.outs(0) :=  0.U(w.W)
+    }
+  }.otherwise {
+    readMem.en := false.B
+    writeMem.en := false.B
+    writeMem.we := false.B
+    readMem.addr := DontCare
+    writeMem.addr := DontCare
+    writeMem.din := DontCare
+    io.outs(0) :=  0.U(w.W)
+  }
+}

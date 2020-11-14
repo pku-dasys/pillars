@@ -182,8 +182,14 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
 
   //LSUs have type ID = 4, and they will be fired by schedule controllers.
   //They are connected with some ports of top design to perform DMA.
-  val LSUs = (0 until LSUnitNum).toArray
-    .map(t => Module(new LoadStoreUnit(moduleInfos.getParams(t + currentNum)(0))))
+
+    val LSUs = (0 until LSUnitNum).toArray
+      .map(t => Module(new LoadStoreUnit2(moduleInfos.getParams(t + currentNum)(0))))
+
+//    val LSUs = (0 until LSUnitNum).toArray
+//      .map(t => Module(new LoadStoreUnit(moduleInfos.getParams(t + currentNum)(0))))
+
+
   for (i <- 0 until LSUnitNum) {
     val lsu = LSUs(i)
     lsu.io.base <> io.baseLSU(i)
@@ -287,6 +293,7 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
     val dsts = connect(src)
     for (j <- 0 until dsts.size) {
       val dst = dsts(j)
+      println("dst is: " + dst)
       if (dst(0) == types) {
         io.outs(dst(2)) := outPorts(src(0))(src(1))(src(2)).asInstanceOf[Data]
       } else if (src(0) == types) {

@@ -69,9 +69,24 @@ object PillarsConfig {
   val ALU_SHRL = 9.U(4.W)
   val ALU_SHRA = 10.U(4.W)
   val ALU_DIV = 11.U(4.W)
-  val ALU_COPY_A = 12.U(4.W)
-  val ALU_COPY_B = 13.U(4.W)
+//  val ALU_COPY_A = 12.U(4.W)
+//  val ALU_COPY_B = 13.U(4.W)
+  val ALU_CMP = 12.U(4.W)
+  val ALU_CGT = 13.U(4.W)
+  val ALU_SELECT = 14.U(4.W)
+  val ALU_CMERGE = 15.U(4.W)
 
 
-  val ALU_FUN_NUM = 14
+//  val ALU_FUN_NUM = 14
+  val ALU_FUN_NUM = 16
+
+  val LSU_LOAD = 0.U(3.W)
+  val LSU_STORE = 1.U(3.W)
+  val LSU_LOADH = 2.U(3.W)
+  val LSU_STOREH = 3.U(3.W)
+  val LSU_LOADB = 4.U(3.W)
+  val LSU_STOREB = 5.U(3.W)
+
+  val USE_PREDICATE = true
+  val LSU_WITH_6_OP = true
 }

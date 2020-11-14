@@ -163,8 +163,9 @@ trait BlockTrait extends ElementTrait {
    * @param arg List(src, dst),
    *            where src and dst are lists representing ports which have a connection
    */
-  def addConnect(arg: List[List[String]]): Unit = {
+  def  addConnect(arg: List[List[String]]): Unit = {
     connectArray.append(arg)
+    println("AddConnect arg: "+arg)
   }
 
   /** Add a connection into this block.

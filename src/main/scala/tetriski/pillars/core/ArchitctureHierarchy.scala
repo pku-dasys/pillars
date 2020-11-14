@@ -196,18 +196,26 @@ class ArchitctureHierarchy extends BlockTrait {
 
     val pattern = "[0-9]+:".r
 
+    println("infos(1)" + infos(1))
+    println("infos(2)" + infos(2))
+    println("infos(3)" + infos(3))
     for (i <- 0 until (infos.size / 3)) {
       val targetStr = infos(i * 3)
+      println("targetStr" + targetStr)
       val tempStr = (pattern findFirstIn targetStr).toArray
+      println("tempStr" + tempStr.mkString(" "))
       val tempII = tempStr(0).replace(":", "").toInt
+      println("tempII" + tempII)
 
       val moduleName = infos(i * 3).replaceAll("([0-9]+:)|<|>", "")
         .split("\\.", 0)
+      println("moduleName" + moduleName)
       var temp = this.asInstanceOf[BlockTrait]
       for (j <- 1 until moduleName.size - 2) {
         temp = temp(moduleName(j))
       }
       val module = temp.getElement(moduleName(moduleName.size - 2))
+      println("module" + module)
       reconfigModuleArrays(tempII).append(module)
 
       if (II == 1) {
@@ -266,6 +274,7 @@ class ArchitctureHierarchy extends BlockTrait {
             }
           }
           if (isDecisive) {
+            println(s"faninNums:$fanInNums fanOutNums:$fanOutNums internalNum:$internalNum")
             module.updateConfig(fanInNums, fanOutNums, internalNum)
           }
           module.configArray
@@ -279,6 +288,7 @@ class ArchitctureHierarchy extends BlockTrait {
         this.ConstsArray(constID).asInstanceOf[ElementConst].updateConfigArray(constVal)
       }
       retBitstreams.append(getConfigBitStream())
+      println("retBitstreans: "+retBitstreams)
     }
     retBitstreams.toArray
   }

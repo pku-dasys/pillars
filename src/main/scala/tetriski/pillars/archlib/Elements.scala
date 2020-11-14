@@ -4,6 +4,7 @@ import Chisel.log2Up
 import tetriski.pillars.core.OpEnum.OpEnum
 import tetriski.pillars.core.{BlockTrait, ElementTrait, OpEnum, OpcodeTranslator}
 import tetriski.pillars.core.MRRGMode._
+import tetriski.pillars.hardware.PillarsConfig.USE_PREDICATE
 
 /** An element corresponding arithmetic logical unit.
  *
@@ -23,7 +24,12 @@ class ElementAlu(name: String, aluOpList: List[OpEnum], supBypass: Boolean, para
 
   //Currently, we have 14 optional operations, so the configBits is 4.
   //TODO: automatically infer configBits to reduce the reconfiguration overhead of ALU.
-  val configBits = 4
+  var configBits = 4
+  if (USE_PREDICATE){
+    configBits = 5
+  }else {
+    configBits = 4
+  }
   setParams((aluFunSelect +: params) :+ configBits)
   setName(name)
 
@@ -57,6 +63,7 @@ class ElementRF(name: String, params: List[Int]) extends ElementTrait {
   var configBits = params(0) * (params(1) + params(2)) + 1
   setParams(params :+ configBits)
   setName(name)
+
 
   addInternalNodesNum(Math.pow(2, params.head).toInt)
   setMRRGMode(REG_MODE)
@@ -116,6 +123,27 @@ class ElementLSU(name: String, params: List[Int]) extends ElementTrait {
 
   //0 for load, 1 for store
   val configBits = 1
+  setParams(params :+ configBits)
+  setName(name)
+
+  addInternalNodesNum(1)
+  setMRRGMode(MEM_MODE)
+}
+
+/** An element corresponding load/store unit.
+ *
+ * @constructor create an abstract LSU model
+ * @param name      the name of the model
+ * @param params    List(w)
+ */
+class ElementLSU2(name: String, params: List[Int]) extends ElementTrait {
+  //Module ID 4
+  setTypeID(4)
+
+  setSupOps(List(OpEnum.LOAD, OpEnum.STORE, OpEnum.LOADH, OpEnum.STOREH, OpEnum.LOADB, OpEnum.STOREB))
+
+  //0 for load, 1 for store
+  val configBits = 3
   setParams(params :+ configBits)
   setName(name)
 

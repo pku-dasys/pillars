@@ -33,7 +33,13 @@ object OpEnum extends Enumeration {
   val SLT = Value("23")
   val SLTU = Value("24")
   val SHLA = Value("25")
+  val LOADH = Value("26")
+  val STOREH = Value("27")
+  val LOADB = Value("28")
+  val STOREB = Value("29")
 }
+
+
 
 /** A object translating opcodes in elements into the set of configuration of modules.
  */
