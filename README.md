@@ -202,7 +202,7 @@ For more detailed information and paper reference, please refer to the following
 ```
 @article{guo-pillars-woset2020,
   title   = "{Pillars: An Integrated CGRA Design Framework}",
-  author  = {Yijiang Guo and Guojie Luo}
+  author  = {Yijiang Guo and Guojie Luo},
   journal = {Third Workshop on Open-Source EDA Technology (WOSET)},
   month   = {November},
   year    = {2020},
