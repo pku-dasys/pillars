@@ -61,6 +61,10 @@ class OpNode(var name: String) extends NodeDFG {
    */
   var inputLatency = ArrayBuffer[Int]()
 
+  /** A variable indicating whether the operand0 and operand1 of this opNode is exchanged.
+   */
+  var commutated = false
+
   /** Set latency of an opNode.
    *
    * @param arg the latency of current opNode

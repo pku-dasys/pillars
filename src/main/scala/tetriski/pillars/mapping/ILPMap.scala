@@ -4,8 +4,10 @@ import java.io.FileWriter
 import java.util
 import java.util.{ArrayList, Date}
 
+import org.scalatest.time.Milliseconds
+
 import scala.collection.JavaConverters
-import tetriski.pillars.core.{MRRG, MRRGMode, NodeMRRG}
+import tetriski.pillars.core.{MRRG, MRRGMode, NodeMRRG, OpEnum, OpcodeTranslator}
 import tetriski.pillars.hardware.PillarsConfig._
 
 import scala.collection.mutable.ArrayBuffer
@@ -31,15 +33,21 @@ object ILPMap {
   def mapping(dfg: DFG, mrrg: MRRG, filename: String = null, fw: FileWriter = null,
               separatedPR: Boolean = false, scheduleControl: Boolean = false,
               skewLimit: Int = 2, latencyLimit: Int = 32): Double = {
-    val start_time = new Date().getTime
     val mapper = new gurobiMapJava(filename)
 
     mapper.II = dfg.II
     mapper.useRelativeSkew = USE_RELATIVE_SKEW
-    mrrg.shortestPath(20).foreach(t =>
+
+    val seed = System.currentTimeMillis()
+    mapper.RNG.setSeed(seed)
+    //    mapper.RNG.setSeed(GlobalMappingResult.usedFuncALUs.size)
+
+    val neighboringDistance = 20
+    mapper.neighboringDistance = neighboringDistance
+    mrrg.shortestPath(neighboringDistance).foreach(t =>
       mapper.MRRGDistance.put(JavaConverters.seqAsJavaList(List(t._1._1, t._1._2)), t._2))
     mrrg.neighboringNodeMap.map(pair => mapper.MRRGNeighboringNode
-      .put(pair._1,JavaConverters.setAsJavaSet(pair._2)))
+      .put(pair._1, JavaConverters.setAsJavaSet(pair._2)))
 
     val num_dfg_op = dfg.getOpSize()
     val num_dfg_val = dfg.getValSize()
@@ -60,6 +68,10 @@ object ILPMap {
 
       mapper.DFGOpNodeName.add(dfgNode.name)
       mapper.DFGOpNodeOpcode.add(Integer.valueOf(dfgNode.opcode.id))
+      if (OpcodeTranslator.commutativeSet.contains(dfgNode.opcode)) {
+        mapper.DFGCommutativeSet.add(i)
+      }
+
       if (dfgNode.output != null) {
         mapper.DFGOpNodeOut.add(Integer.valueOf(dfg.valNodesMap(dfgNode.output.name)))
         mapper.DFGValB2opMap.put(dfgNode.name + "OUT", i)
@@ -102,9 +114,10 @@ object ILPMap {
       if (mode == MRRGMode.MEM_MODE) {
         mapper.MRRGLatency.put(node.name, 1)
       } else if (mode == MRRGMode.REG_MODE) {
-        for (fanIn <- node.fanIn) {
-          mapper.MRRGLatency.put(fanIn.name, 1)
-        }
+        mapper.MRRGLatency.put(node.name, 1)
+        //        for (fanIn <- node.fanIn) {
+        //          mapper.MRRGLatency.put(fanIn.name, 1)
+        //        }
       }
 
       if (mrrg.nodes(i).ops.size != 0) {
@@ -173,12 +186,13 @@ object ILPMap {
       mapper.MRRGRoutingFanin.add(fanIn)
       mapper.MRRGRoutingFaninType.add(fanInType)
 
-      val fanOutSize = routingNodes(i).fanOut.size
+      val node = routingNodes(i)
+      val fanOutSize = node.fanOut.size
       val fanOut = new ArrayList[Integer]()
       val fanOutType = new ArrayList[Integer]()
       for (j <- 0 until fanOutSize) {
-        fanOut.add(Integer.valueOf(nodeIDMap(routingNodes(i).fanOut(j))))
-        if (routingNodes(i).fanOut(j).ops.size == 0) {
+        fanOut.add(Integer.valueOf(nodeIDMap(node.fanOut(j))))
+        if (node.fanOut(j).ops.size == 0) {
           fanOutType.add(Integer.valueOf(0))
         } else {
           fanOutType.add(Integer.valueOf(1))
@@ -190,9 +204,8 @@ object ILPMap {
 
     if (fw != null) {
       val result = mapper.ILPMap(fw)
-      val end_time = new Date().getTime
-      val elapsedTime = end_time - start_time
-      println("Elapsed time:" + elapsedTime + "ms")
+      println("Elapsed time:" + mapper.elapsedTime + "ms")
+      GlobalMappingResult.addResult(mapper.result, mapper.elapsedTime, mapper.usedBypassALU, mapper.usedFuncALU)
       return result
     } else {
       if (scheduleControl) {
@@ -200,56 +213,74 @@ object ILPMap {
         mapper.maxLatency = latencyLimit
       }
       val result = mapper.ILPMap(separatedPR, scheduleControl)
-      val end_time = new Date().getTime
-      val elapsedTime = end_time - start_time
-      println("Elapsed time:" + elapsedTime + "ms")
+      println("Elapsed time:" + mapper.elapsedTime + "ms")
+      GlobalMappingResult.addResult(mapper.result, mapper.elapsedTime, mapper.usedBypassALU, mapper.usedFuncALU)
 
-      val routingResult = result(0)
-      for (i <- 0 until num_mrrg_r) {
-        if (routingResult.get(i).intValue != -1) {
-          routingNodes(i).mapNode = dfg.valNodes(routingResult.get(i).intValue())
-          //println(routingNodes(i).name)
-        }
-      }
-      val functionResult = result(1)
-      for (i <- 0 until num_mrrg_f) {
-        if (functionResult.get(i).intValue != -1) {
-          functionNodes(i).mapNode = dfg.opNodes(functionResult.get(i).intValue())
-          //println(functionNodes(i).name)
-        }
-      }
-
-      if (scheduleControl && mapper.ringCheckPass) {
-        var skewMap = mapper.DFGRelativeSkewMap
-        if(!USE_RELATIVE_SKEW){
-          skewMap.clear()
-          for(node <- dfg.opNodes) {
-            if(mapper.DFGMultipleInputMap.containsKey(node.name)){
-              val sinkName = node.name
-              val inputs = mapper.DFGMultipleInputMap.get(node.name)
-              val sourceName0 =  inputs.get(0)
-              val sourceName1 =  inputs.get(1)
-              val name0 = "WaitSkew_" + sourceName0 + "_" + sinkName
-              val name1 = "WaitSkew_" + sourceName1 + "_" + sinkName
-              val waitSkew0 = mapper.waitSkewMap.get(name0)
-              val waitSkew1 = mapper.waitSkewMap.get(name1)
-              val skew = (waitSkew1 << LOG_SKEW_LENGTH) + waitSkew0
-              skewMap.put(node.name, skew)
-            }
+      if (mapper.result.contains("success")) {
+        val routingResult = result(0)
+        for (i <- 0 until num_mrrg_r) {
+          if (routingResult.get(i).intValue != -1) {
+            routingNodes(i).mapNode = dfg.valNodes(routingResult.get(i).intValue())
+            //println(routingNodes(i).name)
           }
         }
-        dfg.updateSchedule(filename + "_r.txt", mapper.DFGLatencyMap, skewMap, filename + "_r.txt")
+        val functionResult = result(1)
+        for (i <- 0 until num_mrrg_f) {
+          if (functionResult.get(i).intValue != -1) {
+            functionNodes(i).mapNode = dfg.opNodes(functionResult.get(i).intValue())
+            //println(functionNodes(i).name)
+          }
+        }
+
+        if (scheduleControl && mapper.ringCheckPass) {
+          var skewMap = mapper.DFGRelativeSkewMap
+          for (node <- dfg.opNodes) {
+            if (mapper.DFGMultipleInputMap.containsKey(node.name)) {
+              if (mapper.DFGCommutatedSet.contains(node.name)) {
+                node.commutated = true
+                skewMap.replace(node.name, -skewMap.get(node.name))
+              }
+            }
+          }
+          if (!USE_RELATIVE_SKEW) {
+            skewMap.clear()
+            for (node <- dfg.opNodes) {
+              if (mapper.DFGMultipleInputMap.containsKey(node.name)) {
+                val sinkName = node.name
+                val inputs = mapper.DFGMultipleInputMap.get(node.name)
+                val sourceName0 = inputs.get(0)
+                val sourceName1 = inputs.get(1)
+                val name0 = "WaitSkew_" + sourceName0 + "_" + sinkName
+                val name1 = "WaitSkew_" + sourceName1 + "_" + sinkName
+                val waitSkew0 = mapper.waitSkewMap.get(name0)
+                val waitSkew1 = mapper.waitSkewMap.get(name1)
+                var skew = (waitSkew1 << LOG_SKEW_LENGTH) + waitSkew0
+                if (mapper.DFGCommutatedSet.contains(node.name)) {
+                  skew = (waitSkew0 << LOG_SKEW_LENGTH) + waitSkew1
+                }
+                skewMap.put(node.name, skew)
+              }
+            }
+          } else {
+            for (node <- dfg.opNodes) {
+              if (mapper.DFGCommutatedSet.contains(node.name)) {
+                skewMap.replace(node.name, -skewMap.get(node.name))
+              }
+            }
+          }
+          dfg.updateSchedule(filename + "_r.txt", mapper.DFGLatencyMap, skewMap, filename + "_r.txt")
+        }
+        else {
+          Scheduler.schedule(dfg, mrrg, filename = filename, II = dfg.II)
+        }
+        dfg.func2regMap = JavaConverters.mapAsScalaMap(mapper.func2regMap)
+        dfg.funcDirect2funcMap = JavaConverters.mapAsScalaMap(mapper.funcDirect2funcMap)
+        dfg.reg2funcMap = JavaConverters.mapAsScalaMap(mapper.reg2funcMap)
+        dfg.regConnect = JavaConverters.mapAsScalaMap(mapper.regConnect)
+        dfg.synthesizable = true
+        dfg.regNum = mapper.regMap.size()
       }
-      else {
-        Scheduler.schedule(dfg, mrrg, filename = filename, II = dfg.II)
-      }
-      dfg.func2regMap = JavaConverters.mapAsScalaMap(mapper.func2regMap)
-      dfg.funcDirect2funcMap = JavaConverters.mapAsScalaMap(mapper.funcDirect2funcMap)
-      dfg.reg2funcMap = JavaConverters.mapAsScalaMap(mapper.reg2funcMap)
-      dfg.regConnect = JavaConverters.mapAsScalaMap(mapper.regConnect)
-      dfg.synthesizable = true
-      dfg.regNum = mapper.regMap.size()
-      return elapsedTime
+      return mapper.elapsedTime
     }
     -1
   }

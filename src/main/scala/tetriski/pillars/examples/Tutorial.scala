@@ -3,12 +3,13 @@ package tetriski.pillars.examples
 import chisel3.iotesters
 import tetriski.pillars.archlib.TileLSUBlock
 import tetriski.pillars.core.{ArchitctureHierarchy, Connect, HardwareGenerator, OpEnum, SimulationHelper}
-import tetriski.pillars.hardware.{SynthesizedModule, TopModule}
+import tetriski.pillars.hardware.{PillarsConfig, SynthesizedModule, TopModule}
 import tetriski.pillars.mapping.{DotReader, ILPMap, Scheduler}
 import tetriski.pillars.testers.{AppTestHelper, ApplicationTester}
 
 import scala.collection.mutable.ArrayBuffer
 import chisel3.iotesters.PeekPokeTester
+import tetriski.pillars.hardware.PillarsConfig.{LOG_SKEW_LENGTH, USE_RELATIVE_SKEW}
 
 /** An end2end tutorial of Pillars.
  * Example: matrix multiplication: C = A X B, where A is a M * 2 matrix, and B is a 2 * N matrix.
@@ -18,8 +19,8 @@ object Tutorial {
   def main(args: Array[String]): Unit = {
     val rowNum = 4
     val colNum = 6
-    val inputPort = 2
-    val outputPort = 2
+    val inputPort = 3
+    val outputPort = 3
     val dataWidth = 16
 
     //Initialize the top block.
@@ -28,7 +29,7 @@ object Tutorial {
     arch.addOutPorts((0 until outputPort).map(i => s"out_$i").toArray)
 
     val tile = new TileLSUBlock("tile_0", colNum, rowNum, inputPort, outputPort,
-      useMuxBypass = false, complex = true, dataWidth = dataWidth)
+      useMuxBypass = false, complex = true, isToroid = false, dataWidth = dataWidth)
     arch.addBlock(tile)
 
     (0 until inputPort).foreach(i =>
@@ -42,7 +43,9 @@ object Tutorial {
     // and use loadTXT(mrrgFilename) to load the MRRG.
     val II = 1
     val MRRG = arch.getMRRG(II)
-//            val dfgFilename = "dfg/cap/cap.dot"
+    arch.dumpArchitecture()
+    arch.dumpMRRG(II, "testMRRG.txt")
+    //                val dfgFilename = "dfg/accum/accum.dot"
     val dfgFilename = "tutorial/MM.dot"
     val DFG = DotReader.loadDot(dfgFilename, II)
     val mappingResultFilename = s"tutorial/ii$II"
