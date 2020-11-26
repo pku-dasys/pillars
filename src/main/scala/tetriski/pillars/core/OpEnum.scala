@@ -47,10 +47,16 @@ object OpcodeTranslator {
     OpEnum.MUL,
     OpEnum.SLT,
     OpEnum.SHLL,
-    OpEnum.SLTU,
+    OpEnum.SHLA,
     OpEnum.SHRL,
     OpEnum.SHRA,
     OpEnum.DIV)
+
+  val commutativeSet = Set(OpEnum.ADD,
+    OpEnum.AND,
+    OpEnum.OR,
+    OpEnum.XOR,
+    OpEnum.MUL)
 
   /** Get the subset of optional operations of an ALU with a list of opcodes.
    *
@@ -84,7 +90,7 @@ object OpcodeTranslator {
       case OpEnum.MUL => 5
       case OpEnum.SLT => 6
       case OpEnum.SHLL => 7
-      case OpEnum.SLTU => 8
+      case OpEnum.SHLA => 8
       case OpEnum.SHRL => 9
       case OpEnum.SHRA => 10
       case OpEnum.DIV => 11
