@@ -193,11 +193,15 @@ class SynthesizedModule(dfg: DFG, constInfo: ConstInfo, memDatas: Array[Array[In
      */
     def skewCheck(node: OpNode, port: Data): Data = {
       if(USE_RELATIVE_SKEW) {
-        if (node.skew < 0 && operand == 0) {
+        var operandUsed = operand
+        if(node.commutated){
+          operandUsed = 1 - operandUsed
+        }
+        if (node.skew < 0 && operandUsed == 0) {
           val skewReg = Module(new Registers(-node.skew, w))
           port := skewReg.io.outs(0)
           skewReg.io.inputs(0)
-        } else if (node.skew > 0 && operand == 1) {
+        } else if (node.skew > 0 && operandUsed == 1) {
           val skewReg = Module(new Registers(node.skew, w))
           port := skewReg.io.outs(0)
           skewReg.io.inputs(0)

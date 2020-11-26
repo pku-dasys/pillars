@@ -37,7 +37,7 @@ class RegNextN(w: Int) extends Module {
     val input = Input(UInt(w.W))
     val out = Output(UInt(w.W))
   })
-  val regArray = RegInit(VecInit(Seq.fill((1 << LOG_SKEW_LENGTH))(0.U(w.W))))
+  val regArray = RegInit(VecInit(Seq.fill(SKEW_REGISTER_NUM)(0.U(w.W))))
   val posReg = RegInit(0.U(LOG_SKEW_LENGTH.W))
 
   when(io.latency > 0.U) {
@@ -236,7 +236,7 @@ class Alu(funSelect: Int, w: Int) extends Module {
           case 6 => funSeq.append(ALU_SLT -> (input_a.asSInt < input_b.asSInt))
           case 7 => funSeq.append(ALU_SHLL -> (input_a << shamt).asUInt())
           //          case 7 => funSeq.append(ALU_SHLL -> (input_a << input_b).asUInt())
-          case 8 => funSeq.append(ALU_SLTU -> (input_a < input_b))
+          case 8 => funSeq.append(ALU_SHLA -> (input_a.asSInt << shamt).asUInt)
           case 9 => funSeq.append(ALU_SHRL -> (input_a >> shamt).asUInt())
           //          case 9 => funSeq.append(ALU_SHRL -> (input_a >> input_b).asUInt())
           case 10 => funSeq.append(ALU_SHRA -> (input_a.asSInt >> shamt).asUInt)
@@ -503,6 +503,8 @@ class LSMemWrapper(w: Int) extends Module {
     val deqEn = Input(Bool())
     val idle = Output(Bool())
   })
+  MEM_IN_WIDTH = w
+  MEM_OUT_WIDTH = w
 
   val s_noop :: s_write_only :: s_work :: s_read_only :: Nil = Enum(4)
   val state = RegInit(s_noop)

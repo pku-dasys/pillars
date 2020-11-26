@@ -1,6 +1,7 @@
 package tetriski.pillars.hardware
 
 import chisel3._
+import chisel3.util.{Log2, log2Up}
 
 /** Hardware config in Pillars including the depth of RAM in LSU,
  * limitation of II and the schedule length.
@@ -12,14 +13,14 @@ object PillarsConfig {
    * @example If LOG_II_UPPER_BOUND = 2, the compliant II of the CGRA architecture is 1 ~ 3.
    *
    */
-  val LOG_II_UPPER_BOUND = 2
+  var LOG_II_UPPER_BOUND = 2
   val II_UPPER_BOUND = Math.pow(2, LOG_II_UPPER_BOUND).toInt
 
   /** Memory depth in Load/Store unit.
    */
   val MEM_DEPTH = 256
-  val MEM_IN_WIDTH = 32
-  val MEM_OUT_WIDTH = 32
+  var MEM_IN_WIDTH = 32
+  var MEM_OUT_WIDTH = 32
 
   /** The limitation of the schedule length.
    * 3 for TopModuleWrapper generation and 5 for verilator test of examples.
@@ -29,15 +30,17 @@ object PillarsConfig {
    */
   var LOG_SCHEDULE_SIZE = 5
 
-  /** The limitation of the skew.
-   * 2 for TopModuleWrapper generation and 4 for verilator test of examples.
+  /** The number of registers used for skewing.
+   */
+  var SKEW_REGISTER_NUM = 16
+
+  /** Log2 of the limitation of the skew.
    *
-   * @example If LOG_SCHEDULE_SIZE = 4, the compliant skew of the CGRA architecture is 0 ~ 16.
+   * @example If LOG_SCHEDULE_SIZE = 4, the compliant skew of the CGRA architecture is 0 ~ 15.
    * @example If LOG_SCHEDULE_SIZE = -1 and USE_RELATIVE_SKEW = true, which means SKEW_WIDTH = 0,
    *          the Synchronizers will not be employed in the architecture.
-   *
    */
-  val LOG_SKEW_LENGTH = 4
+  var LOG_SKEW_LENGTH = log2Up(SKEW_REGISTER_NUM + 1)
 
   /** A parameter indicating we use relative skew or wait skew in the schedule.
    *
@@ -47,7 +50,7 @@ object PillarsConfig {
    *          and RegNextN will be employed for postponing each input date of 2-input module.
    *
    */
-  val USE_RELATIVE_SKEW = true
+  var USE_RELATIVE_SKEW = true
 
   var SKEW_WIDTH = if (USE_RELATIVE_SKEW) {
     LOG_SKEW_LENGTH + 1
@@ -55,7 +58,7 @@ object PillarsConfig {
     LOG_SKEW_LENGTH * 2
   }
 
-  val USE_AUXILIARY_SCHEDULER = (SKEW_WIDTH != 0) || (LOG_SCHEDULE_SIZE != 0)
+  var USE_AUXILIARY_SCHEDULER = (SKEW_WIDTH != 0) || (LOG_SCHEDULE_SIZE != 0)
 
   val ALU_ADD = 0.U(4.W)
   val ALU_SUB = 1.U(4.W)
@@ -65,7 +68,7 @@ object PillarsConfig {
   val ALU_MUL = 5.U(4.W)
   val ALU_SLT = 6.U(4.W)
   val ALU_SHLL = 7.U(4.W)
-  val ALU_SLTU = 8.U(4.W)
+  val ALU_SHLA = 8.U(4.W)
   val ALU_SHRL = 9.U(4.W)
   val ALU_SHRA = 10.U(4.W)
   val ALU_DIV = 11.U(4.W)
