@@ -263,7 +263,7 @@ class MRRG extends Cloneable {
       addNode(new NodeMRRG(name))
       if((name.indexOf("rf0.internalNode") != -1) ||
         (name.indexOf("global_rf.internalNode") != -1)){
-        nodes(i).mode == REG_MODE
+        nodes(i).mode = REG_MODE
       }
       now += 1
       val fanInSize = Integer.parseInt(file(now))
@@ -301,6 +301,27 @@ class MRRG extends Cloneable {
     for (i <- 0 until numRoutingNodes) {
       now += 1
       val name: String = file(now).substring(1, file(now).length - 1)
+      val node = apply(name)
+      now += 1
+      val fanInSize = Integer.parseInt(file(now))
+      for (j <- 0 until fanInSize) {
+        now += 1
+        node.fanIn.append(apply(file(now)))
+      }
+      now += 1
+      val fanOutSize = Integer.parseInt(file(now))
+      for (j <- 0 until fanOutSize) {
+        now += 1
+        node.fanOut.append(apply(file(now)))
+      }
+    }
+
+
+    now += 1
+    //Add connections of functional nodes.
+    for (i <- 0 until numFuncNodes) {
+      now += 1
+      val name: String = file(now).substring(1, file(now).length - 1)
       now += 1
       val fanInSize = Integer.parseInt(file(now))
       for (j <- 0 until fanInSize) {
@@ -313,29 +334,11 @@ class MRRG extends Cloneable {
         now += 1
         apply(name).fanOut.append(apply(file(now)))
       }
-    }
-
-    now += 1
-    //Add connections of functional nodes.
-    for (i <- 0 until numFuncNodes) {
-      now += 1
-      val name: String = file(now).substring(1, file(now).length - 1)
-      now += 1
-      val fanInSize = Integer.parseInt(file(now))
-      for (j <- 0 until fanInSize) {
-        now += 1
-        addConnect(file(now), name)
-      }
-      now += 1
-      val fanOutSize = Integer.parseInt(file(now))
-      for (j <- 0 until fanOutSize) {
-        now += 1
-        apply(name).fanOut.append(apply(file(now)))
-      }
       now += 1
       var opSize = Integer.parseInt(file(now))
       now += opSize
     }
+
   }
 
   /** Floyd-Warshall shortest path algorithm.
