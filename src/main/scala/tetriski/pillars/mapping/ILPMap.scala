@@ -1,15 +1,12 @@
 package tetriski.pillars.mapping
 
 import java.io.FileWriter
-import java.util
-import java.util.{ArrayList, Date}
+import java.util.ArrayList
 
-import org.scalatest.time.Milliseconds
-
-import scala.collection.JavaConverters
-import tetriski.pillars.core.{MRRG, MRRGMode, NodeMRRG, OpEnum, OpcodeTranslator}
+import tetriski.pillars.core.{MRRG, MRRGMode, NodeMRRG, OpcodeTranslator}
 import tetriski.pillars.hardware.PillarsConfig._
 
+import scala.collection.JavaConverters
 import scala.collection.mutable.ArrayBuffer
 
 /** This object is used to do mapping calling gurobimap_java.
@@ -38,8 +35,9 @@ object ILPMap {
     mapper.II = dfg.II
     mapper.useRelativeSkew = USE_RELATIVE_SKEW
 
-    val seed = System.currentTimeMillis()
-    mapper.RNG.setSeed(seed)
+//        val seed = System.currentTimeMillis()
+//    println(seed)
+//        mapper.RNG.setSeed(seed)
     //    mapper.RNG.setSeed(GlobalMappingResult.usedFuncALUs.size)
 
     val neighboringDistance = 20
@@ -259,12 +257,6 @@ object ILPMap {
                   skew = (waitSkew0 << LOG_SKEW_LENGTH) + waitSkew1
                 }
                 skewMap.put(node.name, skew)
-              }
-            }
-          } else {
-            for (node <- dfg.opNodes) {
-              if (mapper.DFGCommutatedSet.contains(node.name)) {
-                skewMap.replace(node.name, -skewMap.get(node.name))
               }
             }
           }

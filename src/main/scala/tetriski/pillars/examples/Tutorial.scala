@@ -1,15 +1,14 @@
 package tetriski.pillars.examples
 
 import chisel3.iotesters
+import chisel3.iotesters.PeekPokeTester
 import tetriski.pillars.archlib.TileLSUBlock
-import tetriski.pillars.core.{ArchitctureHierarchy, Connect, HardwareGenerator, OpEnum, SimulationHelper}
-import tetriski.pillars.hardware.{PillarsConfig, SynthesizedModule, TopModule}
-import tetriski.pillars.mapping.{DotReader, ILPMap, Scheduler}
+import tetriski.pillars.core._
+import tetriski.pillars.hardware.{SynthesizedModule, TopModule}
+import tetriski.pillars.mapping.{DotReader, ILPMap}
 import tetriski.pillars.testers.{AppTestHelper, ApplicationTester}
 
 import scala.collection.mutable.ArrayBuffer
-import chisel3.iotesters.PeekPokeTester
-import tetriski.pillars.hardware.PillarsConfig.{LOG_SKEW_LENGTH, USE_RELATIVE_SKEW}
 
 /** An end2end tutorial of Pillars.
  * Example: matrix multiplication: C = A X B, where A is a M * 2 matrix, and B is a 2 * N matrix.
@@ -43,8 +42,6 @@ object Tutorial {
     // and use loadTXT(mrrgFilename) to load the MRRG.
     val II = 1
     val MRRG = arch.getMRRG(II)
-    arch.dumpArchitecture()
-    arch.dumpMRRG(II, "testMRRG.txt")
     //                val dfgFilename = "dfg/accum/accum.dot"
     val dfgFilename = "tutorial/MM.dot"
     val DFG = DotReader.loadDot(dfgFilename, II)
