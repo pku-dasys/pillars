@@ -80,6 +80,10 @@ trait BlockTrait extends ElementTrait {
    */
   var elementsMap = Map[String, ElementTrait]()
 
+  /** A parameter indicating whether the MRRG is initialized.
+   */
+  var initialized = false
+
   /** Get a port of this block,
    * and declare it belongs to this block.
    * It will be used for get ports of sub-block of current block when designing the architecture.
@@ -261,7 +265,7 @@ trait BlockTrait extends ElementTrait {
    *          ......
    *          "opcode nOp                    "
    *          ......
-   * @param writer     the JAVA PrintWriter
+   * @param writer       the JAVA PrintWriter
    * @param targetedMRRG this MRRG
    */
   def dumpMRRGAsTXT(writer: PrintWriter, targetedMRRG: MRRG): Unit = {
@@ -305,6 +309,9 @@ trait BlockTrait extends ElementTrait {
    * The I/O ports of this block will generate opNodes that can perform input/output operation.
    */
   def initialization(): Unit = {
+    if (initialized) {
+      return
+    }
     initMRRG()
     val allBlocks = getAllBlocks()
     for (block <- allBlocks) {
@@ -346,6 +353,7 @@ trait BlockTrait extends ElementTrait {
     }
 
     mapRelationMRRG.foreach(connect => mrrg.addConnect(connect._1, connect._2))
+    initialized = true
   }
 
   /** Unroll a MRRG with II.
@@ -375,9 +383,9 @@ trait BlockTrait extends ElementTrait {
         val name = node._1
         tempMRRG.update(name, i.toString + ":" + name)
         //Make sure the input operators only appear in the first reconfiguration cycle.
-        if(i > 0){
+        if (i > 0) {
           val tempNode = tempMRRG.nodes(node._2)
-          if(tempNode.ops.contains(OpEnum.INPUT)){
+          if (tempNode.ops.contains(OpEnum.INPUT)) {
             tempNode.ops.clear()
           }
         }

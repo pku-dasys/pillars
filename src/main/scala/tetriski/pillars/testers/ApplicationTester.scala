@@ -1,9 +1,13 @@
 package tetriski.pillars.testers
 
+import chisel3.assert
 import chisel3.iotesters.PeekPokeTester
 import tetriski.pillars.core.SimulationHelper
 import tetriski.pillars.hardware.PillarsConfig._
 import tetriski.pillars.hardware.TopModule
+import tetriski.pillars.util.SplitOrConcat
+
+import scala.collection.mutable.ArrayBuffer
 
 /** A class which is helpful when creating testers.
  * Since configuration controllers can repeat stored configurations every II cycles,
@@ -234,6 +238,15 @@ class ApplicationTester(c: TopModule, appTestHelper: AppTestHelper) extends Peek
    */
   def asUnsignedInt(signedInt: Int): BigInt = (BigInt(signedInt >>> 1) << 1) + (signedInt & 1)
 
+//  def dataConcat(inData: Array[Int], factor: Int): Array[BigInt] ={
+//    val result = ArrayBuffer[BigInt]()
+//    for(i <- 0 until inData.size / factor){
+//      result.append(BigInt((0 until factor).map(j => inData(i*factor + j)
+//        .toHexString).reduce(_ + _), 16))
+//    }
+//    result.toArray
+//  }
+
   /** Enters data into a LSU.
    *
    * @param numInLSU the identification number of this LSU
@@ -246,6 +259,16 @@ class ApplicationTester(c: TopModule, appTestHelper: AppTestHelper) extends Peek
     poke(c.io.streamInLSU(numInLSU).valid, 0)
     poke(c.io.baseLSU(numInLSU), base)
     step(1)
+
+//    val manip = c.LSUs(0).memWrapper.enq_mem.manip
+//    val inputs = manip.mode match {
+//      case SplitOrConcat.Normal =>
+//        inData.map(i => BigInt(i))
+//      case SplitOrConcat.Split =>
+//        dataConcat(inData, manip.factor)
+//      case SplitOrConcat.Concat =>
+//        inData.map(i => BigInt(i))
+//    }
 
     // push
     for (x <- inData) {

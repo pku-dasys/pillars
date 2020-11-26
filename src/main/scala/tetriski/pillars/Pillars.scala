@@ -13,7 +13,7 @@ object Pillars {
     HardwareExamples.exampleCompleteAdres()
 
 //    ApplicationExamples.dumpWrapperVerilog()
-//    ApplicationExamples.dumpArch(2, "mrrg/cgra-mrrg-4m4-ii2.txt")
+//    ApplicationExamples.dumpArch(1, "mrrg/cgra-mrrg-4m4-ii1.txt")
 
     ApplicationExamples.exampleSum()
     ApplicationExamples.exampleVadd()
