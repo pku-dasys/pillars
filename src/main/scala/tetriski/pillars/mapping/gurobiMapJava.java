@@ -146,6 +146,7 @@ public class gurobiMapJava {
     Map<Integer, List<List<Integer>>> reg2funcMap;
     Map<Integer, List<List<Integer>>> funcDirect2funcMap;
     Set<String> DFGCommutatedSet;
+    Map<Integer, List<Integer>> DFGOpOperand;
     int II = 1;
     int numDfgVals = 0;
     int numDfgOps = 0;
@@ -215,6 +216,7 @@ public class gurobiMapJava {
         reg2funcMap = new HashMap<>();
         funcDirect2funcMap = new HashMap<>();
         DFGCommutatedSet = new HashSet();
+        DFGOpOperand = new HashMap<>();
 
     }
 
@@ -424,14 +426,7 @@ public class gurobiMapJava {
                 for (String key : waitSkewMap.keySet()) {
                     waitSkewMap.replace(key, (int) modelR.getVarByName(key).get(GRB.DoubleAttr.X));
                 }
-                if (DFGCommutativeSet.size() > 0) {
-                    for (int index : DFGCommutativeSet) {
-                        String name = DFGOpNodeName.get(index);
-                        if (abs(1.0 - modelR.getVarByName("commutative_" + name).get(GRB.DoubleAttr.X)) < 0.01) {
-                            DFGCommutatedSet.add(name);
-                        }
-                    }
-                }
+
             }
 
             /****Debug****/
@@ -459,8 +454,8 @@ public class gurobiMapJava {
                 }
 
 //                for (int r = 0; r < numMrrgR; r++) {
-//                    if (modelR.getVarByName("R_" + r + "_2_1").get(GRB.DoubleAttr.X) > 0) {
-//                        System.out.println("R_" + r + "_2_1" + ": " + MRRGRoutingName.get(r) + " " + DFGValNodeName.get(2));
+//                    if (modelR.getVarByName("R_" + r + "_22").get(GRB.DoubleAttr.X) > 0) {
+//                        System.out.println("R_" + r + "_22" + ": " + MRRGRoutingName.get(r) + " " + DFGValNodeName.get(22));
 //                    }
 //                }
             }
@@ -504,6 +499,15 @@ public class gurobiMapJava {
 //                    }
                     if (abs(F[FIndex(op, f)].get(GRB.DoubleAttr.X) - 1.0) < 0.01) {
                         String name = MRRGFunctionName.get(f);
+                        String opName = DFGOpNodeName.get(op);
+                        if(DFGMultipleInputMap.containsKey(opName)) {
+                            int routingNodeOperand0 = MRRGFunctionFanin.get(f).get(0);
+                            int valNodeOperand1 = DFGOpOperand.get(op).get(1);
+                            if (abs(1.0 - modelR.getVarByName("R_" + routingNodeOperand0 + "_" + valNodeOperand1).get(GRB.DoubleAttr.X)) < 0.01) {
+                                DFGCommutatedSet.add(opName);
+                            }
+                        }
+
                         if (name.contains("alu") && name.contains("internalNode")) {
                             System.out.println("Func ALU: " + MRRGFunctionName.get(f) + " " + F[FIndex(op, f)].get(GRB.DoubleAttr.X));
                             usedFuncALU += 1;
@@ -1074,12 +1078,6 @@ public class gurobiMapJava {
         int constrcount = 0;
         int MRRG_NODE_ROUTING = 0;
         int MRRG_NODE_FUNCTION = 1;
-        GRBVar[] commutative = model.addVars(DFGCommutativeSet.size(), 'B');
-        Map<Integer, GRBLinExpr> commutativeConstrs = new HashMap<>();
-        for(int index : DFGCommutativeSet){
-            commutativeConstrs.put(index, new GRBLinExpr());
-        }
-        int commutativeCount = 0;
         for (int val = 0; val < numDfgVals; val++)
             for (int r = 0; r < numMrrgR; r++) {
                 int val_fanouts = DFGValNodeOut.get(val).size();
@@ -1087,8 +1085,6 @@ public class gurobiMapJava {
                 for (int i = 0; i < val_fanouts; i++) {
                     GRBLinExpr sum_of_fanouts = new GRBLinExpr();
                     int fanoutsize = MRRGRoutingFanout.get(r).size();
-                    String name = MRRGRoutingName.get(r);
-                    List<Integer> temp = MRRGRoutingFanout.get(r);
                     for (int mrrg_fanout = 0; mrrg_fanout < fanoutsize; mrrg_fanout++) {
                         if (MRRGRoutingFanoutType.get(r).get(mrrg_fanout) == MRRG_NODE_ROUTING) {
                             sum_of_fanouts.addTerm(1.0, S.get(RIndex(val, MRRGRoutingFanout.get(r).
@@ -1107,9 +1103,6 @@ public class gurobiMapJava {
                                         sum_of_fanouts.addConstant(Integer.class.cast(F[FIndex(op,
                                                 MRRGRoutingFanout.get(r).get(mrrg_fanout))]));
                                     }
-                                    if (MRRGFunctionFanin.get(outOpNode).get(operand) != r && operand == 0) {
-                                        commutativeConstrs.get(op).addTerm(1.0, S.get(RIndex(val, r))[i]);
-                                    }
                                 }
                             }
                         }
@@ -1119,12 +1112,6 @@ public class gurobiMapJava {
                 }
             }
 
-        for(int index : DFGCommutativeSet){
-            commutative[commutativeCount].set(GRB.StringAttr.VarName, "commutative_" + DFGOpNodeName.get(index));
-            model.addConstr(commutative[commutativeCount], GRB.EQUAL,
-                    commutativeConstrs.get(index), "commutativeConstr_" + DFGOpNodeName.get(index));
-            commutativeCount++;
-        }
     }
 
     /**

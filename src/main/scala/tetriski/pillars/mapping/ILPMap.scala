@@ -35,9 +35,9 @@ object ILPMap {
     mapper.II = dfg.II
     mapper.useRelativeSkew = USE_RELATIVE_SKEW
 
-//        val seed = System.currentTimeMillis()
-//    println(seed)
-//        mapper.RNG.setSeed(seed)
+    //        val seed = System.currentTimeMillis()
+    //    println(seed)
+    //        mapper.RNG.setSeed(seed)
     //    mapper.RNG.setSeed(GlobalMappingResult.usedFuncALUs.size)
 
     val neighboringDistance = 20
@@ -54,14 +54,18 @@ object ILPMap {
       val dfgNode = dfg.opNodes(i)
       val inputSize = dfgNode.input.size
       if (inputSize > 1) {
-        val inputs = new ArrayList[String]()
+        val inputS = new ArrayList[String]()
+        val inputI = new ArrayList[Integer]()
         for (inputOperand <- 0 until inputSize) {
-          inputs.add(dfgNode.input(inputOperand).name)
+          val inputName = dfgNode.input(inputOperand).name
+          inputS.add(inputName)
+          inputI.add(dfg.valNodesMap(dfgNode.input(inputOperand).output.name))
           if (dfgNode.input(inputOperand).name == dfgNode.name) {
             mapper.DFGSelfJoinMap.put(dfgNode.name, inputOperand)
           }
         }
-        mapper.DFGMultipleInputMap.put(dfgNode.name, inputs)
+        mapper.DFGOpOperand.put(i, inputI)
+        mapper.DFGMultipleInputMap.put(dfgNode.name, inputS)
       }
 
       mapper.DFGOpNodeName.add(dfgNode.name)
