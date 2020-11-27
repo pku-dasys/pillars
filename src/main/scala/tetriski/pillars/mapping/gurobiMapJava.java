@@ -2,10 +2,7 @@ package tetriski.pillars.mapping;
 
 import gurobi.*;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -1264,6 +1261,18 @@ public class gurobiMapJava {
         for (int op = 0; op < numDfgOps; op++)
             for (int f = 0; f < numMrrgF; f++)
                 F[FIndex(op, f)].set(GRB.StringAttr.VarName, "F_" + f + "_" + op);
+
+        modelR.update();
+
+        File init = new File("./importantBak/MappingSAT/vadd-24.res");
+        Scanner s = new Scanner(init);
+        String nodeName;
+        while(s.hasNext()){
+            nodeName = s.next();
+            GRBVar var = modelR.getVarByName(nodeName);
+            var.set(GRB.DoubleAttr.Start, 1);
+        }
+
 
         /** Constraints of placement.
          */

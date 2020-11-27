@@ -21,7 +21,7 @@ object Mapping {
   //  }
   def main(args: Array[String]): Unit = {
     //    System.out.println(System.getProperty("java.library.path"))
-    val dfgFilename = "dfg/cap/cap.dot"
+    val dfgFilename = "dfg/vadd/vadd.dot"
 //    val dfgFilename = "tutorial/MM.dot"
 //    val mrrgFilename = "MRRG/cgra-mrrg-4m4-ii1.txt"
     val mrrgFilename = "mrrg/cgra-mrrg-4m4-ii1.txt"
