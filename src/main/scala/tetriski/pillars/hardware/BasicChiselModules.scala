@@ -206,8 +206,8 @@ class MultiIIScheduleController extends Module {
  * @param funSelect the subset of optional operations
  * @param w         the data width
  */
-/*
-class Alu_(funSelect: Int, w: Int) extends Module {
+
+class Alu(funSelect: Int, w: Int) extends Module {
   val io = IO(new Bundle {
     val en = Input(Bool())
     val skewing = Input(UInt((SKEW_WIDTH).W))
@@ -289,7 +289,7 @@ class Alu_(funSelect: Int, w: Int) extends Module {
     }
   }
 }
-*/
+
 
 /** An arithmetic logical unit with predicate support which can perform an arbitrary subset of optional operations.
  *
@@ -297,15 +297,16 @@ class Alu_(funSelect: Int, w: Int) extends Module {
  * @param w         the data width
  */
 
-class Alu(funSelect: Int, w: Int) extends Module {
+class Alu2(funSelect: Int, numInI1: Int, numInI2: Int, numInP: Int, w: Int) extends Module {
   val io = IO(new Bundle {
     val en = Input(Bool())
     val skewing = Input(UInt((SKEW_WIDTH).W))
     //port sequnces outs: 0: out
     //port sequnces inputs: 0: input_a, 1: input_b
-    val configuration = Input(UInt(5.W))
+    val configuration = Input(UInt(6.W)) // 5:neg pred, 4: constvalid, 3:0 operation
 //    val negated_predicate = Input(Bool())
-    val inputs = Input(MixedVec(Seq(UInt(w.W), UInt(w.W), UInt(w.W))))
+    val input_mux_config = Input(MixedVec(Seq(UInt(log2Up(numInI1).W), UInt(log2Up(numInI2).W), UInt(log2Up(numInP).W))))
+    val inputs = Input(MixedVec(Seq(UInt(w.W), UInt(w.W), UInt(w.W), UInt(w.W))))
     val outs = Output(MixedVec(Seq(UInt(w.W))))
   })
 
@@ -326,20 +327,21 @@ class Alu(funSelect: Int, w: Int) extends Module {
           case 4 => funSeq.append(ALU_XOR -> (input_a ^ input_b))
           case 5 => funSeq.append(ALU_MUL -> (input_a * input_b))
           case 6 => funSeq.append(ALU_SLT -> (input_a.asSInt < input_b.asSInt))
-          case 7 => funSeq.append(ALU_SHLL -> (input_a << shamt).asUInt())
+          case 7 => funSeq.append(ALU_LS -> (input_a << shamt).asUInt())
           //          case 7 => funSeq.append(ALU_SHLL -> (input_a << input_b).asUInt())
-          case 8 => funSeq.append(ALU_SLTU -> (input_a < input_b))
-          case 9 => funSeq.append(ALU_SHRL -> (input_a >> shamt).asUInt())
+          case 8 => funSeq.append(ALU_CLT -> (input_a < input_b))
+          case 9 => funSeq.append(ALU_RS -> (input_a >> shamt).asUInt())
           //          case 9 => funSeq.append(ALU_SHRL -> (input_a >> input_b).asUInt())
-          case 10 => funSeq.append(ALU_SHRA -> (input_a.asSInt >> shamt).asUInt)
+//          case 10 => funSeq.append(ALU_SHRA -> (input_a.asSInt >> shamt).asUInt)
+          case 10 => funSeq.append(ALU_MOVC -> input_b)
           case 11 => funSeq.append(ALU_DIV -> input_a / input_b)
 //          case 12 => funSeq.append(ALU_COPY_A -> input_a)
 //          case 13 => funSeq.append(ALU_COPY_B -> input_b)
           case 12 => funSeq.append(ALU_CMP -> (input_a === input_b))
           case 13 => funSeq.append(ALU_CGT -> (input_a > input_b))
-          case 14 => funSeq.append(ALU_SELECT -> Mux(input_a(w-1),input_a,Mux(input_b(w-1),input_b,0.U)))
+          case 14 => funSeq.append(ALU_SELECT -> Mux(const_valid, input_const, Mux(input_a(w-1), input_a, Mux(input_b(w-1), input_b,0.U))))
           //(input_a(w) ? input_a : (input_b(w) ? input_b : 0.asUInt)))
-          case 15 => funSeq.append(ALU_CMERGE -> input_b) // should be Mux(constvalid,input_b,input_a)
+          case 15 => funSeq.append(ALU_CMERGE -> Mux(const_valid,input_const,input_a))
         }
       }
     }
@@ -347,39 +349,65 @@ class Alu(funSelect: Int, w: Int) extends Module {
   }
 
   var input_a = io.inputs(0)
-  var input_b = io.inputs(1)
-  var negated_predicate = io.configuration(4)
-  var input_p = Mux(negated_predicate,Cat(io.inputs(2)(w-1,1),~io.inputs(2)(0)),io.inputs(2))
+  var input_const = io.inputs(2)
+  var const_valid = io.configuration(4)
+  var input_b = Mux(const_valid,input_const,io.inputs(1))
+  var negated_predicate = io.configuration(5)
+  var input_p = Mux(negated_predicate,Cat(io.inputs(3)(w-1,1),~io.inputs(3)(0)),io.inputs(3))
 
-  if (LOG_SKEW_LENGTH > 0) {
-    if (USE_RELATIVE_SKEW) {
-      val synchronizer = Module(new Synchronizer(w))
-      synchronizer.io.input0 := input_a
-      synchronizer.io.input1 := input_b
+//  if (LOG_SKEW_LENGTH > 0) {
+//    if (USE_RELATIVE_SKEW) {
+//      val synchronizer = Module(new Synchronizer(w))
+//      synchronizer.io.input0 := input_a
+//      synchronizer.io.input1 := input_b
+//
+//      synchronizer.io.skewing := io.skewing
+//
+//      input_a = synchronizer.io.skewedInput0
+//      input_b = synchronizer.io.skewedInput1
+//    } else {
+//      val regNextNa = Module(new RegNextN(w))
+//      val regNextNb = Module(new RegNextN(w))
+//      regNextNa.io.input := input_a
+//      regNextNa.io.latency := io.skewing(LOG_SKEW_LENGTH - 1, 0)
+//      regNextNb.io.input := input_b
+//      regNextNb.io.latency := io.skewing(2 * LOG_SKEW_LENGTH - 1, LOG_SKEW_LENGTH)
+//
+//      input_a = regNextNa.io.out
+//      input_b = regNextNb.io.out
+//    }
+//  }
 
-      synchronizer.io.skewing := io.skewing
+  var I1_mux_config = io.input_mux_config(0)
+  var I2_mux_config = io.input_mux_config(1)
+  var P_mux_config = io.input_mux_config(2)
+  val prev_I1_mux_config = Reg(UInt(log2Up(numInI1).W))
+  val prev_I2_mux_config = Reg(UInt(log2Up(numInI1).W))
+  val prev_P_mux_config = Reg(UInt(log2Up(numInI1).W))
 
-      input_a = synchronizer.io.skewedInput0
-      input_b = synchronizer.io.skewedInput1
-    } else {
-      val regNextNa = Module(new RegNextN(w))
-      val regNextNb = Module(new RegNextN(w))
-      regNextNa.io.input := input_a
-      regNextNa.io.latency := io.skewing(LOG_SKEW_LENGTH - 1, 0)
-      regNextNb.io.input := input_b
-      regNextNb.io.latency := io.skewing(2 * LOG_SKEW_LENGTH - 1, LOG_SKEW_LENGTH)
-
-      input_a = regNextNa.io.out
-      input_b = regNextNb.io.out
-    }
+  when(io.en){
+    prev_I1_mux_config := I1_mux_config
+    prev_I2_mux_config := I2_mux_config
+    prev_P_mux_config := P_mux_config
+  }.otherwise{
+    prev_I1_mux_config := (math.pow(2, log2Up(numInI1)).toInt - 1).U(log2Up(numInI1).W) // all ones
+    prev_I2_mux_config := (math.pow(2, log2Up(numInI1)).toInt - 1).U(log2Up(numInI1).W)
+    prev_P_mux_config := (math.pow(2, log2Up(numInI1)).toInt - 1).U(log2Up(numInI1).W)
   }
+
 
   val out = io.outs(0)
   val shamt = input_b(log2Up(w), 0).asUInt
-  val not_to_exec_all = (input_a(w-1)=== 0.B || input_b(w-1)=== 0.B || (input_p(w-1)===0.B || input_p === 0.U))
-  //missing router configs
-  val not_to_exec_select = ((input_a(w-1)=== 0.B && input_b(w-1)=== 0.B) || (input_p(w-1)===0.B || input_p === 0.U))
-  //missing router configs
+  val not_to_exec_all =
+    (prev_I1_mux_config =/= (math.pow(2, log2Up(numInI1)).toInt - 1).U(log2Up(numInI1).W) &&  input_a(w-1)=== 0.B) ||
+    (prev_I2_mux_config =/= (math.pow(2, log2Up(numInI2)).toInt - 1).U(log2Up(numInI2).W) &&  input_b(w-1) === 0.B) ||
+    (prev_P_mux_config =/= (math.pow(2, log2Up(numInP)).toInt - 1).U(log2Up(numInP).W) &&  (input_p(w-1)===0.B || input_p === 0.U))
+  //missing const configs
+
+  val not_to_exec_select =
+    ((input_a(w-1)=== 0.B && input_b(w-1)=== 0.B) ||
+    (prev_P_mux_config =/= (math.pow(2, log2Up(numInI1)).toInt - 1).U(log2Up(numInI1).W) &&  (input_p(w-1)===0.B || input_p === 0.U)))
+
   val funSeq = getFunSeq(shamt)
 
   val out_data =  MuxLookup(io.configuration(3,0), input_b, funSeq)
@@ -418,7 +446,7 @@ class RegisterFile(log2Regs: Int, numIn: Int, numOut: Int, w: Int) extends Modul
     when(io.configuration === 1.U) {
       io.outs(0) := reg
     }.otherwise {
-      io.outs(0) := 0.U
+      io.outs(0) := reg //0.U will act as single register
     }
   } else {
     //register files
@@ -786,8 +814,8 @@ class LoadStoreUnit(w: Int) extends Module {
 class LoadStoreUnit2(w: Int) extends Module {
   val io = IO(new Bundle {
     //0 for load, 1 for store
-    // 0:2 load,loadh,loadb, store,storeh,storeb
-    val configuration = Input(UInt(3.W))
+    // 0:2 load,loadh,loadb, store,storeh,storeb 3: constvalid
+    val configuration = Input(UInt(4.W))
     val en = Input(Bool())
     val skewing = Input(UInt((SKEW_WIDTH).W))
 
@@ -801,7 +829,7 @@ class LoadStoreUnit2(w: Int) extends Module {
     val deqEn = Input(Bool())
     val idle = Output(Bool())
 
-    val inputs = Input(MixedVec(UInt((log2Ceil(MEM_DEPTH) + 2).W), UInt(w.W)))
+    val inputs = Input(MixedVec(UInt((log2Ceil(MEM_DEPTH) + 2).W), UInt(w.W), UInt(w.W)))
     val outs = Output(MixedVec((1 to 1) map { i => UInt(w.W) }))
   })
   val memWrapper = Module(new LSMemWrapper(w))
@@ -815,9 +843,11 @@ class LoadStoreUnit2(w: Int) extends Module {
   memWrapper.io.out <> io.streamOut
   memWrapper.io.workEn <> io.en
 
+  var constIn = io.inputs(2)
+  var const_valid = io.configuration(3)
   /** The address where to load/store data.
    */
-  var addr = io.inputs(0)
+  var addr = Mux(const_valid, constIn, io.inputs(0))
   /** The input data which is only used for storing.
    */
   var dataIn = io.inputs(1)

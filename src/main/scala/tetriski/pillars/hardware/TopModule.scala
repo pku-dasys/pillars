@@ -128,7 +128,7 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
   }
 
   //ALUs have type ID = 0, and they will be fired by schedule controllers.
-  val alus = (0 until aluNum).toArray.map(t => Module(new Alu(moduleInfos.getParams(t + currentNum)(0),
+  val alus = (0 until aluNum).toArray.map(t => Module(new Alu2(moduleInfos.getParams(t + currentNum)(0),6,6,6,
     moduleInfos.getParams(t + currentNum)(1))))
   if (USE_AUXILIARY_SCHEDULER) {
     val aluScheduleControllers = (0 until aluNum).toArray
@@ -247,9 +247,14 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
   // to corresponding configuration controllers, and connects them.
   var configControllers = ArrayBuffer[ConfigController]()
   var regionConfigBits = List[Int]()
+  var ALUs_in_region = 0
+  var RFs_in_region = 0
   for (region <- regionList) {
     var configBits = List[Int]()
     var configPorts = List[Data]()
+    var ALU_mux_configPorts = List[Data]()
+    ALUs_in_region = 0
+    RFs_in_region = 0
     for (moduleList <- region) {
       val typeID = moduleList(0)
       val moduleID = moduleList(1)
@@ -262,6 +267,19 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
         case 4 => LSUs(moduleID).io.configuration
       }
       configPorts = configPorts :+ configPort
+      if(typeID == 0) {
+        ALUs_in_region = ALUs_in_region + 1
+      }else if(typeID==1){
+        RFs_in_region = RFs_in_region + 1
+      }
+
+      if (typeID == 0){
+        val ALU_muxI1_configPort = alus(moduleID).io.input_mux_config(0)
+        val ALU_muxI2_configPort = alus(moduleID).io.input_mux_config(1)
+        val ALU_muxP_configPort = alus(moduleID).io.input_mux_config(2)
+        ALU_mux_configPorts = ALU_mux_configPorts :+ ALU_muxI1_configPort :+ ALU_muxI2_configPort :+ ALU_muxP_configPort
+      }
+
     }
     val regionTotalBits = configBits.sum
 
@@ -272,8 +290,20 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
     regionConfigBits = regionConfigBits :+ regionTotalBits
     val dispatch = Module(new Dispatch(regionTotalBits, configBits))
     dispatch.io.en <> io.en
+    println("Region: " + region)
+
     for (i <- 0 until configBits.size) {
       configPorts(i) := dispatch.io.outs(i)
+      println("Config Ports: " + i + ":" + configPorts(i))
+    }
+    println("Number of ALUs in region: " + ALUs_in_region)
+    println("Number of RFs in region: " + RFs_in_region)
+    //connecting mux configurations to ALU in order to generate valid signal
+    if(ALUs_in_region == 1) {
+      for (i <- 0 until ALU_mux_configPorts.size) {
+        ALU_mux_configPorts(i) := dispatch.io.outs(i + ALUs_in_region + RFs_in_region)
+        println("ALU mux Config Ports: " + i + ":" + ALU_mux_configPorts(i))
+      }
     }
     configControllers.append(configController)
     dispatch.io.configuration := configController.io.outConfig

@@ -217,7 +217,7 @@ class STDNOC_PEBlock(name: String, useMuxBypass: Boolean, opList: List[OpEnum] =
   //port sequnces outs: 0: out
   //port sequnces inputs: 0: input_a, 1: input_b
   alu0.addOutPorts(Array("out_0"))
-  alu0.addInPorts(Array("input_a", "input_b", "input_p"))
+  alu0.addInPorts(Array("input_a", "input_b", "input_const", "input_p"))
   addElement(alu0)
 
 //  /** A multiplexer that can choose a data source for input_a of the ALU.
@@ -233,23 +233,23 @@ class STDNOC_PEBlock(name: String, useMuxBypass: Boolean, opList: List[OpEnum] =
 //  mux1.addOutPorts(Array("out_0"))
 //  mux1.addInPorts((0 until neighborSize + 2).map(i => "input_" + i.toString).toArray)
 //  addElement(mux1)
-  /** A multiplexer that can choose a data source for I1 of the ALU from 7 sources(N,E,W,S,RP0,RP1,const)
+  /** A multiplexer that can choose a data source for I1 of the ALU from 6 sources(N,E,W,S,RP0,RP1)
    */
-  val muxI1 = new ElementMux("muxI1", List(neighborSize + 3, dataWidth))
+  val muxI1 = new ElementMux("muxI1", List(neighborSize + 2, dataWidth))
   muxI1.addOutPorts(Array("out_0"))
-  muxI1.addInPorts((0 until neighborSize + 3).map(i => "input_" + i.toString).toArray)
+  muxI1.addInPorts((0 until neighborSize + 2).map(i => "input_" + i.toString).toArray)
   addElement(muxI1)
-  /** A multiplexer that can choose a data source for I2 of the ALU from 7 sources(N,E,W,S,RP0,RP1,const)
+  /** A multiplexer that can choose a data source for I2 of the ALU from 7 sources(N,E,W,S,RP0,RP1)
    */
-  val muxI2 = new ElementMux("muxI2", List(neighborSize + 3, dataWidth))
+  val muxI2 = new ElementMux("muxI2", List(neighborSize + 2, dataWidth))
   muxI2.addOutPorts(Array("out_0"))
-  muxI2.addInPorts((0 until neighborSize + 3).map(i => "input_" + i.toString).toArray)
+  muxI2.addInPorts((0 until neighborSize + 2).map(i => "input_" + i.toString).toArray)
   addElement(muxI2)
-  /** A multiplexer that can choose a data source for P of the ALU from 7 sources(N,E,W,S,RP0,RP1,const)
+  /** A multiplexer that can choose a data source for P of the ALU from 7 sources(N,E,W,S,RP0,RP1)
    */
-  val muxP = new ElementMux("muxP", List(neighborSize + 3, dataWidth))
+  val muxP = new ElementMux("muxP", List(neighborSize + 2, dataWidth))
   muxP.addOutPorts(Array("out_0"))
-  muxP.addInPorts((0 until neighborSize + 3).map(i => "input_" + i.toString).toArray)
+  muxP.addInPorts((0 until neighborSize + 2).map(i => "input_" + i.toString).toArray)
   addElement(muxP)
 
   /** A multiplexer that can choose a data source for North_Out from 3 sources(T,RP0,RP1)
@@ -339,9 +339,9 @@ class STDNOC_PEBlock(name: String, useMuxBypass: Boolean, opList: List[OpEnum] =
   const0.addOutPorts(Array("out_0"))
   addElement(const0)
 
-  val const1 = new ElementConst("const0", List(dataWidth))
-  const1.addOutPorts(Array("out_0"))
-  addElement(const1)
+//  val const1 = new ElementConst("const0", List(dataWidth))
+//  const1.addOutPorts(Array("out_0"))
+//  addElement(const1)
 
   for (i <- 0 until neighborSize) {
     addConnect(term(inPortsNeighbor(i)) -> muxI1 / s"input_$i")
@@ -361,13 +361,13 @@ class STDNOC_PEBlock(name: String, useMuxBypass: Boolean, opList: List[OpEnum] =
 
   addConnect(rf0 / "out_0" -> muxI1 / s"input_$neighborSize")
   addConnect(rf0 / "out_1" -> muxI1 / ("input_" + (neighborSize + 1).toString))
-  addConnect(const0 / "out_0" -> muxI1 / ("input_" + (neighborSize + 2).toString))
+//  addConnect(const0 / "out_0" -> muxI1 / ("input_" + (neighborSize + 2).toString))
   addConnect(rf0 / "out_0" -> muxI2 / s"input_$neighborSize")
   addConnect(rf0 / "out_1" -> muxI2 / ("input_" + (neighborSize + 1).toString))
-  addConnect(const0 / "out_0" -> muxI2 / ("input_" + (neighborSize + 2).toString))
+//  addConnect(const0 / "out_0" -> muxI2 / ("input_" + (neighborSize + 2).toString))
   addConnect(rf0 / "out_0" -> muxP / s"input_$neighborSize")
   addConnect(rf0 / "out_1" -> muxP / ("input_" + (neighborSize + 1).toString))
-  addConnect(const0 / "out_0" -> muxP / ("input_" + (neighborSize + 2).toString))
+//  addConnect(const0 / "out_0" -> muxP / ("input_" + (neighborSize + 2).toString))
 
   addConnect(muxI1 / "out_0" -> rfI1 / "input_0")
   addConnect(muxI2 / "out_0" -> rfI2 / "input_0")
@@ -435,6 +435,7 @@ class STDNOC_PEBlock(name: String, useMuxBypass: Boolean, opList: List[OpEnum] =
   addConnect(rfI1 / "out_0" -> alu0 / "input_a")
   addConnect(rfI2 / "out_0" -> alu0 / "input_b")
   addConnect(rfP / "out_0" -> alu0 / "input_p")
+  addConnect(const0 / "out_0" -> alu0 / "input_const")
 
   if(isMemPE){
     /** A multiplexer that can choose a data source for data address.
@@ -473,7 +474,7 @@ class STDNOC_PEBlock(name: String, useMuxBypass: Boolean, opList: List[OpEnum] =
     /** An LSU can perform load or store operation.
      */
     val LSU = new ElementLSU2("loadStoreUnit", List(dataWidth))
-    LSU.addInPorts(Array("addr", "dataIn"))
+    LSU.addInPorts(Array("addr", "dataIn", "constIn"))
     LSU.addOutPorts(Array("out"))
     addElement(LSU)
 
@@ -482,6 +483,7 @@ class STDNOC_PEBlock(name: String, useMuxBypass: Boolean, opList: List[OpEnum] =
 
     addConnect(rfI2 / "out_0" -> LSU / "addr")
     addConnect(rfI1 / "out_0" -> LSU / "dataIn")
+    addConnect(const0 / "out_0" -> LSU / "constIn")
 
 //    addConnect(List(List(LSU.getName(), "out"), List("out")))
 

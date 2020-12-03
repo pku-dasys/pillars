@@ -49,7 +49,6 @@
     "1": "LOAD",
     "3": "ADD"
 },
-      //ALU
       case OpEnum.ADD => 0
       case OpEnum.SUB => 1
       case OpEnum.AND => 2
@@ -57,15 +56,24 @@
       case OpEnum.XOR => 4
       case OpEnum.MUL => 5
       case OpEnum.SLT => 6
-      case OpEnum.SHLL => 7
-      case OpEnum.SLTU => 8
-      case OpEnum.SHRL => 9
-      case OpEnum.SHRA => 10
+      case OpEnum.LS => 7
+      case OpEnum.CLT => 8
+      case OpEnum.RS => 9
+      case OpEnum.MOVC => 10
       case OpEnum.DIV => 11
+      case OpEnum.CMP => 12
+      case OpEnum.CGT => 13
+      case OpEnum.SELECT => 14
+      case OpEnum.CMERGE => 15
+
 
       //LSU
       case OpEnum.LOAD => 0
       case OpEnum.STORE => 1
+      case OpEnum.LOADH => 2
+      case OpEnum.STOREH => 3
+      case OpEnum.LOADB => 4
+      case OpEnum.STOREB => 5
 
       case OpEnum.CONST => 0
 
@@ -77,10 +85,10 @@ SELECTED_OP
 0
 <1:cgra.tile_0.pe_1_0.loadStoreUnit.internalNode_0>
 SELECTED_OP
-17(storeb)
+5(storeb)
 <1:cgra.tile_0.pe_1_0.loadStoreUnit.internalNode_0>
 SELECTED_OP
-18
+0 (load)
 <3:cgra.tile_0.pe_1_0.alu0.internalNode_0>
 SELECTED_OP
 0
@@ -170,10 +178,10 @@ SELECTED_OP
 0
 <0:cgra.tile_0.pe_2_0.loadStoreUnit.internalNode_0>
 SELECTED_OP
-18(loadb)
+4(loadb)
 <1:cgra.tile_0.pe_2_0.loadStoreUnit.internalNode_0>
 SELECTED_OP
-17(store)
+1(store)
 
 "RF0": {
  "CONNECTIONS": {
@@ -219,7 +227,7 @@ SELECTED_OP
 0
 <0:cgra.tile_0.pe_3_0.loadStoreUnit.internalNode_0>
 SELECTED_OP
-18
+0
 
 "PE_X1|_Y1|": {
 "CONNECTIONS": {
@@ -466,10 +474,10 @@ SELECTED_OP
 0
 <0:cgra.tile_0.pe_2_1.alu0.internalNode_0>
 SELECTED_OP
-CMP
+12
 <2:cgra.tile_0.pe_2_1.alu0.internalNode_0>
 SELECTED_OP
-SELECT
+14
 <3:cgra.tile_0.pe_2_1.alu0.internalNode_0>
 SELECTED_OP
 0
@@ -684,10 +692,10 @@ SELECTED_OP
 
 <0:cgra.tile_0.pe_2_2.alu0.internalNode_0>
 SELECTED_OP
-MOVC
+10
 <0:cgra.tile_0.pe_2_2.alu0.internalNode_0>
 SELECTED_OP
-CMERGE
+15
 
 
                     "RF0": {

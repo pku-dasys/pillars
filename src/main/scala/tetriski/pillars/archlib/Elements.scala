@@ -26,7 +26,7 @@ class ElementAlu(name: String, aluOpList: List[OpEnum], supBypass: Boolean, para
   //TODO: automatically infer configBits to reduce the reconfiguration overhead of ALU.
   var configBits = 4
   if (USE_PREDICATE){
-    configBits = 5
+    configBits = 6 // including const valid
   }else {
     configBits = 4
   }
@@ -41,6 +41,7 @@ class ElementAlu(name: String, aluOpList: List[OpEnum], supBypass: Boolean, para
   }
 
 }
+
 
 /** An element corresponding register file.
  *
@@ -143,7 +144,7 @@ class ElementLSU2(name: String, params: List[Int]) extends ElementTrait {
   setSupOps(List(OpEnum.LOAD, OpEnum.STORE, OpEnum.LOADH, OpEnum.STOREH, OpEnum.LOADB, OpEnum.STOREB))
 
   //0 for load, 1 for store
-  val configBits = 3
+  val configBits = 4 //including const valid
   setParams(params :+ configBits)
   setName(name)
 

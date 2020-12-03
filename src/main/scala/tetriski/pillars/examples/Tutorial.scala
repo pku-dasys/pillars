@@ -18,7 +18,7 @@ import chisel3.iotesters.PeekPokeTester
 object Tutorial {
   def main(args: Array[String]): Unit = {
     val rowNum = 4
-    val colNum = 6
+    val colNum = 4
     val inputPort = 2
     val outputPort = 2
     val dataWidth = 16
@@ -44,8 +44,8 @@ object Tutorial {
     //Get MRRG and mapping.
     //You can also use dumpMRRG(targetedII, filename) to save the MRRG,
     // and use loadTXT(mrrgFilename) to load the MRRG.
-    val II = 1
-    val MRRG = arch.getMRRG(II)
+    val II = 4
+//    val MRRG = arch.getMRRG(II)
 //            val dfgFilename = "dfg/cap/cap.dot"
     val dfgFilename = "tutorial/MM.dot"
     val DFG = DotReader.loadDot(dfgFilename, II)
@@ -68,63 +68,79 @@ object Tutorial {
 
     //Simulate with the mapping result.
 
-    /*
-        //Matrix multiplication: C = A X B, where A is a M * 2 matrix, and B is a 2 * N matrix.
-        val M = 4
-        val N = 3
-        val matrixA = Array.ofDim[Int](M, 2)
-        val matrixB = Array.ofDim[Int](2, N)
-        val matrixC = Array.ofDim[Int](M, N)
-        val flattenedAB = new Array[Int](M * 2 + 2 * N)
 
-        for (i <- 0 until M)
-          for (j <- 0 until 2) {
-            matrixA(i)(j) = i * 2 + j
-            flattenedAB(i * 2 + j) = matrixA(i)(j)
-          }
-        for (i <- 0 until 2)
-          for (j <- 0 until N) {
-            matrixB(i)(j) = i * N + j
-            flattenedAB(i * N + j + M * 2) = matrixB(i)(j)
-          }
-        for (i <- 0 until M)
-          for (j <- 0 until N) {
-            var sum = 0
-            for (k <- 0 until 2) {
-              sum += matrixA(i)(k) * matrixB(k)(j)
-            }
-            matrixC(i)(j) = sum
-          }
+        //Matrix multiplication: C = A X B, where A is a M * 2 matrix, and B is a 2 * N matrix.
+//        val M = 4
+//        val N = 3
+//        val matrixA = Array.ofDim[Int](M, 2)
+//        val matrixB = Array.ofDim[Int](2, N)
+//        val matrixC = Array.ofDim[Int](M, N)
+//        val flattenedAB = new Array[Int](M * 2 + 2 * N)
+    val M = 20
+    val arrayA = new Array[Int](M)
+    val arrayB = new Array[Int](M)
+    val arrayC = new Array[Int](M)
+    val flattenedAB = new Array[Int](M * 2 + 1)
+
+//        for (i <- 0 until M)
+//          for (j <- 0 until 2) {
+//            matrixA(i)(j) = i * 2 + j
+//            flattenedAB(i * 2 + j) = matrixA(i)(j)
+//          }
+//        for (i <- 0 until 2)
+//          for (j <- 0 until N) {
+//            matrixB(i)(j) = i * N + j
+//            flattenedAB(i * N + j + M * 2) = matrixB(i)(j)
+//          }
+//        for (i <- 0 until M)
+//          for (j <- 0 until N) {
+//            var sum = 0
+//            for (k <- 0 until 2) {
+//              sum += matrixA(i)(k) * matrixB(k)(j)
+//            }
+//            matrixC(i)(j) = sum
+//          }
+    for (i <- 0 until M) {
+      arrayA(i) = i * 2 + 5
+      arrayB(i) = i * 3
+      flattenedAB(i) = arrayA(i)
+      flattenedAB(i + M) = arrayB(i)
+      arrayC(i) = arrayA(i) + arrayB(i)
+    }
+    flattenedAB(2*M) = 1 //loop start
+
 
         //The base address of A and B in SRAM of an LSU.
         val a_base = 0
-        val b_base = M * 2
+        val b_base = M
 
         //The value of const operators.
-        val const0 = 2
-        val const3 = 0
-        val const5 = a_base
-        val const11 = b_base
-        val const13 = N * 0
-        val const20 = 1
-        val const22 = a_base
-        val const28 = b_base
-        val const31 = N * 1
-        val constVals = Array(const0, const3, const5, const11, const13,
-          const20, const22, const28, const31)
+//        val const0 = 2
+//        val const3 = 0
+//        val const5 = a_base
+//        val const11 = b_base
+//        val const13 = N * 0
+//        val const20 = 1
+//        val const22 = a_base
+//        val const28 = b_base
+//        val const31 = N * 1
+//        val constVals = Array(const0, const3, const5, const11, const13,
+//          const20, const22, const28, const31)
 
-//       val const13 = 4094
-//       val const11 = 4094
-//       val const4 = 0
-//       val const6 = 0
-//       val const1 = 10
-//       val const9 = 0
+       val const13 = 0
+       val const11 = 2 * M
+       val const4 = 2*M + 1
+       val const6 = 0
+       val const1 = M
+       val const9 = M
+
+      val constVals = Array(const1, const4, const6, const9, const11, const13)
 
 
         //Simulation settings.
         val simulationHelper = new SimulationHelper(arch)
-        val resultFilename = s"tutorial/ii$II" + "_r.txt"
-        val infoFilename = s"tutorial/ii$II" + "_i.txt"
+        val resultFilename = s"tutorial/ii$II" + "_r_array_add.txt"
+        val infoFilename = s"tutorial/ii$II" + "_i_array_add.txt"
         simulationHelper.init(resultFilename)
         simulationHelper.setConst(constVals, II)
 
@@ -151,29 +167,31 @@ object Tutorial {
 
         //Please make sure that the name of those ports are "input_[0-9]+" or "out_[0-9]+"
         // when using simulationHelper.outPorts and simulationHelper.inputPorts.
-        val portI = simulationHelper.inputPorts(0)
-        val portJ = simulationHelper.inputPorts(1)
-        val portResult = simulationHelper.outPorts(0)
+//        val portI = simulationHelper.inputPorts(0)
+//        val portJ = simulationHelper.inputPorts(1)
+//        val portResult = simulationHelper.outPorts(0)
 
-        val inputI = new ArrayBuffer[Int]()
-        val inputJ = new ArrayBuffer[Int]()
-        val outResult = new ArrayBuffer[Int]()
-        for (i <- 0 until M)
-          for (j <- 0 until N) {
-            inputI.append(i)
-            inputJ.append(j)
-            outResult.append(matrixC(i)(j))
-          }
-        appTestHelper.setInputPortData(Map(portI -> inputI.toArray, portJ -> inputJ.toArray))
-        appTestHelper.setOutPortRefs(Map(portResult -> outResult.toArray))
+//        val inputI = new ArrayBuffer[Int]()
+//        val inputJ = new ArrayBuffer[Int]()
+//        val outResult = new ArrayBuffer[Int]()
+        for (i <- 0 until M) {
+//          for (j <- 0 until N) {
+//            inputI.append(i)
+//            inputJ.append(j)
+//            outResult.append(arrayC(i))
+        }
 
-        val loaderNum = DFG.opNodes.map(node => if (node.opcode == OpEnum.LOAD) {
-          1
-        } else {
-          0
-        }).sum
-        val synthesizedDesign = () =>
-          new SynthesizedModule(DFG, constInfo, (0 until loaderNum).map(t => flattenedAB).toArray, dataWidth)
+
+//        appTestHelper.setInputPortData(Map(portI -> inputI.toArray, portJ -> inputJ.toArray))
+//        appTestHelper.setOutPortRefs(Map(portResult -> outResult.toArray))
+
+//        val loaderNum = DFG.opNodes.map(node => if (node.opcode == OpEnum.LOAD) {
+//          1
+//        } else {
+//          0
+//        }).sum
+//        val synthesizedDesign = () =>
+//          new SynthesizedModule(DFG, constInfo, (0 until loaderNum).map(t => flattenedAB).toArray, dataWidth)
 
     //    chisel3.Driver.execute(Array("-td", "tutorial/RTL/"), synthesizedDesign)
     //    iotesters.Driver.execute(Array("-tgvo", "on", "-tbn", "verilator"), synthesizedDesign) {
@@ -185,7 +203,7 @@ object Tutorial {
         iotesters.Driver.execute(Array("-tgvo", "on", "-tbn", "verilator"), topDesign) {
           c => new MatrixMulTester(c, appTestHelper)
         }
-    */
+
 
   }
 }
@@ -229,7 +247,7 @@ class MatrixMulTester(c: TopModule, appTestHelper: AppTestHelper)
   val testII = appTestHelper.getTestII()
   inputConfig(testII)
   poke(c.io.en, 1)
-  checkPortOutsWithInput(testII)
+//  checkPortOutsWithInput(testII)
 
 }
 
