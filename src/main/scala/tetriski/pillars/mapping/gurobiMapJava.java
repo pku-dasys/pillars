@@ -392,9 +392,9 @@ public class gurobiMapJava {
 //        if (status == GRB.OPTIMAL || status == GRB.SUBOPTIMAL || status == GRB.SOLUTION_LIMIT) {
         if (solcntR != 0) {
 
-            if (ringCheckPass) {
+//            if (ringCheckPass) {
                 result = "success\t\t" + iterationNum + "\t\t" + ringCheckCount;
-            }
+//            }
             int[] r_mapped = new int[numMrrgR];
             int[] f_mapped = new int[numMrrgF];
             int[] r_result = new int[numMrrgR];
@@ -497,7 +497,7 @@ public class gurobiMapJava {
                     if (abs(F[FIndex(op, f)].get(GRB.DoubleAttr.X) - 1.0) < 0.01) {
                         String name = MRRGFunctionName.get(f);
                         String opName = DFGOpNodeName.get(op);
-                        if(DFGMultipleInputMap.containsKey(opName)) {
+                        if (DFGMultipleInputMap.containsKey(opName)) {
                             int routingNodeOperand0 = MRRGFunctionFanin.get(f).get(0);
                             int valNodeOperand1 = DFGOpOperand.get(op).get(1);
                             if (abs(1.0 - modelR.getVarByName("R_" + routingNodeOperand0 + "_" + valNodeOperand1).get(GRB.DoubleAttr.X)) < 0.01) {
@@ -560,7 +560,7 @@ public class gurobiMapJava {
             infoFile.flush();
             infoFile.close();
 
-            if(ringCheckPass) {
+            if (ringCheckPass) {
                 int regCount = 0;
                 for (int val = 0; val < numDfgVals; val++) {
                     for (int fanout = 0; fanout < DFGValNodeOut.get(val).size(); fanout++) {
@@ -1264,14 +1264,14 @@ public class gurobiMapJava {
 
         modelR.update();
 
-        File init = new File("./importantBak/MappingSAT/vadd-24.res");
-        Scanner s = new Scanner(init);
-        String nodeName;
-        while(s.hasNext()){
-            nodeName = s.next();
-            GRBVar var = modelR.getVarByName(nodeName);
-            var.set(GRB.DoubleAttr.Start, 1);
-        }
+//        File init = new File("./importantBak/MappingSAT/vadd-24.res");
+//        Scanner s = new Scanner(init);
+//        String nodeName;
+//        while(s.hasNext()){
+//            nodeName = s.next();
+//            GRBVar var = modelR.getVarByName(nodeName);
+//            var.set(GRB.DoubleAttr.Start, 1);
+//        }
 
 
         /** Constraints of placement.
@@ -1327,8 +1327,6 @@ public class gurobiMapJava {
             int RelativeSkewNum = DFGMultipleInputMap.size();
 
             GRBVar[] WaitSkews = modelR.addVars(WaitSkewNum, 'I');
-            GRBVar[] RelativeSkews = modelR.addVars(RelativeSkewNum, 'I');
-            GRBVar[] SkewDirection = modelR.addVars(RelativeSkewNum, 'B');
 
 
             if (separatedPR) {
@@ -1339,6 +1337,8 @@ public class gurobiMapJava {
 
             setLatencyRange(Latencies, maxLatency);
             if (useRelativeSkew) {
+                GRBVar[] RelativeSkews = modelR.addVars(RelativeSkewNum, 'I');
+                GRBVar[] SkewDirection = modelR.addVars(RelativeSkewNum, 'B');
                 constrRelativeSkew(modelR, RelativeSkews, WaitSkews,
                         SkewDirection, skewLimit);
             }
