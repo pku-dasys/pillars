@@ -90,11 +90,12 @@ class TileBlock(name: String, x: Int, y: Int, numIn: Int, numOut: Int,
  * @param complex      a parameter indicating whether using more routable connections
  * @param isToroid     a parameter indicating whether using toroid architecture
  * @param alternation  a parameter indicating whether using alternate PEs
+ * @param basicOpList  basic operator list of ALUs
  * @param dataWidth    the data width
  */
 class TileLSUBlock(name: String, x: Int, y: Int, numIn: Int, numOut: Int,
                    useMuxBypass: Boolean = true, complex: Boolean = false, isToroid: Boolean = true,
-                   alternation: Boolean = false, dataWidth: Int = 32)
+                   alternation: Boolean = false, basicOpList: List[OpEnum] = null, dataWidth: Int = 32)
   extends BlockTrait {
   initName(name)
 
@@ -143,7 +144,11 @@ class TileLSUBlock(name: String, x: Int, y: Int, numIn: Int, numOut: Int,
 
       inPortsNeighbor = neighborPortSet.toArray
 
-      var opList = List(OpEnum.ADD, OpEnum.MUL, OpEnum.SUB, OpEnum.SHLA, OpEnum.SHRA)
+      var defaultOpList = List(OpEnum.ADD, OpEnum.MUL, OpEnum.SUB, OpEnum.SHLA, OpEnum.SHRA)
+      if (basicOpList != null) {
+        defaultOpList = basicOpList
+      }
+      var opList = defaultOpList
       var dualALU = false
       if (alternation) {
         //        if (i < x / 2 && j < y / 2) {
@@ -157,9 +162,9 @@ class TileLSUBlock(name: String, x: Int, y: Int, numIn: Int, numOut: Int,
         opList = List(OpEnum.ADD, OpEnum.MUL, OpEnum.SUB, OpEnum.SHLA, OpEnum.SHRA, OpEnum.AND, OpEnum.OR, OpEnum.XOR)
       }
       if (alternation && (i + j) % 2 == 1) {
-        if(complex){
+        if (complex) {
           dualALU = true
-        }else{
+        } else {
           opList = List(OpEnum.ADD, OpEnum.SUB, OpEnum.AND, OpEnum.OR, OpEnum.XOR)
         }
       }

@@ -30,6 +30,7 @@ object ILPMap {
   def mapping(dfg: DFG, mrrg: MRRG, filename: String = null, fw: FileWriter = null,
               separatedPR: Boolean = false, scheduleControl: Boolean = false,
               skewLimit: Int = 2, latencyLimit: Int = 32): Double = {
+    mrrg.nodes.foreach(n => n.mapNode = null)
     val mapper = new gurobiMapJava(filename)
 
     mapper.II = dfg.II
@@ -218,7 +219,7 @@ object ILPMap {
       println("Elapsed time:" + mapper.elapsedTime + "ms")
       GlobalMappingResult.addResult(mapper.result, mapper.elapsedTime, mapper.usedBypassALU, mapper.usedFuncALU)
 
-      //      if (mapper.result.contains("success")) {
+            if (mapper.result.contains("success")) {
       val routingResult = result(0)
       for (i <- 0 until num_mrrg_r) {
         if (routingResult.get(i).intValue != -1) {
@@ -275,7 +276,7 @@ object ILPMap {
       dfg.regConnect = JavaConverters.mapAsScalaMap(mapper.regConnect)
       dfg.synthesizable = true
       dfg.regNum = mapper.regMap.size()
-      //      }
+            }
       return mapper.elapsedTime
     }
     -1
