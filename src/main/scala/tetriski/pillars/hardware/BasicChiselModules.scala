@@ -289,6 +289,44 @@ class Alu(funSelect: Int, w: Int) extends Module {
   }
 }
 
+/** An reconfigurable counter.
+ * The configuration consists of end (stop value), change (value changes per cycle), and init (initial value).
+ *
+ * @param w         the data width
+ */
+class Counter(w: Int) extends Module {
+  val io = IO(new Bundle {
+    val en = Input(Bool())
+    val configuration = Input(UInt((3 * w).W))
+    val outs = Output(MixedVec((1 to 1) map { i => UInt(w.W) }))
+    val finish = Output(Bool())
+  })
+
+  val init = io.configuration(w - 1, 0)
+  val change = io.configuration(2 * w - 1, w)
+  val end = io.configuration(3 * w - 1, 2 * w)
+
+  val reg = RegInit(0.U(w.W))
+  val firing = RegInit(false.B)
+
+  io.outs(0) := 0.U
+  io.finish := false.B
+  when(io.en){
+    when(!firing){
+      reg := init
+      firing := true.B
+      io.outs(0) := init
+    }.otherwise{
+      when(reg + change =/= end){
+        reg := reg + change
+        io.outs(0) := reg + change
+      }.otherwise{
+        io.finish := true.B
+      }
+    }
+  }
+
+}
 
 /** A register file which can perform an arbitrary subset of optional operations.
  *
@@ -305,7 +343,7 @@ class RegisterFile(log2Regs: Int, numIn: Int, numOut: Int, w: Int) extends Modul
     val inputs = Input(MixedVec((1 to numIn) map { i => UInt(w.W) }))
     val outs = Output(MixedVec((1 to numOut) map { i => UInt(w.W) }))
   })
-  if (log2Regs == 0) {
+  if (log2Regs == 0 && numIn == 1 && numOut == 1) {
     //single register
     val reg = RegInit(0.U(w.W))
     reg := io.inputs(0)
@@ -350,7 +388,7 @@ class Multiplexer(numIn: Int, w: Int) extends Module {
     val outs = Output(MixedVec((1 to 1) map { i => UInt(w.W) }))
   })
   val input0 = io.inputs(0)
-  val input1 = io.inputs(1)
+  //  val input1 = io.inputs(1)
   val out = io.outs(0)
   val selectArray = (0 to numIn - 1).map(i => i.U -> io.inputs(i))
   val muxIn0 = MuxLookup(io.configuration, io.inputs(0), selectArray)

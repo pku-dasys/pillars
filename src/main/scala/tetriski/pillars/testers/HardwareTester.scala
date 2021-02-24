@@ -6,6 +6,26 @@ import tetriski.pillars.hardware.PillarsConfig._
 import tetriski.pillars.hardware._
 import tetriski.pillars.util.SplitOrConcat
 
+/** A tester of the Counter.
+ *
+ * @param c the Counter
+ */
+class CounterTester(c: Counter) extends PeekPokeTester(c) {
+  val w = 8
+  val init = 3
+  val change = 2
+  val end = 13
+  val config: BigInt = (end << (w * 2)) + (change << w) + init
+  poke(c.io.en, true)
+  poke(c.io.configuration, config)
+
+  for (i <- 0 until 10) {
+    println(peek(c.io.outs(0)).toString() + " " + peek(c.io.finish).toString())
+    step(1)
+  }
+}
+
+
 /** A tester of the PEBlock.
  * Since the configuration is set according to human computation, it is deprecated.
  *
@@ -371,14 +391,15 @@ object LoadStoreUnitVerilog extends App {
 }
 
 /** A tester of a multiplexer.
+ *
  * @param c the multiplexer
  */
 class MultiplexerUnitTester(c: Multiplexer) extends PeekPokeTester(c) {
   poke(c.io.configuration, 1)
 
   for (i <- 0 until 40) {
-    poke(c.input0, i)
-    poke(c.input1, i + 1)
+    poke(c.io.inputs(0), i)
+    poke(c.io.inputs(1), i + 1)
     expect(c.out, i + 1)
     step(1)
   }
@@ -393,6 +414,7 @@ object MuxTest extends App {
 }
 
 /** A tester of a synchronizer with skew = 3.
+ *
  * @param c the synchronizer
  */
 class SynchronizerTester(c: Synchronizer) extends PeekPokeTester(c) {
