@@ -168,9 +168,12 @@ trait ElementTrait extends Ports with BasicTrait {
    * @param opcode the opcode of the function will be performed
    */
   def updateConfig(opcode: Int): Unit = {
+
+    println("updateConfig supOps.size" + supOps.size)
     for (i <- 0 until supOps.size) {
       if (supOps(i).toString.toInt == opcode) {
         updateConfigArray(OpcodeTranslator.getModuleConfig(supOps(i)))
+        println("OpcodeTranslator.getModuleConfig(supOps(i))" + OpcodeTranslator.getModuleConfig(supOps(i)))
       }
     }
   }

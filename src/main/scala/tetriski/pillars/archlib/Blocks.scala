@@ -1031,7 +1031,23 @@ class STDNOC_Block(name: String, x: Int, y: Int, numIn: Int, numOut: Int,
 //        inPortsNeighbor = Array("input_w", "input_e", "input_n", "input_s",
 //          "input_wn", "input_ws", "input_en", "input_es", "input_lsu")
 //      }
-      var opList = List(OpEnum.ADD, OpEnum.MUL, OpEnum.SUB, OpEnum.SHLL, OpEnum.SHRA)
+//      var opList = List(OpEnum.ADD, OpEnum.MUL, OpEnum.SUB, OpEnum.SHLL, OpEnum.SHRA)
+      var opList = List(OpEnum.ADD,
+        OpEnum.SUB,
+        OpEnum.AND,
+        OpEnum.OR,
+        OpEnum.XOR,
+        OpEnum.MUL,
+        OpEnum.SLT,
+        OpEnum.LS,
+        OpEnum.CLT,
+        OpEnum.RS,
+        OpEnum.MOVC,
+        OpEnum.DIV,
+        OpEnum.CMP,
+        OpEnum.CGT,
+        OpEnum.SELECT,
+        OpEnum.CMERGE)
 //      if (alternation && (i + j) % 2 == 1) {
 //        opList = List(OpEnum.ADD, OpEnum.SUB)
 //      }

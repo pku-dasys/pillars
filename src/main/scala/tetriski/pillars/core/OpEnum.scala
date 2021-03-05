@@ -33,7 +33,7 @@ object OpEnum extends Enumeration {
   val GEP = Value("20")
   val ICMP = Value("21")
   val CMP = Value("21")
-    val SHR = Value("22")
+  val SHR = Value("22")
   val MOVC = Value("22")
   val SLT = Value("23")
   val CGT = Value("24")

@@ -12,7 +12,7 @@ object PillarsConfig {
    * @example If LOG_II_UPPER_BOUND = 2, the compliant II of the CGRA architecture is 1 ~ 3.
    *
    */
-  val LOG_II_UPPER_BOUND = 2
+  val LOG_II_UPPER_BOUND = 3
   val II_UPPER_BOUND = Math.pow(2, LOG_II_UPPER_BOUND).toInt
 
   /** Memory depth in Load/Store unit.

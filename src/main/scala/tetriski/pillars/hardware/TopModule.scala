@@ -323,7 +323,7 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
     val dsts = connect(src)
     for (j <- 0 until dsts.size) {
       val dst = dsts(j)
-      println("dst is: " + dst)
+     // println("dst is: " + dst)
       if (dst(0) == types) {
         io.outs(dst(2)) := outPorts(src(0))(src(1))(src(2)).asInstanceOf[Data]
       } else if (src(0) == types) {

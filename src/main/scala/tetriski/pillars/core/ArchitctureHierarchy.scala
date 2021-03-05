@@ -196,26 +196,30 @@ class ArchitctureHierarchy extends BlockTrait {
 
     val pattern = "[0-9]+:".r
 
+    println("infos(0)" + infos(0))
     println("infos(1)" + infos(1))
     println("infos(2)" + infos(2))
-    println("infos(3)" + infos(3))
     for (i <- 0 until (infos.size / 3)) {
+      println("")
       val targetStr = infos(i * 3)
-      println("targetStr" + targetStr)
+      println("targetStr " + targetStr)
       val tempStr = (pattern findFirstIn targetStr).toArray
-      println("tempStr" + tempStr.mkString(" "))
+      println("tempStr " + tempStr.mkString(" "))
       val tempII = tempStr(0).replace(":", "").toInt
-      println("tempII" + tempII)
+      println("tempII " + tempII)
 
       val moduleName = infos(i * 3).replaceAll("([0-9]+:)|<|>", "")
         .split("\\.", 0)
-      println("moduleName" + moduleName)
+      println("moduleName " + moduleName.mkString(" "))
       var temp = this.asInstanceOf[BlockTrait]
       for (j <- 1 until moduleName.size - 2) {
         temp = temp(moduleName(j))
+        println("j " + j)
+        println("moduleName(j) " + moduleName(j))
+        println("temp " + temp)
       }
       val module = temp.getElement(moduleName(moduleName.size - 2))
-      println("module" + module)
+      println("module " + module)
       reconfigModuleArrays(tempII).append(module)
 
       if (II == 1) {
@@ -224,6 +228,7 @@ class ArchitctureHierarchy extends BlockTrait {
         infoArrays(tempII).append(infos(i * 3 + 2))
       } else {
         val mode = module.mode
+        println("mode " + mode)
         if (mode == REG_MODE) {
           //Split and reconstruct the contexts.
           infoArrays(tempII).append(moduleName(moduleName.size - 1))
@@ -243,8 +248,11 @@ class ArchitctureHierarchy extends BlockTrait {
           }
         }
       }
+      println("infoArrays(tempII) " + infoArrays(tempII).mkString(" "))
+      println("reconfigModuleArrays(tempII) " + reconfigModuleArrays(tempII).mkString(" "))
     }
-
+    println("")
+    println("update module configs:::")
     for (ii <- 0 until II) {
       resetConfigs()
       val infoArray = infoArrays(ii)
@@ -253,9 +261,12 @@ class ArchitctureHierarchy extends BlockTrait {
 
         val module = reconfigModuleArrays(ii)(i)
         val second = infoArray(offset + 1)
+        println("")
+        println(s"ii:$ii module:$module")
         if (second == "SELECTED_OP") {
           val opcode = infoArray(offset + 2).toInt
           module.updateConfig(opcode)
+          println(s"opcode:$opcode")
         }
         else {
           val fanInNums = second.split(" ").toList.map(i => i.toInt)
@@ -278,6 +289,7 @@ class ArchitctureHierarchy extends BlockTrait {
             module.updateConfig(fanInNums, fanOutNums, internalNum)
           }
           module.configArray
+          println(s"faninNums:$fanInNums fanOutNums:$fanOutNums internalNum:$internalNum fanOutNode:$fanOutNode")
         }
       }
 
@@ -288,7 +300,7 @@ class ArchitctureHierarchy extends BlockTrait {
         this.ConstsArray(constID).asInstanceOf[ElementConst].updateConfigArray(constVal)
       }
       retBitstreams.append(getConfigBitStream())
-      println("retBitstreans: "+retBitstreams)
+      println("retBitstreans: " + retBitstreams)
     }
     retBitstreams.toArray
   }
