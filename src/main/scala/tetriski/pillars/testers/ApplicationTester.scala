@@ -246,7 +246,9 @@ class ApplicationTester(c: TopModule, appTestHelper: AppTestHelper) extends Peek
     poke(c.io.streamInLSU(numInLSU).valid, 0)
     poke(c.io.baseLSU(numInLSU), base)
     step(1)
-
+    println("enqData")
+    println("Base: " + base)
+    println("InData array: " + inData)
     // push
     for (x <- inData) {
       poke(c.io.streamInLSU(numInLSU).valid, 1)

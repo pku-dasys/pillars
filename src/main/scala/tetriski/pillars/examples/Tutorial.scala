@@ -10,6 +10,7 @@ import tetriski.pillars.testers.{AppTestHelper, ApplicationTester}
 
 import scala.collection.mutable.ArrayBuffer
 import chisel3.iotesters.PeekPokeTester
+import tetriski.pillars.examples.ApplicationExamples.simulationHelper
 
 /** An end2end_test tutorial of Pillars.
  * Example: matrix multiplication: C = A X B, where A is a M * 2 matrix, and B is a 2 * N matrix.
@@ -100,16 +101,25 @@ object Tutorial {
     //            }
     //            matrixC(i)(j) = sum
     //          }
+
+
+    //expected
+    var outDataRefArray = Array[Int](M)
+
     for (i <- 0 until M) {
       arrayA(i) = i * 2 + 5
       arrayB(i) = i * 3
       flattenedAB(i) = arrayA(i)
       flattenedAB(i + M) = arrayB(i)
       arrayC(i) = arrayA(i) + arrayB(i)
+      outDataRefArray =  outDataRefArray :+  arrayC(i)
     }
     flattenedAB(2*M) = 1 //loop start
-
-
+    println("FlattenedAB")
+    for (i <- 0 until 2*M){
+      println(" " + flattenedAB(i))
+    }
+    val outDataArrays = Array(outDataRefArray)
     //The base address of A and B in SRAM of an LSU.
     val a_base = 0
     val b_base = M
@@ -126,16 +136,31 @@ object Tutorial {
     //        val const31 = N * 1
     //        val constVals = Array(const0, const3, const5, const11, const13,
     //          const20, const22, const28, const31)
-    val const14 = 0
-    val const13 = 2 * M
-    val const11 = 2 * M
-    val const4 = 2*M + 1
-    val const6 = 0
-    val const1 = M
-    val const9 = M
+//    val const14 = 0
+//    val const13 = 2 * M * 4 //byte address
+//    val const11 = 2 * M * 4 //byte address
+//    val const4 = (2*M + 1) *4
+//    val const6 = 0
+//    val const1 = M // trip count
+//    val const9 = M * 4
+    val const1 = 1
+    val const2 = M //trip count
+    val const4 = (2*M + 1) *4 // store addr
+    val const6 = M * 4 //array b base
+    val const7 =  2 * M * 4 //temporary fix for loop start store byte
+    val const9 = 0
+    val const11 = 2 * M * 4 // loop start
+    val const12 = 0
+    val const14 = 2 //LS
+    val const15 = 2 //LS
+    val const16 = 2 //LS
+    val const19 = 2 * M * 4 // loops start store
+    val const20 = 0
+    val const20017 = 254 //exit
+    val const20018 = 1
 
-    val constVals = Array(const1, const4, const6, const9, const11, const13, const14)
-
+    // order of constvals should match with order of const in ii_r_xx.txt file
+    val constVals = Array(const1, const2, const4, const6, const7,const9, const11,const12, const14, const15, const16, const19, const20, const20017,const20018)
 
     //Simulation settings.
     val simulationHelper = new SimulationHelper(arch)
@@ -181,7 +206,14 @@ object Tutorial {
       //            outResult.append(arrayC(i))
     }
 
-
+//    val inData0 = (0 until M).map(i => scala.util.Random.nextInt()).toArray
+//    val inDataArrays = Array(inData0)
+//
+//    val dataWithAddr = simulationHelper.getDataWithAddr(dataSize = M,
+//      inDataArrays = inDataArrays, outDataArrays = outDataArrays)
+//    val outDatas = dataWithAddr(1).asInstanceOf[Map[List[Int], Array[Int]]]
+//
+//    appTestHelper.addOutData(outDatas)
     //        appTestHelper.setInputPortData(Map(portI -> inputI.toArray, portJ -> inputJ.toArray))
     //        appTestHelper.setOutPortRefs(Map(portResult -> outResult.toArray))
 
@@ -257,14 +289,33 @@ object Tutorial {
  */
 class ArrayAddTester(c: TopModule, appTestHelper: AppTestHelper)
   extends ApplicationTester(c, appTestHelper) {
+  val M = 20
+  val arrayA = new Array[Int](M)
+  val arrayB = new Array[Int](M)
+  val arrayC = new Array[Int](M)
+
+  for (i <- 0 until M) {
+    arrayA(i) = i * 2 + 5
+    arrayB(i) = i * 3
+    arrayC(i) = arrayA(i) + arrayB(i)
+  }
+
+  val onevariableArray = new Array[Int](1)
+  onevariableArray(0) = 0
 
   poke(c.io.en, 0)
   inputData()
   val testII = appTestHelper.getTestII()
   inputConfig(testII)
   poke(c.io.en, 1)
-  step(20)
-  checkLSUData()
+  step(2)
+  //poke(c.io.en, 0)
+  //enqData(1, onevariableArray ,  2 * 20)
+  //poke(c.io.en, 1)
+  step(90)
+//  checkLSUData()/
+  val const4 = (2*M + 1) //*4
+  deqData(0,arrayC,const4)
 //  checkPortOutsWithInput(testII)
 
 }

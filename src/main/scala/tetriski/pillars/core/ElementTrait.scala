@@ -53,6 +53,7 @@ trait ElementTrait extends Ports with BasicTrait {
    * @param internalNum the identification numbers of internal node that
    */
   def updateConfig(fanInNums: List[Int], fanOutNums: List[Int], internalNum: Int): Unit = {
+    println(s" updateConfig fanInNums:$fanInNums fanOutNums:$fanOutNums internalNum:$internalNum ")
     if (internalNodes.size > 1) {
       if (supOps.size > 0) {
         //ALU bypass
@@ -73,6 +74,9 @@ trait ElementTrait extends Ports with BasicTrait {
         val oldConfig = getBigIntConfig()
         var newConfig: BigInt = oldConfig
         val singleConfigMask: BigInt = ((1 << singleConfigSize) - 1)
+
+        println(s"inPortNum:$inPortNum outPortNum:$outPortNum internalNumBigInt:$internalNumBigInt internalNodeNum:$internalNodeNum")
+        println(s"singleConfigSize:$singleConfigSize oldConfig:$oldConfig newConfig:$newConfig singleConfigMask:$singleConfigMask")
         for (fanInNum <- fanInNums) {
           breakable {
             if (fanInNum == -1) {
@@ -91,7 +95,7 @@ trait ElementTrait extends Ports with BasicTrait {
             for (i <- 0 until internalNodeNum) {
               configSet = configSet + i
             }
-
+            println(s"currentInputConfigArray:$currentInputConfigArray configSet:$configSet ")
             bannedINodeSet = bannedINodeSet + internalNumBigInt
             val unusedConfigArray = (configSet &~ bannedINodeSet).toArray
             if (unusedConfigArray.size == 0) {
@@ -107,6 +111,7 @@ trait ElementTrait extends Ports with BasicTrait {
               break
             }
 
+            println(s"currentInputConfigArray:$currentInputConfigArray configSet:$configSet ")
             val unusedConfig = unusedConfigArray(0)
             if (currentInputConfigArray.contains(internalNumBigInt)) {
               for (i <- 0 until inPortNum) {
@@ -129,6 +134,7 @@ trait ElementTrait extends Ports with BasicTrait {
             val clearConfig = newConfig & mask
             val replaceConfig: BigInt = internalNumBigInt << (singleConfigSize * fanInNum)
             newConfig = clearConfig | replaceConfig
+            println(s"newConfig:$newConfig clearConfig:$clearConfig  replaceConfig:$replaceConfig ")
           }
         }
         for (fanOutNum <- fanOutNums) {
@@ -144,6 +150,7 @@ trait ElementTrait extends Ports with BasicTrait {
             val clearConfig = newConfig & mask
             val replaceConfig: BigInt = internalNumBigInt << (singleConfigSize * (fanOutNum + inPortNum))
             newConfig = clearConfig | replaceConfig
+            println(s"newConfig:$newConfig clearConfig:$clearConfig  replaceConfig:$replaceConfig ")
           }
         }
         updateConfigArray(newConfig)
@@ -177,6 +184,20 @@ trait ElementTrait extends Ports with BasicTrait {
       }
     }
   }
+  /** Reset the configuration of the module represented by this element.
+   * The configuration is saved in an array of bits.
+   *
+   * @param newConfig the new configuration in Int format
+   */
+  def resetConfigArray(newConfig: Int): Unit = {
+    println("updateConfigArray before clear: " + configArray)
+    configArray.clear()
+//    var t = newConfig
+    val configSize = getConfigBit()
+    for (i <- 0 until configSize)
+      configArray.append(1)//is this default config?
+    println("updateConfigArray after: " + configArray)
+  }
 
   /** Update the configuration of the module represented by this element.
    * The configuration is saved in an array of bits.
@@ -184,6 +205,7 @@ trait ElementTrait extends Ports with BasicTrait {
    * @param newConfig the new configuration in Int format
    */
   def updateConfigArray(newConfig: Int): Unit = {
+    println("updateConfigArray before clear: " + configArray)
     configArray.clear()
     var t = newConfig
     val configSize = getConfigBit()
@@ -192,6 +214,7 @@ trait ElementTrait extends Ports with BasicTrait {
       configArray.append(bit)
       t = t >> 1
     }
+    println("updateConfigArray after: " + configArray)
   }
 
   /** Update the configuration of the module represented by this element.
@@ -200,6 +223,7 @@ trait ElementTrait extends Ports with BasicTrait {
    * @param newConfig the new configuration in BigInt format
    */
   def updateConfigArray(newConfig: BigInt): Unit = {
+    println("updateConfigArray BigInt before clear: " + configArray)
     configArray.clear()
     var t = newConfig
     val configSize = getConfigBit()
@@ -208,6 +232,7 @@ trait ElementTrait extends Ports with BasicTrait {
       configArray.append(bit.toInt)
       t = t >> 1
     }
+    println("updateConfigArray BigInt after: " + configArray)
   }
 
   /** Get the configuration of the module represented by this element.

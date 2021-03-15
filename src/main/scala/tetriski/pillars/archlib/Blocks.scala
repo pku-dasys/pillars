@@ -233,11 +233,11 @@ class STDNOC_PEBlock(name: String, useMuxBypass: Boolean, opList: List[OpEnum] =
 //  mux1.addOutPorts(Array("out_0"))
 //  mux1.addInPorts((0 until neighborSize + 2).map(i => "input_" + i.toString).toArray)
 //  addElement(mux1)
-  /** A multiplexer that can choose a data source for I1 of the ALU from 6 sources(N,E,W,S,RP0,RP1)
+  /** A multiplexer that can choose a data source for I1 of the ALU from 7 sources(N,E,W,S,RP0,RP1,ALU_OUT)
    */
-  val muxI1 = new ElementMux("muxI1", List(neighborSize + 2, dataWidth))
+  val muxI1 = new ElementMux("muxI1", List(neighborSize + 3, dataWidth))
   muxI1.addOutPorts(Array("out_0"))
-  muxI1.addInPorts((0 until neighborSize + 2).map(i => "input_" + i.toString).toArray)
+  muxI1.addInPorts((0 until neighborSize + 3).map(i => "input_" + i.toString).toArray)
   addElement(muxI1)
   /** A multiplexer that can choose a data source for I2 of the ALU from 7 sources(N,E,W,S,RP0,RP1)
    */
@@ -307,8 +307,12 @@ class STDNOC_PEBlock(name: String, useMuxBypass: Boolean, opList: List[OpEnum] =
   /** A 4-RF with two input ports and two output ports.
    * Its output port 0 is connected to mux0.
    * Its output port 1 is connected to the output port of this PE or muxOut.
+   * log2Regs should be 2
+   * val rf0 = new ElementRF("rf0", List(2, 2, 2, dataWidth))
+   * Changed to 3 to avoid bug: garbage values are written in to register 3 (due to default config 11),
+   * otherwise need wr_en signal to avoid this
    */
-  val rf0 = new ElementRF("rf0", List(2, 2, 2, dataWidth))
+  val rf0 = new ElementRF("rf0", List(3, 2, 2, dataWidth))
   rf0.addOutPorts(Array("out_0", "out_1"))
   rf0.addInPorts(Array("input_0", "input_1"))
   addElement(rf0)
@@ -361,6 +365,7 @@ class STDNOC_PEBlock(name: String, useMuxBypass: Boolean, opList: List[OpEnum] =
 
   addConnect(rf0 / "out_0" -> muxI1 / s"input_$neighborSize")
   addConnect(rf0 / "out_1" -> muxI1 / ("input_" + (neighborSize + 1).toString))
+  addConnect(alu0 / "out_0" -> muxI1 / ("input_" + (neighborSize + 2).toString))
 //  addConnect(const0 / "out_0" -> muxI1 / ("input_" + (neighborSize + 2).toString))
   addConnect(rf0 / "out_0" -> muxI2 / s"input_$neighborSize")
   addConnect(rf0 / "out_1" -> muxI2 / ("input_" + (neighborSize + 1).toString))
@@ -493,9 +498,27 @@ class STDNOC_PEBlock(name: String, useMuxBypass: Boolean, opList: List[OpEnum] =
     addElement(muxT)
 
 
-    addConnect(LSU / "out" -> muxT / "input_0")
+   // addConnect(LSU / "out" -> muxT / "input_0")
 //    addConnect(List(LSU.getName(), "out"),List(muxT.getName(),"input_0"))
-    addConnect(alu0 / "out_0" -> muxT / "input_1")
+
+    /** A register with one input port and one output port.
+     * This makes latency of memPE is equal to two
+     */
+    val rfALUO = new ElementRF("rfALUO", List(0, 1,1, dataWidth))
+    rfALUO.addOutPorts(Array("out_0"))
+    rfALUO.addInPorts(Array("input_0"))
+    addElement(rfALUO)
+
+    addConnect(alu0 / "out_0" -> rfALUO / "input_0")
+    addConnect(rfALUO / "out_0" -> muxT / "input_1")
+
+    val rfLSUO = new ElementRF("rfLSUO", List(0, 1,1, dataWidth))
+    rfLSUO.addOutPorts(Array("out_0"))
+    rfLSUO.addInPorts(Array("input_0"))
+    addElement(rfLSUO)
+
+    addConnect(LSU / "out" -> rfLSUO / "input_0")
+    addConnect(rfLSUO / "out_0" -> muxT / "input_0")
 
     addConnect(muxT / "out_0" -> muxWP0 / s"input_$neighborSize")
     addConnect(muxT / "out_0" -> muxWP1 / s"input_$neighborSize")
@@ -1047,7 +1070,12 @@ class STDNOC_Block(name: String, x: Int, y: Int, numIn: Int, numOut: Int,
         OpEnum.CMP,
         OpEnum.CGT,
         OpEnum.SELECT,
-        OpEnum.CMERGE)
+        OpEnum.CMERGE,
+        OpEnum.ADD_CONST,
+        OpEnum.LS_CONST,
+        OpEnum.CMP_CONST,
+        OpEnum.CMERGE_CONST,
+        OpEnum.CMERGE_NPB)
 //      if (alternation && (i + j) % 2 == 1) {
 //        opList = List(OpEnum.ADD, OpEnum.SUB)
 //      }

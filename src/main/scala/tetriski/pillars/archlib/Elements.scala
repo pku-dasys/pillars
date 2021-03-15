@@ -141,7 +141,7 @@ class ElementLSU2(name: String, params: List[Int]) extends ElementTrait {
   //Module ID 4
   setTypeID(4)
 
-  setSupOps(List(OpEnum.LOAD, OpEnum.STORE, OpEnum.LOADH, OpEnum.STOREH, OpEnum.LOADB, OpEnum.STOREB))
+  setSupOps(List(OpEnum.LOAD, OpEnum.STORE, OpEnum.LOADH, OpEnum.STOREH, OpEnum.LOADB, OpEnum.LOADB_CONST, OpEnum.STOREB, OpEnum.STOREB_CONST))
 
   //0 for load, 1 for store
   val configBits = 4 //including const valid

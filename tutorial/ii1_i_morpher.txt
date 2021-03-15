@@ -1,3 +1,956 @@
+"PE_MEM_X0|_Y0|": {
+                "CONNECTIONS": {
+                    "2": {
+                        "RF0.RP0": [
+                            "THIS.RF0_RP0-->FU0_DP0_I2"
+                        ],
+                        "THIS.RF0_RP0-->FU0_DP0_I2": [
+                            "FU0.DP0_I2"
+                        ],
+                        "THIS.SOUTH_I": [
+                            "FU0.DP0_I1"
+                        ]
+                    },
+                    "3": {
+                        "THIS.EAST_I": [
+                            "RF0.WP0"
+                        ]
+                    }
+                },
+<2:cgra.tile_0.pe_0_0.muxI2.internalNode_0>
+4
+0
+<2:cgra.tile_0.pe_0_0.muxI1.internalNode_0>
+3
+0
+<3:cgra.tile_0.pe_0_0.muxWP0.internalNode_0>
+1
+0
+
+
+                        "OPS": {
+                            "2": "STORE"
+                        },
+
+<3:cgra.tile_0.pe_0_0.loadStoreUnit.internalNode_0>
+SELECTED_OP
+19
+
+  "RF0": {
+                        "CONNECTIONS": {
+                            "2": {
+                                "THIS.R1_RI": [
+                                    "THIS.RP0"
+                                ]
+                            },
+                            "3": {
+                                "THIS.WP0": [
+                                    "THIS.R1_RO"
+                                ]
+                            }
+                        },
+<2:cgra.tile_0.pe_0_0.rf0.internalNode_1>
+1
+0 
+<3:cgra.tile_0.pe_0_0.rf0.internalNode_0>
+0
+1
+correct:
+<2:cgra.tile_0.pe_0_0.rf0.internalNode_1>
+-1
+0
+<3:cgra.tile_0.pe_0_0.rf0.internalNode_1>
+0
+-1
+"PE_MEM_X0|_Y1|": {
+                "CONNECTIONS": {
+                    "0": {
+                        "THIS.EAST_I": [
+                            "RF0.WP0"
+                        ],
+                        "THIS.SOUTH_I": [
+                            "FU0.DP0_I2"
+                        ]
+                    },
+                    "2": {
+                        "FU0.DP0_T": [
+                            "THIS.NORTH_O"
+                        ],
+                        "THIS.EAST_I": [
+                            "FU0.DP0_I2"
+                        ]
+                    },
+                    "3": {
+                        "FU0.DP0_T": [
+                            "THIS.EAST_O",
+                            "THIS.SOUTH_O"
+                        ],
+                        "RF0.RP0": [
+                            "THIS.RF0_RP0-->FU0_DP0_I1"
+                        ],
+                        "THIS.EAST_I": [
+                            "FU0.DP0_P"
+                        ],
+                        "THIS.RF0_RP0-->FU0_DP0_I1": [
+                            "FU0.DP0_I1"
+                        ]
+                    }
+                },
+<0:cgra.tile_0.pe_1_0.muxWP0.internalNode_0>
+1
+0
+<0:cgra.tile_0.pe_1_0.muxI2.internalNode_0>
+3
+0
+<2:cgra.tile_0.pe_1_0.muxNO.internalNode_0>
+0
+0
+<2:cgra.tile_0.pe_1_0.muxI2.internalNode_0>
+1
+0
+<3:cgra.tile_0.pe_1_0.muxEO.internalNode_0>
+0
+0
+<3:cgra.tile_0.pe_1_0.muxSO.internalNode_0>
+0
+0
+<3:cgra.tile_0.pe_1_0.muxI1.internalNode_0>
+4
+0
+<3:cgra.tile_0.pe_1_0.muxP.internalNode_0>
+1
+0
+<3:cgra.tile_0.pe_1_0.muxI1.internalNode_0>
+4
+0
+
+
+                            "1": {
+                                "CONST.4094": "DP0.I2"
+                            },
+,
+                            "3": {
+                                "CONST.2047": "DP0.I2",
+
+<2:cgra.tile_0.pe_1_0.const0.internalNode_0>
+SELECTED_OP
+7
+<0:cgra.tile_0.pe_1_0.const0.internalNode_0>
+SELECTED_OP
+7
+
+                        "OPS": {
+                            "0": "ADD",
+                            "1": "LOADB",
+                            "2": "LOAD",
+                            "3": "STOREB"
+                        },
+
+<1:cgra.tile_0.pe_1_0.alu0.internalNode_0>
+SELECTED_OP
+8
+<2:cgra.tile_0.pe_1_0.loadStoreUnit.internalNode_0>
+SELECTED_OP
+31
+<3:cgra.tile_0.pe_1_0.loadStoreUnit.internalNode_0>
+SELECTED_OP
+18
+<0:cgra.tile_0.pe_1_0.loadStoreUnit.internalNode_0>
+SELECTED_OP
+32
+
+"CONNECTIONS": {
+                                    "0": {
+                                        "THIS.T": [
+                                            "THIS.I1"
+                                        ]
+                                    }
+                                },
+
+MISSING!!!!!!!!!!
+<0:cgra.tile_0.pe_1_0.muxI1.internalNode_0>
+6
+0
+"RF0": {
+                        "CONNECTIONS": {
+                            "0": {
+                                "THIS.WP0": [
+                                    "THIS.R1_RO"
+                                ]
+                            },
+                            "3": {
+                                "THIS.R1_RI": [
+                                    "THIS.RP0"
+                                ]
+                            }
+                        },
+
+<0:cgra.tile_0.pe_1_0.rf0.internalNode_0>
+0
+0 
+<0:cgra.tile_0.pe_1_0.rf0.internalNode_1>
+1
+0 
+correct:
+<0:cgra.tile_0.pe_1_0.rf0.internalNode_1>
+0
+-1
+<0:cgra.tile_0.pe_1_0.rf0.internalNode_1>
+-1
+0
+ "PE_MEM_X0|_Y2|": {
+                "CONNECTIONS": {
+                    "0": {
+                        "RF0.RP0": [
+                            "THIS.NORTH_O"
+                        ],
+                        "THIS.EAST_I": [
+                            "FU0.DP0_I2"
+                        ]
+                    },
+                    "2": {
+                        "FU0.DP0_T": [
+                            "THIS.FU0_DP0_T-->RF0_WP1"
+                        ],
+                        "THIS.FU0_DP0_T-->RF0_WP1": [
+                            "RF0.WP1"
+                        ]
+                    },
+                    "3": {
+                        "THIS.EAST_I": [
+                            "FU0.DP0_I1"
+                        ],
+                        "THIS.NORTH_I": [
+                            "FU0.DP0_P"
+                        ]
+                    }
+                },
+
+<0:cgra.tile_0.pe_2_0.muxNO.internalNode_0>
+1
+0
+<0:cgra.tile_0.pe_2_0.muxI2.internalNode_0>
+1
+0
+<2:cgra.tile_0.pe_2_0.muxWP1.internalNode_0>
+4
+0
+<3:cgra.tile_0.pe_2_0.muxI1.internalNode_0>
+1
+0
+<3:cgra.tile_0.pe_2_0.muxP.internalNode_0>
+2
+0
+
+"3": {
+                                "CONST.4094": "DP0.I2",
+
+<0:cgra.tile_0.pe_2_0.const0.internalNode_0>
+SELECTED_OP
+7
+
+
+                        "OPS": {
+                            "0": "LOAD",
+                            "3": "STOREB"
+                        },
+
+<1:cgra.tile_0.pe_2_0.loadStoreUnit.internalNode_0>
+SELECTED_OP
+18
+<0:cgra.tile_0.pe_2_0.loadStoreUnit.internalNode_0>
+SELECTED_OP
+32
+
+                    "RF0": {
+                        "CONNECTIONS": {
+                            "0": {
+                                "THIS.R3_RI": [
+                                    "THIS.RP0"
+                                ]
+                            },
+                            "2": {
+                                "THIS.WP1": [
+                                    "THIS.R3_RO"
+                                ]
+                            }
+                        },
+<0:cgra.tile_0.pe_2_0.rf0.internalNode_1>
+3
+0 
+<2:cgra.tile_0.pe_2_0.rf0.internalNode_0>
+1
+3
+correct
+<0:cgra.tile_0.pe_2_0.rf0.internalNode_3>
+-1
+0
+<2:cgra.tile_0.pe_2_0.rf0.internalNode_3>
+1
+-1
+"PE_X1|_Y0|": {
+                "CONNECTIONS": {
+                    "1": {
+                        "THIS.SOUTH_I": [
+                            "FU0.DP0_I1"
+                        ]
+                    },
+                    "3": {
+                        "FU0.DP0_T": [
+                            "THIS.FU0_DP0_T-->RF0_WP1"
+                        ],
+                        "RF0.RP0": [
+                            "THIS.WEST_O"
+                        ],
+                        "THIS.FU0_DP0_T-->RF0_WP1": [
+                            "RF0.WP1"
+                        ]
+                    }
+                },
+
+<1:cgra.tile_0.pe_0_1.muxI1.internalNode_0>
+3
+0
+<3:cgra.tile_0.pe_0_1.muxWP1.internalNode_0>
+4
+0
+<3:cgra.tile_0.pe_0_1.muxWO.internalNode_0>
+1
+0
+
+
+                            "1": {
+                                "CONST.2": "DP0.I2",
+                                "THIS.DP0_I1": [
+                                    "DP0.I1"
+                                ]
+                            },
+                            "2": {
+                                "CONST.2048": "DP0.I2"
+                            },
+
+<2:cgra.tile_0.pe_0_1.const0.internalNode_0>
+SELECTED_OP
+7
+<3:cgra.tile_0.pe_0_1.const0.internalNode_0>
+SELECTED_OP
+7
+
+
+                        "OPS": {
+                            "1": "LS",
+                            "2": "ADD"
+                        },
+
+<2:cgra.tile_0.pe_0_1.alu0.internalNode_0>
+SELECTED_OP
+34
+<3:cgra.tile_0.pe_0_1.alu0.internalNode_0>
+SELECTED_OP
+33
+
+ "DP0": {
+                                "CONNECTIONS": {
+                                    "2": {
+                                        "THIS.T": [
+                                            "THIS.I1"
+                                        ]
+                                    }
+MISSING!!!!!!!!
+
+<2:cgra.tile_0.pe_0_1.muxI1.internalNode_0>
+6
+0
+"RF0": {
+                        "CONNECTIONS": {
+                            "3": {
+                                "THIS.R3_RI": [
+                                    "THIS.RP0"
+                                ],
+                                "THIS.WP1": [
+                                    "THIS.R3_RO"
+                                ]
+                            }
+                        },
+
+<3:cgra.tile_0.pe_0_1.rf0.internalNode_1>
+3
+0 
+<3:cgra.tile_0.pe_0_1.rf0.internalNode_0>
+1
+3
+correct
+<3:cgra.tile_0.pe_0_1.rf0.internalNode_3>
+-1
+0
+<3:cgra.tile_0.pe_0_1.rf0.internalNode_3>
+1
+-1
+
+            "PE_X1|_Y1|": {
+                "CONNECTIONS": {
+                    "0": {
+                        "RF0.RP0": [
+                            "THIS.WEST_O"
+                        ],
+                        "THIS.EAST_I": [
+                            "FU0.DP0_I2"
+                        ]
+                    },
+                    "1": {
+                        "FU0.DP0_T": [
+                            "THIS.NORTH_O",
+                            "THIS.EAST_O",
+                            "THIS.SOUTH_O"
+                        ],
+                        "THIS.EAST_I": [
+                            "RF0.WP0"
+                        ]
+                    },
+                    "2": {
+                        "FU0.DP0_T": [
+                            "THIS.EAST_O"
+                        ],
+                        "RF0.RP0": [
+                            "THIS.WEST_O"
+                        ]
+                    },
+                    "3": {
+                        "FU0.DP0_T": [
+                            "THIS.EAST_O",
+                            "THIS.WEST_O"
+                        ],
+                        "THIS.EAST_I": [
+                            "RF0.WP0"
+                        ],
+                        "THIS.WEST_I": [
+                            "FU0.DP0_P"
+                        ]
+                    }
+                },
+<0:cgra.tile_0.pe_1_1.muxWO.internalNode_0>
+1
+0
+<0:cgra.tile_0.pe_1_1.muxI2.internalNode_0>
+1
+0
+<1:cgra.tile_0.pe_1_1.muxNO.internalNode_0>
+0
+0
+<1:cgra.tile_0.pe_1_1.muxEO.internalNode_0>
+0
+0
+<1:cgra.tile_0.pe_1_1.muxSO.internalNode_0>
+0
+0
+<1:cgra.tile_0.pe_1_1.muxWP0.internalNode_0>
+1
+0
+<2:cgra.tile_0.pe_1_1.muxEO.internalNode_0>
+0
+0
+<2:cgra.tile_0.pe_1_1.muxWO.internalNode_0>
+1
+0
+<3:cgra.tile_0.pe_1_1.muxEO.internalNode_0>
+0
+0
+<3:cgra.tile_0.pe_1_1.muxWO.internalNode_0>
+0
+0
+<3:cgra.tile_0.pe_1_1.muxWP0.internalNode_0>
+1
+0
+<3:cgra.tile_0.pe_1_1.muxP.internalNode_0>
+0
+0
+
+"1": {
+                                "CONST.1": "DP0.I2",
+                                "DP0.T": [
+                                    "THIS.DP0_T"
+                                ]
+                            },
+                            "2": {
+                                "CONST.20": "DP0.I2",
+                                "DP0.T": [
+                                    "THIS.DP0_T"
+                                ]
+                            },
+                            "3": {
+                                "CONST.0": "DP0.I2",
+
+<2:cgra.tile_0.pe_1_1.const0.internalNode_0>
+SELECTED_OP
+7
+<3:cgra.tile_0.pe_1_1.const0.internalNode_0>
+SELECTED_OP
+7
+<0:cgra.tile_0.pe_1_1.const0.internalNode_0>
+SELECTED_OP
+7
+
+
+                        "OPS": {
+                            "0": "SELECT",
+                            "1": "ADD",
+                            "2": "CMP",
+                            "3": "CMERGE"
+                        },
+<1:cgra.tile_0.pe_1_1.alu0.internalNode_0>
+SELECTED_OP
+25
+<2:cgra.tile_0.pe_1_1.alu0.internalNode_0>
+SELECTED_OP
+33
+<3:cgra.tile_0.pe_1_1.alu0.internalNode_0>
+SELECTED_OP
+35
+<0:cgra.tile_0.pe_1_1.alu0.internalNode_0>
+SELECTED_OP
+36
+
+
+  "CONNECTIONS": {
+                                    "0": {
+                                        "THIS.T": [
+                                            "THIS.I1"
+                                        ]
+                                    },
+                                    "1": {
+                                        "THIS.T": [
+                                            "THIS.I1"
+                                        ]
+                                    },
+                                    "2": {
+                                        "THIS.T": [
+                                            "THIS.I1"
+                                        ]
+                                    }
+                                },
+ MISSING!!!!!!!!!
+<0:cgra.tile_0.pe_1_1.muxI1.internalNode_0>
+6
+0
+<1:cgra.tile_0.pe_1_1.muxI1.internalNode_0>
+6
+0
+<2:cgra.tile_0.pe_1_1.muxI1.internalNode_0>
+6
+0
+                    "RF0": {
+                        "CONNECTIONS": {
+                            "0": {
+                                "THIS.R2_RI": [
+                                    "THIS.RP0"
+                                ]
+                            },
+                            "1": {
+                                "THIS.WP0": [
+                                    "THIS.R3_RO"
+                                ]
+                            },
+                            "2": {
+                                "THIS.R3_RI": [
+                                    "THIS.RP0"
+                                ]
+                            },
+                            "3": {
+                                "THIS.WP0": [
+                                    "THIS.R2_RO"
+                                ]
+                            }
+
+<0:cgra.tile_0.pe_1_1.rf0.internalNode_1>
+2
+0 
+<1:cgra.tile_0.pe_1_1.rf0.internalNode_0>
+0
+3
+<2:cgra.tile_0.pe_1_1.rf0.internalNode_1>
+3
+0  
+<3:cgra.tile_0.pe_1_1.rf0.internalNode_0>
+0
+2 
+correct
+<0:cgra.tile_0.pe_1_1.rf0.internalNode_2>
+-1
+0
+<1:cgra.tile_0.pe_1_1.rf0.internalNode_3>
+0
+-1
+<2:cgra.tile_0.pe_1_1.rf0.internalNode_3>
+-1
+0
+<3:cgra.tile_0.pe_1_1.rf0.internalNode_2>
+0
+-1
+            "PE_X1|_Y2|": {
+                "CONNECTIONS": {
+                    "0": {
+                        "RF0.RP0": [
+                            "THIS.WEST_O"
+                        ]
+                    },
+                    "1": {
+                        "THIS.NORTH_I": [
+                            "FU0.DP0_I1"
+                        ]
+                    },
+                    "2": {
+                        "THIS.EAST_I": [
+                            "RF0.WP0"
+                        ]
+                    },
+                    "3": {
+                        "FU0.DP0_T": [
+                            "THIS.FU0_DP0_T-->RF0_WP1"
+                        ],
+                        "RF0.RP0": [
+                            "THIS.WEST_O"
+                        ],
+                        "THIS.FU0_DP0_T-->RF0_WP1": [
+                            "RF0.WP1"
+                        ]
+                    }
+                },
+
+<0:cgra.tile_0.pe_2_1.muxWO.internalNode_0>
+1
+0
+<1:cgra.tile_0.pe_2_1.muxI1.internalNode_0>
+2
+0
+<2:cgra.tile_0.pe_2_1.muxWP0.internalNode_0>
+1
+0
+<3:cgra.tile_0.pe_2_1.muxWP1.internalNode_0>
+4
+0
+<3:cgra.tile_0.pe_2_1.muxWO.internalNode_0>
+1
+0
+ "1": {
+                                "CONST.2": "DP0.I2",
+                                "THIS.DP0_I1": [
+                                    "DP0.I1"
+                                ]
+                            },
+                            "2": {
+                                "CONST.0": "DP0.I2"
+                            },
+<2:cgra.tile_0.pe_2_1.const0.internalNode_0>
+SELECTED_OP
+7
+<3:cgra.tile_0.pe_2_1.const0.internalNode_0>
+SELECTED_OP
+7
+
+
+                        "OPS": {
+                            "1": "LS",
+                            "2": "ADD"
+                        },
+
+<2:cgra.tile_0.pe_2_1.alu0.internalNode_0>
+SELECTED_OP
+34
+<3:cgra.tile_0.pe_2_1.alu0.internalNode_0>
+SELECTED_OP
+33
+
+
+                            "DP0": {
+                                "CONNECTIONS": {
+                                    "2": {
+                                        "THIS.T": [
+                                            "THIS.I1"
+                                        ]
+                                    }
+                                },
+
+MISSING!!!!!
+<2:cgra.tile_0.pe_2_1.muxI1.internalNode_0>
+6
+0
+                    "RF0": {
+                        "CONNECTIONS": {
+                            "0": {
+                                "THIS.R3_RI": [
+                                    "THIS.RP0"
+                                ]
+                            },
+                            "2": {
+                                "THIS.WP0": [
+                                    "THIS.R0_RO"
+                                ]
+                            },
+                            "3": {
+                                "THIS.R0_RI": [
+                                    "THIS.RP0"
+                                ],
+                                "THIS.WP1": [
+                                    "THIS.R3_RO"
+                                ]
+                            }
+                        },
+
+<0:cgra.tile_0.pe_2_1.rf0.internalNode_1>
+3
+0 
+<2:cgra.tile_0.pe_2_1.rf0.internalNode_0>
+0
+0 
+<3:cgra.tile_0.pe_2_1.rf0.internalNode_1>
+0
+0 
+<3:cgra.tile_0.pe_2_1.rf0.internalNode_0>
+1
+3
+correct
+<0:cgra.tile_0.pe_2_1.rf0.internalNode_3>
+-1
+0
+<2:cgra.tile_0.pe_2_1.rf0.internalNode_0>
+0
+-1
+<3:cgra.tile_0.pe_2_1.rf0.internalNode_0>
+-1
+0
+<3:cgra.tile_0.pe_2_1.rf0.internalNode_3>
+1
+-1
+
+            "PE_X2|_Y1|": {
+                "CONNECTIONS": {
+                    "0": {
+                        "FU0.DP0_T": [
+                            "THIS.WEST_O"
+                        ]
+                    },
+                    "1": {
+                        "RF0.RP0": [
+                            "THIS.WEST_O"
+                        ],
+                        "THIS.WEST_I": [
+                            "FU0.DP0_I1"
+                        ]
+                    },
+                    "2": {
+                        "FU0.DP0_T": [
+                            "THIS.EAST_O"
+                        ],
+                        "THIS.WEST_I": [
+                            "RF0.WP0"
+                        ]
+                    },
+                    "3": {
+                        "FU0.DP0_T": [
+                            "THIS.WEST_O"
+                        ],
+                        "RF0.RP0": [
+                            "THIS.RF0_RP0-->FU0_DP0_I1"
+                        ],
+                        "THIS.EAST_I": [
+                            "RF0.WP0"
+                        ],
+                        "THIS.RF0_RP0-->FU0_DP0_I1": [
+                            "FU0.DP0_I1"
+                        ],
+                        "THIS.WEST_I": [
+                            "FU0.DP0_P"
+                        ]
+                    }
+                },
+
+<0:cgra.tile_0.pe_1_2.muxWO.internalNode_0>
+0
+0
+<1:cgra.tile_0.pe_1_2.muxWO.internalNode_0>
+1
+0
+<1:cgra.tile_0.pe_1_2.muxI1.internalNode_0>
+0
+0
+<2:cgra.tile_0.pe_1_2.muxEO.internalNode_0>
+0
+0
+<2:cgra.tile_0.pe_1_2.muxWP0.internalNode_0>
+0
+0
+<3:cgra.tile_0.pe_1_2.muxWO.internalNode_0>
+0
+0
+<3:cgra.tile_0.pe_1_2.muxI1.internalNode_0>
+4
+0
+<3:cgra.tile_0.pe_1_2.muxWP0.internalNode_0>
+1
+0
+<3:cgra.tile_0.pe_1_2.muxP.internalNode_0>
+0
+0
+
+"1": {
+                                "CONST.2": "DP0.I2",
+                                "THIS.DP0_I1": [
+                                    "DP0.I1"
+                                ]
+                            },
+                            "2": {
+                                "CONST.1": "DP0.I2",
+<2:cgra.tile_0.pe_1_2.const0.internalNode_0>
+SELECTED_OP
+7
+<3:cgra.tile_0.pe_1_2.const0.internalNode_0>
+SELECTED_OP
+7
+
+
+                        "OPS": {
+                            "1": "LS",
+                            "2": "MOVC",
+                            "3": "CMERGE"
+                        },
+
+<2:cgra.tile_0.pe_1_2.alu0.internalNode_0>
+SELECTED_OP
+34
+<3:cgra.tile_0.pe_1_2.alu0.internalNode_0>
+SELECTED_OP
+22
+<0:cgra.tile_0.pe_1_2.alu0.internalNode_0>
+SELECTED_OP
+37
+
+
+                            "3": {
+                                "NPB": true,
+                                "id": 13
+                            }
+
+CMERGE_NPB=37
+
+
+                    "RF0": {
+                        "CONNECTIONS": {
+                            "1": {
+                                "THIS.R3_RI": [
+                                    "THIS.RP0"
+                                ]
+                            },
+                            "2": {
+                                "THIS.WP0": [
+                                    "THIS.R0_RO"
+                                ]
+                            },
+                            "3": {
+                                "THIS.R0_RI": [
+                                    "THIS.RP0"
+                                ],
+                                "THIS.WP0": [
+                                    "THIS.R3_RO"
+                                ]
+                            }
+                        },
+<1:cgra.tile_0.pe_1_2.rf0.internalNode_1>
+3
+0 
+<2:cgra.tile_0.pe_1_2.rf0.internalNode_0>
+0
+0 
+<3:cgra.tile_0.pe_1_2.rf0.internalNode_1>
+0
+0 
+<3:cgra.tile_0.pe_1_2.rf0.internalNode_1>
+0
+correct
+<1:cgra.tile_0.pe_1_2.rf0.internalNode_<reg num>>
+inport: wp
+outport rp
+
+<1:cgra.tile_0.pe_1_2.rf0.internalNode_3>
+-1
+0
+<2:cgra.tile_0.pe_1_2.rf0.internalNode_0>
+0
+-1
+<3:cgra.tile_0.pe_1_2.rf0.internalNode_0>
+-1
+0
+<3:cgra.tile_0.pe_1_2.rf0.internalNode_3>
+0
+-1
+            "PE_X2|_Y2|": {
+                "CONNECTIONS": {
+                    "2": {
+                        "FU0.DP0_T": [
+                            "THIS.WEST_O"
+                        ]
+                    }
+                },
+<2:cgra.tile_0.pe_2_2.muxWO.internalNode_0>
+0
+0 
+
+
+                            "1": {
+                                "CONST.0": "DP0.I2"
+                            },
+<2:cgra.tile_0.pe_2_2.const0.internalNode_0>
+SELECTED_OP
+7  
+
+
+                        "OPS": {
+                            "1": "MOVC"
+                        },
+
+<2:cgra.tile_0.pe_2_2.alu0.internalNode_0>
+SELECTED_OP
+22  
+
+
+
+            "PE_X3|_Y1|": {
+                "CONNECTIONS": {
+                    "2": {
+                        "THIS.WEST_I": [
+                            "FU0.DP0_I1"
+                        ]
+                    },
+                    "3": {
+                        "FU0.DP0_T": [
+                            "THIS.WEST_O"
+                        ]
+                    }
+                },
+<2:cgra.tile_0.pe_1_3.muxI1.internalNode_0>
+0
+0 
+<3:cgra.tile_0.pe_1_3.muxWO.internalNode_0>
+0
+0 
+
+ "2": {
+                                "CONST.80": "DP0.I2",
+
+<3:cgra.tile_0.pe_1_3.const0.internalNode_0>
+SELECTED_OP
+7  
+
+
+                        "OPS": {
+                            "2": "ADD"
+                        },
+<3:cgra.tile_0.pe_1_3.alu0.internalNode_0>
+SELECTED_OP
+33
+
+
+
+------------------------------------------------previous----------------------------------------
 "PE_MEM_X0|_Y1|": {
     "CONNECTIONS": {
 "1": {
@@ -87,6 +1040,12 @@
   val STOREH = Value("28")
   val LOADB = Value("29")
   val STOREB = Value("30")
+  val LOADB_CONST = Value("31")
+  val STOREB_CONST = Value("32")
+  val ADD_CONST = Value("33")
+  val LS_CONST = Value("34")
+  val CMP_CONST = Value("35")
+  val CMERGE_CONST = Value("36")
 
 <0:cgra.tile_0.pe_1_0.const0.internalNode_0>
 SELECTED_OP

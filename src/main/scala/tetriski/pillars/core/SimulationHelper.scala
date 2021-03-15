@@ -175,12 +175,17 @@ class SimulationHelper(arch: ArchitctureHierarchy) {
   def setConst(vals: Array[Int], testII: Int): Unit = {
     constInfo.reset(testII)
     var valIndex = 0
+    println("\nSet Const:  size " + size)
     for (i <- 0 until size) {
       val module = moduleArray(i)
+      println("module " + module)
       if (module.getTypeID() == 3) {
         constInfo.addConst(module.getModuleID(), RCArray(i), vals(valIndex))
+        println("module.getModuleID() " + module.getModuleID())
+        println("vals(valIndex) " + vals(valIndex))
         valIndex = valIndex + 1
       }
+      println("")
     }
   }
 

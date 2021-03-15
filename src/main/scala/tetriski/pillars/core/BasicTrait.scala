@@ -111,7 +111,8 @@ trait BasicTrait {
   def setConfigBit(arg: Int): Unit = {
     configBit = arg
     for (i <- 0 until arg)
-      configArray.append(0)
+      configArray.append(1)//is this default config?
+    println("Set default config bit" + configArray)
   }
 
   /** Set fire time of the module represented by this abstract model in a reconfiguration cycle.

@@ -339,7 +339,23 @@ class Alu2(funSelect: Int, numInI1: Int, numInI2: Int, numInP: Int, w: Int) exte
 //          case 13 => funSeq.append(ALU_COPY_B -> input_b)
           case 12 => funSeq.append(ALU_CMP -> (input_a === input_b))
           case 13 => funSeq.append(ALU_CGT -> (input_a > input_b))
-          case 14 => funSeq.append(ALU_SELECT -> Mux(const_valid, input_const, Mux(input_a(w-1), input_a, Mux(input_b(w-1), input_b,0.U))))
+          case 14 => funSeq.append(ALU_SELECT -> Mux(const_valid, input_const, Mux(input_a_valid, input_a, Mux(input_b_valid, io.inputs(1)(w-2,0),0.U))))
+            /*
+            SELECT
+            5'b10000: begin
+			        if (operation[5]==1'b0) begin
+				        if (op_LHS[32] == 1'b1)
+					        result = op_LHS[31:0]; //select
+				        else if (op_RHS[32] == 1'b1)
+					        result = op_RHS[31:0]; //select
+				        else
+					        result = {32{1'b0}};
+			        end
+			        else begin
+				        result = op_SHIFT[31:0];
+			        end
+	        end
+             */
           //(input_a(w) ? input_a : (input_b(w) ? input_b : 0.asUInt)))
           case 15 => funSeq.append(ALU_CMERGE -> Mux(const_valid,input_const,input_a))
         }
@@ -348,12 +364,15 @@ class Alu2(funSelect: Int, numInI1: Int, numInI2: Int, numInP: Int, w: Int) exte
     funSeq
   }
 
-  var input_a = io.inputs(0)
-  var input_const = io.inputs(2)
+  var input_a = io.inputs(0)(w-2,0)
+  var input_a_valid = io.inputs(0)(w-1)
+  var input_const = io.inputs(2)(w-2,0)
   var const_valid = io.configuration(4)
-  var input_b = Mux(const_valid,input_const,io.inputs(1))
+  var input_b = Mux(const_valid,input_const,io.inputs(1)(w-2,0))
+  var input_b_valid = io.inputs(1)(w-1)
   var negated_predicate = io.configuration(5)
-  var input_p = Mux(negated_predicate,Cat(io.inputs(3)(w-1,1),~io.inputs(3)(0)),io.inputs(3))
+  var input_p = Mux(negated_predicate,Cat(io.inputs(3)(w-2,1),~io.inputs(3)(0)),io.inputs(3)(w-2,0))
+  var input_p_valid = io.inputs(3)(w-1)
 
 //  if (LOG_SKEW_LENGTH > 0) {
 //    if (USE_RELATIVE_SKEW) {
@@ -398,25 +417,44 @@ class Alu2(funSelect: Int, numInI1: Int, numInI2: Int, numInP: Int, w: Int) exte
 
   val out = io.outs(0)
   val shamt = input_b(log2Up(w), 0).asUInt
-  val not_to_exec_all =
-    (prev_I1_mux_config =/= (math.pow(2, log2Up(numInI1)).toInt - 1).U(log2Up(numInI1).W) &&  input_a(w-1)=== 0.B) ||
-    (prev_I2_mux_config =/= (math.pow(2, log2Up(numInI2)).toInt - 1).U(log2Up(numInI2).W) &&  input_b(w-1) === 0.B) ||
-    (prev_P_mux_config =/= (math.pow(2, log2Up(numInP)).toInt - 1).U(log2Up(numInP).W) &&  (input_p(w-1)===0.B || input_p === 0.U))
+
+  /*
+  * From HyCUBE RTL
+  * https://github.com/ecolab-nus/HyCUBE_32bit_4x4_RTL/blob/main/design/tile_new.sv
+  * assign not_to_execute_all = (
+  *                             (prev_cycle_p_i2_i1[2:0] != 3'b111 && op_rhs[32]==1'b0) ||
+  *                                       (control_reg_data[62] != 1'b1 && prev_cycle_p_i2_i1[5:3] != 3'b111 && op_lhs[32]==1'b0) ||
+  *                                           (prev_cycle_p_i2_i1[8:6] != 3'b111 && (op_predicate[32]==1'b0 ||op_predicate[31:0]=={32{1'b0}}) )
+  *                                             ) ? 1'b1 : 1'b0;
+  * assign not_to_execute_select = ((op_rhs[32]==1'b0 && op_lhs[32]==1'b0) || (prev_cycle_p_i2_i1[8:6] != 3'b111 && (op_predicate[32]==1'b0 || op_predicate[31:0]=={32{1'b0}}))) ? 1'b1 : 1'b0;
+  * assign not_to_execute = (control_reg_data[34:30]==5'b10000) ? not_to_execute_select :  not_to_execute_all;
+  * */
+//  val not_to_exec_all =
+//    (prev_I1_mux_config =/= (math.pow(2, log2Up(numInI1)).toInt - 1).U(log2Up(numInI1).W) &&  input_a(w-1)=== 0.B) ||
+//    (const_valid =/= 1.B &&  prev_I2_mux_config =/= (math.pow(2, log2Up(numInI2)).toInt - 1).U(log2Up(numInI2).W) &&  input_b(w-1) === 0.B) ||
+//    (prev_P_mux_config =/= (math.pow(2, log2Up(numInP)).toInt - 1).U(log2Up(numInP).W) &&  (input_p(w-1)===0.B || input_p === 0.U))
+
+  val not_to_exec_all_i1 = (prev_I1_mux_config =/= (math.pow(2, log2Up(numInI1)).toInt - 1).U(log2Up(numInI1).W) &&  input_a_valid=== 0.B)
+  val not_to_exec_all_i2 =   (const_valid =/= 1.B &&  prev_I2_mux_config =/= (math.pow(2, log2Up(numInI2)).toInt - 1).U(log2Up(numInI2).W) &&  input_b_valid === 0.B)
+  val not_to_exec_all_p =   (prev_P_mux_config =/= (math.pow(2, log2Up(numInP)).toInt - 1).U(log2Up(numInP).W) &&  (input_p_valid===0.B || input_p(w-2,0) === 0.U))
+  val not_to_exec_all = not_to_exec_all_i1 || not_to_exec_all_i2 || not_to_exec_all_p
   //missing const configs
 
   val not_to_exec_select =
-    ((input_a(w-1)=== 0.B && input_b(w-1)=== 0.B) ||
-    (prev_P_mux_config =/= (math.pow(2, log2Up(numInI1)).toInt - 1).U(log2Up(numInI1).W) &&  (input_p(w-1)===0.B || input_p === 0.U)))
+    ((input_a_valid=== 0.B && input_b_valid=== 0.B) ||
+    (prev_P_mux_config =/= (math.pow(2, log2Up(numInI1)).toInt - 1).U(log2Up(numInI1).W) &&  (input_p_valid===0.B || input_p(w-2,0) === 0.U)))
 
   val funSeq = getFunSeq(shamt)
+  println("funSeq:" + funSeq)
 
-  val out_data =  MuxLookup(io.configuration(3,0), input_b, funSeq)
+  val out_data_ =  MuxLookup(io.configuration(3,0), input_b, funSeq)
+  val out_data = out_data_(w-2,0)
   val out_valid = Mux(io.configuration(3,0)===ALU_SELECT, ~not_to_exec_select, ~not_to_exec_all)
 
   when(io.en) {
 //    out(w-2,0) := MuxLookup(io.configuration, input_b, funSeq)
 //    out(w) := Mux(io.configuration===ALU_SELECT, ~not_to_exec_select, ~not_to_exec_all)
-     out := Cat(out_valid,out_data(w-2,0))
+     out := Cat(out_valid,out_data)
   }.otherwise {
     for (out <- io.outs) {
       out := 0.U
@@ -459,7 +497,7 @@ class RegisterFile(log2Regs: Int, numIn: Int, numOut: Int, w: Int) extends Modul
 
     val regs = RegInit(VecInit(Seq.fill(Math.pow(2, log2Regs).toInt)(0.U(w.W))))
 
-    when(forbidden === false.B) {
+    when(forbidden === true.B) {//since default configs were changed from 0 to 1, this should also changed from false.B to true.B
       for (i <- 0 until numIn) {
         regs(dispatch.io.outs(i)) := io.inputs(i)
       }
@@ -641,7 +679,7 @@ class LSMemWrapper(w: Int) extends Module {
   val s_noop :: s_write_only :: s_work :: s_read_only :: Nil = Enum(4)
   val state = RegInit(s_noop)
 
-  val mem = Module(new SimpleDualPortSram(MEM_DEPTH, w))
+  val mem = Module(new SimpleDualPortSram2(MEM_DEPTH, w))
   val enq_mem = Module(new EnqMem(mem.io.a, MEM_IN_WIDTH))
   val deq_mem = Module(new DeqMem(mem.io.b, MEM_OUT_WIDTH))
 
@@ -890,7 +928,7 @@ class LoadStoreUnit2(w: Int) extends Module {
       writeMem.en := false.B
       writeMem.we := false.B
       writeMem.din := dataIn
-      io.outs(0) := readMem.dout
+      io.outs(0) := Cat(1.B,readMem.dout(w-2,0))
     }.elsewhen(io.configuration(2,0) === LSU_STORE) {
       readMem.en := false.B
       writeMem.en := true.B
@@ -898,9 +936,9 @@ class LoadStoreUnit2(w: Int) extends Module {
       writeMem.din := dataIn
       io.outs(0) :=  0.U(w.W)
     }.elsewhen(io.configuration(2,0) === LSU_LOADH) {
-      readMem.en := false.B
-      writeMem.en := true.B
-      writeMem.we := true.B
+      readMem.en := true.B
+      writeMem.en := false.B
+      writeMem.we := false.B
       writeMem.din := dataIn
       when(addr(1,0)===0.U(2.W)) {
         io.outs(0) := Cat(0.U((w/2).W),readMem.dout(w/2-1,0))
@@ -923,18 +961,18 @@ class LoadStoreUnit2(w: Int) extends Module {
         writeMem.din := Cat(0.U((w/2).W),dataIn(w/2-1,0))
       }
     }.elsewhen(io.configuration(2,0) === LSU_LOADB) {
-      readMem.en := false.B
-      writeMem.en := true.B
-      writeMem.we := true.B
+      readMem.en := true.B
+      writeMem.en := false.B
+      writeMem.we := false.B
       writeMem.din := dataIn
       when(addr(1,0)===0.U(2.W)) {
-        io.outs(0) := Cat(0.U((3*w/4).W),readMem.dout(w/4-1,0))
+        io.outs(0):= Cat(1.B,0.U((3*w/4-1).W),readMem.dout(w/4-1,0))//valid bit,00..,byte
       }.elsewhen(addr(1,0)===1.U(2.W)){
-        io.outs(0) := Cat(0.U((3*w/4).W),readMem.dout(w/2-1,w/4))
+        io.outs(0) := Cat(1.B,0.U((3*w/4-1).W),readMem.dout(w/2-1,w/4))
       }.elsewhen(addr(1,0)===0.U(2.W)) {
-        io.outs(0) := Cat(0.U((3*w/4).W),readMem.dout(3*w/4-1,w/2))
+        io.outs(0) := Cat(1.B,0.U((3*w/4-1).W),readMem.dout(3*w/4-1,w/2))
       }.elsewhen(addr(1,0)===2.U(2.W)){
-        io.outs(0) := Cat(0.U((3*w/4).W),readMem.dout(w-1,3*w/4))
+        io.outs(0) := Cat(1.B,0.U((3*w/4-1).W),readMem.dout(w-1,3*w/4))
       }.otherwise{
         io.outs(0) := 0.U(w.W)
       }
@@ -944,20 +982,20 @@ class LoadStoreUnit2(w: Int) extends Module {
       writeMem.we := true.B
       io.outs(0) :=  0.U(w.W)
       when(addr(1,0)===0.U(2.W)) {
-        writeMem.din := Cat(0.U((3*w/4).W),dataIn(w/4-1,0))
+        writeMem.din := 0.U(w.W)//Cat(0.U((3*w/4).W),dataIn(w/4-1,0))
       }.elsewhen(addr(1,0)===1.U(2.W)){
-        writeMem.din := Cat(0.U((w/2).W),dataIn(w/4-1,0),0.U((w/4).W))
+        writeMem.din := 0.U(w.W)//Cat(0.U((w/2).W),dataIn(w/4-1,0),0.U((w/4).W))
       }.elsewhen(addr(1,0)===0.U(2.W)) {
-        writeMem.din := Cat(0.U((w/4).W),dataIn(w/4-1,0),0.U((w/2).W))
+        writeMem.din := 0.U(w.W)//Cat(0.U((w/4).W),dataIn(w/4-1,0),0.U((w/2).W))
       }.elsewhen(addr(1,0)===2.U(2.W)){
-        writeMem.din := Cat(dataIn(w/4-1,0),0.U((3*w/4).W))
+        writeMem.din := 0.U(w.W)//Cat(dataIn(w/4-1,0),0.U((3*w/4).W))
       }.otherwise{
-        writeMem.din := Cat(0.U((3*w/4).W),dataIn(w/4-1,0))
+        writeMem.din := 0.U(w.W)//Cat(0.U((3*w/4).W),dataIn(w/4-1,0))
       }
     }.otherwise {
       readMem.en := false.B
-      writeMem.en := true.B
-      writeMem.we := true.B
+      writeMem.en := false.B
+      writeMem.we := false.B
       writeMem.din := dataIn
       io.outs(0) :=  0.U(w.W)
     }

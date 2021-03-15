@@ -212,3 +212,26 @@ class SimpleDualPortSram(mem_depth: Int, mem_width: Int) extends Module {
   }
 }
 
+// write port A + read port B
+class SimpleDualPortSram2(mem_depth: Int, mem_width: Int) extends Module {
+  val io = IO(new Bundle {
+    val a = Flipped(new MemWriteIO(mem_depth, mem_width))
+    val b = Flipped(new MemReadIO(mem_depth, mem_width))
+  })
+
+  val mem = Mem(mem_depth, UInt(mem_width.W))
+  //val dout = Reg(UInt(io.b.dout.getWidth.W))
+
+  //io.b.dout := dout
+
+  when (io.a.en && io.a.we) {
+    mem.write(io.a.addr, io.a.din)
+  }
+
+  when (io.b.en) {
+    io.b.dout := mem.read(io.b.addr) // unbuffered; io.b.dout available in this cycle
+  }.otherwise {
+    //io.b.dout := DontCare
+    io.b.dout :=  0.U(mem_width.W)
+  }
+}

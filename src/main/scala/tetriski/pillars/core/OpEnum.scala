@@ -45,6 +45,13 @@ object OpEnum extends Enumeration {
   val STOREH = Value("28")
   val LOADB = Value("29")
   val STOREB = Value("30")
+  val LOADB_CONST = Value("31")
+  val STOREB_CONST = Value("32")
+  val ADD_CONST = Value("33")
+  val LS_CONST = Value("34")
+  val CMP_CONST = Value("35")
+  val CMERGE_CONST = Value("36")
+  val CMERGE_NPB = Value("37")
 }
 
 
@@ -68,7 +75,13 @@ object OpcodeTranslator {
     OpEnum.CMP,
     OpEnum.CGT,
     OpEnum.SELECT,
-    OpEnum.CMERGE)
+    OpEnum.CMERGE,
+    OpEnum.ADD_CONST,
+    OpEnum.LS_CONST,
+    OpEnum.CMP_CONST,
+    OpEnum.CMERGE_CONST,
+    OpEnum.CMERGE_NPB
+  )
 //    OpEnum.SLT,
 //    OpEnum.SHLL,
 //    OpEnum.SLTU,
@@ -110,7 +123,7 @@ object OpcodeTranslator {
       case OpEnum.LS => 7
       case OpEnum.CLT => 8
       case OpEnum.RS => 9
-      case OpEnum.MOVC => 10
+      case OpEnum.MOVC => 26 //10+16
       case OpEnum.SLT => 6
       case OpEnum.SHLL => 7
       case OpEnum.SLTU => 8
@@ -121,7 +134,11 @@ object OpcodeTranslator {
       case OpEnum.CGT => 13
       case OpEnum.SELECT => 14
       case OpEnum.CMERGE => 15
-
+      case OpEnum.ADD_CONST => 16 // 0 + 16
+      case OpEnum.LS_CONST => 23 // 7 + 16
+      case OpEnum.CMP_CONST => 28 // 12 + 16
+      case OpEnum.CMERGE_CONST => 31 // 15 + 16
+      case OpEnum.CMERGE_NPB => 47 // 15 + 32
 
       //LSU
       case OpEnum.LOAD => 0
@@ -130,6 +147,8 @@ object OpcodeTranslator {
       case OpEnum.STOREH => 3
       case OpEnum.LOADB => 4
       case OpEnum.STOREB => 5
+      case OpEnum.LOADB_CONST => 12 //4+8
+      case OpEnum.STOREB_CONST => 13 //5+8
 
       case OpEnum.CONST => 0
     }

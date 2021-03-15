@@ -108,10 +108,14 @@ class ArchitctureHierarchy extends BlockTrait {
    * is set as its sequence number in relevant array of ArchitctureHierarchy.
    */
   def init(): Unit = {
+    println("")
+    println("ArchitectureHierarchy init")
     for (i <- 0 until elementsArray.size) {
       for (j <- 0 until elementsArray(i).size) {
         val module = elementsArray(i)(j).asInstanceOf[ElementTrait]
         module.setModuleID(j)
+        println("module " + module)
+        println("setModuleID " + j)
       }
     }
     updateConnect()
@@ -148,7 +152,7 @@ class ArchitctureHierarchy extends BlockTrait {
   def resetConfigs(): Unit = {
     for (moduleArray <- elementsArray) {
       for (module <- moduleArray) {
-        module.asInstanceOf[ElementTrait].updateConfigArray(0)
+        module.asInstanceOf[ElementTrait].resetConfigArray(0)
         module.asInstanceOf[ElementTrait].bannedINodeSet = Set[BigInt]()
       }
     }
@@ -229,24 +233,24 @@ class ArchitctureHierarchy extends BlockTrait {
       } else {
         val mode = module.mode
         println("mode " + mode)
-        if (mode == REG_MODE) {
-          //Split and reconstruct the contexts.
-          infoArrays(tempII).append(moduleName(moduleName.size - 1))
-          infoArrays(tempII).append("-1")
-          infoArrays(tempII).append(infos(i * 3 + 2))
-
-          val preII = (tempII - 1 + II) % II
-
-          infoArrays(preII).append(moduleName(moduleName.size - 1))
-          reconfigModuleArrays(preII).append(module)
-          infoArrays(preII).append(infos(i * 3 + 1))
-          infoArrays(preII).append("-1")
-        } else {
+//        if (mode == REG_MODE) {
+//          //Split and reconstruct the contexts.
+//          infoArrays(tempII).append(moduleName(moduleName.size - 1))
+//          infoArrays(tempII).append("-1")
+//          infoArrays(tempII).append(infos(i * 3 + 2))
+//
+//          val preII = (tempII - 1 + II) % II
+//
+//          infoArrays(preII).append(moduleName(moduleName.size - 1))
+//          reconfigModuleArrays(preII).append(module)
+//          infoArrays(preII).append(infos(i * 3 + 1))
+//          infoArrays(preII).append("-1")
+//        } else {
           infoArrays(tempII).append(moduleName(moduleName.size - 1))
           for (j <- 1 until 3) {
             infoArrays(tempII).append(infos(i * 3 + j))
           }
-        }
+//        }
       }
       println("infoArrays(tempII) " + infoArrays(tempII).mkString(" "))
       println("reconfigModuleArrays(tempII) " + reconfigModuleArrays(tempII).mkString(" "))
@@ -260,9 +264,8 @@ class ArchitctureHierarchy extends BlockTrait {
         val offset = i * 3
 
         val module = reconfigModuleArrays(ii)(i)
+        println("Module ID:" + module.getModuleID())
         val second = infoArray(offset + 1)
-        println("")
-        println(s"ii:$ii module:$module")
         if (second == "SELECTED_OP") {
           val opcode = infoArray(offset + 2).toInt
           module.updateConfig(opcode)
@@ -275,6 +278,8 @@ class ArchitctureHierarchy extends BlockTrait {
           val internalNodeName = infoArray(offset)
           var internalNum = 0
 
+          println("")
+          println(s"ii:$ii module:$module second:$second fanoutNode:$fanOutNode")
           //Only a internal node whose name is in the name set of internal nodes of the module is decisive.
           var isDecisive = false
           for (i <- 0 until module.internalNodes.size) {
@@ -288,8 +293,8 @@ class ArchitctureHierarchy extends BlockTrait {
             println(s"faninNums:$fanInNums fanOutNums:$fanOutNums internalNum:$internalNum")
             module.updateConfig(fanInNums, fanOutNums, internalNum)
           }
-          module.configArray
           println(s"faninNums:$fanInNums fanOutNums:$fanOutNums internalNum:$internalNum fanOutNode:$fanOutNode")
+          module.configArray
         }
       }
 
