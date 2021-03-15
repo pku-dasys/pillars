@@ -296,7 +296,7 @@ class ApplicationTester(c: TopModule, appTestHelper: AppTestHelper) extends Peek
         }
       }
       expect(c.io.streamOutLSU(numInLSU).bits, asUnsignedInt(refArray(i)))
-      println(asUnsignedInt(refArray(i)).toString + " " + peek(c.io.streamOutLSU(numInLSU).bits).toString())
+      println(i + " " + asUnsignedInt(refArray(i)).toString + " " + peek(c.io.streamOutLSU(numInLSU).bits).toString())
       step(1)
     }
 

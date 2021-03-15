@@ -933,7 +933,7 @@ class LoadStoreUnit2(w: Int) extends Module {
       readMem.en := false.B
       writeMem.en := true.B
       writeMem.we := true.B
-      writeMem.din := dataIn
+      writeMem.din := Cat(0.B,dataIn(w-2,0))//remove valid bit
       io.outs(0) :=  0.U(w.W)
     }.elsewhen(io.configuration(2,0) === LSU_LOADH) {
       readMem.en := true.B

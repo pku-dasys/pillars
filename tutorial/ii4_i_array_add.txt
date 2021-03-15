@@ -54,8 +54,14 @@ SELECTED_OP
 31
 <3:cgra.tile_0.pe_1_0.loadStoreUnit.internalNode_0>
 SELECTED_OP
-32
+18
+<0:cgra.tile_0.pe_1_0.muxT.internalNode_0>
+0
+0
 <0:cgra.tile_0.pe_1_0.loadStoreUnit.internalNode_0>
+SELECTED_OP
+32
+<1:cgra.tile_0.pe_1_0.loadStoreUnit.internalNode_0>
 SELECTED_OP
 32
 <0:cgra.tile_0.pe_1_0.muxI1.internalNode_0>

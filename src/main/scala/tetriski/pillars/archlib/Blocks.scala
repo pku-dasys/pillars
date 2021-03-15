@@ -365,7 +365,6 @@ class STDNOC_PEBlock(name: String, useMuxBypass: Boolean, opList: List[OpEnum] =
 
   addConnect(rf0 / "out_0" -> muxI1 / s"input_$neighborSize")
   addConnect(rf0 / "out_1" -> muxI1 / ("input_" + (neighborSize + 1).toString))
-  addConnect(alu0 / "out_0" -> muxI1 / ("input_" + (neighborSize + 2).toString))
 //  addConnect(const0 / "out_0" -> muxI1 / ("input_" + (neighborSize + 2).toString))
   addConnect(rf0 / "out_0" -> muxI2 / s"input_$neighborSize")
   addConnect(rf0 / "out_1" -> muxI2 / ("input_" + (neighborSize + 1).toString))
@@ -526,7 +525,7 @@ class STDNOC_PEBlock(name: String, useMuxBypass: Boolean, opList: List[OpEnum] =
     addConnect(muxT / "out_0" -> muxEO / "input_0")
     addConnect(muxT / "out_0" -> muxWO / "input_0")
     addConnect(muxT / "out_0" -> muxSO / "input_0")
-
+    addConnect(muxT / "out_0" -> muxI1 / ("input_" + (neighborSize + 2).toString))
   } else{
 
     //addConnect(mux2 / "out_0" -> alu0 / "input_n")
@@ -537,6 +536,9 @@ class STDNOC_PEBlock(name: String, useMuxBypass: Boolean, opList: List[OpEnum] =
     addConnect(alu0 / "out_0" -> muxEO / "input_0")
     addConnect(alu0 / "out_0" -> muxWO / "input_0")
     addConnect(alu0 / "out_0" -> muxSO / "input_0")
+
+
+    addConnect(alu0 / "out_0" -> muxI1 / ("input_" + (neighborSize + 2).toString))
 
   }
 

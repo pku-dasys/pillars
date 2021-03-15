@@ -147,7 +147,7 @@ object Tutorial {
     val const2 = M //trip count
     val const4 = (2*M + 1) *4 // store addr
     val const6 = M * 4 //array b base
-    val const7 =  2 * M * 4 //temporary fix for loop start store byte
+    val const7 = 2 * M * 4 //temporary fix for loop start store byte
     val const9 = 0
     val const11 = 2 * M * 4 // loop start
     val const12 = 0
