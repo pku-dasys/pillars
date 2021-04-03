@@ -2,7 +2,8 @@ package tetriski.pillars.core
 
 import scala.collection.mutable.ArrayBuffer
 
-/** A class containing const values, the corresponding RCs and identification number of const units.
+/** A class containing config values, the corresponding RCs
+ * and identification number of modules with constant config.
  *
  * @param initII the targeted II
  */
@@ -11,43 +12,43 @@ class ConstInfo(initII: Int = 0) {
    * We can get a array of the identification numbers of const units in a reconfiguration cycle
    * with constIDArray(RC).
    */
-  val constIDArray = new ArrayBuffer[ArrayBuffer[Int]]()
+  val IDArray = new ArrayBuffer[ArrayBuffer[Int]]()
 
   /** A two dimensional array.
    * We can get a array of values of const units in a reconfiguration cycle
    * with constValArray(RC).
    */
-  val constValArray = new ArrayBuffer[ArrayBuffer[Int]]()
+  val configArray = new ArrayBuffer[ArrayBuffer[BigInt]]()
 
   /** A targeted II.
    */
   var targetedII = initII
 
   for (i <- 0 until targetedII) {
-    constIDArray.append(new ArrayBuffer[Int]())
-    constValArray.append(new ArrayBuffer[Int]())
+    IDArray.append(new ArrayBuffer[Int]())
+    configArray.append(new ArrayBuffer[BigInt]())
   }
 
-  /** Add a item of const information.
+  /** Add a item of config information.
    *
-   * @param constID  the identification number of a const unit
+   * @param ID  the identification number of a module with constant config
    * @param RC       the reconfiguration cycle
-   * @param constVal the const value
+   * @param configVal the config value
    */
-  def addConst(constID: Int, RC: Int, constVal: Int): Unit = {
-    constIDArray(RC).append(constID)
-    constValArray(RC).append(constVal)
+  def addConfig(ID: Int, RC: Int, configVal: BigInt): Unit = {
+    IDArray(RC).append(ID)
+    configArray(RC).append(configVal)
   }
 
   /** Reset values in this class.
    */
   def reset(newTestII: Int): Unit = {
-    constIDArray.clear()
-    constValArray.clear()
+    IDArray.clear()
+    configArray.clear()
     targetedII = newTestII
     for (i <- 0 until targetedII) {
-      constIDArray.append(new ArrayBuffer[Int]())
-      constValArray.append(new ArrayBuffer[Int]())
+      IDArray.append(new ArrayBuffer[Int]())
+      configArray.append(new ArrayBuffer[BigInt]())
     }
   }
 }
