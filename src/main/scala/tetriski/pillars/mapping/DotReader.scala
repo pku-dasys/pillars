@@ -1,5 +1,7 @@
 package tetriski.pillars.mapping
 
+import scala.util.matching.Regex
+
 import tetriski.pillars.core.OpEnum
 
 /** Class to load DFG from a DOT file.
@@ -38,6 +40,7 @@ object DotReader {
     if (op == "slt") return 23
     if (op == "sltu") return 24
     if (op == "shla") return 25
+    if (op == "incr") return 26
     -1
   }
 
@@ -65,9 +68,20 @@ object DotReader {
       if (index1 != -1) {
         if (index0 == -1) {
           val nodeName = file(i).substring(0, index1)
-          val opcode = genOpCode(file(i).substring(index2 + 1, index3))
+          val labelPattern = "\\[.+\\]".r
+          val labels = (labelPattern findFirstIn file(i)).mkString("").replaceAll(" ", "")
+          val opcodePattern = "opcode\\=(([a-z])+)(,|\\])".r
+          val opcodeStr = opcodePattern findFirstIn labels
+          val sramIDPattern = "sram\\=(([0-9])+)(,|\\])".r
+          val sramID = sramIDPattern findFirstIn labels
+          val opcode = genOpCode(opcodeStr.mkString("").replace("opcode=", "")
+            .replace("]", "").replace(",", ""))
           dfg.addOpNode(new OpNode(nodeName))
           dfg.applyOp(nodeName).opcode = OpEnum(opcode)
+          if (sramID != None) {
+            dfg.fixedMapSRAM += dfg.applyOp(nodeName) -> sramID.mkString("").replace("sram=", "")
+              .replace("]", "").replace(",", "").toInt
+          }
         }
         else {
           val from = file(i).substring(0, index0)

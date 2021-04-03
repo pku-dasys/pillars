@@ -109,6 +109,7 @@ object ILPMap {
     val routingNodes = ArrayBuffer[NodeMRRG]()
     val functionNodes = ArrayBuffer[NodeMRRG]()
     var nodeIDMap = Map[NodeMRRG, Int]()
+    var sramMap = Map[Int, ArrayBuffer[Int]]()
 
     for (i <- 0 until num_mrrg) {
 
@@ -133,6 +134,16 @@ object ILPMap {
           opcodes.add(Integer.valueOf(mrrg.nodes(i).ops(j).id))
         }
         mapper.MRRGFunctionSupportOpcode.add(opcodes)
+
+        val sramID = mrrg.nodes(i).sramID
+        if(sramID != -1){
+          if(sramMap.keySet.contains(sramID)){
+            sramMap(sramID).append(num_mrrg_f)
+          }else{
+            sramMap += sramID -> new ArrayBuffer[Int]
+            sramMap(sramID).append(num_mrrg_f)
+          }
+        }
         num_mrrg_f += 1
       }
       else {
@@ -141,6 +152,16 @@ object ILPMap {
         num_mrrg_r += 1
       }
     }
+
+    val fixedMapSRAM = dfg.fixedMapSRAM
+    var fixedMapRelation = Map[Int, Set[Integer]]()
+    for(opNode <- fixedMapSRAM.keys){
+      val opNodeIndex = dfg.opNodes.indexOf(opNode)
+      val sramID = fixedMapSRAM(opNode)
+      fixedMapRelation += opNodeIndex -> sramMap(sramID).map(i => new Integer(i)).toSet
+    }
+    fixedMapRelation.map(pair => mapper.fixedMapRelation
+      .put(pair._1, JavaConverters.setAsJavaSet(pair._2)))
 
     for (i <- 0 until num_mrrg_f) {
       mapper.MRRGFunctionName.add(functionNodes(i).name)

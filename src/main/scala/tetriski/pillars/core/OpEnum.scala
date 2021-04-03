@@ -33,6 +33,7 @@ object OpEnum extends Enumeration {
   val SLT = Value("23")
   val SLTU = Value("24")
   val SHLA = Value("25")
+  val INCR = Value("26")
 }
 
 /** A object translating opcodes in elements into the set of configuration of modules.
@@ -99,7 +100,11 @@ object OpcodeTranslator {
       case OpEnum.LOAD => 0
       case OpEnum.STORE => 1
 
+      //Const Unit
       case OpEnum.CONST => 0
+
+      //Counter
+      case OpEnum.INCR => 0
     }
     ret
   }

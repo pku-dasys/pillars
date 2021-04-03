@@ -36,6 +36,10 @@ class NodeMRRG(var name: String) extends Cloneable {
    */
   var mode = NORMAL_MODE
 
+  /** The identification number of sram, only used for Load/Store Unit.
+   */
+  var sramID = -1
+
   /** Get the name of this MRRG node.
    *
    * @return the name of this MRRG node
@@ -66,6 +70,7 @@ class NodeMRRG(var name: String) extends Cloneable {
     clone.fanOut = ArrayBuffer[NodeMRRG]()
     clone.ops = ops.clone
     clone.mode = mode
+    clone.sramID = sramID
     clone
   }
 }

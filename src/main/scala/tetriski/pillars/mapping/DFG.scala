@@ -141,6 +141,10 @@ class DFG(var name: String) {
    */
   var synthesizable = false
 
+  /** A map between some funcNodes and the fixed SRAM ID belonging to them
+   */
+  var fixedMapSRAM = Map[OpNode, Int]()
+
   /** Get the num of opNodes.
    */
   def getOpSize(): Int = {

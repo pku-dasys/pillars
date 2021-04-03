@@ -144,6 +144,7 @@ public class gurobiMapJava {
     Map<Integer, List<List<Integer>>> funcDirect2funcMap;
     Set<String> DFGCommutatedSet;
     Map<Integer, List<Integer>> DFGOpOperand;
+    Map<Integer, Set<Integer>> fixedMapRelation;
     int II = 1;
     int numDfgVals = 0;
     int numDfgOps = 0;
@@ -214,7 +215,7 @@ public class gurobiMapJava {
         funcDirect2funcMap = new HashMap<>();
         DFGCommutatedSet = new HashSet();
         DFGOpOperand = new HashMap<>();
-
+        fixedMapRelation = new HashMap<>();
     }
 
     /**
@@ -1171,7 +1172,13 @@ public class gurobiMapJava {
                 int flag = 0;
                 for (int i = 0; i < MRRGFunctionSupportOpcode.get(f).size(); i++)
                     if (MRRGFunctionSupportOpcode.get(f).get(i) == DFGOpNodeOpcode.get(op)) {
-                        flag = 1;
+                        if(fixedMapRelation.containsKey(op)){
+                            if(fixedMapRelation.get(op).contains(f)){
+                                flag = 1;
+                            }
+                        }else {
+                            flag = 1;
+                        }
                         break;
                     }
                 if (flag == 0)
