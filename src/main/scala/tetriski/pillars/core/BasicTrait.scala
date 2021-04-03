@@ -1,15 +1,19 @@
 package tetriski.pillars.core
 
 import OpEnum.OpEnum
+import tetriski.pillars.archlib.ElementCounter
 
 import scala.collection.mutable.ArrayBuffer
 import tetriski.pillars.hardware.PillarsConfig._
 
-//TODO: separate traits of elements and blocks
 /** Basic trait of elements and blocks.
  * It helps to produce an in-memory model for both behavior and structure.
  */
-trait BasicTrait {
+trait BasicTrait extends Ports {
+  /** The MRRG corresponding to this element.
+   */
+  var mrrg = new MRRG()
+
   /** The type identification number of the module represented by this abstract model.
    */
   var typeID = -1
@@ -49,6 +53,36 @@ trait BasicTrait {
   /** The skews of the module represented by this abstract model in different reconfiguration cycles.
    */
   var skews = new Array[Int](II_UPPER_BOUND)
+
+  /** Get a port of this element.
+   *
+   * @param portName the name of this port
+   * @return a valid port
+   */
+  def /(portName: String): ValidPort = {
+    if (!(getInPorts().toSet.contains(portName) || getOutPorts().toSet.contains(portName))) {
+      System.err.println(s"Invalid port name $name / $portName!")
+    }
+    new ValidPort(name, portName)
+  }
+
+  /** Initialize MRRG.
+   *
+   * @return the MRRG
+   */
+  def initMRRG(): MRRG = {
+
+    for (inPort <- inPorts) {
+      val node = new NodeMRRG(inPort)
+      mrrg.addNode(node)
+    }
+    for (outPort <- outPorts) {
+      val node = new NodeMRRG(outPort)
+      mrrg.addNode(node)
+    }
+
+    mrrg
+  }
 
   /** Set the module identification number of the module represented by this abstract model.
    *
@@ -133,10 +167,12 @@ trait BasicTrait {
   }
 
   /** Reset all fire times.
+   *
+   * @param t the default fire time
    */
-  def resetFireTimes(): Unit = {
+  def resetFireTimes(t: Int = -1): Unit = {
     for (i <- 0 until II_UPPER_BOUND) {
-      fireTimes(i) = 0
+      fireTimes(i) = t
     }
   }
 
@@ -223,14 +259,14 @@ trait BasicTrait {
     val ret = new Array[Int](II_UPPER_BOUND)
     for (i <- 0 until II_UPPER_BOUND) {
 
-      val fireTime = fireTimes(i)
+      var fireTime = fireTimes(i)
       var mask = 0
-      for(m <- 0 until LOG_SCHEDULE_SIZE){
+      for (m <- 0 until LOG_SCHEDULE_SIZE) {
         mask += 1 << m
       }
       var sche = fireTime & mask
 
-      if (LOG_SKEW_LENGTH > 0) {
+      if (LOG_SKEW_LENGTH > 0 && (!this.isInstanceOf[ElementCounter])) {
         var skew = skews(i)
         if (skew < 0 && USE_RELATIVE_SKEW) {
           skew = Math.pow(2, LOG_SKEW_LENGTH).toInt - skew

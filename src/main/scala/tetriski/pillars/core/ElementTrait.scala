@@ -1,6 +1,8 @@
 package tetriski.pillars.core
 
+import chisel3.Module
 import chisel3.util.log2Up
+import tetriski.pillars.archlib.ElementLSU
 import tetriski.pillars.core.MRRGMode._
 
 import scala.collection.mutable.ArrayBuffer
@@ -10,10 +12,15 @@ import scala.util.control.Breaks._
  * An element should have this trait to generate
  * the structure for reconfiguration.
  */
-trait ElementTrait extends Ports with BasicTrait {
-  /** The MRRG corresponding to this element.
-   */
-  var mrrg = new MRRG()
+trait ElementTrait extends BasicTrait {
+
+  def genModuleRule(): () => Module
+
+  val correlation: Class[_ <: Module]
+
+  //  def getCorrelation() = correlation
+
+  //  setTypeID(ModuleRegistry.getID(this))
 
   /** The MRRG generation mode of this element.
    */
@@ -27,18 +34,6 @@ trait ElementTrait extends Ports with BasicTrait {
    */
   var bannedINodeSet = Set[BigInt]()
 
-  /** Get a port of this element.
-   *
-   * @param portName the name of this port
-   * @return a valid port
-   */
-  def /(portName: String): ValidPort = {
-    if (!(getInPorts().toSet.contains(portName) || getOutPorts().toSet.contains(portName))) {
-      System.err.println(s"Invalid port name $name / $portName!")
-    }
-    new ValidPort(name, portName)
-  }
-
   /** Set the MRRG generation mode of this element.
    */
   def setMRRGMode(newMode: Int): Unit = {
@@ -51,8 +46,9 @@ trait ElementTrait extends Ports with BasicTrait {
    * @param fanInNums   a list of the identification numbers of fan-ins
    * @param fanOutNums  a list of the identification numbers of fan-outs
    * @param internalNum the identification numbers of internal node that
+   * @param rc          the current reconfigurable cycle
    */
-  def updateConfig(fanInNums: List[Int], fanOutNums: List[Int], internalNum: Int): Unit = {
+  def updateConfig(fanInNums: List[Int], fanOutNums: List[Int], internalNum: Int, rc: Int): Unit = {
     if (internalNodes.size > 1) {
       if (supOps.size > 0) {
         //ALU bypass
@@ -63,6 +59,9 @@ trait ElementTrait extends Ports with BasicTrait {
           case 1 => 13
         }
         updateConfigArray(newConfig)
+
+        //Enable the ALU to perform bypass
+        setFireTime(0, rc)
       } else {
         //register files
         val inPortNum = getInPorts().size
@@ -246,7 +245,7 @@ trait ElementTrait extends Ports with BasicTrait {
    *
    * @return the MRRG of this element
    */
-  def initMRRG(): MRRG = {
+  override def initMRRG(): MRRG = {
 
     for (inPort <- inPorts) {
       val node = new NodeMRRG(inPort)
@@ -265,6 +264,8 @@ trait ElementTrait extends Ports with BasicTrait {
       if (supOps.size > 0 && i == 0) {
         node.ops.appendAll(supOps)
       }
+
+
       mrrg.addNode(node)
 
       //ALU bypass.
