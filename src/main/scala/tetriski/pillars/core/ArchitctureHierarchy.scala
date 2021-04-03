@@ -2,7 +2,8 @@ package tetriski.pillars.core
 
 import java.io.{File, PrintWriter}
 
-import tetriski.pillars.archlib.{ElementAlu, ElementConst}
+import chisel3.Module
+import tetriski.pillars.archlib.{ElementAlu, ElementConst, ElementCounter, ElementLSU}
 import tetriski.pillars.hardware.PillarsModuleInfo
 import tetriski.pillars.core.MRRGMode._
 
@@ -23,13 +24,15 @@ class ArchitctureHierarchy extends BlockTrait {
   def getPillarsModuleInfo(): PillarsModuleInfo = {
     var moduleNums = List[Int]()
     var moduleParams = List[List[Int]]()
+    var genModuleRules = List[() => Module]()
     for (i <- 0 until elementsArray.size) {
       moduleNums = moduleNums :+ elementsArray(i).size
       for (j <- elementsArray(i).indices) {
-        moduleParams = moduleParams :+ elementsArray(i)(j).asInstanceOf[ElementTrait].getParams()
+        moduleParams = moduleParams :+ elementsArray(i)(j).getParams()
+        genModuleRules = genModuleRules :+ elementsArray(i)(j).genModuleRule()
       }
     }
-    new PillarsModuleInfo(moduleNums, moduleParams, inPorts.size, outPorts.size)
+    new PillarsModuleInfo(moduleNums, moduleParams, inPorts.size, outPorts.size, genModuleRules)
   }
 
   /** Get a list of configuration regions where modules share a configuration controller.
@@ -62,15 +65,26 @@ class ArchitctureHierarchy extends BlockTrait {
     }
 
     val configRegions = findConfigRegion(blockMap).sortBy(x => x.getName())
+    var unallocatedElements = elementsArray.map(i => i.toSet).reduce(_ ++ _)
     //Translate the information of configuration regions into the List format.
     for (configRegion <- configRegions) {
       var moduleList = List[List[Int]]()
       for (i <- 0 until configRegion.elementsArray.size) {
         for (j <- 0 until configRegion.elementsArray(i).size) {
-          val module = configRegion.elementsArray(i)(j).asInstanceOf[ElementTrait]
+          val module = configRegion.elementsArray(i)(j)
+          unallocatedElements -= module
           if (module.getConfigBit() > 0) {
             moduleList = moduleList :+ List(module.getTypeID(), module.getModuleID())
           }
+        }
+      }
+      ret = ret :+ moduleList
+    }
+    if (unallocatedElements.size != 0) {
+      var moduleList = List[List[Int]]()
+      for (module <- unallocatedElements) {
+        if (module.getConfigBit() > 0) {
+          moduleList = moduleList :+ List(module.getTypeID(), module.getModuleID())
         }
       }
       ret = ret :+ moduleList
@@ -133,13 +147,19 @@ class ArchitctureHierarchy extends BlockTrait {
   /** Reset schedules of ALUs and LSUs.
    */
   def resetSchedules(): Unit = {
+
     for (alu <- ALUsArray) {
       alu.asInstanceOf[ElementTrait].resetFireTimes()
       alu.asInstanceOf[ElementTrait].resetSkew()
     }
+
     for (lsu <- LSUsArray) {
       lsu.asInstanceOf[ElementTrait].resetFireTimes()
       lsu.asInstanceOf[ElementTrait].resetSkew()
+    }
+
+    for (counter <- CountersArray){
+      counter.asInstanceOf[ElementTrait].resetFireTimes()
     }
   }
 
@@ -175,11 +195,15 @@ class ArchitctureHierarchy extends BlockTrait {
    *          whose hierarchy name is "cgra.tile_0.pe_3_0.alu0",
    *          should perform the opcode "8" (i.e. ADD).
    *          So its configuration should be 0, seen in OpcodeTranslator.
-   * @param filename  the file name of information TXT
-   * @param II        the targeted initiation interval (II)
-   * @param constInfo the class containing const values, the corresponding RCs and identification number of const units
+   * @param filename    the file name of behavioral modeling information TXT
+   * @param II          the targeted initiation interval (II)
+   * @param constInfo   the class containing const values, the corresponding RCs
+   *                    and identification number of const units
+   * @param counterInfo the class containing basic parameters (configs), the corresponding RCs
+   *                    and identification number of counters.
    */
-  def genConfig(filename: String, II: Int, constInfo: ConstInfo = null): Array[BigInt] = {
+  def genConfig(filename: String, II: Int, constInfo: ConstInfo = null,
+                counterInfo: CounterInfo = null): Array[BigInt] = {
     val retBitstreams = new ArrayBuffer[BigInt]()
     val infos = Source.fromFile(filename).getLines().toArray
 
@@ -237,13 +261,13 @@ class ArchitctureHierarchy extends BlockTrait {
       }
     }
 
-    for (ii <- 0 until II) {
+    for (rc <- 0 until II) {
       resetConfigs()
-      val infoArray = infoArrays(ii)
+      val infoArray = infoArrays(rc)
       for (i <- 0 until infoArray.size / 3) {
         val offset = i * 3
 
-        val module = reconfigModuleArrays(ii)(i)
+        val module = reconfigModuleArrays(rc)(i)
         val second = infoArray(offset + 1)
         if (second == "SELECTED_OP") {
           val opcode = infoArray(offset + 2).toInt
@@ -266,17 +290,24 @@ class ArchitctureHierarchy extends BlockTrait {
             }
           }
           if (isDecisive) {
-            module.updateConfig(fanInNums, fanOutNums, internalNum)
+            module.updateConfig(fanInNums, fanOutNums, internalNum, rc)
           }
           module.configArray
         }
       }
 
       //Update configurations of const units.
-      for (j <- 0 until constInfo.constIDArray(ii).size) {
-        val constID = constInfo.constIDArray(ii)(j)
-        val constVal = constInfo.constValArray(ii)(j)
+      for (j <- 0 until constInfo.IDArray(rc).size) {
+        val constID = constInfo.IDArray(rc)(j)
+        val constVal = constInfo.configArray(rc)(j)
         this.ConstsArray(constID).asInstanceOf[ElementConst].updateConfigArray(constVal)
+      }
+
+      //Update configurations of counters.
+      for (j <- 0 until counterInfo.IDArray(rc).size) {
+        val ID = counterInfo.IDArray(rc)(j)
+        val value = counterInfo.configArray(rc)(j)
+        this.CountersArray(ID).asInstanceOf[ElementCounter].updateConfigArray(value)
       }
       retBitstreams.append(getConfigBitStream())
     }
@@ -290,6 +321,7 @@ class ArchitctureHierarchy extends BlockTrait {
   def getSchedules(): List[Int] = {
     var schedules = ALUsArray.map(alu => alu.getSchedule().toList).reduce(_ ++ _)
     schedules = schedules ++ LSUsArray.map(lsu => lsu.getSchedule().toList).reduce(_ ++ _)
+    schedules = schedules ++ CountersArray.map(lsu => lsu.getSchedule().toList).reduce(_ ++ _)
     schedules
   }
 }
