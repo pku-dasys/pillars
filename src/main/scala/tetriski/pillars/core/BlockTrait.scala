@@ -2,6 +2,7 @@ package tetriski.pillars.core
 
 import java.io.{File, PrintWriter}
 
+import tetriski.pillars.archlib.{ElementAlu, ElementConst, ElementCounter, ElementLSU}
 import tetriski.pillars.core.MRRGMode._
 import tetriski.pillars.core.OpEnum.OpEnum
 
@@ -16,35 +17,32 @@ import scala.collection.mutable.ArrayBuffer
  * but the prepared results can still work well.
  */
 //TODO: update the results prepared in advance
-trait BlockTrait extends ElementTrait {
+trait BlockTrait extends BasicTrait {
 
   /** A variable indicating whether this block is a configuration region.
    */
   var isConfigRegion = false
 
-  /** An array of ALUs belonging to this block or its sub-blocks.
-   */
-  var ALUsArray = new ArrayBuffer[ElementTrait]
+  //  /** An array of ALUs belonging to this block or its sub-blocks.
+  //   */
+  //  var ALUsArray = new ArrayBuffer[ElementTrait]
+  //
+  //  /** An array of RFs belonging to this block or its sub-blocks.
+  //   */
+  //  var RFsArray = new ArrayBuffer[ElementTrait]
+  //
+  //  /** An array of multiplexers belonging to this block or its sub-blocks.
+  //   */
+  //  var MuxsArray = new ArrayBuffer[ElementTrait]
+  //
+  //  /** An array of const units belonging to this block or its sub-blocks.
+  //   */
+  //  var ConstsArray = new ArrayBuffer[ElementTrait]
+  //
+  //  /** An array of LSUs belonging to this block or its sub-blocks.
+  //   */
+  //  var LSUsArray = new ArrayBuffer[ElementTrait]
 
-  /** An array of RFs belonging to this block or its sub-blocks.
-   */
-  var RFsArray = new ArrayBuffer[ElementTrait]
-
-  /** An array of multiplexers belonging to this block or its sub-blocks.
-   */
-  var MuxsArray = new ArrayBuffer[ElementTrait]
-
-  /** An array of const units belonging to this block or its sub-blocks.
-   */
-  var ConstsArray = new ArrayBuffer[ElementTrait]
-
-  /** An array of LSUs belonging to this block or its sub-blocks.
-   */
-  var LSUsArray = new ArrayBuffer[ElementTrait]
-
-  /** An array of elements belonging to this block or its sub-blocks.
-   */
-  var elementsArray = new ArrayBuffer[ArrayBuffer[ElementTrait]]
 
   /** An array of elements belonging to this block directly.
    * Lists in Int format represent those elements.
@@ -53,15 +51,39 @@ trait BlockTrait extends ElementTrait {
 
   //TODO: update this part with the features of Scala
   //It should be guaranteed that the order of element arrays here is consist with the type ID.
-  elementsArray.append(ALUsArray)
-  elementsArray.append(RFsArray)
-  elementsArray.append(MuxsArray)
-  elementsArray.append(ConstsArray)
-  elementsArray.append(LSUsArray)
+  //  elementsArray.append(ALUsArray)
+  //  elementsArray.append(RFsArray)
+  //  elementsArray.append(MuxsArray)
+  //  elementsArray.append(ConstsArray)
+  //  elementsArray.append(LSUsArray)
 
   /** The number of types of elements.
    */
-  val typeNum = elementsArray.size
+  val typeNum = ModuleRegistry.classOfElements.size
+
+  /** An array of elements belonging to this block or its sub-blocks.
+   */
+  var elementsArray = new ArrayBuffer[ArrayBuffer[ElementTrait]]
+
+  for (t <- 0 until typeNum) {
+    elementsArray.append(new ArrayBuffer[ElementTrait])
+  }
+
+  /** An array of ALUs belonging to this block or its sub-blocks.
+   */
+  val ALUsArray = elementsArray(ModuleRegistry.classOfElements.indexOf(classOf[ElementAlu]))
+
+  /** An array of LSUs belonging to this block or its sub-blocks.
+   */
+  val LSUsArray = elementsArray(ModuleRegistry.classOfElements.indexOf(classOf[ElementLSU]))
+
+  /** An array of Counters belonging to this block or its sub-blocks.
+   */
+  val CountersArray = elementsArray(ModuleRegistry.classOfElements.indexOf(classOf[ElementCounter]))
+
+  /** An array of const units belonging to this block or its sub-blocks.
+   */
+  var ConstsArray = elementsArray(ModuleRegistry.classOfElements.indexOf(classOf[ElementConst]))
 
   /** The hierarchy name of this block.
    */
@@ -304,6 +326,7 @@ trait BlockTrait extends ElementTrait {
     writer.close()
   }
 
+
   /** Initialize MRRG of this block.
    * The hierarchy name of its sub-blocks will be updated accordingly.
    * The I/O ports of this block will generate opNodes that can perform input/output operation.
@@ -348,6 +371,9 @@ trait BlockTrait extends ElementTrait {
     for (modules <- elementsArray) {
       for (module <- modules) {
         val tempMRRG = module.asInstanceOf[ElementTrait].mrrg
+        if(module.isInstanceOf[ElementLSU]){
+          tempMRRG.nodes.filter(n => n.ops.size > 0).foreach(n => n.sramID = module.getModuleID())
+        }
         mrrg.merge(tempMRRG)
       }
     }

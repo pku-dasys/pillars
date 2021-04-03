@@ -3,6 +3,7 @@ package tetriski.pillars.archlib
 import chisel3.util.log2Up
 import tetriski.pillars.core.OpEnum.OpEnum
 import tetriski.pillars.core.{BlockTrait, OpEnum}
+import tetriski.pillars.hardware.PillarsConfig
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -118,7 +119,7 @@ class TileLSUBlock(name: String, x: Int, y: Int, numIn: Int, numOut: Int,
   var peMap = Map[Int, AdresPEBlock]()
   for (j <- 0 until y) {
     for (i <- 0 until x) {
-      var inPortsNeighbor = Array("input_w", "input_e", "input_n", "input_s", "input_lsu")
+      var inPortsNeighbor = Array("input_w", "input_e", "input_n", "input_s", "input_lsu", "input_counter")
       var neighborPortSet = inPortsNeighbor.toSet
       if (complex) {
         neighborPortSet ++= Set("input_wn", "input_ws", "input_en", "input_es")
@@ -245,6 +246,18 @@ class TileLSUBlock(name: String, x: Int, y: Int, numIn: Int, numOut: Int,
       val pe = peMap(i + j * x)
       addConnect(pe / "out_0" -> lsuBlock / s"neighbour_input_$i")
       addConnect(lsuBlock / "out" -> pe / "input_lsu")
+    }
+  }
+
+  /** PEs in the same column share a Counter (independent width according to global config).
+   */
+  for (i <- 0 until x) {
+    val counter = new ElementCounter("counter_" + i.toString, List(PillarsConfig.COUNTER_WIDTH))
+    counter.addOutPorts(Array("out"))
+    addElement(counter)
+    for (j <- 0 until y) {
+      val pe = peMap(i + j * x)
+      addConnect(counter / "out" -> pe / "input_counter")
     }
   }
 
@@ -443,7 +456,7 @@ class BlockImmediate(name: String) extends BlockTrait {
   val aluParams = List(32)
   val aluOpList = List(OpEnum.ADD)
   val muxParams = List(2, 32)
-  val constParams = List(32)
+  val constParams = List(PillarsConfig.CONST_WIDTH)
   initName(name)
 
   addInPorts(Array("in0", "in1"))
