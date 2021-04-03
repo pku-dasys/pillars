@@ -13,15 +13,22 @@ import tetriski.pillars.util.SplitOrConcat
 class CounterTester(c: Counter) extends PeekPokeTester(c) {
   val w = 8
   val init = 3
-  val change = 2
+  val step = 2
   val end = 13
-  val config: BigInt = (end << (w * 2)) + (change << w) + init
+  val freq = 2
+  val config: BigInt = (freq << (w * 3)) + (end << (w * 2)) + (step << w) + init
   poke(c.io.en, true)
   poke(c.io.configuration, config)
 
-  for (i <- 0 until 10) {
-    println(peek(c.io.outs(0)).toString() + " " + peek(c.io.finish).toString())
+  for (_ <- 0 until 10) {
+    println(peek(c.io.outs(0)).toString())
     step(1)
+  }
+}
+
+object CTest extends App{
+  iotesters.Driver.execute(Array("-tgvo", "on", "-tbn", "verilator"), () => new Counter(8)) {
+    c => new CounterTester(c)
   }
 }
 
@@ -168,11 +175,23 @@ class TopModuleLSUAdresUnitTest(c: TopModule, bitstream: BigInt, schedules: List
   poke(c.io.configuration, bitstream)
 
   var schedulesBigInt: BigInt = 0
-  for (sche <- schedules.reverse) {
-    schedulesBigInt = (schedulesBigInt << LOG_SCHEDULE_SIZE + LOG_SKEW_LENGTH + 1) + sche
-  }
 
-  poke(c.io.schedules, schedulesBigInt)
+  var scheduleConfigs: Array[BigInt] = new Array[BigInt](II_UPPER_BOUND)
+  for(ii <- 0 until II_UPPER_BOUND){
+    scheduleConfigs(ii) = BigInt(0)
+  }
+  val sches = schedules.reverse
+  for (j <- 0 until sches.size / II_UPPER_BOUND) {
+    for(ii <- 0 until II_UPPER_BOUND){
+      val sche = sches(j * II_UPPER_BOUND + ii)
+      scheduleConfigs(ii) = (scheduleConfigs(ii) << LOG_SCHEDULE_SIZE + SKEW_WIDTH) + sche
+    }
+  }
+//  for (sche <- schedules.reverse) {
+//    schedulesBigInt = (schedulesBigInt << LOG_SCHEDULE_SIZE + LOG_SKEW_LENGTH + 1) + sche
+//  }
+
+  poke(c.io.schedules, scheduleConfigs(II_UPPER_BOUND - 1))
   step(1)
 
   //Start the activating process.
@@ -245,19 +264,33 @@ class TopModuleCompleteAdresUnitTest(c: TopModule, bitstreams: Array[BigInt], sc
   //Set the configurations and schedules in the pre-process.
   poke(c.io.enConfig, 1)
 
-  var schedulesBigInt: BigInt = 0
-  for (sche <- schedules.reverse) {
-    schedulesBigInt = (schedulesBigInt << LOG_SCHEDULE_SIZE + LOG_SKEW_LENGTH + 1) + sche
+  var scheduleConfigs: Array[BigInt] = new Array[BigInt](II_UPPER_BOUND)
+  for(ii <- 0 until II_UPPER_BOUND){
+    scheduleConfigs(ii) = BigInt(0)
   }
+  val sches = schedules.reverse
+  for (j <- 0 until sches.size / II_UPPER_BOUND) {
+    for(ii <- 0 until II_UPPER_BOUND){
+      val sche = sches(j * II_UPPER_BOUND + ii)
+      scheduleConfigs(ii) = (scheduleConfigs(ii) << LOG_SCHEDULE_SIZE + SKEW_WIDTH) + sche
+    }
+  }
+  scheduleConfigs = scheduleConfigs.reverse
 
-  poke(c.io.schedules, schedulesBigInt)
+//  var schedulesBigInt: BigInt = 0
+//  for (sche <- schedules.reverse) {
+//    schedulesBigInt = (schedulesBigInt << LOG_SCHEDULE_SIZE + LOG_SKEW_LENGTH + 1) + sche
+//  }
 
+  poke(c.io.schedules, scheduleConfigs(0))
   poke(c.io.configuration, bitstreams(0))
   step(1)
 
+  poke(c.io.schedules, scheduleConfigs(1))
   poke(c.io.configuration, bitstreams(1))
   step(1)
 
+  poke(c.io.schedules, scheduleConfigs(2))
   poke(c.io.configuration, bitstreams(2))
   step(1)
 

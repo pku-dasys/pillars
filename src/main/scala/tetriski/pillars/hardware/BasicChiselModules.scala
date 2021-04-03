@@ -84,7 +84,9 @@ class Synchronizer(w: Int) extends Module {
  *
  * @param configWidth the width of the configuration in a reconfiguration cycle
  */
-class ConfigController(configWidth: Int) extends Module {
+class ConfigController(configWidth: Int, name: String = "ConfigController") extends Module {
+  override def desiredName = name
+
   val io = IO(new Bundle {
     val en = Input(Bool())
     val II = Input(UInt(LOG_II_UPPER_BOUND.W))
@@ -97,8 +99,6 @@ class ConfigController(configWidth: Int) extends Module {
   val cycleReg = RegInit(0.U(LOG_II_UPPER_BOUND.W))
 
   val configRegs = RegInit(VecInit(Seq.fill(II_UPPER_BOUND)(0.U(configWidth.W))))
-
-  //io.outConfig := configRegs(cycleReg - 1.U(LOG_II_UPPER_BOUND.W))
 
   when(state === s_read_write) {
     io.outConfig := 0.U
@@ -135,22 +135,22 @@ class ScheduleController extends Module {
     val valid = Output(Bool())
   })
 
-  val s_wait :: s_valid :: Nil = Enum(2)
-  val state = RegInit(s_wait)
   val cycleReg = Reg(UInt(LOG_SCHEDULE_SIZE.W))
 
-  io.valid := (cycleReg === io.waitCycle) && io.en
+  io.valid := (cycleReg >= (io.waitCycle + 1.U)) && io.en
+
+  /** If waitCycle == (1 << LOG_SCHEDULE_SIZE) - 1,
+   * it means the "valid" signal should be always false.
+   */
+  when(io.waitCycle === ((1 << LOG_SCHEDULE_SIZE) - 1).U){
+    io.valid := false.B
+  }
 
   when(io.en) {
-    when(state === s_wait) {
-      when(cycleReg === io.waitCycle) {
-        state := s_valid
-      }.otherwise {
-        cycleReg := cycleReg + 1.U
-      }
+    when(cycleReg + 1.U =/= 0.U) {
+      cycleReg := cycleReg + 1.U
     }
   }.otherwise {
-    state := s_wait
     cycleReg := 0.U
   }
 }
@@ -159,34 +159,58 @@ class ScheduleController extends Module {
  * It also dispatchs "skewing" to modules.
  *
  */
-class MultiIIScheduleController extends Module {
+class MultiIIScheduleController(DualInput: Boolean = true) extends Module {
+  val skewWidth = if (DualInput) {
+    SKEW_WIDTH
+  } else {
+    0
+  }
+
+  val SWidth = LOG_SCHEDULE_SIZE + skewWidth
+
   val io = IO(new Bundle {
     val en = Input(Bool())
-    val schedules = Input(Vec(II_UPPER_BOUND, UInt((LOG_SCHEDULE_SIZE + SKEW_WIDTH).W)))
+    val enConfig = Input(Bool())
+    //    val schedules = Input(Vec(II_UPPER_BOUND, UInt(SWidth.W)))
+    val schedule = Input(UInt(SWidth.W))
     val II = Input(UInt(LOG_II_UPPER_BOUND.W))
     val valid = Output(Bool())
-    val skewing = Output(UInt((SKEW_WIDTH).W))
+    val skewing = Output(UInt(skewWidth.W))
   })
 
   val cycleReg = RegInit((II_UPPER_BOUND - 1).U(LOG_II_UPPER_BOUND.W))
 
+  val SConfigController = Module(new ConfigController(SWidth, "SConfigController"))
+
+  SConfigController.io.en := io.enConfig
+  SConfigController.io.inConfig := io.schedule
+  SConfigController.io.II := io.II
+  val SConfig = SConfigController.io.outConfig
+
   if (LOG_SCHEDULE_SIZE > 0) {
-    val scheduleControllers = (0 until II_UPPER_BOUND).toArray.map(t => Module(new ScheduleController))
-    val validRegs = RegInit(VecInit(Seq.fill(II_UPPER_BOUND)(false.B)))
-    for (i <- 0 until II_UPPER_BOUND) {
-      val scheduleController = scheduleControllers(i)
-      scheduleController.io.en := io.en
-      scheduleController.io.waitCycle := io.schedules(i)(LOG_SCHEDULE_SIZE - 1, 0)
-      validRegs(i) := scheduleController.io.valid
-    }
-    io.valid := validRegs(cycleReg)
+    val waitCycle = SConfig(LOG_SCHEDULE_SIZE - 1, 0)
+    val scheduleController = Module(new ScheduleController)
+    scheduleController.io.en := io.en
+    scheduleController.io.waitCycle := waitCycle
+    io.valid := scheduleController.io.valid
+
+    //    val scheduleControllers = (0 until II_UPPER_BOUND).toArray.map(_ => Module(new ScheduleController))
+    //    val validRegs = RegInit(VecInit(Seq.fill(II_UPPER_BOUND)(false.B)))
+    //    for (i <- 0 until II_UPPER_BOUND) {
+    //      val scheduleController = scheduleControllers(i)
+    //      scheduleController.io.en := io.en
+    //      scheduleController.io.waitCycle := io.schedules(i)(LOG_SCHEDULE_SIZE - 1, 0)
+    //      validRegs(i) := scheduleController.io.valid
+    //    }
+    //    io.valid := validRegs(cycleReg)
   } else {
     io.valid := io.en
   }
 
 
-  if (LOG_SKEW_LENGTH > 0) {
-    io.skewing := io.schedules(cycleReg)(LOG_SCHEDULE_SIZE + SKEW_WIDTH - 1, LOG_SCHEDULE_SIZE)
+  if (skewWidth > 0) {
+    io.skewing := SConfig(LOG_SCHEDULE_SIZE + SKEW_WIDTH - 1, LOG_SCHEDULE_SIZE)
+    //    io.skewing := io.schedules(cycleReg)(LOG_SCHEDULE_SIZE + SKEW_WIDTH - 1, LOG_SCHEDULE_SIZE)
   } else {
     io.skewing := DontCare
   }
@@ -289,40 +313,63 @@ class Alu(funSelect: Int, w: Int) extends Module {
   }
 }
 
-/** An reconfigurable counter.
- * The configuration consists of end (stop value), change (value changes per cycle), and init (initial value).
- *
- * @param w         the data width
- */
-class Counter(w: Int) extends Module {
+class DefaultBasicModule(w: Int, configBits: Int, numIn: Int, numOut: Int) extends Module {
   val io = IO(new Bundle {
     val en = Input(Bool())
-    val configuration = Input(UInt((3 * w).W))
-    val outs = Output(MixedVec((1 to 1) map { i => UInt(w.W) }))
-    val finish = Output(Bool())
+    val configuration = Input(UInt(configBits.W))
+    val inputs = Input(MixedVec((1 to numIn) map { _ => UInt(w.W) }))
+    val outs = Output(MixedVec((1 to numOut) map { _ => UInt(w.W) }))
   })
+}
 
-  val init = io.configuration(w - 1, 0)
-  val change = io.configuration(2 * w - 1, w)
+/** An reconfigurable counter.
+ * The configuration consists of freq (interval cycles of value change), end (stop value),
+ * step (value changes per interval), and init (initial value).
+ *
+ * @example If freq = 2, end = 13, step = 2, and init = 3,
+ *          the output should be 3, 0, 5, 0, 7, 0, 9, 0, 11, 0, 0, 0.....
+ * @param w the data width
+ */
+class Counter(w: Int) extends DefaultBasicModule(w, 4 * w, 0, 1) {
+
+  val freq = io.configuration(4 * w - 1, 3 * w)
   val end = io.configuration(3 * w - 1, 2 * w)
+  val step = io.configuration(2 * w - 1, w)
+  val init = io.configuration(w - 1, 0)
 
   val reg = RegInit(0.U(w.W))
   val firing = RegInit(false.B)
+  val finish = RegInit(false.B)
+
+  val intervalReg = RegInit(0.U(w.W))
+  val intervalStart = RegInit(false.B)
 
   io.outs(0) := 0.U
-  io.finish := false.B
-  when(io.en){
-    when(!firing){
+  when(io.en) {
+    when(!firing) {
       reg := init
       firing := true.B
       io.outs(0) := init
-    }.otherwise{
-      when(reg + change =/= end){
-        reg := reg + change
-        io.outs(0) := reg + change
-      }.otherwise{
-        io.finish := true.B
+      when(freq === 1.U) {
+        intervalStart := true.B
       }
+    }.otherwise {
+      when(intervalReg + 1.U === freq) {
+        intervalReg := 0.U
+      }.otherwise {
+        intervalReg := intervalReg + 1.U
+        intervalStart := true.B
+      }
+
+      when(intervalReg + 1.U === freq && intervalStart) {
+        when(reg + step =/= end) {
+          reg := reg + step
+          io.outs(0) := reg + step
+        }.otherwise {
+          finish := true.B
+        }
+      }
+
     }
   }
 
@@ -335,14 +382,8 @@ class Counter(w: Int) extends Module {
  * @param numOut   the number of output ports
  * @param w        the data width
  */
-class RegisterFile(log2Regs: Int, numIn: Int, numOut: Int, w: Int) extends Module {
-  val io = IO(new Bundle {
-    val en = Input(Bool())
-    //port sequnces: 0:outs, 1:inputs, 2: configuration, 3: configTest for test
-    val configuration = Input(UInt((log2Regs * (numIn + numOut) + 1).W))
-    val inputs = Input(MixedVec((1 to numIn) map { i => UInt(w.W) }))
-    val outs = Output(MixedVec((1 to numOut) map { i => UInt(w.W) }))
-  })
+class RegisterFile(log2Regs: Int, numIn: Int, numOut: Int, w: Int)
+  extends DefaultBasicModule(w, log2Regs * (numIn + numOut) + 1, numIn, numOut) {
   if (log2Regs == 0 && numIn == 1 && numOut == 1) {
     //single register
     val reg = RegInit(0.U(w.W))
@@ -379,15 +420,8 @@ class RegisterFile(log2Regs: Int, numIn: Int, numOut: Int, w: Int) extends Modul
  * @param numIn the number of input ports
  * @param w     the data width
  */
-class Multiplexer(numIn: Int, w: Int) extends Module {
-  val io = IO(new Bundle {
-    val en = Input(Bool())
-
-    val configuration = Input(UInt(log2Up(numIn).W))
-    val inputs = Input(MixedVec((1 to numIn) map { i => UInt(w.W) }))
-    val outs = Output(MixedVec((1 to 1) map { i => UInt(w.W) }))
-  })
-  val input0 = io.inputs(0)
+class Multiplexer(numIn: Int, w: Int) extends DefaultBasicModule(w, log2Up(numIn), numIn, 1) {
+  //  val input0 = io.inputs(0)
   //  val input1 = io.inputs(1)
   val out = io.outs(0)
   val selectArray = (0 to numIn - 1).map(i => i.U -> io.inputs(i))
@@ -418,14 +452,7 @@ class Multiplexer(numIn: Int, w: Int) extends Module {
  *
  * @param w the data width
  */
-class ConstUnit(w: Int) extends Module {
-  val io = IO(new Bundle {
-    val en = Input(Bool())
-
-    val configuration = Input(UInt(w.W))
-    val outs = Output(MixedVec((1 to 1) map { i => UInt(w.W) }))
-  })
-
+class ConstUnit(w: Int) extends DefaultBasicModule(w, w, 0, 1) {
   io.outs(0) := io.configuration
 }
 
@@ -567,7 +594,7 @@ class LSMemWrapper(w: Int) extends Module {
     deq_mem.io.mem.dout <> DontCare
     enq_mem.io.idle <> io.idle
   }.elsewhen(state === s_write_only) {
-    when(io.enqEn === false.B) {
+    when(io.enqEn === false.B && io.workEn === true.B) {
       state := s_work
       io.writeMem <> mem.io.a
     }.otherwise {
