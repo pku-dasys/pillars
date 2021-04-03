@@ -158,7 +158,7 @@ class ApplicationWrapperTester(c: TopModuleWrapper, appTestHelper: AppTestHelper
       val schedulePos = c.topModule.io.schedules.getWidth - i - 1
       val configPos = c.topModule.io.configuration.getWidth - i - 1
       if (schedulePos >= 0) {
-        poke(c.io.singleBitSchedule, getSingleBit(schedules, schedulePos))
+        poke(c.io.singleBitSchedule, getSingleBit(schedules(0), schedulePos))
       }
       if (configPos >= 0) {
         poke(c.io.singleBitConfig, getSingleBit(bitStreams(0), configPos))

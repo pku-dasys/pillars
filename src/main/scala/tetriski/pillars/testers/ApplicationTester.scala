@@ -2,7 +2,7 @@ package tetriski.pillars.testers
 
 import chisel3.assert
 import chisel3.iotesters.PeekPokeTester
-import tetriski.pillars.core.SimulationHelper
+import tetriski.pillars.core.{ArchitctureHierarchy, RuntimeInfo, SimulationHelper}
 import tetriski.pillars.hardware.PillarsConfig._
 import tetriski.pillars.hardware.TopModule
 import tetriski.pillars.util.SplitOrConcat
@@ -20,12 +20,80 @@ import scala.collection.mutable.ArrayBuffer
  * ports of the top module during the activating process, while if only the
  * data obtained from LSUs is needed to be verified, it should be large enough.
  *
- * @param bitStreams the configurations
- * @param schedules  the schedules of modules
- * @param testII     the targeted II
+ * @param testII the targeted II
  */
-class AppTestHelper(bitStreams: Array[BigInt], schedules: List[Int],
-                    testII: Int) {
+class AppTestHelper(testII: Int) {
+  /** An array of configurations.
+   */
+  var bitStreams: Array[BigInt] = null
+
+  /** A list of modules' schedules.
+   */
+  var schedules: List[Int] = null
+
+  /** The number of counters in the architecture.
+   */
+  var counterNum = 0
+
+  /** A constructor function
+   *
+   * @param bitStreams the configurations
+   * @param schedules  the schedules of modules
+   * @param testII     the targeted II
+   */
+  def this(bitStreams: Array[BigInt], schedules: List[Int],
+           testII: Int, counterNum: Int = 0) = {
+    this(testII)
+    this.bitStreams = bitStreams
+    this.schedules = schedules
+    this.counterNum = counterNum
+  }
+
+  /** Initialize this class
+   *
+   * @param arch               the architecture under test
+   * @param simulationHelper   the class that helps users to automatically generate simulation codes
+   * @param moduleInfoFilename the file name of behavioral modeling information TXT
+   * @param     runtimeInfo    the runtime information
+   */
+  def init(arch: ArchitctureHierarchy, simulationHelper: SimulationHelper,
+           moduleInfoFilename: String, runtimeInfo: RuntimeInfo): Unit = {
+    val constInfo = simulationHelper.constInfo
+    val counterInfo = simulationHelper.counterInfo
+    counterNum = arch.CountersArray.size
+    bitStreams = arch.genConfig(moduleInfoFilename, testII, constInfo, counterInfo)
+    //NOTE: getSchedules should be called after genConfig if ALUs are allowed to perform bypass.
+    schedules = arch.getSchedules()
+
+    //Set cycles when we can put data through the input ports or get the result from the output ports,
+    // which can be obtained from "*_r.txt"
+    setPortCycle(simulationHelper)
+
+    var inputDataMap = Map[List[Int], Array[Int]]()
+    runtimeInfo.inputToSRAM.foreach(i => inputDataMap += List(i.SRAMID, i.offset) -> i.data.toArray)
+    addInData(inputDataMap)
+
+    var outputDataMap = Map[List[Int], Array[Int]]()
+    runtimeInfo.outputFromSRAM.foreach(i => outputDataMap += List(i.SRAMID, i.offset) -> i.expectedData.toArray)
+    addOutData(outputDataMap)
+
+    //Please make sure that the name of those ports are "input_[0-9]+" or "out_[0-9]+"
+    // when using simulationHelper.outPorts and simulationHelper.inputPorts.
+    val inputPorts = simulationHelper.inputPorts
+    var inputToPortMap = Map[Int, Array[Int]]()
+    for(i <- 0 until inputPorts.size){
+      inputToPortMap += inputPorts(i) -> runtimeInfo.inputToPort(i).data.toArray
+    }
+    setInputPortData(inputToPortMap)
+
+    val outPorts = simulationHelper.outPorts
+    var outFromPortMap = Map[Int, Array[Int]]()
+    for(i <- 0 until outPorts.size){
+      outFromPortMap += outPorts(i) -> runtimeInfo.outputFromPort(i).expectedData.toArray
+    }
+    setOutPortRefs(outFromPortMap)
+  }
+
   /** A map between a list and the input data array.
    * The list consists of the identification number of targeted LSU and base address.
    */
@@ -179,12 +247,23 @@ class AppTestHelper(bitStreams: Array[BigInt], schedules: List[Int],
    *
    * @return the schedules as BigInt
    */
-  def getSchedulesBigInt(): BigInt = {
-    var ret: BigInt = 0
-    for (sche <- schedules.reverse) {
-      ret = (ret << LOG_SCHEDULE_SIZE + SKEW_WIDTH) + sche
+  def getSchedulesBigInt(): Array[BigInt] = {
+    var ret: Array[BigInt] = new Array[BigInt](II_UPPER_BOUND)
+    for (ii <- 0 until II_UPPER_BOUND) {
+      ret(ii) = BigInt(0)
     }
-    ret
+    val sches = schedules.reverse
+    for (j <- 0 until sches.size / II_UPPER_BOUND) {
+      var scheWidth = LOG_SCHEDULE_SIZE + SKEW_WIDTH
+      if(j < counterNum){
+        scheWidth = LOG_SCHEDULE_SIZE
+      }
+      for (ii <- 0 until II_UPPER_BOUND) {
+        val sche = sches(j * II_UPPER_BOUND + ii)
+        ret(ii) = (ret(ii) << scheWidth) + sche
+      }
+    }
+    ret.reverse
   }
 
   /** Get the targeted II.
@@ -238,14 +317,14 @@ class ApplicationTester(c: TopModule, appTestHelper: AppTestHelper) extends Peek
    */
   def asUnsignedInt(signedInt: Int): BigInt = (BigInt(signedInt >>> 1) << 1) + (signedInt & 1)
 
-//  def dataConcat(inData: Array[Int], factor: Int): Array[BigInt] ={
-//    val result = ArrayBuffer[BigInt]()
-//    for(i <- 0 until inData.size / factor){
-//      result.append(BigInt((0 until factor).map(j => inData(i*factor + j)
-//        .toHexString).reduce(_ + _), 16))
-//    }
-//    result.toArray
-//  }
+  //  def dataConcat(inData: Array[Int], factor: Int): Array[BigInt] ={
+  //    val result = ArrayBuffer[BigInt]()
+  //    for(i <- 0 until inData.size / factor){
+  //      result.append(BigInt((0 until factor).map(j => inData(i*factor + j)
+  //        .toHexString).reduce(_ + _), 16))
+  //    }
+  //    result.toArray
+  //  }
 
   /** Enters data into a LSU.
    *
@@ -260,15 +339,15 @@ class ApplicationTester(c: TopModule, appTestHelper: AppTestHelper) extends Peek
     poke(c.io.baseLSU(numInLSU), base)
     step(1)
 
-//    val manip = c.LSUs(0).memWrapper.enq_mem.manip
-//    val inputs = manip.mode match {
-//      case SplitOrConcat.Normal =>
-//        inData.map(i => BigInt(i))
-//      case SplitOrConcat.Split =>
-//        dataConcat(inData, manip.factor)
-//      case SplitOrConcat.Concat =>
-//        inData.map(i => BigInt(i))
-//    }
+    //    val manip = c.LSUs(0).memWrapper.enq_mem.manip
+    //    val inputs = manip.mode match {
+    //      case SplitOrConcat.Normal =>
+    //        inData.map(i => BigInt(i))
+    //      case SplitOrConcat.Split =>
+    //        dataConcat(inData, manip.factor)
+    //      case SplitOrConcat.Concat =>
+    //        inData.map(i => BigInt(i))
+    //    }
 
     // push
     for (x <- inData) {
@@ -345,10 +424,11 @@ class ApplicationTester(c: TopModule, appTestHelper: AppTestHelper) extends Peek
 
     poke(c.io.enConfig, 1)
     poke(c.io.II, testII)
-    poke(c.io.schedules, schedules)
+    //    poke(c.io.schedules, schedules)
 
     for (i <- 0 until testII) {
       poke(c.io.configuration, bitStreams(i))
+      poke(c.io.schedules, schedules(i))
       step(1)
     }
   }
@@ -385,6 +465,7 @@ class ApplicationTester(c: TopModule, appTestHelper: AppTestHelper) extends Peek
     val outputPortCycleMap = appTestHelper.outputPortCycleMap
     val inputPortCycleMap = appTestHelper.inputPortCycleMap
 
+    println("Checking the results from the output port(s) of the CGRA.")
 
     //Wait till the configuration controllers are ready.
     step(testII + 1)
@@ -397,7 +478,7 @@ class ApplicationTester(c: TopModule, appTestHelper: AppTestHelper) extends Peek
         val cycle = inputPortCycleMap(port)
         if (t >= cycle && t < cycle + dataSize * testII) {
           if (cycle % testII == t % testII) {
-            poke(c.io.inputs(port), data((t - cycle)/testII))
+            poke(c.io.inputs(port), data((t - cycle) / testII))
           }
         }
       }
@@ -406,8 +487,8 @@ class ApplicationTester(c: TopModule, appTestHelper: AppTestHelper) extends Peek
         val cycle = outputPortCycleMap(port)
         if (t >= cycle && t < cycle + dataSize * testII) {
           if (cycle % testII == t % testII) {
-            expect(c.io.outs(port), asUnsignedInt(data((t - cycle)/testII)))
-            println(asUnsignedInt(data((t - cycle)/testII)).toString + " " + peek(c.io.outs(port)).toString())
+            expect(c.io.outs(port), asUnsignedInt(data((t - cycle) / testII)))
+            println(asUnsignedInt(data((t - cycle) / testII)).toString + " " + peek(c.io.outs(port)).toString())
           }
         }
       }
@@ -418,6 +499,7 @@ class ApplicationTester(c: TopModule, appTestHelper: AppTestHelper) extends Peek
   /** Verifies data in LSUs under the guide of outDataMap in appTestHelper during the post-process.
    */
   def checkLSUData(): Unit = {
+    println("Checking the results stored in the SRAM(s) of the CGRA.")
     //stream deq test
     for (inDataItem <- appTestHelper.outDataMap) {
       val numInLSU = inDataItem._1(0)
@@ -445,7 +527,7 @@ class SumTester(c: TopModule, appTestHelper: AppTestHelper)
   val outputCycle = appTestHelper.getOutputCycle()
   step(outputCycle + 1)
 
-//  checkPortOutsWithInput(testII)
+  //  checkPortOutsWithInput(testII)
   checkPortOuts(testII)
   //  checkLSUData()
 }

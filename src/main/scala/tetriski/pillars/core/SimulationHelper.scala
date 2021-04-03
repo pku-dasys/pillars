@@ -1,5 +1,8 @@
 package tetriski.pillars.core
 
+import tetriski.pillars.archlib.{ElementConst, ElementCounter}
+import tetriski.pillars.hardware.PillarsConfig
+
 import scala.collection.mutable.ArrayBuffer
 import scala.io.Source
 
@@ -20,9 +23,25 @@ class SimulationHelper(arch: ArchitctureHierarchy) {
    */
   val opArray = new ArrayBuffer[String]()
 
+  /** The array of const values in order.
+   */
+  var constArray = Array[Int]()
+
+  /** The array of counter parameters in order.
+   */
+  var counterArray = Array[CounterParameter]()
+
+  /** The array of the identification number of the SRAM which is mapped by "store" operation.
+   */
+  val outSRAMIDs = new ArrayBuffer[Int]()
+
+  /** The array of the identification number of the SRAM which is mapped by "load" operation.
+   */
+  val inputSRAMIDs = new ArrayBuffer[Int]()
+
   /** The array of elements corresponding mapped MRRG nodes.
    */
-  val moduleArray = new ArrayBuffer[ElementTrait]()
+  val moduleArray = new ArrayBuffer[BasicTrait]()
 
   /** The array of the reconfiguration cycle of mapped MRRG nodes.
    */
@@ -39,6 +58,10 @@ class SimulationHelper(arch: ArchitctureHierarchy) {
   /** A class containing const values, the corresponding RCs and identification number of const units.
    */
   val constInfo = new ConstInfo()
+
+  /** A class containing basic parameters (configs), the corresponding RCs and identification number of counters.
+   */
+  val counterInfo = new CounterInfo(w = PillarsConfig.COUNTER_WIDTH)
 
   /** The array of the identification number of the mapped output ports.
    */
@@ -100,6 +123,12 @@ class SimulationHelper(arch: ArchitctureHierarchy) {
     } else {
       val module = temp.getElement(moduleName(moduleName.size - 2))
       moduleArray.append(module)
+      val sramID = module.getModuleID()
+      if (op.contains("store")) {
+        outSRAMIDs.append(sramID)
+      } else if (op.contains("load")) {
+        inputSRAMIDs.append(sramID)
+      }
     }
 
     //Add the reconfiguration cycle of the mapped MRRG node into RCArray.
@@ -132,6 +161,9 @@ class SimulationHelper(arch: ArchitctureHierarchy) {
     fireTimeArray.clear()
     skewArray.clear()
     outPorts.clear()
+    outSRAMIDs.clear()
+    inputPorts.clear()
+    inputSRAMIDs.clear()
     outputPortCycleMap = Map[Int, Int]()
     inputPortCycleMap = Map[Int, Int]()
   }
@@ -139,26 +171,36 @@ class SimulationHelper(arch: ArchitctureHierarchy) {
   /** Initialize values in this class according to a result TXT.
    *
    * @param resultFilename the file name of the result TXT
+   * @param runtimeInfo    the runtime information
+   * @param testII         the targeted II
    */
-  def init(resultFilename: String): Unit = {
+  def init(resultFilename: String, runtimeInfo: RuntimeInfo = null, testII: Int = 1): Unit = {
     reset()
+
     val resultArray = Source.fromFile(resultFilename).getLines().toArray
     resultArray.map(r => addResult(r))
     size = opArray.size
     //Set the cycle we can obtain the last result.
-    if(outputPortCycleMap.size>0) {
+    if (outputPortCycleMap.size > 0) {
       outputCycle = outputPortCycleMap.map(t => t._2)
         .reduce((t1, t2) => Math.max(t1, t2))
-    }else{
+    } else {
       outputCycle = 0
+    }
+    updateSchedules()
+
+    if (runtimeInfo != null) {
+      setConst(runtimeInfo.constValue.map(c => c.value).toArray, testII)
+      setCounter(runtimeInfo.counterConfig.map(i =>
+        new CounterParameter(i.freq, i.end, i.step, i.init)).toArray, testII)
     }
   }
 
-  /** Get the schedules of the mapping result.
+  /** Update the schedules of the mapping result.
    *
    * @return the schedules of the mapping result
    */
-  def getSchedules(): List[Int] = {
+  def updateSchedules(): List[Int] = {
     arch.resetSchedules()
     for (i <- 0 until size) {
       moduleArray(i).setSkew(skewArray(i), RCArray(i))
@@ -174,11 +216,30 @@ class SimulationHelper(arch: ArchitctureHierarchy) {
    */
   def setConst(vals: Array[Int], testII: Int): Unit = {
     constInfo.reset(testII)
+    constArray = vals
     var valIndex = 0
     for (i <- 0 until size) {
       val module = moduleArray(i)
-      if (module.getTypeID() == 3) {
-        constInfo.addConst(module.getModuleID(), RCArray(i), vals(valIndex))
+      if (module.getClass == classOf[ElementConst]) {
+        constInfo.addConfig(module.getModuleID(), RCArray(i), vals(valIndex))
+        valIndex = valIndex + 1
+      }
+    }
+  }
+
+  /** Set const values, the corresponding RC and identification number of a const unit.
+   *
+   * @param params the counter parameters
+   * @param testII the targeted II
+   */
+  def setCounter(params: Array[CounterParameter], testII: Int): Unit = {
+    counterInfo.reset(testII)
+    counterArray = params
+    var valIndex = 0
+    for (i <- 0 until size) {
+      val module = moduleArray(i)
+      if (module.getClass == classOf[ElementCounter]) {
+        counterInfo.addConfig(module.getModuleID(), RCArray(i), params(valIndex))
         valIndex = valIndex + 1
       }
     }
