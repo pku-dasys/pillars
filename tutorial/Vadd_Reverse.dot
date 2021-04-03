@@ -1,0 +1,39 @@
+digraph  A  {
+input0[opcode = input]; //input index i of A(i) and B(i)
+const0[opcode = const]; //offset of array A in an SRAM 0
+const1[opcode = const]; //offset of array B in an SRAM 1
+add0[opcode = add]; //get the offset of A(i) by adding const0 to input0
+add1[opcode = add]; //get the offset of B(i) by adding const1 to input0
+load0[opcode = load, sram = 0]; //get the value of A(i) from an SRAM 0
+load1[opcode = load, sram = 1]; //get the value of B(i) from an SRAM 1
+add2[opcode = add]; //sum A(i) and B(i)
+output0[opcode = output]; //get (A(i) + B(i)) from output port
+const0->add0[operand=0];
+input0->add0[operand=1];
+const1->add1[operand=0];
+input0->add1[operand=1];
+add0->load0[operand=0];
+add1->load1[operand=0];
+load0->add2[operand=0];
+load1->add2[operand=1];
+add2->output0[operand=0];
+
+incr0[opcode = incr]; //get index j <- 0 until A.size
+const2[opcode = const]; //A.size - 1
+sub0[opcode = sub]; // get (A.size - 1 - j)
+const3[opcode = const]; //offset of array A in an SRAM 2
+const4[opcode = const]; //offset of reversed array A in an SRAM 3
+add3[opcode = add]; //get the offset of A(j) by adding const3 to incr0
+add4[opcode = add]; //get the offset of reversed A(j) by adding const4 to sub0
+load2[opcode = load, sram = 2]; //get the value of A(j) from an SRAM 2
+store0[opcode = store, sram = 3]; //store reversed A(j) in an SRAM 3
+incr0->add3[operand=0];
+const3->add3[operand=1];
+const2->sub0[operand=0]; //operand of the minuend should be 0
+incr0->sub0[operand=1]; //operand of the subtrahend should be 1
+sub0->add4[operand=0];
+const4->add4[operand=1];
+add3->load2[operand=0];
+add4->store0[operand=0]; //operand of the address should be 0
+load2->store0[operand=1]; //operand of the value to be saved should be 0
+}
