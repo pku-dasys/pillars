@@ -100,7 +100,6 @@ object ApplicationExamples {
       simulationHelper.init(resultFilename)
       simulationHelper.setConst(constVals, testII)
       val constInfo = simulationHelper.getConstInfo()
-      val schedules = simulationHelper.getSchedules()
       val dataWithAddr = simulationHelper.getDataWithAddr(dataSize = dataSize,
         inDataArrays = inDataArrays, outDataArrays = outDataArrays)
 
@@ -108,6 +107,8 @@ object ApplicationExamples {
       val refLSUOutDatas = dataWithAddr(1).asInstanceOf[Map[List[Int], Array[Int]]]
 
       val bitStreams = arch.genConfig(infoFilename, testII, constInfo)
+      //NOTE: getSchedules should be called after genConfig if ALUs are allowed to perform bypass.
+      val schedules = arch.getSchedules()
 
       val appTestHelper = new AppTestHelper(bitStreams, schedules, testII)
 
@@ -219,7 +220,6 @@ object ApplicationExamples {
       val outputCycle = simulationHelper.getOutputCycle()
       simulationHelper.setConst(constVals, testII)
       val constInfo = simulationHelper.getConstInfo()
-      val schedules = simulationHelper.getSchedules()
       val dataWithAddr = simulationHelper.getDataWithAddr(addrArray = addrArray,
         inDataArrays = inDataArrays, refDataArrays = outPortRefArrays)
 
@@ -227,6 +227,8 @@ object ApplicationExamples {
       val outPortRefs = dataWithAddr(2).asInstanceOf[Map[Int, Array[Int]]]
 
       val bitStreams = arch.genConfig(infoFilename, testII, constInfo)
+      //NOTE: getSchedules should be called after genConfig if ALUs are allowed to perform bypass.
+      val schedules = arch.getSchedules()
 
       val appTestHelper = new AppTestHelper(bitStreams, schedules, testII)
 
@@ -344,7 +346,6 @@ object ApplicationExamples {
       val outputCycle = simulationHelper.getOutputCycle()
       simulationHelper.setConst(constVals, testII)
       val constInfo = simulationHelper.getConstInfo()
-      val schedules = simulationHelper.getSchedules()
       val dataWithAddr = simulationHelper.getDataWithAddr(addrArray = addrArray,
         inDataArrays = inDataArrays, outDataArrays = outDataRefArrays, refDataArrays = outPortRefArrays)
 
@@ -353,6 +354,8 @@ object ApplicationExamples {
       val outPortRefs = dataWithAddr(2).asInstanceOf[Map[Int, Array[Int]]]
 
       val bitStreams = arch.genConfig(infoFilename, testII, constInfo)
+      //NOTE: getSchedules should be called after genConfig if ALUs are allowed to perform bypass.
+      val schedules = arch.getSchedules()
 
       val appTestHelper = new AppTestHelper(bitStreams, schedules, testII)
 
@@ -456,7 +459,6 @@ object ApplicationExamples {
       simulationHelper.init(resultFilename)
       simulationHelper.setConst(constVals, testII)
       val constInfo = simulationHelper.getConstInfo()
-      val schedules = simulationHelper.getSchedules()
       val dataWithAddr = simulationHelper.getDataWithAddr(addrArray = addrArray,
         inDataArrays = inDataArrays, outDataArrays = outDataRefArrays)
 
@@ -464,6 +466,8 @@ object ApplicationExamples {
       val outDatas = dataWithAddr(1).asInstanceOf[Map[List[Int], Array[Int]]]
 
       val bitStreams = arch.genConfig(infoFilename, testII, constInfo)
+      //NOTE: getSchedules should be called after genConfig if ALUs are allowed to perform bypass.
+      val schedules = arch.getSchedules()
 
       val appTestHelper = new AppTestHelper(bitStreams, schedules, testII)
 
