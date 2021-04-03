@@ -77,4 +77,7 @@ object PillarsConfig {
 
 
   val ALU_FUN_NUM = 14
+
+  val COUNTER_WIDTH = 8
+  val CONST_WIDTH = 8
 }

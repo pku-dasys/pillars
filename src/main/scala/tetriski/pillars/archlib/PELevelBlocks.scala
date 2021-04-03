@@ -3,6 +3,7 @@ package tetriski.pillars.archlib
 import chisel3.util.log2Up
 import tetriski.pillars.core.{BlockTrait, OpEnum}
 import tetriski.pillars.core.OpEnum.OpEnum
+import tetriski.pillars.hardware.PillarsConfig
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -135,9 +136,9 @@ class AdresPEBlock(name: String, useMuxBypass: Boolean, opList: List[OpEnum] = n
   rf0.addInPorts((0 until rfInputNum).map(i => s"input_$i").toArray)
   addElement(rf0)
 
-  /** A const unit connected to the multiplexers.
+  /** A const unit connected to the multiplexers (independent width according to global config).
    */
-  val const0 = new ElementConst("const0", List(dataWidth))
+  val const0 = new ElementConst("const0", List(PillarsConfig.CONST_WIDTH))
   const0.addOutPorts(Array("out_0"))
   addElement(const0)
 
@@ -273,9 +274,9 @@ class AdresVLIWPEBlock(name: String, useMuxBypass: Boolean, opList: List[OpEnum]
   mux1.addInPorts((0 until neighborSize + 3).map(i => "input_" + i.toString).toArray)
   addElement(mux1)
 
-  /** A const unit connected to the multiplexers.
+  /** A const unit connected to the multiplexers (independent width according to global config).
    */
-  val const0 = new ElementConst("const0", List(dataWidth))
+  val const0 = new ElementConst("const0", List(PillarsConfig.CONST_WIDTH))
   const0.addOutPorts(Array("out_0"))
   addElement(const0)
 
