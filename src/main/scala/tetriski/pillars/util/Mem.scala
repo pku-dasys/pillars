@@ -196,19 +196,22 @@ class SimpleDualPortSram(mem_depth: Int, mem_width: Int) extends Module {
   val io = IO(new Bundle {
     val a = Flipped(new MemWriteIO(mem_depth, mem_width))
     val b = Flipped(new MemReadIO(mem_depth, mem_width))
+    val memReset = Input(Bool())
   })
 
-  val mem = Mem(mem_depth, UInt(mem_width.W))
-  val dout = Reg(UInt(io.b.dout.getWidth.W))
+  withReset(io.memReset){
+    val mem = Mem(mem_depth, UInt(mem_width.W))
+    val dout = Reg(UInt(io.b.dout.getWidth.W))
 
-  io.b.dout := dout
+    io.b.dout := dout
 
-  when (io.a.en && io.a.we) {
-    mem.write(io.a.addr, io.a.din)
-  }
+    when (io.a.en && io.a.we) {
+      mem.write(io.a.addr, io.a.din)
+    }
 
-  when (io.b.en) {
-    dout := mem.read(io.b.addr) // buffered; io.b.dout available in next cycle
+    when (io.b.en) {
+      dout := mem.read(io.b.addr) // buffered; io.b.dout available in next cycle
+    }
   }
 }
 

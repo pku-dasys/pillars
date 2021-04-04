@@ -218,6 +218,7 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
 
         lsu.io.en <> LSUnitScheduleController.io.valid
         lsu.io.skewing <> LSUnitScheduleController.io.skewing
+        lsu.io.memReset <> io.memReset
       }
     } else {
       for (i <- 0 until LSUnitNum) {
@@ -392,6 +393,8 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
     val enqEnLSU = Input(Vec(LSUnitNum, Bool()))
     val deqEnLSU = Input(Vec(LSUnitNum, Bool()))
     val idleLSU = Output(Vec(LSUnitNum, Bool()))
+
+    val memReset = Input(Bool())
 
     val enConfig = Input(Bool())
     val en = Input(Bool())
