@@ -159,7 +159,7 @@ object NoC4CGRA extends App {
 
   val largeDesign = () => new MultiTileCGRA(tileMap, bitStreamMap, scheduleMap)
 
-  iotesters.Driver.execute(Array("-tgvo", "on", "-tbn", "verilator"), largeDesign) {
+  iotesters.Driver.execute(Array("-tgvo", "on", "-tbn", "verilator", "-tmvf", "--threads 12"), largeDesign) {
     c => new NocMeshCGRATester(c)
   }
 }
