@@ -3,9 +3,10 @@ package tetriski.pillars.util
 import chisel3._
 import chisel3.util._
 
-class WriteRequest[T<:Data](addr_gen: T, data_gen: T) extends Bundle {
+class WriteRequest[T <: Data](addr_gen: T, data_gen: T) extends Bundle {
   val addr = addr_gen
   val data = data_gen
+
   override def cloneType: this.type = new WriteRequest(addr_gen, data_gen).asInstanceOf[this.type]
 }
 
@@ -14,14 +15,17 @@ trait TraitMemIO extends TraitMemWriteIO with TraitMemReadIO {
     super[TraitMemWriteIO].disable()
     super[TraitMemReadIO].enable()
   }
+
   def wenable() {
     super[TraitMemReadIO].disable()
     super[TraitMemWriteIO].enable()
   }
+
   override def disable() {
     super[TraitMemReadIO].disable()
     super[TraitMemWriteIO].disable()
   }
+
   override def <>(that: TraitMemIO) {
     super[TraitMemReadIO].<>(that)
     super[TraitMemWriteIO].<>(that)
@@ -39,6 +43,7 @@ trait TraitMemReadIO extends Bundle {
   def enable() {
     en := true.B
   }
+
   def disable() {
     en := false.B
     addr := DontCare
@@ -49,6 +54,7 @@ trait TraitMemReadIO extends Bundle {
     this.addr <> that.addr
     this.dout <> that.dout
   }
+
   def <>(that: TraitMemReadIO) {
     this.en <> that.en
     this.addr <> that.addr
@@ -69,12 +75,14 @@ trait TraitMemWriteIO extends Bundle {
     en := true.B
     we := true.B
   }
+
   def disable() {
     en := false.B
     we := false.B
     addr := DontCare
     din := DontCare
   }
+
   def write(addr: UInt, data: UInt) {
     this.addr := addr
     this.din := data
@@ -86,6 +94,7 @@ trait TraitMemWriteIO extends Bundle {
     this.addr <> that.addr
     this.din <> that.din
   }
+
   def <>(that: TraitMemWriteIO) {
     this.en <> that.en
     this.we <> that.we
@@ -132,16 +141,16 @@ class SinglePortMem(WIDTH: Int, DEPTH: Int) extends Module {
   //val mem = SyncReadMem(DEPTH, UInt(WIDTH.W))
   val mem = Mem(DEPTH, UInt(WIDTH.W))
 
-  when (io.en) {
-    when (io.we) {
+  when(io.en) {
+    when(io.we) {
       mem.write(io.addr, io.din)
       io.dout := DontCare
       //io.dout_valid := false.B
-    } .otherwise {
+    }.otherwise {
       io.dout := mem.read(io.addr)
       //io.dout_valid := true.B
     }
-  } .otherwise {
+  }.otherwise {
     io.dout := DontCare
     //io.dout_valid := false.B
   }
@@ -158,13 +167,13 @@ class SimpleDualPortMem(WIDTH: Int, DEPTH: Int) extends Module {
   //val mem = SyncReadMem(DEPTH, UInt(WIDTH.W))
   val mem = Mem(DEPTH, UInt(WIDTH.W))
 
-  when (io.a.en && io.a.we) {
+  when(io.a.en && io.a.we) {
     mem.write(io.a.addr, io.a.din)
   }
 
-  when (io.b.en) {
+  when(io.b.en) {
     io.b.dout := mem.read(io.b.addr)
-  } .otherwise {
+  }.otherwise {
     io.b.dout := DontCare
   }
 }
@@ -180,10 +189,10 @@ class SinglePortSram(mem_depth: Int, mem_width: Int) extends Module {
 
   io.dout := dout
 
-  when (io.en) {
-    when (io.we) {
+  when(io.en) {
+    when(io.we) {
       mem.write(io.addr, io.din)
-    } .otherwise {
+    }.otherwise {
       dout := mem.read(io.addr) // buffered; io.dout available in next cycle
     }
   }
@@ -196,22 +205,19 @@ class SimpleDualPortSram(mem_depth: Int, mem_width: Int) extends Module {
   val io = IO(new Bundle {
     val a = Flipped(new MemWriteIO(mem_depth, mem_width))
     val b = Flipped(new MemReadIO(mem_depth, mem_width))
-    val memReset = Input(Bool())
   })
 
-  withReset(io.memReset){
-    val mem = Mem(mem_depth, UInt(mem_width.W))
-    val dout = Reg(UInt(io.b.dout.getWidth.W))
+  val mem = Mem(mem_depth, UInt(mem_width.W))
+  val dout = Reg(UInt(io.b.dout.getWidth.W))
 
-    io.b.dout := dout
+  io.b.dout := dout
 
-    when (io.a.en && io.a.we) {
-      mem.write(io.a.addr, io.a.din)
-    }
+  when(io.a.en && io.a.we) {
+    mem.write(io.a.addr, io.a.din)
+  }
 
-    when (io.b.en) {
-      dout := mem.read(io.b.addr) // buffered; io.b.dout available in next cycle
-    }
+  when(io.b.en) {
+    dout := mem.read(io.b.addr) // buffered; io.b.dout available in next cycle
   }
 }
 

@@ -555,7 +555,6 @@ class LSMemWrapper(w: Int) extends Module {
     val workEn = Input(Bool())
 
     val in = Flipped(EnqIO(UInt(MEM_IN_WIDTH.W)))
-    val memReset = Input(Bool())
 
     val readMem = Flipped(new MemReadIO(MEM_DEPTH, w))
     val writeMem = Flipped(new MemWriteIO(MEM_DEPTH, w))
@@ -577,8 +576,6 @@ class LSMemWrapper(w: Int) extends Module {
 
 
   val mem = Module(new SimpleDualPortSram(MEM_DEPTH, w))
-  mem.io.memReset := io.memReset
-
   val enq_mem = Module(new EnqMem(mem.io.a, MEM_IN_WIDTH))
   val deq_mem = Module(new DeqMem(mem.io.b, MEM_OUT_WIDTH))
 
@@ -660,8 +657,6 @@ class LoadStoreUnit(w: Int) extends Module {
     val en = Input(Bool())
     val skewing = Input(UInt((SKEW_WIDTH).W))
 
-    val memReset = Input(Bool())
-
     val streamIn = Flipped(EnqIO(UInt(MEM_IN_WIDTH.W)))
     val len = Input(UInt(log2Ceil(MEM_DEPTH).W))
     val streamOut = Flipped(DeqIO(UInt(MEM_OUT_WIDTH.W)))
@@ -685,7 +680,6 @@ class LoadStoreUnit(w: Int) extends Module {
   memWrapper.io.in <> io.streamIn
   memWrapper.io.out <> io.streamOut
   memWrapper.io.workEn <> io.en
-  memWrapper.io.memReset <> io.memReset
 
   /** The address where to load/store data.
    */

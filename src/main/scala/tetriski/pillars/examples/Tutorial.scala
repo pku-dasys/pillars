@@ -295,11 +295,5 @@ class MatrixMulTester(c: TopModule, appTestHelper: AppTestHelper)
   //Wait reverse finished
   step(10)
   checkLSUData()
-
-  reset(1)
-  checkLSUData()
-
-  poke(c.io.memReset, 1)
-  checkLSUData()
 }
 
