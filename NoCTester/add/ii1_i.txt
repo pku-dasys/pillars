@@ -11,7 +11,7 @@
 2 
 0 
 <0:cgra.tile_0.pe_0_0.mux1.internalNode_0>
-4 
+5 
 0 
 <0:cgra.tile_0.pe_0_0.alu0.internalNode_0>
 SELECTED_OP

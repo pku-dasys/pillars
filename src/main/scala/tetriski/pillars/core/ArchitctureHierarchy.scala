@@ -158,7 +158,7 @@ class ArchitctureHierarchy extends BlockTrait {
       lsu.asInstanceOf[ElementTrait].resetSkew()
     }
 
-    for (counter <- CountersArray){
+    for (counter <- CountersArray) {
       counter.asInstanceOf[ElementTrait].resetFireTimes()
     }
   }
@@ -297,17 +297,26 @@ class ArchitctureHierarchy extends BlockTrait {
       }
 
       //Update configurations of const units.
-      for (j <- 0 until constInfo.IDArray(rc).size) {
-        val constID = constInfo.IDArray(rc)(j)
-        val constVal = constInfo.configArray(rc)(j)
-        this.ConstsArray(constID).asInstanceOf[ElementConst].updateConfigArray(constVal)
+      if (constInfo != null) {
+        if (constInfo.IDArray.size > 0) {
+          for (j <- 0 until constInfo.IDArray(rc).size) {
+            val constID = constInfo.IDArray(rc)(j)
+            val constVal = constInfo.configArray(rc)(j)
+            this.ConstsArray(constID).asInstanceOf[ElementConst].updateConfigArray(constVal)
+          }
+        }
       }
 
+
       //Update configurations of counters.
-      for (j <- 0 until counterInfo.IDArray(rc).size) {
-        val ID = counterInfo.IDArray(rc)(j)
-        val value = counterInfo.configArray(rc)(j)
-        this.CountersArray(ID).asInstanceOf[ElementCounter].updateConfigArray(value)
+      if (counterInfo != null) {
+        if (counterInfo.IDArray.size > 0) {
+          for (j <- 0 until counterInfo.IDArray(rc).size) {
+            val ID = counterInfo.IDArray(rc)(j)
+            val value = counterInfo.configArray(rc)(j)
+            this.CountersArray(ID).asInstanceOf[ElementCounter].updateConfigArray(value)
+          }
+        }
       }
       retBitstreams.append(getConfigBitStream())
     }

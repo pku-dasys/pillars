@@ -87,10 +87,8 @@ object NoC4CGRA extends App {
         if (!(x == 1 && y == 1)) {
           val constVals = Array(x + y)
           simulationHelper.setConst(constVals, II)
-          val constInfo = simulationHelper.getConstInfo()
-          val schedules = simulationHelper.updateSchedules()
-          val bitStreams = arch.genConfig(infoFilename, II, constInfo)
-          val appTestHelper = new AppTestHelper(bitStreams, schedules, II)
+          val appTestHelper = new AppTestHelper(II)
+          appTestHelper.init(arch, simulationHelper, infoFilename, null)
 
           val bitStreamWriter = new PrintWriter("NoCTester/config/bitstream/" + y.toString
             + "_" + x.toString + ".hex")
@@ -117,11 +115,8 @@ object NoC4CGRA extends App {
 
     val constVals = Array(6, 2)
     simulationHelper.setConst(constVals, II)
-    val constInfo = simulationHelper.getConstInfo()
-    val schedules = simulationHelper.updateSchedules()
-    val bitStreams = arch.genConfig(infoFilename, II, constInfo)
-
-    val appTestHelper = new AppTestHelper(bitStreams, schedules, II)
+    val appTestHelper = new AppTestHelper(II)
+    appTestHelper.init(arch, simulationHelper, infoFilename, null)
 
     val bitStreamWriter = new PrintWriter("NoCTester/config/bitstream/" + 1.toString
       + "_" + 1.toString + ".hex")

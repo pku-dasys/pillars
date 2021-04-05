@@ -69,29 +69,32 @@ class AppTestHelper(testII: Int) {
     // which can be obtained from "*_r.txt"
     setPortCycle(simulationHelper)
 
-    var inputDataMap = Map[List[Int], Array[Int]]()
-    runtimeInfo.inputToSRAM.foreach(i => inputDataMap += List(i.SRAMID, i.offset) -> i.data.toArray)
-    addInData(inputDataMap)
+    if(runtimeInfo != null){
+      var inputDataMap = Map[List[Int], Array[Int]]()
+      runtimeInfo.inputToSRAM.foreach(i => inputDataMap += List(i.SRAMID, i.offset) -> i.data.toArray)
+      addInData(inputDataMap)
 
-    var outputDataMap = Map[List[Int], Array[Int]]()
-    runtimeInfo.outputFromSRAM.foreach(i => outputDataMap += List(i.SRAMID, i.offset) -> i.expectedData.toArray)
-    addOutData(outputDataMap)
+      var outputDataMap = Map[List[Int], Array[Int]]()
+      runtimeInfo.outputFromSRAM.foreach(i => outputDataMap += List(i.SRAMID, i.offset) -> i.expectedData.toArray)
+      addOutData(outputDataMap)
 
-    //Please make sure that the name of those ports are "input_[0-9]+" or "out_[0-9]+"
-    // when using simulationHelper.outPorts and simulationHelper.inputPorts.
-    val inputPorts = simulationHelper.inputPorts
-    var inputToPortMap = Map[Int, Array[Int]]()
-    for(i <- 0 until inputPorts.size){
-      inputToPortMap += inputPorts(i) -> runtimeInfo.inputToPort(i).data.toArray
+      //Please make sure that the name of those ports are "input_[0-9]+" or "out_[0-9]+"
+      // when using simulationHelper.outPorts and simulationHelper.inputPorts.
+      val inputPorts = simulationHelper.inputPorts
+      var inputToPortMap = Map[Int, Array[Int]]()
+      for(i <- 0 until inputPorts.size){
+        inputToPortMap += inputPorts(i) -> runtimeInfo.inputToPort(i).data.toArray
+      }
+      setInputPortData(inputToPortMap)
+
+      val outPorts = simulationHelper.outPorts
+      var outFromPortMap = Map[Int, Array[Int]]()
+      for(i <- 0 until outPorts.size){
+        outFromPortMap += outPorts(i) -> runtimeInfo.outputFromPort(i).expectedData.toArray
+      }
+      setOutPortRefs(outFromPortMap)
     }
-    setInputPortData(inputToPortMap)
 
-    val outPorts = simulationHelper.outPorts
-    var outFromPortMap = Map[Int, Array[Int]]()
-    for(i <- 0 until outPorts.size){
-      outFromPortMap += outPorts(i) -> runtimeInfo.outputFromPort(i).expectedData.toArray
-    }
-    setOutPortRefs(outFromPortMap)
   }
 
   /** A map between a list and the input data array.
