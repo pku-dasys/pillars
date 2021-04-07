@@ -255,7 +255,8 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
       genericIOs(i) = moduleClass match {
         case CAlu => wrapperForAlu(modules, scheduleConfigs.slice(0, aluNum))
         case CLSU => wrapperForLSU(modules, scheduleConfigs.slice(aluNum, aluNum + LSUnitNum))
-        case CCounter => wrapperForCounter(modules, scheduleConfigs.slice(aluNum + LSUnitNum, aluNum + LSUnitNum + counterNum))
+        case CCounter => wrapperForCounter(modules,
+          scheduleConfigs.slice(aluNum + LSUnitNum, aluNum + LSUnitNum + counterNum))
         case _ => wrapperForDefaultModule(modules)
       }
       currentNum += moduleNum

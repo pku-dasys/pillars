@@ -96,7 +96,7 @@ object Tutorial {
       //Operator incr0 should generate (j <- 0 until dataSize).
       //So the parameter of the counter is (init = 0, step = 1, end = dataSize, freq = 1)
       val counterOpNames = dfg.opNodes.filter(op => op.opcode == OpEnum.INCR).map(op => op.name)
-      val counterConfig = List(CounterConfig(counterOpNames(0), 1, 1, dataSize, 1))
+      val counterConfig = List(CounterConfig(counterOpNames(0), 0, 1, dataSize, 1))
 
       //In this simple tutorial, A and B are put into all LSUs.
       //But you can put them into partial LSUs according to the mapping results,
@@ -234,7 +234,7 @@ object Tutorial {
 
 
     iotesters.Driver.execute(Array("-tgvo", "on", "-tbn", "verilator"), topDesign) {
-      c => new MatrixMulTester(c, appTestHelper)
+      c => new VaddReverseTester(c, appTestHelper)
     }
 
     testSynthesize(dfg, simulationHelper, dataWidth, runtimeInfo)
@@ -282,7 +282,7 @@ class SynthesizedModuleTester(c: SynthesizedModule, input: Array[Int], outResult
  * @param c             the top design
  * @param appTestHelper the class which is helpful when creating testers
  */
-class MatrixMulTester(c: TopModule, appTestHelper: AppTestHelper)
+class VaddReverseTester(c: TopModule, appTestHelper: AppTestHelper)
   extends ApplicationTester(c, appTestHelper) {
 
   poke(c.io.en, 0)
