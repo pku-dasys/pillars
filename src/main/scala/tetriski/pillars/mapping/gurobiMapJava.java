@@ -14,14 +14,22 @@ import static java.lang.Math.abs;
  */
 class checkWithoutRing {
     List<Map<Integer, List<Integer>>> directionGraphs;
+    List<List<Integer>> rootCandidates;
+    List<Integer> expectedRoutingDelay;
+    List<Map<Integer, Integer>> potentialDelayUnits;
+    Set<Integer> invalidVars = new HashSet<>();
 
     /**
      * Constructed function.
      *
      * @param testedGraphs a list of direction graphs
      */
-    checkWithoutRing(List<Map<Integer, List<Integer>>> testedGraphs) {
+    checkWithoutRing(List<Map<Integer, List<Integer>>> testedGraphs, List<List<Integer>> _rootCandidates,
+                     List<Integer> _expectedRoutingDelay, List<Map<Integer, Integer>> _potentialDelayUnits) {
         directionGraphs = testedGraphs;
+        rootCandidates = _rootCandidates;
+        expectedRoutingDelay = _expectedRoutingDelay;
+        potentialDelayUnits = _potentialDelayUnits;
     }
 
     /**
@@ -31,8 +39,8 @@ class checkWithoutRing {
      * meaning there are not useless rings in targeted direction graphs.
      */
     Boolean check() {
-        for (Map<Integer, List<Integer>> graph : directionGraphs) {
-            if (!checkSimplyConnected(graph)) {
+        for (int i = 0; i < directionGraphs.size(); i++) {
+            if (!checkSimplyConnected(i)) {
                 return false;
             }
         }
@@ -74,11 +82,12 @@ class checkWithoutRing {
     /**
      * check whether there are useless rings in a targeted direction graph.
      *
-     * @param nodeConnects the direction graph
+     * @param index the index of the targeted direction graph
      * @return if the graph passes simply connected checking, return true,
      * meaning there are not useless rings in targeted direction graphs.
      */
-    Boolean checkSimplyConnected(Map<Integer, List<Integer>> nodeConnects) {
+    Boolean checkSimplyConnected(Integer index) {
+        Map<Integer, List<Integer>> nodeConnects = directionGraphs.get(index);
         Map<Integer, Integer> unionMap = new HashMap();
         for (int sourceID : nodeConnects.keySet()) {
             unionMap.put(sourceID, sourceID);
@@ -94,7 +103,53 @@ class checkWithoutRing {
         for (Integer node : nodeConnects.keySet()) {
             rootSet.add(find(unionMap, node));
         }
-        return rootSet.size() == 1;
+
+        if (rootSet.size() != 1) {
+            Map<Integer, Set<Integer>> nodeBelongRoot = new HashMap<>();
+            for (int root : rootSet) {
+                nodeBelongRoot.put(root, new HashSet<>());
+            }
+            for (Integer node : nodeConnects.keySet()) {
+                nodeBelongRoot.get(find(unionMap, node)).add(node);
+            }
+
+            List<Integer> __rootCandidates = rootCandidates.get(index);
+            Integer __expectedRoutingDelay = expectedRoutingDelay.get(index);
+            Map<Integer, Integer> __potentialDelayUnits = potentialDelayUnits.get(index);
+
+            System.out.println("Start delay verify.");
+
+            for(int root : rootSet){
+                Set<Integer> nodes = nodeBelongRoot.get(root);
+                int delay = 0;
+                boolean flag = false;
+                for(int node : nodes){
+                    if(__rootCandidates.contains(node)){
+                        flag = true;
+                    }
+                    if(__potentialDelayUnits.containsKey(node)){
+                        delay += __potentialDelayUnits.get(node);
+                    }
+                }
+                if(flag){
+                    System.out.println("expectedRoutingDelay: " + __expectedRoutingDelay + ", routingDelay: " + delay);
+                    boolean pass = delay == __expectedRoutingDelay;
+                    for(int otherRoot:rootSet){
+                        if(otherRoot != root){
+                            Set<Integer> invalidNodes = nodeBelongRoot.get(otherRoot);
+                            invalidVars.addAll(invalidNodes);
+                        }
+                    }
+                    return pass;
+                }
+            }
+            return false;
+        }else{
+            return true;
+        }
+
+
+//        return rootSet.size() == 1;
     }
 }
 
@@ -145,6 +200,8 @@ public class gurobiMapJava {
     Set<String> DFGCommutatedSet;
     Map<Integer, List<Integer>> DFGOpOperand;
     Map<Integer, Set<Integer>> fixedMapRelation;
+    Map<Integer, Integer> mappedOp2MrrgMap;
+    Set<Integer> invalidVars;
     int II = 1;
     int numDfgVals = 0;
     int numDfgOps = 0;
@@ -216,6 +273,8 @@ public class gurobiMapJava {
         DFGCommutatedSet = new HashSet();
         DFGOpOperand = new HashMap<>();
         fixedMapRelation = new HashMap<>();
+        mappedOp2MrrgMap = new HashMap();
+        invalidVars = new HashSet<>();
     }
 
     /**
@@ -352,6 +411,18 @@ public class gurobiMapJava {
     }
 
     /**
+     * Initialize mappedOp2MrrgMap.
+     */
+    void initOp2MrrgMap(GRBVar[] F) throws GRBException {
+        for (int op = 0; op < numDfgOps; op++)
+            for (int f = 0; f < numMrrgF; f++) {
+                if (abs(F[FIndex(op, f)].get(GRB.DoubleAttr.X) - 1.0) < 0.01) {
+                    mappedOp2MrrgMap.put(op, f);
+                }
+            }
+    }
+
+    /**
      * Do ILP mapping and return the mapping result
      *
      * @param separatedPR     a parameter indicating whether ILP placement and routing should be separated
@@ -394,7 +465,7 @@ public class gurobiMapJava {
         if (solcntR != 0) {
 
 //            if (ringCheckPass) {
-                result = "success\t\t" + iterationNum + "\t\t" + ringCheckCount;
+            result = "success\t\t" + iterationNum + "\t\t" + ringCheckCount;
 //            }
             int[] r_mapped = new int[numMrrgR];
             int[] f_mapped = new int[numMrrgF];
@@ -451,6 +522,7 @@ public class gurobiMapJava {
                             modelR.getVarByName(key).get(GRB.DoubleAttr.X));
                 }
 
+
 //                for (int r = 0; r < numMrrgR; r++) {
 //                    if (modelR.getVarByName("R_" + r + "_22").get(GRB.DoubleAttr.X) > 0) {
 //                        System.out.println("R_" + r + "_22" + ": " + MRRGRoutingName.get(r) + " " + DFGValNodeName.get(22));
@@ -468,11 +540,15 @@ public class gurobiMapJava {
 //            }
             /****Debug****/
 
-            Map<Integer, Integer> mappedOp2MrrgMap = new HashMap();
 
             for (int val = 0; val < numDfgVals; val++) {
                 for (int r = 0; r < numMrrgR; r++)
                     if (abs(R[RIndex(val, r)].get(GRB.DoubleAttr.X) - 1.0) < 0.01) {
+                        if(invalidVars.contains(r)){
+                            System.out.println("Routing node " + MRRGRoutingName.get(r) +
+                                    " for value " + DFGValNodeName.get(val) + " has been optimized.");
+                            continue;
+                        }
                         String name = MRRGRoutingName.get(r);
                         if (name.contains("alu") && name.contains("internalNode")) {
                             System.out.println("Routing ALU: " + MRRGRoutingName.get(r) + " " + DFGValNodeName.get(val)
@@ -489,12 +565,9 @@ public class gurobiMapJava {
                 filename = "internalNodeinfo" + format.format(now);
             }
             FileWriter resultFile = new FileWriter(filename + "_r.txt");
+
             for (int op = 0; op < numDfgOps; op++)
                 for (int f = 0; f < numMrrgF; f++) {
-//                    if(op == 2){
-//                        System.out.println(DFGOpNodeName.get(op) + " " +  f + " " + MRRGFunctionName.get(f) +
-//                                " " + F[FIndex(op, f)].get(GRB.DoubleAttr.X));
-//                    }
                     if (abs(F[FIndex(op, f)].get(GRB.DoubleAttr.X) - 1.0) < 0.01) {
                         String name = MRRGFunctionName.get(f);
                         String opName = DFGOpNodeName.get(op);
@@ -515,9 +588,6 @@ public class gurobiMapJava {
                         f_mapped[f] = DFGOpNodeOpcode.get(op).intValue() + 1;
                         f_result[f] = op;
                         mappedOp2MrrgMap.put(op, f);
-//                        int mrrgOperand0 = MRRGFunctionFanin.get(f).get(0);
-//                        int dfgOperand0 = DFGMultipleInputMap.get(DFGOpNodeName.get(op)).get(0);
-//                        if(abs(modelR.getVarByName("R_"+).get(GRB.DoubleAttr.X) - 1.0) < 0.01)
                     }
                 }
             resultFile.flush();
@@ -684,7 +754,7 @@ public class gurobiMapJava {
             if (fanouts > 1) {
                 valueName = "R_" + r + "_" + val + "_" + fanout;
             }
-            if (model.getVarByName(valueName).get(GRB.DoubleAttr.X) == 1) {
+            if (abs(model.getVarByName(valueName).get(GRB.DoubleAttr.X) - 1.0) < 0.01) {
 //                System.out.println(r + " " + MRRGRoutingName.get(r));
                 mappedRoutingNodes.add(r);
             }
@@ -711,14 +781,56 @@ public class gurobiMapJava {
      */
     Boolean checkRoutingWithoutUselessRing(GRBModel model) throws GRBException {
         List<Map<Integer, List<Integer>>> testedGraphs = new ArrayList<>();
+        List<List<Integer>> rootCandidates = new ArrayList<>();
+        List<Integer> expectedRoutingDelay = new ArrayList<>();
+        List<Map<Integer, Integer>> potentialDelayUnits = new ArrayList<>();
         for (int val = 0; val < numDfgVals; val++) {
             int fanouts = DFGValNodeOut.get(val).size();
             for (int fanout = 0; fanout < fanouts; fanout++) {
                 Map<Integer, List<Integer>> graph = getGraph(model, val, fanout);
                 testedGraphs.add(graph);
+//                System.out.println(val +", " + fanout + " =================");
+                Map<Integer, Integer> delayUnits = new HashMap<>();
+                for (int i : graph.keySet()) {
+                    String name = MRRGRoutingName.get(i);
+                    if (MRRGLatency.containsKey(name)) {
+                        int delay = MRRGLatency.get(name);
+                        delayUnits.put(i, delay);
+                    }
+//                    System.out.println(name + ": " + model.getVarByName("Latency_R_" + i).get(GRB.DoubleAttr.X));
+                }
+                potentialDelayUnits.add(delayUnits);
+
+                int op = DFGValB2opMap.get(DFGValNodeName.get(val));
+                int mappedMrrgNode = mappedOp2MrrgMap.get(op);
+
+                String mappedMrrgNodeName = MRRGFunctionName.get(mappedMrrgNode);
+                int opDelay = 0;
+                if (MRRGLatency.containsKey(mappedMrrgNodeName)) {
+                    opDelay = MRRGLatency.get(mappedMrrgNodeName);
+                }
+                double delay = model.getVarByName("Delay_" + val).get(GRB.DoubleAttr.X);
+//                System.out.println(val +", " + fanout + "delay: " +delay);
+                expectedRoutingDelay.add((int)Math.round(delay) - opDelay);
+
+                List<Integer> functionFanout = MRRGFunctionFanout.get(mappedMrrgNode);
+                List<Integer> roots = new ArrayList<>();
+                for (Integer root : functionFanout) {
+                    if (graph.containsKey(root)) {
+                        roots.add(root);
+                    }
+                }
+                if (roots.size() > 1) {
+                    System.err.println("Too many roots.");
+                } else {
+                    rootCandidates.add(roots);
+                }
             }
         }
-        return new checkWithoutRing(testedGraphs).check();
+        checkWithoutRing check = new checkWithoutRing(testedGraphs, rootCandidates, expectedRoutingDelay, potentialDelayUnits);
+        boolean ret = check.check();
+        invalidVars = check.invalidVars;
+        return ret;
     }
 
     /**
@@ -738,21 +850,82 @@ public class gurobiMapJava {
     /**
      * Constraint: Legality of Delay and WaitSkew.
      */
-    <T> void constrDelay(GRBModel model, List<GRBVar[]> S, GRBVar[] Delays,
+    <T> void constrDelay(GRBModel model, List<GRBVar[]> S, GRBVar[] R, GRBVar[] Delays, GRBVar[] L_R,
                          GRBVar[] Latencies, GRBVar[] WaitSkews, T[] F, Boolean VariableF) throws GRBException {
+
+        for (int r = 0; r < numMrrgR; r++) {
+            List<Integer> fanIns = MRRGRoutingFanin.get(r);
+            List<Integer> fanInTypes = MRRGRoutingFaninType.get(r);
+            int size = fanIns.size();
+            GRBVar[] passValues = model.addVars(size, 'B');
+            for (int fanIn = 0; fanIn < size; fanIn++) {
+                int type = fanInTypes.get(fanIn);
+                int fanInID = fanIns.get(fanIn);
+                int latch = 0;
+                GRBLinExpr expr = new GRBLinExpr();
+                GRBVar passValue = passValues[fanIn];
+                if (type == 0) {
+                    String name = MRRGRoutingName.get(fanInID);
+                    if (MRRGLatency.containsKey(name)) {
+                        latch = MRRGLatency.get(name);
+                    }
+                    expr.addTerm(1, L_R[fanInID]);
+                    passValue.set(GRB.StringAttr.VarName, "passValueR2R_" + fanInID + "_" + r);
+                    GRBVar[] valueChosen = model.addVars(numDfgVals, 'B');
+                    GRBLinExpr constraintPassValue = new GRBLinExpr();
+                    for (int val = 0; val < numDfgVals; val++) {
+                        valueChosen[val].set(GRB.StringAttr.VarName, "passValueR2R_" + fanInID + "_" + r + "_val" + val);
+                        GRBVar[] pairR = {R[RIndex(val, r)], R[RIndex(val, fanInID)]};
+                        model.addGenConstrAnd(valueChosen[val], pairR, "validPassValueR2R_" + fanInID + "_" + r + "_val" + val);
+                        constraintPassValue.addTerm(1.0, valueChosen[val]);
+                    }
+                    model.addConstr(constraintPassValue, GRB.EQUAL, passValue, "exclusivity_" + "passValueR2R_" + fanInID + "_" + r);
+                } else {
+                    String name = MRRGFunctionName.get(fanInID);
+                    if (MRRGLatency.containsKey(name)) {
+                        latch = MRRGLatency.get(name);
+                    }
+                    passValue.set(GRB.StringAttr.VarName, "passValueF2R_" + fanInID + "_" + r);
+
+                    GRBVar[] valueChosen = model.addVars(numDfgOps, 'B');
+                    GRBLinExpr constraintPassValue = new GRBLinExpr();
+                    for (int val = 0; val < numDfgVals; val++) {
+                        valueChosen[val].set(GRB.StringAttr.VarName, "passValueF2R_" + fanInID + "_" + r + "_val" + val);
+                        String valName = DFGValNodeName.get(val);
+                        if (VariableF) {
+                            GRBVar[] pairR = {R[RIndex(val, r)], (GRBVar) F[FIndex(DFGValB2opMap.get(valName), fanInID)]};
+                            model.addGenConstrAnd(valueChosen[val], pairR, "validPassValueF2R_" + fanInID + "_" + r + "_val" + val);
+                        } else {
+                            int valF = Integer.class.cast(F[FIndex(DFGValB2opMap.get(valName), fanInID)]);
+                            if (valF == 1) {
+                                model.addConstr(R[RIndex(val, r)], GRB.EQUAL, valueChosen[val],
+                                        "validPassValueF2R_" + fanInID + "_" + r + "_val" + val);
+                            }
+                        }
+                        constraintPassValue.addTerm(1.0, valueChosen[val]);
+                    }
+                    model.addConstr(constraintPassValue, GRB.EQUAL, passValue, "exclusivity_" + "passValueF2R_" + fanInID + "_" + r);
+                }
+                expr.addConstant(latch);
+                expr.addTerm(-1, L_R[r]);
+                model.addGenConstrIndicator(passValue, 1, expr, GRB.EQUAL, 0, "passValueR_" + r + "_fanIn_" + fanIn);
+            }
+
+        }
+
 
         int constrcount = 0;
         for (int val = 0; val < numDfgVals; val++) {
             for (int fanOut = 0; fanOut < DFGValNodeOut.get(val).size(); fanOut++) {
                 GRBLinExpr constraint = new GRBLinExpr();
                 String valName = DFGValNodeName.get(val);
-                for (int r = 0; r < numMrrgR; r++) {
-                    int coeff = 0;
-                    if (MRRGLatency.containsKey(MRRGRoutingName.get(r))) {
-                        coeff = MRRGLatency.get(MRRGRoutingName.get(r));
-                    }
-                    constraint.addTerm(coeff, S.get(RIndex(val, r))[fanOut]);
-                }
+//                for (int r = 0; r < numMrrgR; r++) {
+//                    int coeff = 0;
+//                    if (MRRGLatency.containsKey(MRRGRoutingName.get(r))) {
+//                        coeff = MRRGLatency.get(MRRGRoutingName.get(r));
+//                    }
+//                    constraint.addTerm(coeff, S.get(RIndex(val, r))[fanOut]);
+//                }
 //                if (DFGValNodeOut.get(val).size() > 1) {
 //                    for (int r = 0; r < numMrrgR; r++) {
 //                        int coeff = 0;
@@ -770,28 +943,67 @@ public class gurobiMapJava {
 //                        constraint.addTerm(coeff, R[RIndex(val, r)]);
 //                    }
 //                }
-                for (int f = 0; f < numMrrgF; f++) {
-                    int coeff = 0;
-                    if (MRRGLatency.containsKey(MRRGFunctionName.get(f))) {
-                        coeff = MRRGLatency.get(MRRGFunctionName.get(f));
-                    }
-                    if (VariableF) {
-                        constraint.addTerm(coeff, (GRBVar) F[FIndex(DFGValB2opMap.get(valName), f)]);
-                    } else {
-                        constraint.addConstant(coeff * Integer.class.cast(F[FIndex(DFGValB2opMap.get(valName), f)]));
-                    }
+//                for (int f = 0; f < numMrrgF; f++) {
+//                    int coeff = 0;
+//                    if (MRRGLatency.containsKey(MRRGFunctionName.get(f))) {
+//                        coeff = MRRGLatency.get(MRRGFunctionName.get(f));
+//                    }
+//                    if (VariableF) {
+//                        constraint.addTerm(coeff, (GRBVar) F[FIndex(DFGValB2opMap.get(valName), f)]);
+//                    } else {
+//                        constraint.addConstant(coeff * Integer.class.cast(F[FIndex(DFGValB2opMap.get(valName), f)]));
+//                    }
+//
+//                }
 
-                }
 
                 Delays[constrcount].set(GRB.StringAttr.VarName, "Delay_" + constrcount);
 
-                model.addConstr(constraint, GRB.EQUAL, Delays[constrcount], "delay_" + (constrcount));
+//                model.addConstr(constraint, GRB.EQUAL, Delays[constrcount], "delay_" + (constrcount));
 
                 /** Constraint delay and wait skew
                  */
 
                 int sourceID = DFGValB2opMap.get(valName);
                 int sinkID = DFGValNodeOut.get(val).get(fanOut);
+
+                for (int f = 0; f < numMrrgF; f++) {
+                    List<Integer> fanInsF = MRRGFunctionFanin.get(f);
+                    List<Integer> fanInTypesF = MRRGFunctionFaninType.get(f);
+                    int size = fanInsF.size();
+                    if (VariableF) {
+                        GRBVar varF = (GRBVar) F[FIndex(sinkID, f)];
+                        GRBVar[] routingChosen = model.addVars(size, 'B');
+                        for (int fanInF = 0; fanInF < size; fanInF++) {
+                            int type = fanInTypesF.get(fanInF);
+                            int fanInID = fanInsF.get(fanInF);
+                            GRBLinExpr expr = new GRBLinExpr();
+                            expr.addTerm(1, L_R[fanInID]);
+                            expr.addTerm(-1, Delays[constrcount]);
+                            if (type == 0) {
+                                GRBVar[] pairR = {R[RIndex(val, fanInID)], varF};
+                                model.addGenConstrAnd(routingChosen[fanInF], pairR, "routingChosen_" + fanInID + "_" + sinkID + "fanInF");
+                                model.addGenConstrIndicator(routingChosen[fanInF], 1, expr, GRB.EQUAL, 0,
+                                        "delay_" + constrcount + "_f" + f + "_fanIn" + fanInF);
+                            }
+                        }
+                    } else {
+                        if (Integer.class.cast(F[FIndex(sinkID, f)]) == 1) {
+                            for (int fanInF = 0; fanInF < size; fanInF++) {
+                                int type = fanInTypesF.get(fanInF);
+                                int fanInID = fanInsF.get(fanInF);
+                                if (type == 0) {
+                                    GRBLinExpr expr = new GRBLinExpr();
+                                    expr.addTerm(1, L_R[fanInID]);
+                                    expr.addTerm(-1, Delays[constrcount]);
+                                    model.addGenConstrIndicator(R[RIndex(val, fanInID)], 1, expr, GRB.EQUAL, 0,
+                                            "delay_" + constrcount + "_f" + f + "_fanIn" + fanInF);
+                                }
+                            }
+                        }
+                    }
+
+                }
 
                 String sourceName = DFGOpNodeName.get(sourceID);
                 String sinkName = DFGOpNodeName.get(sinkID);
@@ -832,12 +1044,18 @@ public class gurobiMapJava {
     /**
      * Set Latency Range.
      */
-    void setLatencyRange(GRBVar[] Latencies, int maxLatency) throws GRBException {
+    void setLatencyRange(GRBVar[] Latencies, GRBVar[] L_R, int maxLatency) throws GRBException {
         int minLatency = 0;
         for (int op = 0; op < numDfgOps; op++) {
             Latencies[op].set(GRB.StringAttr.VarName, "Latency_" + op);
             Latencies[op].set(GRB.DoubleAttr.LB, minLatency);
             Latencies[op].set(GRB.DoubleAttr.UB, maxLatency);
+        }
+
+        for (int r = 0; r < numMrrgR; r++) {
+            L_R[r].set(GRB.StringAttr.VarName, "Latency_R_" + r);
+            L_R[r].set(GRB.DoubleAttr.LB, minLatency);
+            L_R[r].set(GRB.DoubleAttr.UB, maxLatency);
         }
     }
 
@@ -1172,11 +1390,11 @@ public class gurobiMapJava {
                 int flag = 0;
                 for (int i = 0; i < MRRGFunctionSupportOpcode.get(f).size(); i++)
                     if (MRRGFunctionSupportOpcode.get(f).get(i) == DFGOpNodeOpcode.get(op)) {
-                        if(fixedMapRelation.containsKey(op)){
-                            if(fixedMapRelation.get(op).contains(f)){
+                        if (fixedMapRelation.containsKey(op)) {
+                            if (fixedMapRelation.get(op).contains(f)) {
                                 flag = 1;
                             }
-                        }else {
+                        } else {
                             flag = 1;
                         }
                         break;
@@ -1330,6 +1548,8 @@ public class gurobiMapJava {
             GRBVar[] Delays = modelR.addVars(connectSize, 'I');
             GRBVar[] Latencies = modelR.addVars(numDfgOps, 'I');
 
+            GRBVar[] L_R = modelR.addVars(numMrrgR, 'I');
+
             int WaitSkewNum = connectSize;
             int RelativeSkewNum = DFGMultipleInputMap.size();
 
@@ -1337,12 +1557,12 @@ public class gurobiMapJava {
 
 
             if (separatedPR) {
-                constrDelay(modelR, S, Delays, Latencies, WaitSkews, afterPlacementF, false);
+                constrDelay(modelR, S, R, Delays, L_R, Latencies, WaitSkews, afterPlacementF, false);
             } else {
-                constrDelay(modelR, S, Delays, Latencies, WaitSkews, F, true);
+                constrDelay(modelR, S, R, Delays, L_R, Latencies, WaitSkews, F, true);
             }
 
-            setLatencyRange(Latencies, maxLatency);
+            setLatencyRange(Latencies, L_R, maxLatency);
             if (useRelativeSkew) {
                 GRBVar[] RelativeSkews = modelR.addVars(RelativeSkewNum, 'I');
                 GRBVar[] SkewDirection = modelR.addVars(RelativeSkewNum, 'B');
@@ -1384,6 +1604,7 @@ public class gurobiMapJava {
                 System.out.println("\033[31;4m" + "Integrated P&R mapping fail." + "\033[0m");
             }
         } else {
+            initOp2MrrgMap(F);
             ringCheckPass = checkRoutingWithoutUselessRing(modelR);
             if (separatedPR) {
 //                if(!ringCheckPass) {
