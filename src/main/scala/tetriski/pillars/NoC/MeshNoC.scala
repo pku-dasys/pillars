@@ -5,6 +5,7 @@ import chisel3.util._
 import chisel3.{Bundle, Input, Module, Output, UInt, Vec, _}
 
 class MeshNoC(routerRule: (Int, Int) => Router, packetRule: () => Bundle) extends Module {
+  override def desiredName = "MeshNoc_" + NoCParam.channelSize + "_" + NoCParam.xSize + "_" + NoCParam.ySize
 
   val io = IO(new Bundle {
     val en = Input(Bool())

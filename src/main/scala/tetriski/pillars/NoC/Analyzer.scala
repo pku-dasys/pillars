@@ -38,66 +38,70 @@ class Analyzer(size: Int, y: Int, x: Int, deqSeq: Array[(UInt, UInt)],
     val src = io.packet.header.src
     val dst = io.packet.header.dst
 
-    when(src === dst) {
-      //broadcast
-      //By default, we assume the routing algorithm guarantees congestion should not exist when broadcasting packets.
 
-      val filter = Module(new Filter(size, NoCParam.grandNumLimit, NoCParam.getGrandWidth))
-      io.analyzedPacket.grandNum := filter.io.validNum
-      io.analyzedPacket.grands := filter.io.resources
-      filter.io.signalRequests.foreach(b => b := false.B)
-      filter.io.dataRequests.foreach(d => d := 0.U)
+    //p2p
+    when(dst.x === xUInt && dst.y === yUInt) {
+      io.analyzedPacket.grandNum := 1.U
+      io.analyzedPacket.grands(0) := (size - 1).U
+      io.channelReady := io.deqsReady(size - 1)
+    }.otherwise {
+      val direction = routing(1, 0)
+      val grand = MuxLookup(direction, NoCParam.Fault.U(NoCParam.getGrandWidth.W), deqSeq)
+      io.channelReady := io.deqsReady(grand)
+      io.analyzedPacket.grandNum := 1.U
+      io.analyzedPacket.grands(0) := grand
+      io.analyzedPacket.packet.header.routing := routing(NoCParam.log2Routing - 1, 2)
+    }
+
+    if(NoCParam.useBroadcast){
+      when(src === dst) {
+        //broadcast
+        //By default, we assume the routing algorithm guarantees congestion should not exist when broadcasting packets.
+
+        val filter = Module(new Filter(size, NoCParam.grandNumLimit, NoCParam.getGrandWidth))
+        io.analyzedPacket.grandNum := filter.io.validNum
+        io.analyzedPacket.grands := filter.io.resources
+        filter.io.signalRequests.foreach(b => b := false.B)
+        filter.io.dataRequests.foreach(d => d := 0.U)
 
 
-      for (i <- 0 until broadcastArray.size) {
-        val pair = broadcastArray(i)
-        val direction = pair._1
-        val index = pair._2
-        direction match {
-          case NoCParam.E => when(src.x <= xUInt && src.y === yUInt) {
-            channelDeqReady(index) := io.deqsReady(index)
-            filter.io.signalRequests(index) := true.B
-            filter.io.dataRequests(index) := i.U
-          }
-          case NoCParam.W => when(src.x >= xUInt && src.y === yUInt) {
-            channelDeqReady(index) := io.deqsReady(index)
-            filter.io.signalRequests(index) := true.B
-            filter.io.dataRequests(index) := i.U
-          }
-          case NoCParam.S => when(src.y <= yUInt) {
-            channelDeqReady(index) := io.deqsReady(index)
-            filter.io.signalRequests(index) := true.B
-            filter.io.dataRequests(index) := i.U
-          }
-          case NoCParam.N => when(src.y >= yUInt) {
-            channelDeqReady(index) := io.deqsReady(index)
-            filter.io.signalRequests(index) := true.B
-            filter.io.dataRequests(index) := i.U
+        for (i <- 0 until broadcastArray.size) {
+          val pair = broadcastArray(i)
+          val direction = pair._1
+          val index = pair._2
+          direction match {
+            case NoCParam.E => when(src.x <= xUInt && src.y === yUInt) {
+              channelDeqReady(index) := io.deqsReady(index)
+              filter.io.signalRequests(index) := true.B
+              filter.io.dataRequests(index) := i.U
+            }
+            case NoCParam.W => when(src.x >= xUInt && src.y === yUInt) {
+              channelDeqReady(index) := io.deqsReady(index)
+              filter.io.signalRequests(index) := true.B
+              filter.io.dataRequests(index) := i.U
+            }
+            case NoCParam.S => when(src.y <= yUInt) {
+              channelDeqReady(index) := io.deqsReady(index)
+              filter.io.signalRequests(index) := true.B
+              filter.io.dataRequests(index) := i.U
+            }
+            case NoCParam.N => when(src.y >= yUInt) {
+              channelDeqReady(index) := io.deqsReady(index)
+              filter.io.signalRequests(index) := true.B
+              filter.io.dataRequests(index) := i.U
+            }
           }
         }
-      }
 
-      when(!(src === co)) {
-        filter.io.signalRequests(size - 1) := true.B
-        filter.io.dataRequests(size - 1) := (size - 1).U
-        io.channelReady := io.deqsReady(size - 1)
-      }
+        when(!(src === co)) {
+          filter.io.signalRequests(size - 1) := true.B
+          filter.io.dataRequests(size - 1) := (size - 1).U
+          io.channelReady := io.deqsReady(size - 1)
+        }
 
-    }.otherwise {
-      //p2p
-      when(dst.x === xUInt && dst.y === yUInt) {
-        io.analyzedPacket.grandNum := 1.U
-        io.analyzedPacket.grands(0) := (size - 1).U
-        io.channelReady := io.deqsReady(size - 1)
-      }.otherwise {
-        val direction = routing(1, 0)
-        val grand = MuxLookup(direction, NoCParam.Fault.U(NoCParam.getGrandWidth.W), deqSeq)
-        io.channelReady := io.deqsReady(grand)
-        io.analyzedPacket.grandNum := 1.U
-        io.analyzedPacket.grands(0) := grand
-        io.analyzedPacket.packet.header.routing := routing(NoCParam.log2Routing - 1, 2)
       }
     }
+
   }
 
   io.channelReady := channelDeqReady.reduce(_ & _)

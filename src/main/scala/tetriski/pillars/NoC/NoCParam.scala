@@ -46,6 +46,13 @@ object NoCParam {
   var grandNumLimit = 4 //For broadcast, a packet could be granted to at most 4 destination
   var grandRegion = 5 //E, W, S, N, Arrival
 
+  var useBroadcast = true
+
+  def abandonBroadcast(): Unit = {
+    grandNumLimit = 1
+    useBroadcast = false
+  }
+
   def getGrandNumWidth = log2Ceil(NoCParam.grandNumLimit + 1)
 
   def getGrandWidth = log2Ceil(grandRegion)
