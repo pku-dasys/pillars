@@ -195,9 +195,9 @@ Users can also use
  Some tested synthesized hardware can significantly
   reduce the resource usages compared with HLS. 
   
-## Publication
+## Publications
 
-For more detailed information and paper reference, please refer to the following paper:
+For more detailed information and paper reference, please refer to the following papers:
 `Yijiang Guo and Guojie Luo, "Pillars: An Integrated CGRA Design Framework," Third Workshop on Open-Source EDA Technology (WOSET), November 2020.`
 ```
 @article{guo-pillars-woset2020,
@@ -206,5 +206,18 @@ For more detailed information and paper reference, please refer to the following
   journal = {Third Workshop on Open-Source EDA Technology (WOSET)},
   month   = {November},
   year    = {2020},
+} 
+```
+
+`Yijiang Guo, Jiarui Wang, Jiaxi Zhang and Guojie Luo, 
+"Formulating Data-arrival Synchronizers in Integer Linear Programming for CGRA Mapping",
+58th Design Automation Conference (DAC), December 2021.`
+```
+@article{guo-formulating-dac2021,
+  title   = "{Formulating Data-arrival Synchronizers in Integer Linear Programming for CGRA Mapping}",
+  author  = {Yijiang Guo and Jiarui Wang and Jiaxi Zhang and Guojie Luo},
+  journal = {58th Design Automation Conference (DAC)},
+  month   = {December},
+  year    = {2021},
 } 
 ```
