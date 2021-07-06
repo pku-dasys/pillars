@@ -103,7 +103,7 @@ object NoC4CGRA extends App {
       }
     }
 
-    arch = getArch(true)
+    arch = getArch(false)
     dfgFilename = "NoCTester/div.dot"
     mappingResultFilename = s"NoCTester/div/ii$II"
     mapping(arch, dfgFilename, mappingResultFilename, II)
@@ -153,6 +153,8 @@ object NoC4CGRA extends App {
   val tileMap = getTileMap()
 
   val largeDesign = () => new MultiTileCGRA(tileMap, bitStreamMap, scheduleMap)
+
+  chisel3.Driver.execute(Array("-td", "tutorial/RTL/"), largeDesign)
 
   iotesters.Driver.execute(Array("-tgvo", "on", "-tbn", "verilator", "-tmvf", "--threads 12"), largeDesign) {
     c => new NocMeshCGRATester(c)

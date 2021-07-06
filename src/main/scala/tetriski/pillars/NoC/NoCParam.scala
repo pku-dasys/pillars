@@ -40,6 +40,7 @@ object NoCParam {
   val W = 3
   val S = 1
   val N = 2
+  val TILE = -1
 
   val Fault = 5
 

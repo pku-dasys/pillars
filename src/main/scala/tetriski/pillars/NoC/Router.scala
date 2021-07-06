@@ -5,7 +5,7 @@ import chisel3.{Bundle, Input, Module, Output, UInt, Vec, _}
 import scala.collection.mutable.ArrayBuffer
 
 class Router(y: Int, x: Int, packetRule: () => Bundle) extends Module {
-  override def desiredName = "Router_" + y + "_" + x
+  override def desiredName = "Router_" + x + "_" + y
 
   def getPacketRule = packetRule
 

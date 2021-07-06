@@ -92,10 +92,13 @@ object MeshNoCTest extends App {
   NoCParam.useMultiChannelRouter = true
 //  NoCParam.xSize = 3
 //  NoCParam.ySize = 3
+  val router = () => new MultiChannelRouter(1, 1)
   val multiChannelRouter = () => new MeshNoC((y, x) => new MultiChannelRouter(y, x), () => new MultiChannelPacket)
-  iotesters.Driver.execute(Array("-tgvo", "on", "-tbn", "verilator"), multiChannelRouter) {
-    c => new MeshMCNoCTester(c)
-  }
+  chisel3.Driver.execute(Array("-td", "tutorial/RTL/"), router)
+  chisel3.Driver.execute(Array("-td", "tutorial/RTL/"), multiChannelRouter)
+//  iotesters.Driver.execute(Array("-tgvo", "on", "-tbn", "verilator"), multiChannelRouter) {
+//    c => new MeshMCNoCTester(c)
+//  }
 }
 
 
