@@ -92,11 +92,13 @@ class TileBlock(name: String, x: Int, y: Int, numIn: Int, numOut: Int,
  * @param isToroid     a parameter indicating whether using toroid architecture
  * @param alternation  a parameter indicating whether using alternate PEs
  * @param basicOpList  basic operator list of ALUs
+ * @param useCounter   a parameter indicating whether using counters
  * @param dataWidth    the data width
  */
 class TileLSUBlock(name: String, x: Int, y: Int, numIn: Int, numOut: Int,
                    useMuxBypass: Boolean = true, complex: Boolean = false, isToroid: Boolean = true,
-                   alternation: Boolean = false, basicOpList: List[OpEnum] = null, dataWidth: Int = 32)
+                   alternation: Boolean = false, basicOpList: List[OpEnum] = null,
+                   useCounter: Boolean = false, dataWidth: Int = 32)
   extends BlockTrait {
   initName(name)
 
@@ -121,6 +123,9 @@ class TileLSUBlock(name: String, x: Int, y: Int, numIn: Int, numOut: Int,
     for (i <- 0 until x) {
       var inPortsNeighbor = Array("input_w", "input_e", "input_n", "input_s", "input_lsu", "input_counter")
       var neighborPortSet = inPortsNeighbor.toSet
+      if(!useCounter){
+        neighborPortSet --= Set("input_counter")
+      }
       if (complex) {
         neighborPortSet ++= Set("input_wn", "input_ws", "input_en", "input_es")
       }
@@ -251,13 +256,15 @@ class TileLSUBlock(name: String, x: Int, y: Int, numIn: Int, numOut: Int,
 
   /** PEs in the same column share a Counter (independent width according to global config).
    */
-  for (i <- 0 until x) {
-    val counter = new ElementCounter("counter_" + i.toString, List(PillarsConfig.COUNTER_WIDTH))
-    counter.addOutPorts(Array("out"))
-    addElement(counter)
-    for (j <- 0 until y) {
-      val pe = peMap(i + j * x)
-      addConnect(counter / "out" -> pe / "input_counter")
+  if(useCounter){
+    for (i <- 0 until x) {
+      val counter = new ElementCounter("counter_" + i.toString, List(PillarsConfig.COUNTER_WIDTH))
+      counter.addOutPorts(Array("out"))
+      addElement(counter)
+      for (j <- 0 until y) {
+        val pe = peMap(i + j * x)
+        addConnect(counter / "out" -> pe / "input_counter")
+      }
     }
   }
 

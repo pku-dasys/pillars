@@ -27,21 +27,22 @@ import scala.collection.mutable.ArrayBuffer
 //  }
 //}
 
-/** A module which postpones the input date for "latency" clock cycles.
+/** A module which postpones the input date for "slack" clock cycles.
  *
- * @param w the data width
+ * @param w           the data width
  */
-class RegNextN(w: Int) extends Module {
+class SlackSynchronizer(w: Int) extends Module {
   val io = IO(new Bundle {
-    val latency = Input(UInt((LOG_SKEW_LENGTH).W))
-    val input = Input(UInt(w.W))
-    val out = Output(UInt(w.W))
+    val slack = Input(UInt((LOG_SKEW_LENGTH).W))
+    val input = Input(getClassIO(w))
+    val out = Output(getClassIO(w))
   })
-  val regArray = RegInit(VecInit(Seq.fill(SKEW_REGISTER_NUM)(0.U(w.W))))
+  //  val regArray = RegInit(VecInit(Seq.fill(SKEW_REGISTER_NUM)(0.U(w.W))))
+  val regArray = Mem(SKEW_REGISTER_NUM, getClassIO(w))
   val posReg = RegInit(0.U(LOG_SKEW_LENGTH.W))
 
-  when(io.latency > 0.U) {
-    io.out := regArray(posReg - io.latency)
+  when(io.slack > 0.U) {
+    io.out := regArray(posReg - io.slack)
     regArray(posReg) := io.input
   }.otherwise {
     io.out := io.input
@@ -54,27 +55,27 @@ class RegNextN(w: Int) extends Module {
  *
  * @param w the data width
  */
-class Synchronizer(w: Int) extends Module {
+class SkewSynchronizer(w: Int) extends Module {
   val io = IO(new Bundle {
     val skewing = Input(UInt((LOG_SKEW_LENGTH + 1).W))
-    val input0 = Input(UInt(w.W))
-    val input1 = Input(UInt(w.W))
-    val skewedInput0 = Output(UInt(w.W))
-    val skewedInput1 = Output(UInt(w.W))
+    val input0 = Input(getClassIO(w))
+    val input1 = Input(getClassIO(w))
+    val skewedInput0 = Output(getClassIO(w))
+    val skewedInput1 = Output(getClassIO(w))
   })
 
-  val regNextN = Module(new RegNextN(w))
+  val slackSynchronizer = Module(new SlackSynchronizer(w))
   val latency = io.skewing(LOG_SKEW_LENGTH - 1, 0)
   val signal = io.skewing(LOG_SKEW_LENGTH, LOG_SKEW_LENGTH)
-  regNextN.io.latency := latency
+  slackSynchronizer.io.slack := latency
 
   when(signal === 1.U) {
-    regNextN.io.input := io.input0
-    io.skewedInput0 := regNextN.io.out
+    slackSynchronizer.io.input := io.input0
+    io.skewedInput0 := slackSynchronizer.io.out
     io.skewedInput1 := io.input1
   }.otherwise {
-    regNextN.io.input := io.input1
-    io.skewedInput1 := regNextN.io.out
+    slackSynchronizer.io.input := io.input1
+    io.skewedInput1 := slackSynchronizer.io.out
     io.skewedInput0 := io.input0
   }
 }
@@ -142,7 +143,7 @@ class ScheduleController extends Module {
   /** If waitCycle == (1 << LOG_SCHEDULE_SIZE) - 1,
    * it means the "valid" signal should be always false.
    */
-  when(io.waitCycle === ((1 << LOG_SCHEDULE_SIZE) - 1).U){
+  when(io.waitCycle === ((1 << LOG_SCHEDULE_SIZE) - 1).U) {
     io.valid := false.B
   }
 
@@ -237,8 +238,8 @@ class Alu(funSelect: Int, w: Int) extends Module {
     //port sequnces outs: 0: out
     //port sequnces inputs: 0: input_a, 1: input_b
     val configuration = Input(UInt(4.W))
-    val inputs = Input(MixedVec(Seq(UInt(w.W), UInt(w.W))))
-    val outs = Output(MixedVec(Seq(UInt(w.W))))
+    val inputs = Input(MixedVec(Seq(getClassIO(w), getClassIO(w))))
+    val outs = Output(MixedVec(Seq(getClassIO(w))))
   })
 
   /** Translates the subset of optional operations into hardware.
@@ -247,6 +248,8 @@ class Alu(funSelect: Int, w: Int) extends Module {
    */
   def getFunSeq(shamt: UInt = null): Seq[(UInt, UInt)] = {
     val funSeq = new ArrayBuffer[(UInt, UInt)]()
+    val input_a = getData(inputA)
+    val input_b = getData(inputB)
 
     for (i <- 0 until ALU_FUN_NUM) {
       if ((funSelect & (1 << i)) > 0) {
@@ -273,56 +276,68 @@ class Alu(funSelect: Int, w: Int) extends Module {
     funSeq
   }
 
-  var input_a = io.inputs(0)
-  var input_b = io.inputs(1)
+  var inputA = io.inputs(0)
+  var inputB = io.inputs(1)
 
   if (LOG_SKEW_LENGTH > 0) {
     if (USE_RELATIVE_SKEW) {
-      val synchronizer = Module(new Synchronizer(w))
-      synchronizer.io.input0 := input_a
-      synchronizer.io.input1 := input_b
+      val synchronizer = Module(new SkewSynchronizer(w))
+      synchronizer.io.input0 := inputA
+      synchronizer.io.input1 := inputB
 
       synchronizer.io.skewing := io.skewing
 
-      input_a = synchronizer.io.skewedInput0
-      input_b = synchronizer.io.skewedInput1
+      inputA = synchronizer.io.skewedInput0
+      inputB = synchronizer.io.skewedInput1
     } else {
-      val regNextNa = Module(new RegNextN(w))
-      val regNextNb = Module(new RegNextN(w))
-      regNextNa.io.input := input_a
-      regNextNa.io.latency := io.skewing(LOG_SKEW_LENGTH - 1, 0)
-      regNextNb.io.input := input_b
-      regNextNb.io.latency := io.skewing(2 * LOG_SKEW_LENGTH - 1, LOG_SKEW_LENGTH)
+      val slackSynchronizerA = Module(new SlackSynchronizer(w))
+      val slackSynchronizerB = Module(new SlackSynchronizer(w))
+      slackSynchronizerA.io.input := inputA
+      slackSynchronizerA.io.slack := io.skewing(LOG_SKEW_LENGTH - 1, 0)
+      slackSynchronizerB.io.input := inputB
+      slackSynchronizerB.io.slack := io.skewing(2 * LOG_SKEW_LENGTH - 1, LOG_SKEW_LENGTH)
 
-      input_a = regNextNa.io.out
-      input_b = regNextNb.io.out
+      inputA = slackSynchronizerA.io.out
+      inputB = slackSynchronizerB.io.out
     }
   }
 
   val out = io.outs(0)
-  val shamt = input_b(log2Up(w), 0).asUInt
+  val shamt = getData(inputB)(log2Up(w), 0).asUInt
 
   val funSeq = getFunSeq(shamt)
 
-  when(io.en) {
-    out := MuxLookup(io.configuration, input_b, funSeq)
+  val validBypassA = (io.configuration === ALU_COPY_A) & getToken(inputA)
+  val validBypassB = (io.configuration === ALU_COPY_B) & getToken(inputB)
+  val valid = (getToken(inputA) & getToken(inputB)) | validBypassA | validBypassB
+
+  when(io.en & valid) {
+    //    out := MuxLookup(io.configuration, input_b, funSeq)
+    setIO(out, MuxLookup(io.configuration, getData(inputB), funSeq), true.B)
   }.otherwise {
     for (out <- io.outs) {
-      out := 0.U
+      setIO(out, 0.U)
     }
   }
 }
 
-class DefaultBasicModule(w: Int, configBits: Int, numIn: Int, numOut: Int) extends Module {
+class DefaultBasicModule(w: Int, configBits: Int, numIn: Int, numOut: Int, inputII: Boolean = false) extends Module {
+  val widthII = if (inputII) {
+    LOG_II_UPPER_BOUND
+  } else {
+    0
+  }
   val io = IO(new Bundle {
     val en = Input(Bool())
+    val II = Input(UInt(widthII.W))
     val configuration = Input(UInt(configBits.W))
-    val inputs = Input(MixedVec((1 to numIn) map { _ => UInt(w.W) }))
-    val outs = Output(MixedVec((1 to numOut) map { _ => UInt(w.W) }))
+    val inputs = Input(MixedVec((1 to numIn) map { _ => getClassIO(w) }))
+    val outs = Output(MixedVec((1 to numOut) map { _ => getClassIO(w) }))
   })
+
 }
 
-/** An reconfigurable counter.
+/** An reconfigurable counter for II = 1.
  * The configuration consists of freq (interval cycles of value change), end (stop value),
  * step (value changes per interval), and init (initial value).
  *
@@ -330,7 +345,7 @@ class DefaultBasicModule(w: Int, configBits: Int, numIn: Int, numOut: Int) exten
  *          the output should be 3, 0, 5, 0, 7, 0, 9, 0, 11, 0, 0, 0.....
  * @param w the data width
  */
-class Counter(w: Int) extends DefaultBasicModule(w, 4 * w, 0, 1) {
+class SingleCounter(w: Int) extends DefaultBasicModule(w, 4 * w, 0, 1) {
 
   val freq = io.configuration(4 * w - 1, 3 * w)
   val end = io.configuration(3 * w - 1, 2 * w)
@@ -344,12 +359,14 @@ class Counter(w: Int) extends DefaultBasicModule(w, 4 * w, 0, 1) {
   val intervalReg = RegInit(0.U(w.W))
   val intervalStart = RegInit(false.B)
 
-  io.outs(0) := 0.U
+  setIO(io.outs(0), 0.U)
+
   when(io.en) {
     when(!firing) {
       reg := init
       firing := true.B
-      io.outs(0) := init
+      //      io.outs(0) := init
+      setIO(io.outs(0), init, true.B)
       when(freq === 1.U) {
         intervalStart := true.B
       }
@@ -364,12 +381,57 @@ class Counter(w: Int) extends DefaultBasicModule(w, 4 * w, 0, 1) {
       when(intervalReg + 1.U === freq && intervalStart) {
         when(reg + step =/= end) {
           reg := reg + step
-          io.outs(0) := reg + step
+          //          io.outs(0) := reg + step
+          setIO(io.outs(0), reg + step, true.B)
         }.otherwise {
           finish := true.B
         }
       }
 
+    }
+  }
+
+}
+
+/** An reconfigurable counter for arbitrary II.
+ * The configuration consists of freq (interval cycles of value change), end (stop value),
+ * step (value changes per interval), and init (initial value).
+ *
+ * @example If freq = 2, end = 13, step = 2, and init = 3 when context ID = 0,
+ *          and freq = 2, end = 16, step = 3, and init = 1 when context ID = 1,
+ *          and inputII = 2,
+ *          the output should be 3,    5,    7,    9,    11,    0,  .....
+ *          1,    4,    7,    10,    13,   0.....
+ * @param w the data width
+ */
+class Counter(w: Int) extends DefaultBasicModule(w, 4 * w, 0, 1, true) {
+  val counters = (0 until II_UPPER_BOUND).map(_ => Module(new SingleCounter(w)))
+
+  val cycleReg = RegInit((0).U(LOG_II_UPPER_BOUND.W))
+  //  when(io.en === true.B) {
+  when(cycleReg === io.II - 1.U) {
+    cycleReg := 0.U
+  }.otherwise {
+    cycleReg := cycleReg + 1.U
+  }
+  //  }
+
+  setIO(io.outs(0), 0.U)
+
+  for (i <- 0 until II_UPPER_BOUND) {
+    val enReg = RegInit(false.B)
+    val configReg = RegInit(0.U((4 * w).W))
+    counters(i).io.II := DontCare
+    counters(i).io.en := enReg
+    counters(i).io.configuration := configReg
+    when(cycleReg === i.U) {
+      counters(i).io.en := io.en
+      counters(i).io.configuration := io.configuration
+      enReg := io.en
+      configReg := io.configuration
+      when(io.en) {
+        io.outs(0) := counters(i).io.outs(0)
+      }
     }
   }
 
@@ -402,7 +464,8 @@ class RegisterFile(log2Regs: Int, numIn: Int, numOut: Int, w: Int)
     dispatch.io.en <> io.en
     val forbidden = io.configuration(configSize, configSize)
 
-    val regs = RegInit(VecInit(Seq.fill(Math.pow(2, log2Regs).toInt)(0.U(w.W))))
+    //    val regs = RegInit(VecInit(Seq.fill(Math.pow(2, log2Regs).toInt)(0.U(w.W))))
+    val regs = Mem(Math.pow(2, log2Regs).toInt, getClassIO(w))
 
     when(forbidden === false.B) {
       for (i <- 0 until numIn) {
@@ -453,7 +516,13 @@ class Multiplexer(numIn: Int, w: Int) extends DefaultBasicModule(w, log2Up(numIn
  * @param w the data width
  */
 class ConstUnit(w: Int) extends DefaultBasicModule(w, w, 0, 1) {
-  io.outs(0) := io.configuration
+  if (USE_TOKEN) {
+    io.outs(0).asInstanceOf[TokenIO].data := io.configuration
+    io.outs(0).asInstanceOf[TokenIO].token := true.B
+  } else {
+    io.outs(0) := io.configuration
+  }
+
 }
 
 /** A Chisel ADRES PE.
@@ -651,6 +720,11 @@ class LSMemWrapper(w: Int) extends Module {
  * @param w the data width
  */
 class LoadStoreUnit(w: Int) extends Module {
+  val widthII = if (USE_TOKEN) {
+    LOG_II_UPPER_BOUND
+  } else {
+    0
+  }
   val io = IO(new Bundle {
     //0 for load, 1 for store
     val configuration = Input(UInt(1.W))
@@ -667,8 +741,11 @@ class LoadStoreUnit(w: Int) extends Module {
     val deqEn = Input(Bool())
     val idle = Output(Bool())
 
-    val inputs = Input(MixedVec(UInt(log2Ceil(MEM_DEPTH).W), UInt(w.W)))
-    val outs = Output(MixedVec((1 to 1) map { i => UInt(w.W) }))
+    val II = Input(UInt(widthII.W))
+
+    //    val inputs = Input(MixedVec(UInt(log2Ceil(MEM_DEPTH).W), UInt(w.W)))
+    val inputs = Input(MixedVec(getClassIO(w), getClassIO(w)))
+    val outs = Output(MixedVec((1 to 1) map { i => getClassIO(w) }))
   })
   val memWrapper = Module(new LSMemWrapper(w))
   memWrapper.io.base <> io.base
@@ -690,7 +767,7 @@ class LoadStoreUnit(w: Int) extends Module {
 
   if (LOG_SKEW_LENGTH > 0) {
     if (USE_RELATIVE_SKEW) {
-      val synchronizer = Module(new Synchronizer(w))
+      val synchronizer = Module(new SkewSynchronizer(w))
       synchronizer.io.input0 := addr
       synchronizer.io.input1 := dataIn
 
@@ -699,15 +776,15 @@ class LoadStoreUnit(w: Int) extends Module {
       addr = synchronizer.io.skewedInput0
       dataIn = synchronizer.io.skewedInput1
     } else {
-      val regNextNaddr = Module(new RegNextN(w))
-      val regNextNdataIn = Module(new RegNextN(w))
-      regNextNaddr.io.input := addr
-      regNextNaddr.io.latency := io.skewing(LOG_SKEW_LENGTH - 1, 0)
-      regNextNdataIn.io.input := dataIn
-      regNextNdataIn.io.latency := io.skewing(2 * LOG_SKEW_LENGTH - 1, LOG_SKEW_LENGTH)
+      val slackSynchronizerAddr = Module(new SlackSynchronizer(w))
+      val slackSynchronizerDataIn = Module(new SlackSynchronizer(w))
+      slackSynchronizerAddr.io.input := addr
+      slackSynchronizerAddr.io.slack := io.skewing(LOG_SKEW_LENGTH - 1, 0)
+      slackSynchronizerDataIn.io.input := dataIn
+      slackSynchronizerDataIn.io.slack := io.skewing(2 * LOG_SKEW_LENGTH - 1, LOG_SKEW_LENGTH)
 
-      addr = regNextNaddr.io.out
-      dataIn = regNextNdataIn.io.out
+      addr = slackSynchronizerAddr.io.out
+      dataIn = slackSynchronizerDataIn.io.out
     }
   }
   val out = io.outs(0)
@@ -715,12 +792,23 @@ class LoadStoreUnit(w: Int) extends Module {
   val readMem = memWrapper.io.readMem
   val writeMem = memWrapper.io.writeMem
 
-  io.outs(0) := readMem.dout
+  //  io.outs(0) := readMem.dout
+  val validLoad = getToken(addr) & (io.configuration === 0.U)
+  val validStore = getToken(addr) & getToken(dataIn) & (io.configuration === 1.U)
+  val valid = validLoad | validStore
 
-  when(io.en) {
-    readMem.addr := addr
-    writeMem.addr := addr
-    writeMem.din := dataIn
+  setIO(io.outs(0), readMem.dout, valid, 1)
+  //Default for store because latch is not needed.
+//  IIWire := 0.U
+//  when(io.configuration === 0.U){
+//    IIWire := io.II
+//  }
+
+
+  when(io.en && valid) {
+    readMem.addr := getData(addr)
+    writeMem.addr := getData(addr)
+    writeMem.din := getData(dataIn)
     when(io.configuration === 0.U) {
       readMem.en := true.B
       writeMem.en := false.B
