@@ -1,6 +1,6 @@
 package tetriski.pillars.testers
 
-import chisel3.{assert, iotesters}
+import chisel3.{Data, UInt, assert, iotesters}
 import chisel3.iotesters.PeekPokeTester
 import tetriski.pillars.hardware.PillarsConfig._
 import tetriski.pillars.hardware._
@@ -17,11 +17,29 @@ class CounterTester(c: Counter) extends PeekPokeTester(c) {
   val end = 13
   val freq = 2
   val config: BigInt = (freq << (w * 3)) + (end << (w * 2)) + (step << w) + init
-  poke(c.io.en, true)
-  poke(c.io.configuration, config)
 
-  for (_ <- 0 until 10) {
-    println(peek(c.io.outs(0)).toString())
+  val init2 = 1
+  val step2 = 3
+  val end2 = 16
+  val freq2 = 2
+  val config2: BigInt = (freq2 << (w * 3)) + (end2 << (w * 2)) + (step2 << w) + init2
+
+  poke(c.io.II, 2)
+  step(2)
+
+  for (i <- 0 until 20) {
+    if(i % 2 == 0){
+      poke(c.io.en, true)
+      poke(c.io.configuration, config)
+    }else if(i % 2 == 1){
+      if(i > 4){
+        poke(c.io.en, true)
+      }else{
+        poke(c.io.en, false)
+      }
+      poke(c.io.configuration, config2)
+    }
+    println(peek(c.io.outs(0).asInstanceOf[UInt]).toString())
     step(1)
   }
 }
@@ -40,8 +58,8 @@ object CTest extends App{
  * @param c the top design
  */
 class TopModule2PEUnitTest(c: TopModule) extends PeekPokeTester(c) {
-  poke(c.io.inputs(0), 2)
-  poke(c.io.inputs(1), 3)
+  poke(c.io.inputs(0).asInstanceOf[UInt], 2)
+  poke(c.io.inputs(1).asInstanceOf[UInt], 3)
 
 
   //because input data is poked on the falling edge, we should wait a cycle
@@ -77,26 +95,26 @@ class TopModule2PEUnitTest(c: TopModule) extends PeekPokeTester(c) {
 
   poke(c.io.en, 1)
 
-  expect(c.out, 0)
+  expect(c.out.asInstanceOf[UInt], 0)
   //  expect(c.io.configTest(0), 2272)
   //  expect(c.io.configTest(1), 2273)
   step(1)
-  expect(c.out, 0)
+  expect(c.out.asInstanceOf[UInt], 0)
 
   //  expect(c.io.configTest(0), 1619)
   //  expect(c.io.configTest(1), 1619)
   //  step(1)
   //  expect(c.out, 2) //0 or 2 due to SyncReadMem
   step(1)
-  expect(c.out, 7)
+  expect(c.out.asInstanceOf[UInt], 7)
   //  expect(c.io.configTest(0), 3616)
   //  expect(c.io.configTest(1), 64)
   //  step(1)
   //  expect(c.out, 8)// 1 + 7 due to SyncReadMem
   step(1)
-  expect(c.out, 10)
+  expect(c.out.asInstanceOf[UInt], 10)
   step(1)
-  expect(c.out, 10)
+  expect(c.out.asInstanceOf[UInt], 10)
 }
 
 /** A tester of a 2*2 TileBlock with 2 input ports and 1 output port.
@@ -118,11 +136,11 @@ class TopModuleAdresUnitTest(c: TopModule, bitstream: BigInt) extends PeekPokeTe
   poke(c.io.en, 1)
 
   for (i <- 0 until 40) {
-    poke(c.io.inputs(1), i)
+    poke(c.io.inputs(1).asInstanceOf[UInt], i)
     if (i > 2) {
-      expect(c.out, 5 * (i - 2 + 4))
+      expect(c.out.asInstanceOf[UInt], 5 * (i - 2 + 4))
     }
-    println((5 * (i - 2 + 4)).toString + " " + peek(c.out).toString())
+    println((5 * (i - 2 + 4)).toString + " " + peek(c.out.asInstanceOf[UInt]).toString())
     step(1)
   }
 }
@@ -200,8 +218,8 @@ class TopModuleLSUAdresUnitTest(c: TopModule, bitstream: BigInt, schedules: List
   var ref = 0
   for (i <- 1 until 128) {
     ref = ref + i
-    expect(c.out, ref)
-    println(ref.toString + " " + peek(c.out).toString())
+    expect(c.out.asInstanceOf[UInt], ref)
+    println(ref.toString + " " + peek(c.out.asInstanceOf[UInt]).toString())
     step(1)
   }
 }
@@ -301,8 +319,8 @@ class TopModuleCompleteAdresUnitTest(c: TopModule, bitstreams: Array[BigInt], sc
   var ref = 0
   for (i <- 10 until 100) {
     ref = ref + i
-    expect(c.io.outs(0), ref)
-    println(ref.toString + " " + peek(c.io.outs(0)).toString())
+    expect(c.io.outs(0).asInstanceOf[UInt], ref)
+    println(ref.toString + " " + peek(c.io.outs(0).asInstanceOf[UInt]).toString())
     step(3)
   }
 }
@@ -329,6 +347,24 @@ class DispatchUnitTest(c: DispatchT, bitstream: BigInt) extends PeekPokeTester(c
  * @param c the LSU
  */
 class LoadStoreUnitTester(c: LoadStoreUnit) extends PeekPokeTester(c) {
+  def safePoke(data: Data, value: BigInt): Unit ={
+    if(USE_TOKEN){
+      poke(data.asInstanceOf[TokenIO].data, value)
+      poke(data.asInstanceOf[TokenIO].token, true)
+    }else{
+      poke(data.asInstanceOf[UInt], value)
+    }
+  }
+
+  def safeExpect(data: Data, value: BigInt): Unit ={
+    if(USE_TOKEN){
+      expect(data.asInstanceOf[TokenIO].data, value)
+      expect(data.asInstanceOf[TokenIO].token, true)
+    }else{
+      expect(data.asInstanceOf[UInt], value)
+    }
+  }
+
   poke(c.io.en, 0)
   val idata = c.memWrapper.enq_mem.manip.mode match {
     case SplitOrConcat.Normal =>
@@ -377,34 +413,34 @@ class LoadStoreUnitTester(c: LoadStoreUnit) extends PeekPokeTester(c) {
 
   // read
   poke(c.io.configuration, 0)
-  poke(c.addr, base)
+  safePoke(c.io.inputs(0), base)
   step(1)
-  expect(c.out, odata(0))
+  safeExpect(c.out, odata(0))
 
   //  poke(c.io.configuration, 0)
-  poke(c.addr, base + 2)
+  safePoke(c.io.inputs(0), base + 2)
   step(1)
-  expect(c.out, odata(2))
+  safeExpect(c.out, odata(2))
 
   //  poke(c.io.configuration, 0)
-  poke(c.addr, base + 1)
+  safePoke(c.io.inputs(0), base + 1)
   step(1)
-  expect(c.out, odata(1))
+  safeExpect(c.out, odata(1))
 
-  poke(c.addr, 17)
+  safePoke(c.io.inputs(0), 17)
   step(1)
-  expect(c.out, 0)
+  safeExpect(c.out, 0)
 
-  poke(c.io.configuration, 1)
-  poke(c.dataIn, 233)
-  poke(c.addr, 17)
+  safePoke(c.io.configuration, 1)
+  safePoke(c.io.inputs(1), 233)
+  safePoke(c.io.inputs(0), 17)
   step(1)
-  expect(c.out, 0)
+  safeExpect(c.out, 0)
 
-  poke(c.io.configuration, 0)
-  poke(c.addr, 17)
+  safePoke(c.io.configuration, 0)
+  safePoke(c.io.inputs(0), 17)
   step(1)
-  expect(c.out, 233)
+  safeExpect(c.out, 233)
 }
 
 /** A object invoking the tester of a load/store unit.
@@ -431,9 +467,9 @@ class MultiplexerUnitTester(c: Multiplexer) extends PeekPokeTester(c) {
   poke(c.io.configuration, 1)
 
   for (i <- 0 until 40) {
-    poke(c.io.inputs(0), i)
-    poke(c.io.inputs(1), i + 1)
-    expect(c.out, i + 1)
+    poke(c.io.inputs(0).asInstanceOf[UInt], i)
+    poke(c.io.inputs(1).asInstanceOf[UInt], i + 1)
+    expect(c.out.asInstanceOf[UInt], i + 1)
     step(1)
   }
 }
@@ -450,16 +486,38 @@ object MuxTest extends App {
  *
  * @param c the synchronizer
  */
-class SynchronizerTester(c: Synchronizer) extends PeekPokeTester(c) {
+class SynchronizerTester(c: SkewSynchronizer) extends PeekPokeTester(c) {
+  def safePoke(data: Data, value: BigInt): Unit ={
+    if(USE_TOKEN){
+      poke(data.asInstanceOf[TokenIO].data, value)
+      poke(data.asInstanceOf[TokenIO].token, true)
+    }else{
+      poke(data.asInstanceOf[UInt], value)
+    }
+  }
+
+  def safePeek(data: Data)={
+    if(USE_TOKEN){
+      val token = peek(data.asInstanceOf[TokenIO].token)
+      if(token == 0){
+        println("Invalid data!!!")
+      }
+      peek(data.asInstanceOf[TokenIO].data)
+    }else{
+      peek(data.asInstanceOf[UInt])
+    }
+  }
+
+
   poke(c.io.skewing, 3)
-  poke(c.io.input0, 2)
-  poke(c.io.input1, 3)
+  safePoke(c.io.input0, 2)
+  safePoke(c.io.input1, 3)
 
   for (i <- 0 until 10) {
-    poke(c.io.input0, i)
-    poke(c.io.input1, i + 1)
-    println(peek(c.io.skewedInput0).toString())
-    println(peek(c.io.skewedInput1).toString())
+    safePoke(c.io.input0, i)
+    safePoke(c.io.input1, i + 1)
+    println(safePeek(c.io.skewedInput0).toString())
+    println(safePeek(c.io.skewedInput1).toString())
     step(1)
   }
 }
@@ -467,5 +525,5 @@ class SynchronizerTester(c: Synchronizer) extends PeekPokeTester(c) {
 /** A object invoking the tester of a synchronizer.
  */
 object SkewTest extends App {
-  iotesters.Driver.execute(args, () => new Synchronizer(32)) { c => new SynchronizerTester(c) }
+  iotesters.Driver.execute(args, () => new SkewSynchronizer(32)) { c => new SynchronizerTester(c) }
 }

@@ -60,6 +60,51 @@ object PillarsConfig {
 
   var USE_AUXILIARY_SCHEDULER = (SKEW_WIDTH != 0) || (LOG_SCHEDULE_SIZE != 0)
 
+  var USE_TOKEN = false
+
+  def getClassIO(w: Int) = if (USE_TOKEN) {
+    new TokenIO(w)
+  } else {
+    UInt(w.W)
+  }
+
+  def setIO(out: Data, r: Data, valid: Bool = false.B, latch: Int = 0) = {
+    if (USE_TOKEN) {
+      out.asInstanceOf[TokenIO].data := r
+      out.asInstanceOf[TokenIO].token := valid
+      if(latch != 0){
+        out.asInstanceOf[TokenIO].token := latchToken(valid, latch)
+      }
+    } else {
+      out := r
+    }
+  }
+
+  def latchToken(token: Bool, latch: Int): Data ={
+    val regs = (0 until latch).map(_ => RegInit(false.B))
+    regs(0) := token
+    for(i <- 0 until latch - 1){
+      regs(i + 1) := regs(i)
+    }
+    regs(latch - 1)
+  }
+
+  def getData(data: Data) = {
+    if (USE_TOKEN) {
+      data.asInstanceOf[TokenIO].data
+    } else {
+      data.asInstanceOf[UInt]
+    }
+  }
+
+  def getToken(data: Data) = {
+    if (USE_TOKEN) {
+      data.asInstanceOf[TokenIO].token
+    } else {
+      true.B
+    }
+  }
+
   val ALU_ADD = 0.U(4.W)
   val ALU_SUB = 1.U(4.W)
   val ALU_AND = 2.U(4.W)
@@ -80,4 +125,19 @@ object PillarsConfig {
 
   val COUNTER_WIDTH = 8
   val CONST_WIDTH = 8
+}
+
+class TokenIO(val w: Int) extends Bundle {
+  val token = Bool()
+  val data = UInt(w.W)
+
+  def :=(r: TokenIO): Unit = {
+    token := r.token
+    data := r.data
+  }
+
+  def <>(r: TokenIO): Unit = {
+    token <> r.token
+    data <> r.data
+  }
 }

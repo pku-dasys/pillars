@@ -1,10 +1,10 @@
 package tetriski.pillars.testers
 
-import chisel3.assert
+import chisel3.{UInt, assert}
 import chisel3.iotesters.PeekPokeTester
 import tetriski.pillars.core.{ArchitctureHierarchy, RuntimeInfo, SimulationHelper}
 import tetriski.pillars.hardware.PillarsConfig._
-import tetriski.pillars.hardware.TopModule
+import tetriski.pillars.hardware.{TokenIO, TopModule}
 import tetriski.pillars.util.SplitOrConcat
 
 import scala.collection.mutable.ArrayBuffer
@@ -69,7 +69,7 @@ class AppTestHelper(testII: Int) {
     // which can be obtained from "*_r.txt"
     setPortCycle(simulationHelper)
 
-    if(runtimeInfo != null){
+    if (runtimeInfo != null) {
       var inputDataMap = Map[List[Int], Array[Int]]()
       runtimeInfo.inputToSRAM.foreach(i => inputDataMap += List(i.SRAMID, i.offset) -> i.data.toArray)
       addInData(inputDataMap)
@@ -82,14 +82,14 @@ class AppTestHelper(testII: Int) {
       // when using simulationHelper.outPorts and simulationHelper.inputPorts.
       val inputPorts = simulationHelper.inputPorts
       var inputToPortMap = Map[Int, Array[Int]]()
-      for(i <- 0 until inputPorts.size){
+      for (i <- 0 until inputPorts.size) {
         inputToPortMap += inputPorts(i) -> runtimeInfo.inputToPort(i).data.toArray
       }
       setInputPortData(inputToPortMap)
 
       val outPorts = simulationHelper.outPorts
       var outFromPortMap = Map[Int, Array[Int]]()
-      for(i <- 0 until outPorts.size){
+      for (i <- 0 until outPorts.size) {
         outFromPortMap += outPorts(i) -> runtimeInfo.outputFromPort(i).expectedData.toArray
       }
       setOutPortRefs(outFromPortMap)
@@ -258,7 +258,7 @@ class AppTestHelper(testII: Int) {
     val sches = schedules.reverse
     for (j <- 0 until sches.size / II_UPPER_BOUND) {
       var scheWidth = LOG_SCHEDULE_SIZE + SKEW_WIDTH
-      if(j < counterNum){
+      if (j < counterNum) {
         scheWidth = LOG_SCHEDULE_SIZE
       }
       for (ii <- 0 until II_UPPER_BOUND) {
@@ -448,8 +448,13 @@ class ApplicationTester(c: TopModule, appTestHelper: AppTestHelper) extends Peek
     }
     for (ref <- refs) {
       for (i <- ref._2) {
-        expect(c.io.outs(ref._1), asUnsignedInt(i))
-        println(asUnsignedInt(i).toString + " " + peek(c.io.outs(ref._1)).toString())
+        val outputData = if (USE_TOKEN) {
+          c.io.outs(ref._1).asInstanceOf[TokenIO].data
+        } else {
+          c.io.outs(ref._1).asInstanceOf[UInt]
+        }
+        expect(outputData, asUnsignedInt(i))
+        println(asUnsignedInt(i).toString + " " + peek(outputData).toString())
         step(testII * throughput)
       }
     }
@@ -481,7 +486,19 @@ class ApplicationTester(c: TopModule, appTestHelper: AppTestHelper) extends Peek
         val cycle = inputPortCycleMap(port)
         if (t >= cycle && t < cycle + dataSize * testII) {
           if (cycle % testII == t % testII) {
-            poke(c.io.inputs(port), data((t - cycle) / testII))
+            val inputData = if (USE_TOKEN) {
+              c.io.inputs(port).asInstanceOf[TokenIO].data
+            } else {
+              c.io.inputs(port).asInstanceOf[UInt]
+            }
+            poke(inputData, data((t - cycle) / testII))
+            if(USE_TOKEN){
+              poke(c.io.inputs(port).asInstanceOf[TokenIO].token, true)
+            }
+          }else{
+            if(USE_TOKEN){
+              poke(c.io.inputs(port).asInstanceOf[TokenIO].token, false)
+            }
           }
         }
       }
@@ -490,8 +507,18 @@ class ApplicationTester(c: TopModule, appTestHelper: AppTestHelper) extends Peek
         val cycle = outputPortCycleMap(port)
         if (t >= cycle && t < cycle + dataSize * testII) {
           if (cycle % testII == t % testII) {
-            expect(c.io.outs(port), asUnsignedInt(data((t - cycle) / testII)))
-            println(asUnsignedInt(data((t - cycle) / testII)).toString + " " + peek(c.io.outs(port)).toString())
+            val outputData = if (USE_TOKEN) {
+              c.io.outs(port).asInstanceOf[TokenIO].data
+            } else {
+              c.io.outs(port).asInstanceOf[UInt]
+            }
+            expect(outputData, asUnsignedInt(data((t - cycle) / testII)))
+            var outputStr = asUnsignedInt(data((t - cycle) / testII)).toString + " " + peek(outputData).toString()
+            if(USE_TOKEN){
+              outputStr = "TOKEN: " + peek(c.io.outs(port).asInstanceOf[TokenIO].token).toString() +
+                ", DATA: " + outputStr
+            }
+            println(outputStr)
           }
         }
       }

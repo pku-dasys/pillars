@@ -1,13 +1,12 @@
 package tetriski.pillars.hardware
 
-import chisel3.internal.LegacyModule
 import chisel3.util._
 import chisel3.{Bundle, Input, Module, Output, UInt, _}
 import tetriski.pillars.core.ModuleRegistry
-
-import scala.collection.mutable.ArrayBuffer
 import tetriski.pillars.hardware.PillarsConfig._
 import tetriski.pillars.testers.AppTestHelper
+
+import scala.collection.mutable.ArrayBuffer
 
 
 /** A class containing the parameters of modules and the port number of top design.
@@ -150,12 +149,15 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
         counterScheduleController.io.schedule <> scheduleConfigs(i)
 
         counter.io.en <> counterScheduleController.io.valid
+        counter.io.II <> io.II
       }
     } else {
       for (counter <- counters) {
         counter.io.en <> io.en
+        counter.io.II <> io.II
       }
     }
+
     val ret = new GenericIO
     ret.inputPorts = counters.map(i => i.io.inputs.toList)
     ret.outPorts = counters.map(i => i.io.outs.toList)
@@ -172,6 +174,7 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
     val modules = moduleArray.map(m => m.asInstanceOf[DefaultBasicModule])
     for (m <- modules) {
       m.io.en <> io.en
+      m.io.II <> DontCare
     }
     val ret = new GenericIO
     ret.inputPorts = modules.map(i => i.io.inputs.toList)
@@ -217,12 +220,14 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
         LSUnitScheduleController.io.schedule <> scheduleConfigs(i)
 
         lsu.io.en <> LSUnitScheduleController.io.valid
+        lsu.io.II <> io.II
         lsu.io.skewing <> LSUnitScheduleController.io.skewing
       }
     } else {
       for (i <- 0 until LSUnitNum) {
         val lsu = lsus(i)
         lsu.io.en <> io.en
+        lsu.io.II <> io.II
         lsu.io.skewing <> DontCare
       }
     }
@@ -401,8 +406,8 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
 
     val configuration = Input(UInt(moduleInfos.getTotalBits().W))
 
-    val inputs = Input(MixedVec((1 to moduleInfos.getInPortNum) map { _ => UInt(w.W) }))
-    val outs = Output(MixedVec((1 to moduleInfos.getOutPortNum) map { _ => UInt(w.W) }))
+    val inputs = Input(MixedVec((1 to moduleInfos.getInPortNum) map { _ => getClassIO(w) }))
+    val outs = Output(MixedVec((1 to moduleInfos.getOutPortNum) map { _ => getClassIO(w) }))
   })
 
   val genModuleRules = moduleInfos.getGenModuleRules()
