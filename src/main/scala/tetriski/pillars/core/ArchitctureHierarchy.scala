@@ -329,8 +329,12 @@ class ArchitctureHierarchy extends BlockTrait {
    */
   def getSchedules(): List[Int] = {
     var schedules = ALUsArray.map(alu => alu.getSchedule().toList).reduce(_ ++ _)
-    schedules = schedules ++ LSUsArray.map(lsu => lsu.getSchedule().toList).reduce(_ ++ _)
-    schedules = schedules ++ CountersArray.map(counter => counter.getSchedule().toList).reduce(_ ++ _)
+    if (LSUsArray.size > 0) {
+      schedules = schedules ++ LSUsArray.map(lsu => lsu.getSchedule().toList).reduce(_ ++ _)
+    }
+    if (CountersArray.size > 0) {
+      schedules = schedules ++ CountersArray.map(counter => counter.getSchedule().toList).reduce(_ ++ _)
+    }
     schedules
   }
 }
