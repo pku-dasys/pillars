@@ -54,22 +54,23 @@ object DotReader {
 
     val buffer = Source.fromFile(filename)
     val file = buffer.getLines().toArray
-    val name = file(0).substring(8, file(0).length - 2)
+    val name = file(0).replaceAll(" |\\{|digraph", "")
     val dfg = new DFG(name)
     val lines = file.length
 
     dfg.II = targetedII
 
     for (i <- 1 until lines) {
-      val index0 = file(i).indexOf("->")
-      val index1 = file(i).indexOf('[')
-      val index2 = file(i).indexOf('=')
-      val index3 = file(i).indexOf(']')
+      val line = file(i).replaceAll(" ", "")
+      val index0 = line.indexOf("->")
+      val index1 = line.indexOf('[')
+      val index2 = line.indexOf('=')
+      val index3 = line.indexOf(']')
       if (index1 != -1) {
         if (index0 == -1) {
-          val nodeName = file(i).substring(0, index1)
+          val nodeName = line.substring(0, index1)
           val labelPattern = "\\[.+\\]".r
-          val labels = (labelPattern findFirstIn file(i)).mkString("").replaceAll(" ", "")
+          val labels = (labelPattern findFirstIn line).mkString("").replaceAll(" ", "")
           val opcodePattern = "opcode\\=(([a-z])+)(,|\\])".r
           val opcodeStr = opcodePattern findFirstIn labels
           val sramIDPattern = "sram\\=(([0-9])+)(,|\\])".r
@@ -84,13 +85,13 @@ object DotReader {
           }
         }
         else {
-          val from = file(i).substring(0, index0)
+          val from = line.substring(0, index0)
           if (dfg.applyOp(from).output == null) {
             dfg.addValNode(new ValNode(from + "OUT"))
             dfg.applyOp(from).output = dfg.applyVal(from + "OUT")
           }
-          val sink = file(i).substring(index0 + 2, index1)
-          val operand = Integer.parseInt(file(i).substring(index2 + 1, index3))
+          val sink = line.substring(index0 + 2, index1)
+          val operand = Integer.parseInt(line.substring(index2 + 1, index3))
           dfg.applyOp(from).output.output.append(dfg.applyOp(sink))
           dfg.applyOp(from).output.outputOperand.append(operand)
           dfg.applyOp(sink).input += (operand -> (dfg.applyOp(from)))
