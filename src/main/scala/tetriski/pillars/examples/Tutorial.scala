@@ -8,7 +8,6 @@ import tetriski.pillars.hardware.{SynthesizedModule, TopModule}
 import tetriski.pillars.mapping.{DFG, DotReader, ILPMap}
 import tetriski.pillars.testers.{AppTestHelper, ApplicationTester}
 
-import scala.collection.mutable.ArrayBuffer
 import scala.util.Random
 
 /** An end2end tutorial of Pillars.
@@ -24,35 +23,6 @@ object Tutorial {
      * @return the runtime information
      */
     def prepareRuntimeInfo(dfg: DFG, numSRAM: Int) = {
-      //Matrix multiplication: C = A X B, where A is a M * 2 matrix, and B is a 2 * N matrix.
-      //      val M = 4
-      //      val N = 3
-      //      val matrixA = Array.ofDim[Int](M, 2)
-      //      val matrixB = Array.ofDim[Int](2, N)
-      //      val matrixC = Array.ofDim[Int](M, N)
-      //      val flattenedAB = new Array[Int](M * 2 + 2 * N)
-      //
-      //      for (i <- 0 until M)
-      //        for (j <- 0 until 2) {
-      //          matrixA(i)(j) = i * 2 + j
-      //          flattenedAB(i * 2 + j) = matrixA(i)(j)
-      //        }
-      //      for (i <- 0 until 2)
-      //        for (j <- 0 until N) {
-      //          matrixB(i)(j) = i * N + j
-      //          flattenedAB(i * N + j + M * 2) = matrixB(i)(j)
-      //        }
-      //      for (i <- 0 until M)
-      //        for (j <- 0 until N) {
-      //          var sum = 0
-      //          for (k <- 0 until 2) {
-      //            sum += matrixA(i)(k) * matrixB(k)(j)
-      //          }
-      //          matrixC(i)(j) = sum
-      //        }
-
-
-      //
       val dataSize = 50
       //      val VectorA = (0 until dataSize).toArray
       //      val VectorB = (100 until dataSize + 100).toArray
@@ -72,17 +42,6 @@ object Tutorial {
       val b_base = dataSize
 
       //The value of const operators.
-      //      val const0 = 2
-      //      val const3 = 0
-      //      val const5 = a_base
-      //      val const11 = b_base
-      //      val const13 = N * 0
-      //      val const20 = 1
-      //      val const22 = a_base
-      //      val const28 = b_base
-      //      val const31 = N * 1
-      //      val constVals = Array(const0, const3, const5, const11, const13,
-      //        const20, const22, const28, const31)
       val const0 = a_base
       val const1 = b_base
       val const2 = dataSize - 1
@@ -106,19 +65,6 @@ object Tutorial {
         (0 until numSRAM).map(i => InputToSRAM(i, b_base, VectorB.toList)).toList
 
       val outputFromSRAM = List(OutputFromSRAM(3, a_base, VectorA.reverse.toList))
-
-
-      //Input i, j in the corresponding input ports,
-      //and verify C(i, j) in the corresponding output port.
-      //      val inputI = new ArrayBuffer[Int]()
-      //      val inputJ = new ArrayBuffer[Int]()
-      //      val outResult = new ArrayBuffer[Int]()
-      //      for (i <- 0 until M)
-      //        for (j <- 0 until N) {
-      //          inputI.append(i)
-      //          inputJ.append(j)
-      //          outResult.append(matrixC(i)(j))
-      //        }
 
       //Please make sure there are 2 operators with INPUT opcode in the DFG.
       val inputOpNames = dfg.opNodes.filter(op => op.opcode == OpEnum.INPUT).map(op => op.name)
@@ -184,7 +130,7 @@ object Tutorial {
     arch.addOutPorts((0 until outputPort).map(i => s"out_$i").toArray)
 
     val tile = new TileLSUBlock("tile_0", colNum, rowNum, inputPort, outputPort,
-      useMuxBypass = false, complex = true, isToroid = false, dataWidth = dataWidth)
+      useMuxBypass = false, complex = true, isToroid = false, useCounter = true, dataWidth = dataWidth)
     arch.addBlock(tile)
 
     (0 until inputPort).foreach(i =>
@@ -198,13 +144,14 @@ object Tutorial {
     // and use loadTXT(mrrgFilename) to load the MRRG.
     val II = 1
     val MRRG = arch.getMRRG(II)
-    //                val dfgFilename = "dfg/accum/accum.dot"
     val dfgFilename = "tutorial/Vadd_Reverse.dot"
     val dfg = DotReader.loadDot(dfgFilename, II)
     val mappingResultFilename = s"tutorial/ii$II"
     val scheduleControl = true
     ILPMap.mapping(dfg, MRRG, filename = mappingResultFilename, separatedPR = true,
       scheduleControl = scheduleControl, skewLimit = 4, latencyLimit = 15)
+
+//    PillarsConfig.USE_TOKEN = true
 
     //Generate the top design.
     val connect = new Connect(arch.connectArray)
@@ -216,8 +163,6 @@ object Tutorial {
     chisel3.Driver.execute(Array("-td", "tutorial/RTL/"), topDesign)
 
     //Simulate with the mapping result.
-
-
     JsonParser.writeJson(prepareRuntimeInfo(dfg, rowNum), "runtime.json")
     val runtimeInfo = JsonParser.readJson("runtime.json")
 
@@ -237,7 +182,10 @@ object Tutorial {
       c => new VaddReverseTester(c, appTestHelper)
     }
 
-    testSynthesize(dfg, simulationHelper, dataWidth, runtimeInfo)
+    if(II == 1){
+      testSynthesize(dfg, simulationHelper, dataWidth, runtimeInfo)
+    }
+
   }
 }
 
