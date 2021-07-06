@@ -192,7 +192,7 @@ class SimulationHelper(arch: ArchitctureHierarchy) {
     if (runtimeInfo != null) {
       setConst(runtimeInfo.constValue.map(c => c.value).toArray, testII)
       setCounter(runtimeInfo.counterConfig.map(i =>
-        new CounterParameter(i.freq, i.end, i.step, i.init)).toArray, testII)
+        new CounterParameter(i.freq * testII, i.end, i.step, i.init)).toArray, testII)
     }
   }
 

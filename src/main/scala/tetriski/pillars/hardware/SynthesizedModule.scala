@@ -100,8 +100,9 @@ class SynthesizedCounter(config: BigInt, fireTime: Int, w: Int) extends Module {
     val outs = Output(MixedVec(Seq(UInt(w.W))))
   })
 
-  val counter = Module(new Counter(w / 4))
+  val counter = Module(new SingleCounter(w / 4))
   counter.io.en := false.B
+  counter.io.II := DontCare
   if (fireTime > 0) {
     val cycleReg = RegInit(0.U(log2Ceil(fireTime).W))
     when(cycleReg < fireTime.U) {
