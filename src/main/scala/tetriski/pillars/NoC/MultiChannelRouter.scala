@@ -44,11 +44,11 @@ class MultiChannelRouter(y: Int, x: Int) extends Router(y, x, () => new MultiCha
     }
   }
 
-  val arbiter = Module(new Arbiter(size, NoCParam.channelSize, NoCParam.grandNumLimit, NoCParam.getGrandWidth))
+  val arbiter = Module(new Arbiter(size, NoCParam.channelSize, NoCParam.grantNumLimit, NoCParam.getGrantWidth))
 
   val deqSeq = new ArrayBuffer[(UInt, UInt)]()
   for (i <- 0 until connectArray.size) {
-    deqSeq.append(connectArray(i).U(NoCParam.getRoutingRegionWidth.W) -> i.U(NoCParam.getGrandWidth.W))
+    deqSeq.append(connectArray(i).U(NoCParam.getRoutingRegionWidth.W) -> i.U(NoCParam.getGrantWidth.W))
   }
 
   val validBroadcastArray = Array(NoCParam.E, NoCParam.W, NoCParam.S, NoCParam.N)
@@ -67,8 +67,8 @@ class MultiChannelRouter(y: Int, x: Int) extends Router(y, x, () => new MultiCha
       analyzers(channel).io.deqsReady := deqs.map(deq => deq.ready)
 
       val emptyAnalyzedPacket = Wire(new AnalyzedPacket)
-      emptyAnalyzedPacket.grandNum := 0.U
-      emptyAnalyzedPacket.grands.foreach(grand => grand := 0.U)
+      emptyAnalyzedPacket.grantNum := 0.U
+      emptyAnalyzedPacket.grants.foreach(grant => grant := 0.U)
       emptyAnalyzedPacket.packet := DontCare
       packer.io.analyzedPackets(i * NoCParam.channelSize + channel) := emptyAnalyzedPacket
       channelReady(channel) := analyzers(channel).io.channelReady
@@ -85,16 +85,16 @@ class MultiChannelRouter(y: Int, x: Int) extends Router(y, x, () => new MultiCha
     winner := false.B
 
     for (channel <- 0 until NoCParam.channelSize) {
-      arbiter.io.numGrands(i)(channel) := 0.U
-      arbiter.io.grands(i)(channel).foreach(p => p := 0.U)
+      arbiter.io.numGrants(i)(channel) := 0.U
+      arbiter.io.grants(i)(channel).foreach(p => p := 0.U)
     }
 
 
 
     when(multiChannelPacketReady && io.en) {
       for (channel <- 0 until NoCParam.channelSize) {
-        arbiter.io.numGrands(i)(channel) := analyzers(channel).io.analyzedPacket.grandNum
-        arbiter.io.grands(i)(channel) := analyzers(channel).io.analyzedPacket.grands
+        arbiter.io.numGrants(i)(channel) := analyzers(channel).io.analyzedPacket.grantNum
+        arbiter.io.grants(i)(channel) := analyzers(channel).io.analyzedPacket.grants
       }
 
       winner := arbiter.io.winners(i)

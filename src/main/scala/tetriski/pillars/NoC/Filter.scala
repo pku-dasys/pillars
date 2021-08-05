@@ -23,7 +23,7 @@ class Filter[T <: Data](requestSize: Int, resourceLimit: Int, dataWidth: Int) ex
   (0 until requestSize).foreach(i => signalUInt(i) := io.signalRequests(i))
   io.validNum := signalUInt.reduce(_ + _)
 
-  val accumRequest = (0 until requestSize).map(_ => Wire(UInt(NoCParam.getGrandNumWidth.W)))
+  val accumRequest = (0 until requestSize).map(_ => Wire(UInt(NoCParam.getGrantNumWidth.W)))
   accumRequest.foreach(accum => accum := 0.U)
   accumRequest(0) := signalUInt(0)
   for (i <- 0 until requestSize - 1) {
@@ -36,7 +36,7 @@ class Filter[T <: Data](requestSize: Int, resourceLimit: Int, dataWidth: Int) ex
 
   for (i <- 0 until requestSize - 1) {
     when(accumRequest(i) =/= accumRequest(i + 1)) {
-      when(accumRequest(i) < NoCParam.grandNumLimit.U(NoCParam.getGrandNumWidth.W)) {
+      when(accumRequest(i) < NoCParam.grantNumLimit.U(NoCParam.getGrantNumWidth.W)) {
         io.resources(accumRequest(i)) := io.dataRequests(i + 1)
       }
     }

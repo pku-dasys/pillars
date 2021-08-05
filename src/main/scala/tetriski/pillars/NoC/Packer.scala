@@ -11,7 +11,7 @@ class Packer(numIn: Int, numOut: Int) extends Module{
   })
   val channelSize = io.packedPacket(0).packets.size
   val dataWidth = io.packedPacket(0).packets(0).getWidth
-  val grandSize = io.analyzedPackets(0).grands.size
+  val grantSize = io.analyzedPackets(0).grants.size
 
   val filters = (0 until numOut).map(_ => Module(new Filter(numIn, channelSize, dataWidth)))
   val filterSignals = VecInit((0 until numOut).map(_ =>
@@ -27,12 +27,12 @@ class Packer(numIn: Int, numOut: Int) extends Module{
   }
 
   for(i <- 0 until numIn){
-    val grandNum = io.analyzedPackets(i).grandNum
-    for(g <- 0 until grandSize){
-      when(g.U(grandNum.getWidth.W) < grandNum){
-        val grand = io.analyzedPackets(i).grands(g)
-        filterSignals(grand)(i) := true.B
-        filterDatas(grand)(i) := io.analyzedPackets(i).packet.asUInt()
+    val grantNum = io.analyzedPackets(i).grantNum
+    for(g <- 0 until grantSize){
+      when(g.U(grantNum.getWidth.W) < grantNum){
+        val grant = io.analyzedPackets(i).grants(g)
+        filterSignals(grant)(i) := true.B
+        filterDatas(grant)(i) := io.analyzedPackets(i).packet.asUInt()
       }
     }
   }
@@ -54,19 +54,19 @@ object PackerTest extends App {
 
 class PackerTester(packer: Packer) extends PeekPokeTester(packer) {
   poke(packer.io.analyzedPackets(0).packet.payload, 1)
-  poke(packer.io.analyzedPackets(0).grandNum, 2)
-  poke(packer.io.analyzedPackets(0).grands(0), 1)
-  poke(packer.io.analyzedPackets(0).grands(1), 2)
-  poke(packer.io.analyzedPackets(0).grands(2), 3) // Inactive
+  poke(packer.io.analyzedPackets(0).grantNum, 2)
+  poke(packer.io.analyzedPackets(0).grants(0), 1)
+  poke(packer.io.analyzedPackets(0).grants(1), 2)
+  poke(packer.io.analyzedPackets(0).grants(2), 3) // Inactive
 
   poke(packer.io.analyzedPackets(1).packet.payload, 5)
-  poke(packer.io.analyzedPackets(1).grandNum, 1)
-  poke(packer.io.analyzedPackets(1).grands(0), 0)
+  poke(packer.io.analyzedPackets(1).grantNum, 1)
+  poke(packer.io.analyzedPackets(1).grants(0), 0)
 
   poke(packer.io.analyzedPackets(2).packet.payload, 8)
-  poke(packer.io.analyzedPackets(2).grandNum, 2)
-  poke(packer.io.analyzedPackets(2).grands(0), 2)
-  poke(packer.io.analyzedPackets(2).grands(1), 3)
+  poke(packer.io.analyzedPackets(2).grantNum, 2)
+  poke(packer.io.analyzedPackets(2).grants(0), 2)
+  poke(packer.io.analyzedPackets(2).grants(1), 3)
 
   expect(packer.io.packedPacket(0).validNum, 1)
   expect(packer.io.packedPacket(1).validNum, 1)

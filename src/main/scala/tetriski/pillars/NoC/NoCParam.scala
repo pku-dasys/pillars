@@ -44,21 +44,21 @@ object NoCParam {
 
   val Fault = 5
 
-  var grandNumLimit = 4 //For broadcast, a packet could be granted to at most 4 destination
-  var grandRegion = 5 //E, W, S, N, Arrival
+  var grantNumLimit = 4 //For broadcast, a packet could be granted to at most 4 destination
+  var grantRegion = 5 //E, W, S, N, Arrival
 
   var useBroadcast = true
 
   def abandonBroadcast(): Unit = {
-    grandNumLimit = 1
+    grantNumLimit = 1
     useBroadcast = false
   }
 
-  def getGrandNumWidth = log2Ceil(NoCParam.grandNumLimit + 1)
+  def getGrantNumWidth = log2Ceil(NoCParam.grantNumLimit + 1)
 
-  def getGrandWidth = log2Ceil(grandRegion)
+  def getGrantWidth = log2Ceil(grantRegion)
 
-  def getRoutingRegionWidth = log2Ceil(grandRegion - 1) //E, W, S, N
+  def getRoutingRegionWidth = log2Ceil(grantRegion - 1) //E, W, S, N
 
   def reverse(direction: Int) = 3 - direction
 
@@ -101,8 +101,8 @@ class Packet extends Bundle {
 
 class AnalyzedPacket extends Bundle {
   val packet = new Packet
-  val grandNum = UInt(log2Ceil(NoCParam.grandNumLimit + 1).W)
-  val grands = Vec(NoCParam.grandNumLimit, UInt(NoCParam.getGrandWidth.W))
+  val grantNum = UInt(log2Ceil(NoCParam.grantNumLimit + 1).W)
+  val grants = Vec(NoCParam.grantNumLimit, UInt(NoCParam.getGrantWidth.W))
 }
 
 class MultiChannelPacket extends Bundle {

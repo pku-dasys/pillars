@@ -24,7 +24,7 @@ class SwitchBox(size: Int, channelSize: Int, configSize: Int, w: Int) extends Mo
   val outputToTile = io.outputs(size - 1)
 }
 
-class FlexibleSB(model: SBModel, w: Int)
+class FlexibleSB(model: SBModel, w: Int, regNext: Boolean = true)
   extends SwitchBox(model.adjacency.size, model.channelSize, model.configSize, w) {
   override def desiredName = "Router_" + model.x + "_" + model.y
 
@@ -35,8 +35,13 @@ class FlexibleSB(model: SBModel, w: Int)
     val func = (0 until srcs.size).map(i => i.U -> io.inputs(model.findPortIndex(srcs(i)._1))(srcs(i)._2))
 
     when(io.en) {
-      io.outputs(model.findPortIndex(dst._1))(dst._2) :=
-        RegNext(MuxLookup(io.configs(model.findPortIndex(dst._1))(dst._2), 0.U, func))
+      if (regNext) {
+        io.outputs(model.findPortIndex(dst._1))(dst._2) :=
+          RegNext(MuxLookup(io.configs(model.findPortIndex(dst._1))(dst._2), 0.U, func))
+      } else {
+        io.outputs(model.findPortIndex(dst._1))(dst._2) :=
+          MuxLookup(io.configs(model.findPortIndex(dst._1))(dst._2), 0.U, func)
+      }
     }.otherwise {
       io.outputs(model.findPortIndex(dst._1))(dst._2) := RegNext(0.U)
     }
@@ -219,11 +224,11 @@ object testMeshSB extends App {
   val network = () => new MeshSwitchBox(model, 16)
 
   val routerModel = model.routerModelMap(1, 1)
-  val router = () => new FlexibleSB(routerModel,32)
+  val router = () => new FlexibleSB(routerModel, 32)
   chisel3.Driver.execute(Array("-td", "tutorial/RTL/"), router)
-//  iotesters.Driver.execute(Array("-tgvo", "on", "-tbn", "verilator"), network) {
-//    c => new MeshSBTester(c, model)
-//  }
+  iotesters.Driver.execute(Array("-tgvo", "on", "-tbn", "verilator"), network) {
+    c => new MeshSBTester(c, model)
+  }
 }
 
 class MeshSBTester(c: MeshSwitchBox, model: MeshSBModel) extends PeekPokeTester(c) {
@@ -289,7 +294,7 @@ class RoutingResultTester(c: MeshSwitchBox, model: MeshSBModel, globalRouting: G
       val dstChannel: Int = message.routingStrategy.get.last.dstChannel.getOrElse(-1)
 
       val size = message.routingStrategy.get.size
-      if(i > size){
+      if (i > size) {
         expect(c.io.outputToTiles(dstY)(dstX)(dstChannel),
           srcX * 10000 + srcY * 100 + i + srcChannel - size)
         println("From: (" + srcX + ", " + srcY + ") to (" + dstX + ", " + dstY +
