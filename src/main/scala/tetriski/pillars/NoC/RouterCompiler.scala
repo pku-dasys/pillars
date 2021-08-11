@@ -304,7 +304,7 @@ class MeshSBModel {
   def init(): Unit = {
     for (x <- 0 until xSize) {
       for (y <- 0 until ySize) {
-        val routerModel = new SBModel(Fs, x, y, channelSize)
+        val routerModel = new SBModel(Fs, x, y, channelSize, xSize, ySize)
         routerModelMap += (x, y) -> routerModel
       }
     }
@@ -364,7 +364,7 @@ class SBModel {
 
   def findPortIndex(direction: Int) = adjacency.indexOf(direction)
 
-  def this(Fs: Int, x: Int, y: Int, channelSize: Int) = {
+  def this(Fs: Int, x: Int, y: Int, channelSize: Int, xSize: Int = NoCParam.xSize, ySize: Int = NoCParam.ySize) = {
     this()
     this.Fs = Fs
     this.x = x
@@ -372,13 +372,13 @@ class SBModel {
     //    this.Fc = Fc
 
     val connectArray = new ArrayBuffer[Int]()
-    if (x < NoCParam.xSize - 1) {
+    if (x < xSize - 1) {
       connectArray.append(NoCParam.E)
     }
     if (x > 0) {
       connectArray.append(NoCParam.W)
     }
-    if (y < NoCParam.ySize - 1) {
+    if (y < ySize - 1) {
       connectArray.append(NoCParam.S)
     }
     if (y > 0) {
