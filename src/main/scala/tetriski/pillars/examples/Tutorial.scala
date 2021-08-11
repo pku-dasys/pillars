@@ -11,8 +11,9 @@ import tetriski.pillars.testers.{AppTestHelper, ApplicationTester}
 import scala.util.Random
 
 /** An end2end tutorial of Pillars.
- * Example: matrix multiplication: C = A X B, where A is a M * 2 matrix, and B is a 2 * N matrix.
- * In the simulation, we can get C(i)(j) every II cycle.
+ * Example: a DFG contains vector addition and vector reverse.
+ * In the simulation, we can get A(i) + B(i) form output port every II cycle during activating process,
+ * and get A.reverse during post-process.
  */
 object Tutorial {
   def main(args: Array[String]): Unit = {
@@ -151,7 +152,7 @@ object Tutorial {
     ILPMap.mapping(dfg, MRRG, filename = mappingResultFilename, separatedPR = true,
       scheduleControl = scheduleControl, skewLimit = 4, latencyLimit = 15)
 
-//    PillarsConfig.USE_TOKEN = true
+    //    PillarsConfig.USE_TOKEN = true
 
     //Generate the top design.
     val connect = new Connect(arch.connectArray)
@@ -182,7 +183,7 @@ object Tutorial {
       c => new VaddReverseTester(c, appTestHelper)
     }
 
-    if(II == 1){
+    if (II == 1) {
       testSynthesize(dfg, simulationHelper, dataWidth, runtimeInfo)
     }
 

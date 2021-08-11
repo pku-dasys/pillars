@@ -7,6 +7,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static java.lang.Math.abs;
+import static java.lang.Math.ceil;
 
 
 /**
@@ -160,6 +161,8 @@ class checkWithoutRing {
  * {@code getILPModel} is used to setup the Mapping model.
  */
 public class gurobiMapJava {
+    //TODO: rename 'WaitSkew', 'RelativeSkew' as 'Slack' and 'Skew'.
+    //TODO: delete unused codes.
     String filename;
 
     List<Integer> DFGOpNodeOut;
@@ -484,16 +487,16 @@ public class gurobiMapJava {
             if (scheduleControl) {
                 for (int i = 0; i < numDfgOps; i++) {
                     DFGLatencyMap.put(DFGOpNodeName.get(i),
-                            (int) modelR.getVarByName("Latency_" + i).get(GRB.DoubleAttr.X));
+                            (int) ceil(modelR.getVarByName("Latency_" + i).get(GRB.DoubleAttr.X)));
                 }
                 if (useRelativeSkew) {
                     for (String key : DFGMultipleInputMap.keySet()) {
                         DFGRelativeSkewMap.put(key,
-                                (int) modelR.getVarByName("Skew_" + key).get(GRB.DoubleAttr.X));
+                                (int) ceil(modelR.getVarByName("Skew_" + key).get(GRB.DoubleAttr.X)));
                     }
                 }
                 for (String key : waitSkewMap.keySet()) {
-                    waitSkewMap.replace(key, (int) modelR.getVarByName(key).get(GRB.DoubleAttr.X));
+                    waitSkewMap.replace(key, (int) ceil(modelR.getVarByName(key).get(GRB.DoubleAttr.X)));
                 }
 
             }
@@ -1017,11 +1020,20 @@ public class gurobiMapJava {
                     WaitSkews[constrcount].set(GRB.StringAttr.VarName, "WaitSkew_" + sourceName + "_" + sinkName);
                     waitSkewMap.put("WaitSkew_" + sourceName + "_" + sinkName, constrcount);
                     if (!useRelativeSkew) {
-                        if (sourceID == sinkID) {
-                            WaitSkews[constrcount].set(GRB.DoubleAttr.UB, skewLimit + II);
-                        } else {
-                            WaitSkews[constrcount].set(GRB.DoubleAttr.UB, skewLimit);
+                        int UB = skewLimit / II;
+                        if(sourceID == sinkID) {
+                            UB += 1;
                         }
+                        GRBVar DivisibleII = model.addVar(0, UB ,1,
+                                'I', "DivisibleII_"  + constrcount);
+                        GRBLinExpr expr = new GRBLinExpr();
+                        expr.addTerm(II, DivisibleII);
+                        model.addConstr(expr, GRB.EQUAL, WaitSkews[constrcount], "Slack_divisible_by_II_" + constrcount);
+//                        if (sourceID == sinkID) {
+//                            WaitSkews[constrcount].set(GRB.DoubleAttr.UB, skewLimit + II);
+//                        } else {
+//                            WaitSkews[constrcount].set(GRB.DoubleAttr.UB, skewLimit);
+//                        }
                     }
 
                     if (sourceID == sinkID) {
@@ -1065,12 +1077,20 @@ public class gurobiMapJava {
     void constrRelativeSkew(GRBModel model, GRBVar[] RelativeSkews, GRBVar[] WaitSkews,
                             GRBVar[] SkewDirection, int skewLimit) throws GRBException {
         int constrcount = 0;
+        GRBVar[] DivisibleII = model.addVars(RelativeSkews.length, 'I');
         for (String key : DFGMultipleInputMap.keySet()) {
             String sinkNodeName = key;
 //            int sinkID = DFGopnodename.indexOf(sinkNodeName);
             RelativeSkews[constrcount].set(GRB.StringAttr.VarName, "Skew_" + sinkNodeName);
-            RelativeSkews[constrcount].set(GRB.DoubleAttr.LB, -skewLimit);
-            RelativeSkews[constrcount].set(GRB.DoubleAttr.UB, skewLimit);
+
+            DivisibleII[constrcount].set(GRB.StringAttr.VarName, "DivisibleII_"  + constrcount);
+            DivisibleII[constrcount].set(GRB.DoubleAttr.LB, -skewLimit / II);
+            DivisibleII[constrcount].set(GRB.DoubleAttr.UB, skewLimit / II);
+            GRBLinExpr expr = new GRBLinExpr();
+            expr.addTerm(II, DivisibleII[constrcount]);
+            model.addConstr(expr, GRB.EQUAL, RelativeSkews[constrcount], "Skew_divisible_by_II_" + constrcount);
+//            RelativeSkews[constrcount].set(GRB.DoubleAttr.LB, -skewLimit);
+//            RelativeSkews[constrcount].set(GRB.DoubleAttr.UB, skewLimit);
 //            GRBLinExpr skewConstraint = new GRBLinExpr();
 //            skewConstraint.addConstant(skewLimit);
 //            model.addConstr(skewConstraint, GRB.GREATER_EQUAL,
