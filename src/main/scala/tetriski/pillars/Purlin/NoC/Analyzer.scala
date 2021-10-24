@@ -33,6 +33,8 @@ class Analyzer(size: Int, y: Int, x: Int, deqSeq: Array[(UInt, UInt)],
   val channelDeqReady = (0 to broadcastArray.size).map(_ => Wire(Bool()))
   channelDeqReady.foreach(ready => ready := true.B)
 
+  io.channelReady := true.B
+
   when(io.valid) {
     val routing = io.packet.header.routing
     val src = io.packet.header.src
@@ -98,13 +100,13 @@ class Analyzer(size: Int, y: Int, x: Int, deqSeq: Array[(UInt, UInt)],
           filter.io.dataRequests(size - 1) := (size - 1).U
           channelDeqReady(size - 1) := io.deqsReady(size - 1)
         }
-
+        io.channelReady := channelDeqReady.reduce(_ & _)
       }
     }
 
   }
 
-  io.channelReady := channelDeqReady.reduce(_ & _)
+
 }
 
 

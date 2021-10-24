@@ -201,23 +201,55 @@ class SinglePortSram(mem_depth: Int, mem_width: Int) extends Module {
 }
 
 // write port A + read port B
-class SimpleDualPortSram(mem_depth: Int, mem_width: Int) extends Module {
+class SimpleDualPortSram(mem_depth: Int, mem_width: Int, useBlackBox: Boolean = false) extends Module {
   val io = IO(new Bundle {
     val a = Flipped(new MemWriteIO(mem_depth, mem_width))
     val b = Flipped(new MemReadIO(mem_depth, mem_width))
   })
 
-  val mem = Mem(mem_depth, UInt(mem_width.W))
-  val dout = Reg(UInt(io.b.dout.getWidth.W))
+  if (useBlackBox) {
+    val bb = Module(new sram_dp_32bit_freepdk45(mem_depth, mem_width))
+    bb.io.clk0 := clock
+    bb.io.clk1 := clock
+    bb.io.addr0 := io.a.addr
+    bb.io.csb0 := !(io.a.en && io.a.we)
+    bb.io.din0 := io.a.din
+    bb.io.addr1 := io.b.addr
+    bb.io.csb1 := !io.b.en
+    io.b.dout := bb.io.dout1
+  } else {
+    val mem = Mem(mem_depth, UInt(mem_width.W))
+    val dout = Reg(UInt(io.b.dout.getWidth.W))
 
-  io.b.dout := dout
+    io.b.dout := dout
 
-  when(io.a.en && io.a.we) {
-    mem.write(io.a.addr, io.a.din)
+    when(io.a.en && io.a.we) {
+      mem.write(io.a.addr, io.a.din)
+    }
+
+    when(io.b.en) {
+      dout := mem.read(io.b.addr) // buffered; io.b.dout available in next cycle
+    }
   }
 
-  when(io.b.en) {
-    dout := mem.read(io.b.addr) // buffered; io.b.dout available in next cycle
-  }
 }
 
+class sram_dp_32bit_freepdk45(mem_depth: Int, mem_width: Int)
+  extends BlackBox(Map("DATA_WIDTH" -> mem_width,
+    "ADDR_WIDTH" -> log2Ceil(mem_depth),
+    "DELAY" -> 0,
+    "VERBOSE" -> 0)) with HasBlackBoxResource {
+  val ADDR_WIDTH = log2Ceil(mem_depth)
+  val io = IO(new Bundle() {
+    val clk0 = Input(Clock())
+    val csb0 = Input(Bool())
+    val addr0 = Input(UInt(ADDR_WIDTH.W))
+    val din0 = Input(UInt(mem_width.W))
+    val clk1 = Input(Clock())
+    val csb1 = Input(Bool())
+    val addr1 = Input(UInt(ADDR_WIDTH.W))
+    val dout1 = Output(UInt(mem_width.W))
+  })
+
+  addResource("/sram_dp_32bit_freepdk45.v")
+}

@@ -11,7 +11,7 @@ import scala.io.Source
 
 object RouterCompiler extends App {
   val model = new MeshSBModel(2, 4, 4, 8)
-    genRandomTask(0.4, model)
+  genRandomTask(0.4, model, 10)
   val result = greedyRouting(readJson(), model)
   writeJson(result, "globalRoutingResult.json")
 
@@ -120,7 +120,7 @@ object RouterCompiler extends App {
     writer.close()
   }
 
-  def genRandomTask(avgRatio: Double, model: MeshSBModel) = {
+  def genRandomTask(avgRatio: Double, model: MeshSBModel, valueNum: Int = -1) = {
     val availablePortNum: Int = (model.channelSize * model.xSize * model.ySize * avgRatio).toInt
     val channelSize = model.channelSize
     var srcPortUsedMap = Map[(Int, Int), Int]()
@@ -149,7 +149,11 @@ object RouterCompiler extends App {
       }
       dstPortUsedMap += (dstX, dstY) -> (srcPortUsedMap.getOrElse((dstX, dstY), 0) + 1)
 
-      val message = Message(srcX, srcY, dstX, dstY, None, None)
+      val message = Message(srcX, srcY, dstX, dstY, if (valueNum == -1) {
+        None
+      } else {
+        Option(valueNum)
+      }, None)
       messages ::= message
     }
 

@@ -345,7 +345,8 @@ object MemTest extends App {
   //iotesters.Driver.execute(args, () => new SimpleDualPortMem(32, 10000)) { c => new SimpleDualPortMemUnitTester(c) }
 
   iotesters.Driver.execute(args, () => new SinglePortSram(10000, 32)) { c => new SinglePortSramUnitTester(c) }
-  iotesters.Driver.execute(args, () => new SimpleDualPortSram(10000, 32)) { c => new SimpleDualPortSramUnitTester(c) }
+  iotesters.Driver.execute(Array("-tgvo", "on", "-tbn", "verilator"),
+    () => new SimpleDualPortSram(10000, 32, true)) { c => new SimpleDualPortSramUnitTester(c) }
 
   iotesters.Driver.execute(args, () => new EnqMemWrapper(32, 32, 10000)) { c => new EnqMemUnitTester(c) }
   iotesters.Driver.execute(args, () => new EnqMemWrapper(128, 32, 10000)) { c => new EnqMemUnitTester(c) }
