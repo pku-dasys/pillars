@@ -1,52 +1,55 @@
-package tetriski.pillars.NoC
+package tetriski.pillars.Purlin.CGRATesting
 
 import chisel3.iotesters.PeekPokeTester
-import chisel3.util.{Cat, DecoupledIO}
+import chisel3.util.Cat
 import chisel3.{Bundle, Input, Module, Output, UInt, Vec, _}
+import tetriski.pillars.Purlin.NoC.{DecoupledIOHelper, FIFO, MeshNoC, MultiChannelRouter, SimpleRouter}
+import tetriski.pillars.Purlin._
+import tetriski.pillars.Purlin.utils.{DeliverCtrl, Header, MultiChannelPacket, Packet, Parameters, ReceiveCtrl}
 import tetriski.pillars.hardware.TopModule
 
 class MultiTileCGRA(tileMap: Map[(Int, Int), () => TopModule], bitStreamMap: Map[(Int, Int), BigInt],
                     scheduleMap: Map[(Int, Int), BigInt]) extends Module {
   val io = IO(new Bundle {
     val en = Input(Bool())
-    val configSel = Input(UInt(NoCParam.log2MemSize.W))
+    val configSel = Input(UInt(Parameters.log2MemSize.W))
 
-    val test = Vec(NoCParam.xSize * NoCParam.ySize, Output(UInt(NoCParam.payloadSize.W)))
+    val test = Vec(Parameters.xSize * Parameters.ySize, Output(UInt(Parameters.payloadSize.W)))
   })
 
   def getTestHeader(isP2P: Boolean, y: Int, x: Int) = {
     val header = Wire(new Header)
     header.srcPort := 0.U
 
-    val srcX = x.U(NoCParam.log2X.W)
-    val srcY = y.U(NoCParam.log2Y.W)
+    val srcX = x.U(Parameters.log2X.W)
+    val srcY = y.U(Parameters.log2Y.W)
     header.src.x := srcX
     header.src.y := srcY
 
-    var dstX = x.U(NoCParam.log2X.W)
-    var dstY = y.U(NoCParam.log2Y.W)
+    var dstX = x.U(Parameters.log2X.W)
+    var dstY = y.U(Parameters.log2Y.W)
     if (isP2P) {
-      dstX = 2.U(NoCParam.log2X.W)
-      dstY = 3.U(NoCParam.log2Y.W)
+      dstX = 2.U(Parameters.log2X.W)
+      dstY = 3.U(Parameters.log2Y.W)
     }
     header.dst.x := dstX
     header.dst.y := dstY
 
     val routing = Array("E", "E", "S", "S", "W").reverse
-      .map(d => NoCParam.intDirection(d).U(2.W)).reduce(Cat(_, _))
+      .map(d => Parameters.intDirection(d).U(2.W)).reduce(Cat(_, _))
 
-    val fullRouting = Cat(0.U((NoCParam.log2Routing - routing.getWidth).W), routing)
+    val fullRouting = Cat(0.U((Parameters.log2Routing - routing.getWidth).W), routing)
 
     header.routing := fullRouting
     header
   }
 
-  var routerRule = if (NoCParam.useMultiChannelRouter) {
+  var routerRule = if (Parameters.useMultiChannelRouter) {
     (yIndex: Int, xIndex: Int) => new MultiChannelRouter(yIndex, xIndex)
   } else {
     (yIndex: Int, xIndex: Int) => new SimpleRouter(yIndex, xIndex)
   }
-  var packetRule = if (NoCParam.useMultiChannelRouter) {
+  var packetRule = if (Parameters.useMultiChannelRouter) {
     () => new MultiChannelPacket
   } else {
     () => new Packet
@@ -55,8 +58,8 @@ class MultiTileCGRA(tileMap: Map[(Int, Int), () => TopModule], bitStreamMap: Map
 
   val meshNoC = Module(new MeshNoC(routerRule, packetRule))
 
-  if (NoCParam.useMultiChannelRouter) {
-    assert(NoCParam.tilePortSize == NoCParam.channelSize,
+  if (Parameters.useMultiChannelRouter) {
+    assert(Parameters.tilePortSize == Parameters.channelSize,
       "The number of tile ports should be equal to the number of channel in the setting in NoCParam.")
   }
 
@@ -64,14 +67,14 @@ class MultiTileCGRA(tileMap: Map[(Int, Int), () => TopModule], bitStreamMap: Map
   meshNoC.io.en := io.en
 
 
-  for (y <- 0 until NoCParam.ySize) {
-    for (x <- 0 until NoCParam.xSize) {
+  for (y <- 0 until Parameters.ySize) {
+    for (x <- 0 until Parameters.xSize) {
       val tile = Module(tileMap(y, x).apply())
 
-      assert(tile.io.inputs.size == NoCParam.tilePortSize && tile.io.outs.size == NoCParam.tilePortSize,
+      assert(tile.io.inputs.size == Parameters.tilePortSize && tile.io.outs.size == Parameters.tilePortSize,
         "The number of tile ports should be equal to the setting in NoCParam.")
 
-      assert(tile.io.inputs(0).getWidth == NoCParam.payloadSize && tile.io.outs(0).getWidth == NoCParam.payloadSize,
+      assert(tile.io.inputs(0).getWidth == Parameters.payloadSize && tile.io.outs(0).getWidth == Parameters.payloadSize,
         "The payload (data) size of tile should be equal to the setting in NoCParam.")
 
       meshNoC.io.enqFromTiles(y)(x).bits := DontCare
@@ -94,19 +97,19 @@ class MultiTileCGRA(tileMap: Map[(Int, Int), () => TopModule], bitStreamMap: Map
       tile.io.deqEnLSU <> DontCare
       tile.io.idleLSU <> DontCare
 
-      for (i <- 0 until NoCParam.tilePortSize) {
+      for (i <- 0 until Parameters.tilePortSize) {
         tile.io.inputs(i) := 0.U
       }
 
-      val srcPacketBuffers = (0 until NoCParam.tilePortSize)
-        .map(p => Module(new FIFO(UInt(NoCParam.payloadSize.W), NoCParam.fifoDep,
+      val srcPacketBuffers = (0 until Parameters.tilePortSize)
+        .map(p => Module(new FIFO(UInt(Parameters.payloadSize.W), Parameters.fifoDep,
           "srcPacketBuffer_" + y.toString + "_" + x.toString + "_" + p.toString)))
       //      val srcEnqs = Vec(NoCParam.tilePortSize, Wire(Flipped(new DecoupledIO(UInt(NoCParam.payloadSize.W)))))
-      val srcEnqs = new DecoupledIOHelper(true, NoCParam.payloadSize, NoCParam.tilePortSize)
+      val srcEnqs = new DecoupledIOHelper(true, Parameters.payloadSize, Parameters.tilePortSize)
       //      val srcDeqs = Vec(NoCParam.tilePortSize, Wire(new DecoupledIO(UInt(NoCParam.payloadSize.W))))
-      val srcDeqs = new DecoupledIOHelper(false, NoCParam.payloadSize, NoCParam.tilePortSize)
+      val srcDeqs = new DecoupledIOHelper(false, Parameters.payloadSize, Parameters.tilePortSize)
 
-      for (i <- 0 until NoCParam.tilePortSize) {
+      for (i <- 0 until Parameters.tilePortSize) {
         srcDeqs(i).ready := false.B
 
         srcEnqs(i).valid := false.B
@@ -114,22 +117,22 @@ class MultiTileCGRA(tileMap: Map[(Int, Int), () => TopModule], bitStreamMap: Map
       }
 
 
-      val dstPacketBuffers = (0 until NoCParam.tilePortSize)
-        .map(p => Module(new FIFO(UInt(NoCParam.payloadSize.W), NoCParam.fifoDep,
+      val dstPacketBuffers = (0 until Parameters.tilePortSize)
+        .map(p => Module(new FIFO(UInt(Parameters.payloadSize.W), Parameters.fifoDep,
           "dstPacketBuffer_" + y.toString + "_" + x.toString + "_" + p.toString)))
       //      val dstEnqs = Vec(NoCParam.tilePortSize, Wire(Flipped(new DecoupledIO(UInt(NoCParam.payloadSize.W)))))
-      val dstEnqs = new DecoupledIOHelper(true, NoCParam.payloadSize, NoCParam.tilePortSize)
+      val dstEnqs = new DecoupledIOHelper(true, Parameters.payloadSize, Parameters.tilePortSize)
       //      val dstDeqs = Vec(NoCParam.tilePortSize, Wire(new DecoupledIO(UInt(NoCParam.payloadSize.W))))
-      val dstDeqs = new DecoupledIOHelper(false, NoCParam.payloadSize, NoCParam.tilePortSize)
+      val dstDeqs = new DecoupledIOHelper(false, Parameters.payloadSize, Parameters.tilePortSize)
 
-      for (i <- 0 until NoCParam.tilePortSize) {
+      for (i <- 0 until Parameters.tilePortSize) {
         dstEnqs(i).valid := false.B
         dstEnqs(i).bits := 0.U
 
         dstDeqs(i).ready := false.B
       }
 
-      io.test(y * NoCParam.xSize + x) := tile.io.outs(0)
+      io.test(y * Parameters.xSize + x) := tile.io.outs(0)
       //      meshNoC.io.enqFromTiles(y * NoCParam.xSize + x) := tile.io.outs(0)
       //      tile.io.inputs(0) := meshNoC.io.deqToTiles(y * NoCParam.xSize + x)
 
@@ -137,29 +140,29 @@ class MultiTileCGRA(tileMap: Map[(Int, Int), () => TopModule], bitStreamMap: Map
       /** Memory for configuration.
        * The 1st memory.
        */
-      val configMem = Mem(NoCParam.memSize, UInt(configSize.W))
+      val configMem = Mem(Parameters.memSize, UInt(configSize.W))
 
       val scheduleSize = tile.io.schedules.getWidth
       /** Memory for schedules.
        * The 2nd memory.
        */
-      val scheduleMem = Mem(NoCParam.memSize, UInt(scheduleSize.W))
+      val scheduleMem = Mem(Parameters.memSize, UInt(scheduleSize.W))
 
       /** Memory for controlling data deliver, including headers of packets.
        * The 3rd memory.
        */
-      val deliverCtrlMem = Mem(NoCParam.memSize, new DeliverCtrl)
+      val deliverCtrlMem = Mem(Parameters.memSize, new DeliverCtrl)
 
       /** Memory for controlling data receive, guiding which port should receive the payload of packets.
        * The 4th memory.
        */
-      val receiveCtrlMem = Mem(NoCParam.memSize, new ReceiveCtrl)
+      val receiveCtrlMem = Mem(Parameters.memSize, new ReceiveCtrl)
 
 
       if (x == 1 && y == 1) {
         val deliverCtrl = Wire(new DeliverCtrl)
 
-        if (NoCParam.useMultiChannelRouter) {
+        if (Parameters.useMultiChannelRouter) {
           val deliverValidNum = 2
           val header0 = getTestHeader(true, y, x)
           val header1 = getTestHeader(false, y, x)
@@ -196,12 +199,12 @@ class MultiTileCGRA(tileMap: Map[(Int, Int), () => TopModule], bitStreamMap: Map
         //Encode
         val deliverCtrl = deliverCtrlMem.read(io.configSel)
         val deliverValidNum = deliverCtrl.validNum
-        val deliverDataValids = VecInit((0 until NoCParam.tilePortSize).map(_ => true.B))
+        val deliverDataValids = VecInit((0 until Parameters.tilePortSize).map(_ => true.B))
         val NoCEnq = meshNoC.io.enqFromTiles(y)(x)
         val deliverSignal = deliverDataValids.reduce(_ & _) & (deliverValidNum > 0.U)
         NoCEnq.valid := deliverSignal
-        val deliverPackets = (0 until NoCParam.tilePortSize).map(_ => Wire(new Packet))
-        for (deliverIndex <- 0 until NoCParam.tilePortSize) {
+        val deliverPackets = (0 until Parameters.tilePortSize).map(_ => Wire(new Packet))
+        for (deliverIndex <- 0 until Parameters.tilePortSize) {
           //Init
           deliverPackets(deliverIndex).payload := 0.U
           deliverPackets(deliverIndex).header.dst.y := 0.U
@@ -223,10 +226,10 @@ class MultiTileCGRA(tileMap: Map[(Int, Int), () => TopModule], bitStreamMap: Map
             srcDeq.ready := NoCEnq.ready & deliverSignal
           }
         }
-        if (NoCParam.useMultiChannelRouter) {
+        if (Parameters.useMultiChannelRouter) {
           val multiChannelPacket = Wire(new MultiChannelPacket)
           multiChannelPacket.validNum := deliverValidNum
-          for (port <- 0 until NoCParam.tilePortSize) {
+          for (port <- 0 until Parameters.tilePortSize) {
             multiChannelPacket.packets(port) := deliverPackets(port)
           }
           //          for (port <- NoCParam.tilePortSize until NoCParam.channelSize) {
@@ -240,18 +243,18 @@ class MultiTileCGRA(tileMap: Map[(Int, Int), () => TopModule], bitStreamMap: Map
         //decode
         val receiveCtrl = receiveCtrlMem.read(io.configSel)
         val NoCDeq = meshNoC.io.deqToTiles(y)(x)
-        val receiveReadys = VecInit((0 until NoCParam.tilePortSize).map(_ => true.B))
+        val receiveReadys = VecInit((0 until Parameters.tilePortSize).map(_ => true.B))
         val receiveSignal = receiveReadys.reduce(_ & _) & NoCDeq.valid
         NoCDeq.ready := receiveSignal
-        if (NoCParam.useMultiChannelRouter) {
+        if (Parameters.useMultiChannelRouter) {
           val multiChannelPacket = Wire(new MultiChannelPacket)
           multiChannelPacket := NoCDeq.bits
           val validPacketNum = multiChannelPacket.validNum
-          for (packetIndex <- 0 until NoCParam.channelSize) {
+          for (packetIndex <- 0 until Parameters.channelSize) {
             when(packetIndex.U(validPacketNum.getWidth.W) < validPacketNum) {
               val packet = multiChannelPacket.packets(packetIndex.U(validPacketNum.getWidth.W))
               val header = packet.header
-              for (receiveIndex <- 0 until NoCParam.tilePortSize) {
+              for (receiveIndex <- 0 until Parameters.tilePortSize) {
                 when(receiveIndex.U(receiveCtrl.validNum.getWidth.W) < receiveCtrl.validNum) {
                   val pattern = receiveCtrl.patterns(receiveIndex)
                   when(pattern.check(header)) {
@@ -268,7 +271,7 @@ class MultiTileCGRA(tileMap: Map[(Int, Int), () => TopModule], bitStreamMap: Map
           val packet = Wire(new Packet)
           packet := NoCDeq.bits
           val header = packet.header
-          for (receiveIndex <- 0 until NoCParam.tilePortSize) {
+          for (receiveIndex <- 0 until Parameters.tilePortSize) {
             when(receiveIndex.U(receiveCtrl.validNum.getWidth.W) < receiveCtrl.validNum) {
               val pattern = receiveCtrl.patterns(receiveIndex)
               when(pattern.check(header)) {
@@ -282,7 +285,7 @@ class MultiTileCGRA(tileMap: Map[(Int, Int), () => TopModule], bitStreamMap: Map
         }
       }
 
-      for (i <- 0 until NoCParam.tilePortSize) {
+      for (i <- 0 until Parameters.tilePortSize) {
         val srcPacketBuffer = srcPacketBuffers(i)
         srcEnqs(i) <> srcPacketBuffer.io.enq
         srcDeqs(i) <> srcPacketBuffer.io.deq
@@ -293,7 +296,7 @@ class MultiTileCGRA(tileMap: Map[(Int, Int), () => TopModule], bitStreamMap: Map
       }
 
       when(io.en) {
-        for (i <- 0 until NoCParam.tilePortSize) {
+        for (i <- 0 until Parameters.tilePortSize) {
           dstDeqs(i).ready := true.B
           when(dstDeqs(i).valid) {
             tile.io.inputs(i) := dstDeqs(i).bits
@@ -313,9 +316,9 @@ class NocMeshCGRATester(cgra: MultiTileCGRA) extends PeekPokeTester(cgra) {
   poke(cgra.io.en, true)
   for (i <- 0 until 20) {
     println("Cycle: " + i)
-    for (y <- 0 until NoCParam.ySize) {
-      for (x <- 0 until NoCParam.xSize) {
-        print(peek(cgra.io.test(y * NoCParam.xSize + x)).toString() + "\t")
+    for (y <- 0 until Parameters.ySize) {
+      for (x <- 0 until Parameters.xSize) {
+        print(peek(cgra.io.test(y * Parameters.xSize + x)).toString() + "\t")
       }
       print("\n")
     }

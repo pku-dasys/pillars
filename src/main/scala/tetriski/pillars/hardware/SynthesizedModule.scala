@@ -104,7 +104,7 @@ class SynthesizedCounter(config: BigInt, fireTime: Int, w: Int) extends Module {
   counter.io.en := false.B
   counter.io.II := DontCare
   if (fireTime > 0) {
-    val cycleReg = RegInit(0.U(log2Ceil(fireTime).W))
+    val cycleReg = RegInit(0.U(log2Ceil(fireTime + 1).W))
     when(cycleReg < fireTime.U) {
       cycleReg := cycleReg + 1.U
     }.otherwise {

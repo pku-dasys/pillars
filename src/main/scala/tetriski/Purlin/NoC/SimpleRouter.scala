@@ -1,7 +1,8 @@
-package tetriski.pillars.NoC
+package tetriski.pillars.Purlin.NoC
 
 import chisel3.util._
 import chisel3.{Module, UInt, _}
+import tetriski.pillars.Purlin.utils.{Packet, Parameters}
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -36,7 +37,7 @@ class SimpleRouter(y: Int, x: Int) extends Router(y, x, () => new Packet) {
 //  dstPacketBuffer.io.deq.ready := false.B
 
 
-  val packetBuffer = Module(new FIFO(new Packet, NoCParam.fifoDep, "packetBuffer"))
+  val packetBuffer = Module(new FIFO(new Packet, Parameters.fifoDep, "packetBuffer"))
   packetBuffer.io.deq.ready := false.B
 
   var concatValid = io.enqs(0).valid.asUInt()
@@ -83,7 +84,7 @@ class SimpleRouter(y: Int, x: Int) extends Router(y, x, () => new Packet) {
 
       packetBuffer.io.deq.ready := true.B
       val packet = packetBuffer.io.deq.bits
-      val validBroadcastArray = Array(NoCParam.E, NoCParam.W, NoCParam.S, NoCParam.N)
+      val validBroadcastArray = Array(Parameters.E, Parameters.W, Parameters.S, Parameters.N)
         .filter(i => connectArray.indexOf(i) >= 0)
       val broadcastArray = validBroadcastArray.map(i => (i, connectArray.indexOf(i)))
 
@@ -91,19 +92,19 @@ class SimpleRouter(y: Int, x: Int) extends Router(y, x, () => new Packet) {
         val direction = pair._1
         val index = pair._2
         direction match {
-          case NoCParam.E => when(src.x <= xUInt && src.y === yUInt) {
+          case Parameters.E => when(src.x <= xUInt && src.y === yUInt) {
             io.deqs(index).valid := true.B
             io.deqs(index).bits := packet
           }
-          case NoCParam.W => when(src.x >= xUInt && src.y === yUInt) {
+          case Parameters.W => when(src.x >= xUInt && src.y === yUInt) {
             io.deqs(index).valid := true.B
             io.deqs(index).bits := packet
           }
-          case NoCParam.S => when(src.y <= yUInt) {
+          case Parameters.S => when(src.y <= yUInt) {
             io.deqs(index).valid := true.B
             io.deqs(index).bits := packet
           }
-          case NoCParam.N => when(src.y >= yUInt) {
+          case Parameters.N => when(src.y >= yUInt) {
             io.deqs(index).valid := true.B
             io.deqs(index).bits := packet
           }
@@ -132,7 +133,7 @@ class SimpleRouter(y: Int, x: Int) extends Router(y, x, () => new Packet) {
         deqSel <> packetBuffer.io.deq
         val newPacket = Wire(new Packet)
         newPacket := packetBuffer.io.deq.bits
-        newPacket.header.routing := routing(NoCParam.log2Routing - 1, 2)
+        newPacket.header.routing := routing(Parameters.log2Routing - 1, 2)
         deqSel.bits := newPacket
 
       }

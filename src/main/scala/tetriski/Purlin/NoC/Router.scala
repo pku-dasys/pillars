@@ -1,6 +1,8 @@
-package tetriski.pillars.NoC
+package tetriski.pillars.Purlin.NoC
+
 import chisel3.util._
-import chisel3.{Bundle, Input, Module, Output, UInt, Vec, _}
+import chisel3.{Bundle, Input, Module, Vec, _}
+import tetriski.pillars.Purlin.utils.{Coordinate, Parameters}
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -10,31 +12,31 @@ class Router(y: Int, x: Int, packetRule: () => Bundle) extends Module {
   def getPacketRule = packetRule
 
   val connectArray = new ArrayBuffer[Int]()
-  if (x < NoCParam.xSize - 1) {
-    connectArray.append(NoCParam.E)
+  if (x < Parameters.xSize - 1) {
+    connectArray.append(Parameters.E)
   }
   if (x > 0) {
-    connectArray.append(NoCParam.W)
+    connectArray.append(Parameters.W)
   }
-  if (y < NoCParam.ySize - 1) {
-    connectArray.append(NoCParam.S)
+  if (y < Parameters.ySize - 1) {
+    connectArray.append(Parameters.S)
   }
   if (y > 0) {
-    connectArray.append(NoCParam.N)
+    connectArray.append(Parameters.N)
   }
 
   val connectSize = connectArray.size
   val size = connectArray.size + 1
 
-  val xUInt = x.U(NoCParam.log2X.W)
-  val yUInt = y.U(NoCParam.log2Y.W)
+  val xUInt = x.U(Parameters.log2X.W)
+  val yUInt = y.U(Parameters.log2Y.W)
 
   val co = Cat(xUInt, yUInt).asTypeOf(new Coordinate)
 
-  val defaultX = 0.U(NoCParam.log2X.W)
-  val defaultY = 0.U(NoCParam.log2Y.W)
-  val defaultP = 0.U(NoCParam.log2TilePortSize.W)
-  val defaultRouting = 0.U(log2Ceil(4 * (NoCParam.xSize + NoCParam.ySize)).W)
+  val defaultX = 0.U(Parameters.log2X.W)
+  val defaultY = 0.U(Parameters.log2Y.W)
+  val defaultP = 0.U
+  val defaultRouting = 0.U(log2Ceil(4 * (Parameters.xSize + Parameters.ySize)).W)
 
 
   val io = IO(new Bundle {

@@ -1,9 +1,9 @@
-package tetriski.pillars.NoC
+package tetriski.pillars.Purlin.NoC
 
 import chisel3.iotesters.PeekPokeTester
-import chisel3.{Bundle, Input, Module, Output, Vec}
-import chisel3._
 import chisel3.util.log2Ceil
+import chisel3.{Bundle, Input, Module, Output, Vec, _}
+import tetriski.pillars.Purlin.utils.Parameters
 
 class Arbiter(size: Int, numChannel: Int, grantResourceLimit: Int, grantWidth: Int) extends Module {
   val io = IO(new Bundle() {
@@ -20,11 +20,11 @@ class Arbiter(size: Int, numChannel: Int, grantResourceLimit: Int, grantWidth: I
   val outputResourceLimit = size
 
   val grantCounts = VecInit((0 until outputResourceLimit).map(_ =>
-    VecInit((0 until size).map(_ => 0.U(log2Ceil(numChannel * size * grantResourceLimit).W)))))
+    VecInit((0 until size).map(_ => 0.U(log2Ceil(numChannel * size * grantResourceLimit + 1).W)))))
 
   for (i <- 0 until size) {
     val grantValids = VecInit((0 until outputResourceLimit).map(_ =>
-      VecInit((0 until numChannel).map(_ => 0.U(log2Ceil(numChannel * grantResourceLimit).W)))))
+      VecInit((0 until numChannel).map(_ => 0.U(log2Ceil(numChannel * grantResourceLimit + 1).W)))))
 
     grantValids.foreach(c => c.foreach(r => r := 0.U))
     for (channel <- 0 until numChannel) {
@@ -63,7 +63,7 @@ class Arbiter(size: Int, numChannel: Int, grantResourceLimit: Int, grantWidth: I
 }
 
 object ArbiterTest extends App {
-  val arbiter = () => new Arbiter(5, 2, NoCParam.grantNumLimit, NoCParam.getGrantWidth)
+  val arbiter = () => new Arbiter(5, 2, Parameters.grantNumLimit, Parameters.getGrantWidth)
   iotesters.Driver.execute(Array("-tgvo", "on", "-tbn", "verilator"), arbiter) {
     c => new ArbiterTester(c)
   }

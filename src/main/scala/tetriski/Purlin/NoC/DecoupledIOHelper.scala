@@ -1,7 +1,7 @@
-package tetriski.pillars.NoC
+package tetriski.pillars.Purlin.NoC
 
-import chisel3.{Flipped, UInt, Wire, _}
 import chisel3.util.DecoupledIO
+import chisel3.{UInt, _}
 
 class DecoupledIOHelper(flipped: Boolean, dataWidth: Int, channelNum: Int) {
 

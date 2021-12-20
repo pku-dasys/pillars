@@ -1,35 +1,56 @@
-package tetriski.pillars.NoC
+package tetriski.pillars.Purlin.NoC
 
-import chisel3.{Bool, Bundle, Input, Output}
-import chisel3._
 import chisel3.iotesters.PeekPokeTester
+import chisel3.{Bundle, Input, Output, _}
+import tetriski.pillars.Purlin.utils.{AnalyzedPacket, MultiChannelPacket, Packet, Parameters}
 
-class Packer(numIn: Int, numOut: Int) extends Module{
+class Packer(numIn: Int, numOut: Int, betterFrequency: Boolean = false) extends Module {
   val io = IO(new Bundle() {
     val analyzedPackets = Input(Vec(numIn, new AnalyzedPacket))
     val packedPacket = Output(Vec(numOut, new MultiChannelPacket))
+//    val valid = Input(Vec(numOut, Bool()))
   })
   val channelSize = io.packedPacket(0).packets.size
   val dataWidth = io.packedPacket(0).packets(0).getWidth
   val grantSize = io.analyzedPackets(0).grants.size
 
+  //filters here play the role of switch
   val filters = (0 until numOut).map(_ => Module(new Filter(numIn, channelSize, dataWidth)))
   val filterSignals = VecInit((0 until numOut).map(_ =>
     VecInit((0 until numIn).map(_ => false.B))))
   val filterDatas = VecInit((0 until numOut).map(_ =>
     VecInit((0 until numIn).map(_ => 0.U(filters(0).io.dataRequests(0).getWidth.W)))))
 
-  for(i <- 0 until numOut){
-    io.packedPacket(i).validNum := filters(i).io.validNum
-    io.packedPacket(i).packets := filters(i).io.resources.asTypeOf(Vec(channelSize, new Packet))
+  for (i <- 0 until numOut) {
+
+    if (betterFrequency) {
+      io.packedPacket(i).validNum := RegNext(filters(i).io.validNum)
+      io.packedPacket(i).packets := RegNext(filters(i).io.resources.asTypeOf(Vec(channelSize, new Packet)))
+
+//      val regValidNum = RegInit(0.U(filters(i).io.validNum.getWidth.W))
+//      val regPackets = RegInit(0.U(Vec(channelSize, new Packet).getWidth.W))
+//
+//      io.packedPacket(i).validNum := regValidNum
+//      io.packedPacket(i).packets := regPackets.asTypeOf(Vec(channelSize, new Packet))
+//
+//      when(io.valid(i)){
+//        regValidNum := filters(i).io.validNum
+//        regPackets := filters(i).io.resources.asUInt()
+//      }
+
+    } else {
+      io.packedPacket(i).validNum := filters(i).io.validNum
+      io.packedPacket(i).packets := filters(i).io.resources.asTypeOf(Vec(channelSize, new Packet))
+    }
+
     filters(i).io.signalRequests.foreach(signal => signal := false.B)
     filters(i).io.dataRequests.foreach(data => data := 0.U)
   }
 
-  for(i <- 0 until numIn){
+  for (i <- 0 until numIn) {
     val grantNum = io.analyzedPackets(i).grantNum
-    for(g <- 0 until grantSize){
-      when(g.U(grantNum.getWidth.W) < grantNum){
+    for (g <- 0 until grantSize) {
+      when(g.U(grantNum.getWidth.W) < grantNum) {
         val grant = io.analyzedPackets(i).grants(g)
         filterSignals(grant)(i) := true.B
         filterDatas(grant)(i) := io.analyzedPackets(i).packet.asUInt()
@@ -37,8 +58,8 @@ class Packer(numIn: Int, numOut: Int) extends Module{
     }
   }
 
-  for(i <- 0 until numOut){
-    for(j <- 0 until numIn){
+  for (i <- 0 until numOut) {
+    for (j <- 0 until numIn) {
       filters(i).io.signalRequests(j) := filterSignals(i)(j)
       filters(i).io.dataRequests(j) := filterDatas(i)(j)
     }
@@ -79,9 +100,9 @@ class PackerTester(packer: Packer) extends PeekPokeTester(packer) {
   expect(packer.io.packedPacket(2).packets(1).payload, 8)
   expect(packer.io.packedPacket(3).packets(0).payload, 8)
 
-  for(i <- 0 until 5){
+  for (i <- 0 until 5) {
     println("Valid number: " + peek(packer.io.packedPacket(i).validNum).toString())
-    for(channel <- 0 until NoCParam.channelSize){
+    for (channel <- 0 until Parameters.channelSize) {
       print(peek(packer.io.packedPacket(i).packets(channel).payload).toString() + "\t")
     }
     print("\n")

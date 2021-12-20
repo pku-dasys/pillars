@@ -1,7 +1,8 @@
-package tetriski.pillars.NoC
+package tetriski.pillars.Purlin.NoC
 
-import chisel3.util.log2Ceil
 import chisel3._
+import chisel3.util.log2Ceil
+import tetriski.pillars.Purlin.utils.Parameters
 
 class Filter[T <: Data](requestSize: Int, resourceLimit: Int, dataWidth: Int) extends Module{
   /** @example If resourceLimit = 2, it means there are 2 available resources,
@@ -23,7 +24,7 @@ class Filter[T <: Data](requestSize: Int, resourceLimit: Int, dataWidth: Int) ex
   (0 until requestSize).foreach(i => signalUInt(i) := io.signalRequests(i))
   io.validNum := signalUInt.reduce(_ + _)
 
-  val accumRequest = (0 until requestSize).map(_ => Wire(UInt(NoCParam.getGrantNumWidth.W)))
+  val accumRequest = (0 until requestSize).map(_ => Wire(UInt(log2Ceil(resourceLimit + 1).W)))
   accumRequest.foreach(accum => accum := 0.U)
   accumRequest(0) := signalUInt(0)
   for (i <- 0 until requestSize - 1) {
@@ -36,7 +37,7 @@ class Filter[T <: Data](requestSize: Int, resourceLimit: Int, dataWidth: Int) ex
 
   for (i <- 0 until requestSize - 1) {
     when(accumRequest(i) =/= accumRequest(i + 1)) {
-      when(accumRequest(i) < NoCParam.grantNumLimit.U(NoCParam.getGrantNumWidth.W)) {
+      when(accumRequest(i) < resourceLimit.U) {
         io.resources(accumRequest(i)) := io.dataRequests(i + 1)
       }
     }

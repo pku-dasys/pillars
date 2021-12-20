@@ -1,9 +1,10 @@
-package tetriski.pillars.NoC
+package tetriski.pillars.Purlin.NoC
 
-import chisel3.util.{Cat, MuxLookup, log2Ceil}
-import chisel3.{Bool, Bundle, Input, Module, Output, UInt, Vec, Wire, when}
-import chisel3._
 import chisel3.iotesters.PeekPokeTester
+import chisel3.util.{Cat, MuxLookup}
+import chisel3.{Bool, Bundle, Input, Module, Output, UInt, Vec, Wire, when, _}
+import tetriski.pillars.Purlin._
+import tetriski.pillars.Purlin.utils.{AnalyzedPacket, Coordinate, Packet, Parameters}
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -20,13 +21,13 @@ class Analyzer(size: Int, y: Int, x: Int, deqSeq: Array[(UInt, UInt)],
 
 //  println(y.toString + " " + x.toString + " " + size.toString)
 
-  val xUInt = x.U(NoCParam.log2X.W)
-  val yUInt = y.U(NoCParam.log2Y.W)
+  val xUInt = x.U(Parameters.log2X.W)
+  val yUInt = y.U(Parameters.log2Y.W)
 
   val co = Cat(xUInt, yUInt).asTypeOf(new Coordinate)
 
   io.analyzedPacket.grantNum := 0.U
-  io.analyzedPacket.grants.foreach(grant => grant := 0.U(NoCParam.getGrantWidth.W))
+  io.analyzedPacket.grants.foreach(grant => grant := 0.U(Parameters.getGrantWidth.W))
   io.analyzedPacket.packet := io.packet
   //  io.channelReady := false.B
 
@@ -47,20 +48,40 @@ class Analyzer(size: Int, y: Int, x: Int, deqSeq: Array[(UInt, UInt)],
       io.analyzedPacket.grants(0) := (size - 1).U
       io.channelReady := io.deqsReady(size - 1)
     }.otherwise {
-      val direction = routing(1, 0)
-      val grant = MuxLookup(direction, NoCParam.Fault.U(NoCParam.getGrantWidth.W), deqSeq)
+      val direction = Wire(UInt(2.W))
+      if(Parameters.sourceRouting){
+        direction := routing(1, 0)
+        io.analyzedPacket.packet.header.routing := routing(Parameters.log2Routing - 1, 2)
+      }else{
+        //X-Y routing
+        when(dst.x === xUInt ){
+          when(dst.y > yUInt){
+            direction := Parameters.S.U
+          }.otherwise{
+            direction := Parameters.N.U
+          }
+        }.otherwise{
+          when(dst.x > xUInt){
+            direction := Parameters.E.U
+          }.otherwise{
+            direction := Parameters.W.U
+          }
+        }
+        io.analyzedPacket.packet.header.routing := DontCare
+      }
+      val grant = MuxLookup(direction, Parameters.Fault.U(Parameters.getGrantWidth.W), deqSeq)
       io.channelReady := io.deqsReady(grant)
       io.analyzedPacket.grantNum := 1.U
       io.analyzedPacket.grants(0) := grant
-      io.analyzedPacket.packet.header.routing := routing(NoCParam.log2Routing - 1, 2)
+
     }
 
-    if(NoCParam.useBroadcast){
+    if(Parameters.useBroadcast){
       when(src === dst) {
         //broadcast
         //By default, we assume the routing algorithm guarantees congestion should not exist when broadcasting packets.
 
-        val filter = Module(new Filter(size, NoCParam.grantNumLimit, NoCParam.getGrantWidth))
+        val filter = Module(new Filter(size, Parameters.grantNumLimit, Parameters.getGrantWidth))
         io.analyzedPacket.grantNum := filter.io.validNum
         io.analyzedPacket.grants := filter.io.resources
         filter.io.signalRequests.foreach(b => b := false.B)
@@ -72,22 +93,22 @@ class Analyzer(size: Int, y: Int, x: Int, deqSeq: Array[(UInt, UInt)],
           val direction = pair._1
           val index = pair._2
           direction match {
-            case NoCParam.E => when(src.x <= xUInt && src.y === yUInt) {
+            case Parameters.E => when(src.x <= xUInt && src.y === yUInt) {
               channelDeqReady(index) := io.deqsReady(index)
               filter.io.signalRequests(index) := true.B
               filter.io.dataRequests(index) := i.U
             }
-            case NoCParam.W => when(src.x >= xUInt && src.y === yUInt) {
+            case Parameters.W => when(src.x >= xUInt && src.y === yUInt) {
               channelDeqReady(index) := io.deqsReady(index)
               filter.io.signalRequests(index) := true.B
               filter.io.dataRequests(index) := i.U
             }
-            case NoCParam.S => when(src.y <= yUInt) {
+            case Parameters.S => when(src.y <= yUInt) {
               channelDeqReady(index) := io.deqsReady(index)
               filter.io.signalRequests(index) := true.B
               filter.io.dataRequests(index) := i.U
             }
-            case NoCParam.N => when(src.y >= yUInt) {
+            case Parameters.N => when(src.y >= yUInt) {
               channelDeqReady(index) := io.deqsReady(index)
               filter.io.signalRequests(index) := true.B
               filter.io.dataRequests(index) := i.U
@@ -111,11 +132,11 @@ class Analyzer(size: Int, y: Int, x: Int, deqSeq: Array[(UInt, UInt)],
 
 
 object AnalyzerTest extends App {
-  val connectArray = Array(NoCParam.E, NoCParam.W, NoCParam.S, NoCParam.N)
+  val connectArray = Array(Parameters.E, Parameters.W, Parameters.S, Parameters.N)
   val broadcastArray = connectArray.map(i => (i, connectArray.indexOf(i)))
   val deqSeq = new ArrayBuffer[(UInt, UInt)]()
   for (i <- 0 until connectArray.size) {
-    deqSeq.append(connectArray(i).U(NoCParam.getRoutingRegionWidth.W) -> i.U(NoCParam.getGrantWidth.W))
+    deqSeq.append(connectArray(i).U(Parameters.getRoutingRegionWidth.W) -> i.U(Parameters.getGrantWidth.W))
   }
 
   val analyzer = () => new Analyzer(connectArray.size + 1, 1, 1, deqSeq.toArray, broadcastArray)
@@ -149,7 +170,7 @@ class AnalyzerTester(analyzer: Analyzer, size: Int) extends PeekPokeTester(analy
   step(10)
 
   println("Test2: Correctness for P2P")
-  poke(analyzer.io.packet.header.routing, NoCParam.W)
+  poke(analyzer.io.packet.header.routing, Parameters.W)
   poke(analyzer.io.packet.header.src.x, 0)
   poke(analyzer.io.packet.header.src.y, 0)
   poke(analyzer.io.packet.header.dst.x, 0)

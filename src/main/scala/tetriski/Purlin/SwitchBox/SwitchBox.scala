@@ -1,12 +1,10 @@
-package tetriski.pillars.NoC
+package tetriski.pillars.Purlin.SwitchBox
 
 import chisel3.iotesters.PeekPokeTester
-import chisel3.{Bundle, Input, Module, Output, Vec}
-import chisel3._
-import chisel3.experimental.FixedPoint
-import chisel3.util.{MuxLookup, log2Ceil}
-
-import scala.collection.mutable.ArrayBuffer
+import chisel3.util.{Cat, MuxLookup, log2Ceil}
+import chisel3.{Bundle, Input, Module, Output, Vec, _}
+import tetriski.pillars.Purlin.utils.{GlobalRouting, MeshSBModel, Parameters, SBModel}
+import tetriski.pillars.util.SimpleDualPortSram
 
 class SwitchBox(size: Int, channelSize: Int, configSize: Int, w: Int) extends Module {
 
@@ -193,6 +191,65 @@ class MeshSwitchBox(model: MeshSBModel, w: Int) extends Module {
 }
 
 
+class MeshSBwithContext(model: MeshSBModel, w: Int, contextDepth: Int) extends Module {
+  val channelSize = model.channelSize
+  val xSize = model.xSize
+  val ySize = model.ySize
+  val Fs = model.Fs
+  val configSize = model.configSize
+  val maxAdjacency = model.maxAdjacency
+
+  override def desiredName = "SwitchBoxNetwork_" + channelSize + "_" + xSize +
+    "_" + ySize + "_Fs" + Fs + "_ContextDepth_" + contextDepth
+
+  val io = IO(new Bundle {
+    val en = Input(Bool())
+    val configAddrForNextCycle = Input(UInt(log2Ceil(contextDepth).W))
+
+    val writeConfig = Input(Bool())
+    val configAddr = Input(UInt(log2Ceil(contextDepth).W))
+    val configIn = Input(UInt((ySize * xSize * 5 * channelSize * configSize).W))
+
+    val inputFromTiles = Input(Vec(ySize, Vec(xSize, Vec(channelSize, UInt(w.W)))))
+    val outputToTiles = Output(Vec(ySize, Vec(xSize, Vec(channelSize, UInt(w.W)))))
+  })
+
+  val mesh = Module(new MeshSwitchBox(model, w))
+  mesh.io.en := io.en
+  mesh.io.inputFromTiles <> io.inputFromTiles
+  mesh.io.outputToTiles <> io.outputToTiles
+
+  val contextWidth = ySize * xSize * 5 * channelSize * configSize
+  val contextMemNum = Math.round(contextWidth.toDouble / 32.0).toInt
+
+  val contextMems = (0 until contextMemNum).map (_ => Module(new SimpleDualPortSram(contextDepth, 32, false)))
+
+  for(i <- 0 until contextMemNum){
+    val contextMem = contextMems(i)
+    contextMem.io.a.en := io.en
+    contextMem.io.a.we := io.writeConfig
+    contextMem.io.a.din := io.configIn(math.min(i * 32 + 31,  contextWidth - 1), i * 32)
+    contextMem.io.a.addr := io.configAddr
+
+    contextMem.io.b.en := io.en
+    contextMem.io.b.addr := io.configAddrForNextCycle
+  }
+
+
+  val config = contextMems.map(contextMem => contextMem.io.b.dout).reduce(Cat(_, _))
+
+  for(x <- 0 until xSize){
+    for(y <- 0 until ySize){
+      for(direction <- 0 until 5){
+        for(c <- 0 until channelSize){
+          val offset = c + (direction + (y + x * ySize) * 5) * channelSize
+          mesh.io.configs(x)(y)(direction)(c) := config(offset + configSize - 1, offset)
+        }
+      }
+    }
+  }
+}
+
 //object generateRTL extends App {
 //  NoCParam.useMultiChannelRouter = true
 //  NoCParam.abandonBroadcast()
@@ -219,89 +276,3 @@ class MeshSwitchBox(model: MeshSBModel, w: Int) extends Module {
 //
 //}
 
-object testMeshSB extends App {
-  val model = new MeshSBModel(2, 4, 4, 5)
-  val network = () => new MeshSwitchBox(model, 16)
-
-  val routerModel = model.routerModelMap(1, 1)
-  val router = () => new FlexibleSB(routerModel, 32)
-  chisel3.Driver.execute(Array("-td", "tutorial/RTL/"), router)
-  iotesters.Driver.execute(Array("-tgvo", "on", "-tbn", "verilator"), network) {
-    c => new MeshSBTester(c, model)
-  }
-}
-
-class MeshSBTester(c: MeshSwitchBox, model: MeshSBModel) extends PeekPokeTester(c) {
-  model.setPath(1, 1, (-1, 0), (NoCParam.E, 0))
-  model.setPath(2, 1, (NoCParam.W, 0), (NoCParam.E, 1))
-  model.setPath(3, 1, (NoCParam.W, 1), (NoCParam.N, 1))
-  model.setPath(3, 0, (NoCParam.S, 1), (-1, 1))
-
-  model.setPath(2, 3, (-1, 1), (NoCParam.N, 1))
-  model.setPath(2, 2, (NoCParam.S, 1), (NoCParam.N, 0))
-  model.setPath(2, 1, (NoCParam.S, 0), (NoCParam.N, 1))
-  model.setPath(2, 0, (NoCParam.S, 1), (NoCParam.E, 1))
-  model.setPath(3, 0, (NoCParam.W, 1), (-1, 0))
-
-  val configArray = model.getConfigArray
-
-  poke(c.io.en, 1)
-  // (x, y) => (y, x)
-  poke(c.io.inputFromTiles(1)(1)(0), 123)
-  poke(c.io.inputFromTiles(3)(2)(1), 666)
-  for (configBundle <- configArray) {
-    val y = configBundle.y
-    val x = configBundle.x
-    val dIndex = configBundle.dIndex
-    val channel = configBundle.channel
-    val config = configBundle.config
-    poke(c.io.configs(y)(x)(dIndex)(channel), config)
-  }
-
-  for (i <- 0 until 10) {
-    step(1)
-    println("y: 0, x: 3, c: 1 ::: " + peek(c.io.outputToTiles(0)(3)(1)).toString()
-      + "...  y: 0, x: 3, c: 0 ::: " + peek(c.io.outputToTiles(0)(3)(0)).toString())
-  }
-}
-
-class RoutingResultTester(c: MeshSwitchBox, model: MeshSBModel, globalRouting: GlobalRouting)
-  extends PeekPokeTester(c) {
-
-  val configArray = model.getConfigArray
-
-  poke(c.io.en, 1)
-  // (x, y) => (y, x)
-  for (configBundle <- configArray) {
-    val y = configBundle.y
-    val x = configBundle.x
-    val dIndex = configBundle.dIndex
-    val channel = configBundle.channel
-    val config = configBundle.config
-    poke(c.io.configs(y)(x)(dIndex)(channel), config)
-  }
-
-  for (i <- 0 until 20) {
-    println("Cycle: " + i)
-    for (message <- globalRouting.messages) {
-      val srcX: Int = message.srcX
-      val srcY: Int = message.srcY
-      val srcChannel: Int = message.routingStrategy.get.apply(0).srcChannel.getOrElse(-1)
-      poke(c.io.inputFromTiles(srcY)(srcX)(srcChannel), srcX * 10000 + srcY * 100 + i + srcChannel)
-
-      val dstX: Int = message.dstX
-      val dstY: Int = message.dstY
-      val dstChannel: Int = message.routingStrategy.get.last.dstChannel.getOrElse(-1)
-
-      val size = message.routingStrategy.get.size
-      if (i > size) {
-        expect(c.io.outputToTiles(dstY)(dstX)(dstChannel),
-          srcX * 10000 + srcY * 100 + i + srcChannel - size)
-        println("From: (" + srcX + ", " + srcY + ") to (" + dstX + ", " + dstY +
-          "); Expected: " + (srcX * 10000 + srcY * 100 + i + srcChannel - size).toString
-          + "\tReceived: " + peek(c.io.outputToTiles(dstY)(dstX)(dstChannel)).toString())
-      }
-    }
-    step(1)
-  }
-}
