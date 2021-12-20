@@ -1,11 +1,11 @@
-package tetriski.pillars.Purlin.CGRATesting
+package tetriski.Purlin.CGRATesting
 
 import chisel3.iotesters.PeekPokeTester
 import chisel3.util.Cat
 import chisel3.{Bundle, Input, Module, Output, UInt, Vec, _}
-import tetriski.pillars.Purlin.NoC.{DecoupledIOHelper, FIFO, MeshNoC, MultiChannelRouter, SimpleRouter}
-import tetriski.pillars.Purlin._
-import tetriski.pillars.Purlin.utils.{DeliverCtrl, Header, MultiChannelPacket, Packet, Parameters, ReceiveCtrl}
+import tetriski.Purlin.NoC.{DecoupledIOHelper, FIFO, MeshNoC, MultiChannelRouter, SimpleRouter}
+import tetriski.Purlin._
+import tetriski.Purlin.utils.{DeliverCtrl, Header, MultiChannelPacket, Packet, Parameters, ReceiveCtrl}
 import tetriski.pillars.hardware.TopModule
 
 class MultiTileCGRA(tileMap: Map[(Int, Int), () => TopModule], bitStreamMap: Map[(Int, Int), BigInt],

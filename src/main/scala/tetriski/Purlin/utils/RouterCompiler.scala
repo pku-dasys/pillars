@@ -1,13 +1,13 @@
-package tetriski.pillars.Purlin.utils
+package tetriski.Purlin.utils
 
 import java.io.{File, FileWriter, PrintWriter}
 import java.util.Date
 
 import chisel3.iotesters
 import play.api.libs.json.{JsObject, JsValue, Json}
-import tetriski.pillars.Purlin.NoC.{MeshNoC, MeshNoCInjection, MultiChannelRouter}
-import tetriski.pillars.Purlin.SwitchBox.{MeshSwitchBox, RoutingResultTester}
-import tetriski.pillars.Purlin.utils.AlgorithmType.AlgorithmType
+import tetriski.Purlin.NoC.{MeshNoC, MeshNoCInjection, MultiChannelRouter}
+import tetriski.Purlin.SwitchBox.{MeshSwitchBox, RoutingResultTester}
+import tetriski.Purlin.utils.AlgorithmType.AlgorithmType
 
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
@@ -60,7 +60,7 @@ object RouterCompiler extends App {
   var i = 12
   var count = 3
 
-  testNoCAlgorithm(25, 2, 4, 4)
+  testNoCAlgorithm(0.1, 2, 4, 4)
 //  for(i <- 1 until 20){
 //    val injectionRate = 0.01 * i
 //    testNoCAlgorithm(injectionRate, 2, 4, 4)
@@ -198,7 +198,7 @@ object RouterCompiler extends App {
     //          AlgorithmType.minimalCongestion, AlgorithmType.pathFinder,
     //          AlgorithmType.estimation, AlgorithmType.estimationRipUp)
 
-    val underTestAlgorithm = Array(AlgorithmType.XY)
+    val underTestAlgorithm = Array(AlgorithmType.minimalDis)
 
     underTestAlgorithm.foreach(algorithm => algorithm match {
       case AlgorithmType.XY => runTester(network, algorithm, injectionRate, onceInjection)

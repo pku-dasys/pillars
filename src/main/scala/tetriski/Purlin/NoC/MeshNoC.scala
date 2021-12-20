@@ -1,12 +1,12 @@
-package tetriski.pillars.Purlin.NoC
+package tetriski.Purlin.NoC
 
 import java.io.{File, FileWriter}
 
 import chisel3.iotesters.PeekPokeTester
 import chisel3.util._
 import chisel3.{Bundle, Input, Module, Vec, _}
-import tetriski.pillars.Purlin.utils.AlgorithmType.AlgorithmType
-import tetriski.pillars.Purlin.utils.{AlgorithmType, GlobalRouting, MultiChannelPacket, Parameters}
+import tetriski.Purlin.utils.AlgorithmType.AlgorithmType
+import tetriski.Purlin.utils.{AlgorithmType, GlobalRouting, MultiChannelPacket, Parameters}
 //import tetriski.pillars.Purlin.MultiChannelPacket
 
 import scala.collection.mutable.ArrayBuffer
@@ -254,7 +254,7 @@ class MeshNoCInjection(mesh: MeshNoC, algorithm: AlgorithmType = AlgorithmType.X
 
     injectionNum = globalRouting.messages.length
     cycleUpper = Math.max(globalRouting.messages.map(item =>
-      item.injectionCycle.getOrElse(defaultInjectionCycle)).max * 2, 1000)
+      item.injectionCycle.getOrElse(defaultInjectionCycle)).max * 3, 1000)
 
     defaultPacketLength = globalRouting.messages(0).packetLength.getOrElse(defaultPacketLength)
     packetLengths = (0 until injectionNum).map(i =>

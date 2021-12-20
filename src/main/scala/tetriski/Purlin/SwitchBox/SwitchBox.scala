@@ -1,9 +1,9 @@
-package tetriski.pillars.Purlin.SwitchBox
+package tetriski.Purlin.SwitchBox
 
 import chisel3.iotesters.PeekPokeTester
 import chisel3.util.{Cat, MuxLookup, log2Ceil}
 import chisel3.{Bundle, Input, Module, Output, Vec, _}
-import tetriski.pillars.Purlin.utils.{GlobalRouting, MeshSBModel, Parameters, SBModel}
+import tetriski.Purlin.utils.{GlobalRouting, MeshSBModel, Parameters, SBModel}
 import tetriski.pillars.util.SimpleDualPortSram
 
 class SwitchBox(size: Int, channelSize: Int, configSize: Int, w: Int) extends Module {
