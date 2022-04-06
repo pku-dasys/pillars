@@ -1,11 +1,13 @@
 package tetriski.pillars.examples
 
+import java.util.Date
+
 import chisel3.iotesters
 import chisel3.iotesters.PeekPokeTester
 import tetriski.pillars.archlib.TileLSUBlock
 import tetriski.pillars.core._
 import tetriski.pillars.hardware.{SynthesizedModule, TopModule}
-import tetriski.pillars.mapping.{DFG, DotReader, ILPMap}
+import tetriski.pillars.mapping.{DFG, DotReader, ILPMap, SearchMap}
 import tetriski.pillars.testers.{AppTestHelper, ApplicationTester}
 
 import scala.util.Random
@@ -25,15 +27,15 @@ object Tutorial {
      */
     def prepareRuntimeInfo(dfg: DFG, numSRAM: Int) = {
       val dataSize = 50
-      //      val VectorA = (0 until dataSize).toArray
-      //      val VectorB = (100 until dataSize + 100).toArray
+//            val VectorA = (0 until dataSize).toArray
+//            val VectorB = (100 until dataSize + 100).toArray
       val VectorA = (0 until dataSize).map(_ => Math.abs(scala.util.Random.nextInt() % 1000)).toArray
       val VectorB = (0 until dataSize).map(_ => Math.abs(scala.util.Random.nextInt() % 1000)).toArray
 
       //Input random indexes into the mapped input port in CGRA,
       // and get A(index) + B(index) from the mapped output port.
       val inputIndexes = Random.shuffle((0 until dataSize).toList)
-      //      val inputIndexes = (0 until dataSize).toList
+//            val inputIndexes = (0 until dataSize).toList.reverse
       val expectedRet = (0 until dataSize).map(i => VectorA(inputIndexes(i)) + VectorB(inputIndexes(i)))
 
       //The base address of A and B in SRAM of an LSU.
@@ -86,7 +88,7 @@ object Tutorial {
     }
 
     /** Test synthesizing wire-fixed RTL.
-     * !!NOTE: Only work when II = 1!!
+     * !!NOTE: Only work when II = 1 and using ILP mapper!!
      *
      * @param mappedDfg        the mapped data-flow graph
      * @param simulationHelper a class that helps users to automatically generate simulation codes
@@ -126,7 +128,7 @@ object Tutorial {
     val dataWidth = 32
 
     //Initialize the top block.
-    val arch = new ArchitctureHierarchy()
+    val arch = new ArchitectureHierarchy()
     arch.addInPorts((0 until inputPort).map(i => s"input_$i").toArray)
     arch.addOutPorts((0 until outputPort).map(i => s"out_$i").toArray)
 
@@ -146,11 +148,19 @@ object Tutorial {
     val II = 1
     val MRRG = arch.getMRRG(II)
     val dfgFilename = "tutorial/Vadd_Reverse.dot"
+//    val dfgFilename = "dfg/accum/accum.dot"
     val dfg = DotReader.loadDot(dfgFilename, II)
     val mappingResultFilename = s"tutorial/ii$II"
     val scheduleControl = true
+
+    var startTime = new Date().getTime()
+
     ILPMap.mapping(dfg, MRRG, filename = mappingResultFilename, separatedPR = true,
       scheduleControl = scheduleControl, skewLimit = 4, latencyLimit = 15)
+//    SearchMap.mapping(dfg, MRRG, mappingResultFilename, scheduleControl =scheduleControl, skewLimit = 4)
+
+    var endTime = new Date().getTime()
+    println("Mapping runtime: " + (endTime - startTime))
 
     //    PillarsConfig.USE_TOKEN = true
 
@@ -183,9 +193,9 @@ object Tutorial {
       c => new VaddReverseTester(c, appTestHelper)
     }
 
-    if (II == 1) {
-      testSynthesize(dfg, simulationHelper, dataWidth, runtimeInfo)
-    }
+//    if (II == 1) {
+//      testSynthesize(dfg, simulationHelper, dataWidth, runtimeInfo)
+//    }
 
   }
 }

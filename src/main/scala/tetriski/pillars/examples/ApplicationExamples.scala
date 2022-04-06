@@ -13,7 +13,7 @@ import tetriski.pillars.testers._
  */
 object ApplicationExamples {
 
-  val arch = new ArchitctureHierarchy()
+  val arch = new ArchitectureHierarchy()
   //The order of ports should be same as TopModule
   arch.addOutPorts(Array("out_0", "out_1", "out_2", "out_3"))
   arch.addInPorts(Array("input_0", "input_1", "input_2", "input_3"))

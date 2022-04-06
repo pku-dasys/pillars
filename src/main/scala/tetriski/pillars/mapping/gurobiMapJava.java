@@ -1625,7 +1625,12 @@ public class gurobiMapJava {
             }
         } else {
             initOp2MrrgMap(F);
-            ringCheckPass = checkRoutingWithoutUselessRing(modelR);
+            if(scheduleControl){
+                ringCheckPass = checkRoutingWithoutUselessRing(modelR);
+            }else{
+                ringCheckPass = true;
+            }
+
             if (separatedPR) {
 //                if(!ringCheckPass) {
 //                    Random tempRNG = new Random(100);

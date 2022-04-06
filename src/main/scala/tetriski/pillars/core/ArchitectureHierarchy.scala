@@ -13,7 +13,7 @@ import scala.io.Source
 /** A special block describing the architecture of the top desgin.
  * It is the highest level in the hierarchy.
  */
-class ArchitctureHierarchy extends BlockTrait {
+class ArchitectureHierarchy extends BlockTrait {
 
   initName("cgra")
 

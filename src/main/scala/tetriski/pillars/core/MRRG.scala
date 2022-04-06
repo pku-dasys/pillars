@@ -246,6 +246,16 @@ class MRRG extends Cloneable {
     ret
   }
 
+  def getOpNodeSet(): Set[NodeMRRG] = {
+    var ret = Set[NodeMRRG]()
+    for (node <- nodes) {
+      if (node.ops.size != 0) {
+        ret = ret + node
+      }
+    }
+    ret
+  }
+
   /** Load an MRRG from a text file.
    * Currently, the mode of MRRG node is not stored in the text file,
    * so all nodes are in the default normal mode.

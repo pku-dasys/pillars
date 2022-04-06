@@ -14,7 +14,7 @@ import scala.io.Source
  *
  * @param arch the abstract model of the top design
  */
-class SimulationHelper(arch: ArchitctureHierarchy) {
+class SimulationHelper(arch: ArchitectureHierarchy) {
   /** The size of the DFG. It is equal to the size of arrays in this class.
    */
   var size = 0

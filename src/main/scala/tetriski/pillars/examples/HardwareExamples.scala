@@ -2,7 +2,7 @@ package tetriski.pillars.examples
 
 import chisel3.iotesters
 import tetriski.pillars.archlib._
-import tetriski.pillars.core.{ArchitctureHierarchy, Connect, ConstInfo, HardwareGenerator}
+import tetriski.pillars.core.{ArchitectureHierarchy, Connect, ConstInfo, HardwareGenerator}
 import tetriski.pillars.hardware.TopModule
 import tetriski.pillars.mapping.{DFG, DotReader, ILPMap}
 import tetriski.pillars.testers.{TopModule2PEUnitTest, TopModuleAdresUnitTest, TopModuleCompleteAdresUnitTest, TopModuleLSUAdresUnitTest}
@@ -21,7 +21,7 @@ object HardwareExamples {
    */
   def example2PE(): Unit = {
 
-    val arch = new ArchitctureHierarchy()
+    val arch = new ArchitectureHierarchy()
     //The order of ports should be same as TopModule
     arch.addOutPorts(Array("output"))
     arch.addInPorts(Array("input_0", "input_1"))
@@ -72,7 +72,7 @@ object HardwareExamples {
    * A correct MRRG is generated.
    */
   def exampleBlockMesh(): Unit = {
-    val arch = new ArchitctureHierarchy()
+    val arch = new ArchitectureHierarchy()
     arch.addOutPorts(Array("out_0"))
     arch.addInPorts(Array("input_0", "input_1"))
     val blockMesh = new BlockMesh("blockMesh")
@@ -89,7 +89,7 @@ object HardwareExamples {
    * when mapping a simple DFG with add and mul.
    */
   def exampleAdres(): Unit = {
-    val arch = new ArchitctureHierarchy()
+    val arch = new ArchitectureHierarchy()
     //The order of ports should be same as TopModule
     arch.addOutPorts(Array("output"))
     arch.addInPorts(Array("input_0", "input_1"))
@@ -147,7 +147,7 @@ object HardwareExamples {
    * when mapping the DFG of sum.
    */
   def exampleLSUAdres(): Unit = {
-    val arch = new ArchitctureHierarchy()
+    val arch = new ArchitectureHierarchy()
     //The order of ports should be same as TopModule
     arch.addOutPorts(Array("output"))
     arch.addInPorts(Array("input_0", "input_1"))
@@ -210,7 +210,7 @@ object HardwareExamples {
    * when mapping the DFG of sum.
    */
   def exampleCompleteAdres(): Unit = {
-    val arch = new ArchitctureHierarchy()
+    val arch = new ArchitectureHierarchy()
     //The order of ports should be same as TopModule
     arch.addOutPorts(Array("out_0", "out_1", "out_2", "out_3"))
     arch.addInPorts(Array("input_0", "input_1", "input_2", "input_3"))

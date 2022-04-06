@@ -60,10 +60,10 @@ class HardwareGenerator(arch: BlockTrait, connect: Connect) {
 
   /** A class containing the parameters of modules and the port number of top design.
    */
-  val pillarsModuleInfo = arch.asInstanceOf[ArchitctureHierarchy].getPillarsModuleInfo()
+  val pillarsModuleInfo = arch.asInstanceOf[ArchitectureHierarchy].getPillarsModuleInfo()
 
   /** A list of regions where modules share a configuration controller.
    */
-  val regionList = arch.asInstanceOf[ArchitctureHierarchy].getRegionList()
+  val regionList = arch.asInstanceOf[ArchitectureHierarchy].getRegionList()
 
 }
