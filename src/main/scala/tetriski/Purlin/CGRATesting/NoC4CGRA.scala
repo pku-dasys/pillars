@@ -20,7 +20,7 @@ object NoC4CGRA extends App {
     val outputPort = 1
     val dataWidth = Parameters.payloadSize
 
-    val arch = new ArchitctureHierarchy()
+    val arch = new ArchitectureHierarchy()
     arch.addInPorts((0 until inputPort).map(i => s"input_$i").toArray)
     arch.addOutPorts((0 until outputPort).map(i => s"out_$i").toArray)
 
@@ -61,7 +61,7 @@ object NoC4CGRA extends App {
     TileMap
   }
 
-  def mapping(arch: ArchitctureHierarchy, dfgFilename: String, mappingResultFilename: String, II: Int): Unit = {
+  def mapping(arch: ArchitectureHierarchy, dfgFilename: String, mappingResultFilename: String, II: Int): Unit = {
     val MRRG = arch.getMRRG(II)
     val DFG = DotReader.loadDot(dfgFilename, II)
     val scheduleControl = true

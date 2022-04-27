@@ -118,7 +118,7 @@ object SearchMap {
       val opNodeIndex = dfg.opNodes.indexOf(opNode)
       val sramID = fixedMapSRAM(opNode)
 //      if (opNodeIndex == 17 || opNodeIndex == 16) {
-        fixedMapRelation += opNodeIndex -> sramMap(sramID).map(i => new Integer(i)).toSet
+        fixedMapRelation += opNodeIndex -> sramMap(sramID).map(i => Integer.valueOf(i)).toSet
 //      }
     }
     fixedMapRelation.map(pair => mapper.fixedMapRelation

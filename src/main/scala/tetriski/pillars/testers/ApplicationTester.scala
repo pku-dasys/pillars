@@ -2,7 +2,7 @@ package tetriski.pillars.testers
 
 import chisel3.{UInt, assert}
 import chisel3.iotesters.PeekPokeTester
-import tetriski.pillars.core.{ArchitctureHierarchy, RuntimeInfo, SimulationHelper}
+import tetriski.pillars.core.{ArchitectureHierarchy, RuntimeInfo, SimulationHelper}
 import tetriski.pillars.hardware.PillarsConfig._
 import tetriski.pillars.hardware.{TokenIO, TopModule}
 import tetriski.pillars.util.SplitOrConcat
@@ -56,7 +56,7 @@ class AppTestHelper(testII: Int) {
    * @param moduleInfoFilename the file name of behavioral modeling information TXT
    * @param     runtimeInfo    the runtime information
    */
-  def init(arch: ArchitctureHierarchy, simulationHelper: SimulationHelper,
+  def init(arch: ArchitectureHierarchy, simulationHelper: SimulationHelper,
            moduleInfoFilename: String, runtimeInfo: RuntimeInfo): Unit = {
     val constInfo = simulationHelper.constInfo
     val counterInfo = simulationHelper.counterInfo

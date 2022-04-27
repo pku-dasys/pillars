@@ -158,7 +158,7 @@ object ILPMap {
     for(opNode <- fixedMapSRAM.keys){
       val opNodeIndex = dfg.opNodes.indexOf(opNode)
       val sramID = fixedMapSRAM(opNode)
-      fixedMapRelation += opNodeIndex -> sramMap(sramID).map(i => new Integer(i)).toSet
+      fixedMapRelation += opNodeIndex -> sramMap(sramID).map(i => Integer.valueOf(i)).toSet
     }
     fixedMapRelation.map(pair => mapper.fixedMapRelation
       .put(pair._1, JavaConverters.setAsJavaSet(pair._2)))
