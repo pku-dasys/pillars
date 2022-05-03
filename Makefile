@@ -11,7 +11,7 @@ run:
 	sbt 'test:runMain tetriski.pillars.Pillars'
 
 end2end:
-	sbt 'test:runMain tetriski.pillars.examples.Tutorial'
+	LD_LIBRARY_PATH=$$LD_LIBRARY_PATH:./lib sbt 'test:runMain tetriski.pillars.examples.Tutorial'
 
 clean:
 	rm -f *.json *.fir *.v

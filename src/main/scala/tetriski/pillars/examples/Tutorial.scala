@@ -7,7 +7,7 @@ import chisel3.iotesters.PeekPokeTester
 import tetriski.pillars.archlib.TileLSUBlock
 import tetriski.pillars.core._
 import tetriski.pillars.hardware.{SynthesizedModule, TopModule}
-import tetriski.pillars.mapping.{DFG, DotReader, ILPMap, SearchMap}
+import tetriski.pillars.mapping.{DFG, DotReader, ILPMap, OmtMap, SearchMap}
 import tetriski.pillars.testers.{AppTestHelper, ApplicationTester}
 
 import scala.util.Random
@@ -151,14 +151,19 @@ object Tutorial {
 //    val dfgFilename = "dfg/accum/accum.dot"
     val dfg = DotReader.loadDot(dfgFilename, II)
     val mappingResultFilename = s"tutorial/ii$II"
+
+    object Solver extends Enumeration {
+      val Gurobi, Search, Z3Prover = Value
+    }
+    val solver = Solver.Gurobi
     val scheduleControl = true
 
     var startTime = new Date().getTime()
-
-    ILPMap.mapping(dfg, MRRG, filename = mappingResultFilename, separatedPR = true,
-      scheduleControl = scheduleControl, skewLimit = 4, latencyLimit = 15)
-//    SearchMap.mapping(dfg, MRRG, mappingResultFilename, scheduleControl =scheduleControl, skewLimit = 4)
-
+    solver match {
+      case Solver.Gurobi => ILPMap.mapping(dfg, MRRG, filename = mappingResultFilename, separatedPR = true, scheduleControl = scheduleControl, skewLimit = 4, latencyLimit = 15)
+      case Solver.Search => SearchMap.mapping(dfg, MRRG, mappingResultFilename, scheduleControl = scheduleControl, skewLimit = 4)
+      case Solver.Z3Prover => OmtMap.mapping(dfg, MRRG, filename = mappingResultFilename, separatedPR = true, scheduleControl = scheduleControl, skewLimit = 4, latencyLimit = 15)
+    }
     var endTime = new Date().getTime()
     println("Mapping runtime: " + (endTime - startTime))
 
@@ -255,4 +260,3 @@ class VaddReverseTester(c: TopModule, appTestHelper: AppTestHelper)
   step(10)
   checkLSUData()
 }
-
