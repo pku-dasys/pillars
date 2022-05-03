@@ -3,7 +3,7 @@ package tetriski.pillars.mapping
 import java.util.List
 import java.io.FileWriter
 import scala.collection.JavaConverters.{bufferAsJavaList, mapAsJavaMap}
-import scala.collection.mutable.{Map, ArrayBuffer}
+import scala.collection.mutable.{ArrayBuffer, Map, Set}
 import org.apache.logging.log4j.LogManager
 
 import tetriski.pillars.core.{MRRG, MRRGMode, NodeMRRG, OpcodeTranslator}
@@ -138,13 +138,15 @@ object OmtMap {
       sramMap
     }
 
-    val fixedMapRelation = {
-      val fixedMapRelation = Map[Int, Set[Int]]()
-      for ((opNode, sramId) <- dfg.fixedMapSRAM) {
-        val opNodeIndex = dfg.opNodes.indexOf(opNode)
-        fixedMapRelation.put(opNodeIndex, sramMap(sramId).toSet)
-      }
-      fixedMapRelation
+    // collect fixed map relation
+    for ((opNode, sramId) <- dfg.fixedMapSRAM) {
+      val opNodeIndex = dfg.opNodes.indexOf(opNode)
+      mapper.fixedMapRelation.put(opNodeIndex, Set(sramMap(sramId): _*))
+    }
+
+    def nodeType(node: NodeMRRG): Int = {
+      if (node.ops.size == 0) mapper.MRRG_ROUT_NODE_TYPE
+      else mapper.MRRG_FUNC_NODE_TYPE
     }
 
     // collect attribues and edges of funcNodes
@@ -155,14 +157,14 @@ object OmtMap {
         case MRRGMode.MEM_MODE | MRRGMode.REG_MODE => mapper.mrrgLatency.put(funcNode.name, 1)
         case _ => {}
       }
-      mapper.mrrgFuncOpcodes.append(funcNode.ops)
+      mapper.mrrgFuncOpcodes.append(funcNode.ops.map(_.id))
 
       // collect in-edges
       val faninId = new ArrayBuffer[Int]()
       val faninType = new ArrayBuffer[Int]()
       for (faninNode <- funcNode.fanIn) {
         faninId.append(nodeIdMap(faninNode))
-        faninType.append(if (faninNode.ops.size == 0) 0 else 1) // ?
+        faninType.append(nodeType(faninNode))
       }
       mapper.mrrgFuncFaninId.append(faninId)
       mapper.mrrgFuncFaninType.append(faninType)
@@ -172,7 +174,7 @@ object OmtMap {
       val fanoutType = new ArrayBuffer[Int]()
       for (fanoutNode <- funcNode.fanOut) {
         fanoutId.append(nodeIdMap(fanoutNode))
-        fanoutType.append(if (fanoutNode.ops.size == 0) 0 else 1) // ?
+        fanoutType.append(nodeType(fanoutNode))
       }
       mapper.mrrgFuncFanoutId.append(fanoutId)
       mapper.mrrgFuncFanoutType.append(fanoutType)
@@ -188,7 +190,7 @@ object OmtMap {
       val faninType = ArrayBuffer[Int]()
       for (faninNode <- routNode.fanIn) {
         faninId.append(nodeIdMap(faninNode))
-        faninType.append(if (faninNode.ops.size == 0) 0 else 1) // ?
+        faninType.append(nodeType(faninNode))
       }
       mapper.mrrgRoutFaninId.append(faninId)
       mapper.mrrgRoutFaninType.append(faninType)
@@ -198,7 +200,7 @@ object OmtMap {
       val fanoutType = ArrayBuffer[Int]()
       for (fanoutNode <- routNode.fanOut) {
         fanoutId.append(nodeIdMap(fanoutNode))
-        fanoutType.append(if (fanoutNode.ops.size == 0) 0 else 1) // ?
+        fanoutType.append(nodeType(fanoutNode))
       }
       mapper.mrrgRoutFanoutId.append(fanoutId)
       mapper.mrrgRoutFanoutType.append(fanoutType)
@@ -277,11 +279,11 @@ object OmtMap {
         }
 
         def convertLists(in: Map[Int,ArrayBuffer[Int]]): Map[Integer, List[Integer]] = {
-          in.map(kv => (Integer.valueOf(kv._1), bufferAsJavaList(kv._2.map(Integer.valueOf(_)))))
+          in.map{case (k,v) => (Integer.valueOf(k), bufferAsJavaList(v.map(Integer.valueOf(_))))}
         }
         def convertNestedLists(in: Map[Int,ArrayBuffer[ArrayBuffer[Int]]]): Map[Integer, List[List[Integer]]] = {
-          in.map(kv => (Integer.valueOf(kv._1), bufferAsJavaList(
-            kv._2.map(buf => bufferAsJavaList(buf.map(Integer.valueOf(_)))))))
+          in.map{case (k,v) => (Integer.valueOf(k), bufferAsJavaList(
+          v.map(buf => bufferAsJavaList(buf.map(Integer.valueOf(_))))))}
         }
         dfg.func2regMap = convertLists(mapper.func2regMap)
         dfg.funcDirect2funcMap = convertNestedLists(mapper.func2funcMap)
@@ -292,6 +294,8 @@ object OmtMap {
       }
       mapper.elapsedTime
     }
+
+    System.exit(-1) // for debug purpose
 
     elapsedTime
   }

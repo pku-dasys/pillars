@@ -156,13 +156,14 @@ object Tutorial {
       val Gurobi, Search, Z3Prover = Value
     }
     val solver = Solver.Gurobi
+    val separatedPR = true
     val scheduleControl = true
 
     var startTime = new Date().getTime()
     solver match {
-      case Solver.Gurobi => ILPMap.mapping(dfg, MRRG, filename = mappingResultFilename, separatedPR = true, scheduleControl = scheduleControl, skewLimit = 4, latencyLimit = 15)
+      case Solver.Gurobi => ILPMap.mapping(dfg, MRRG, filename = mappingResultFilename, separatedPR = separatedPR, scheduleControl = scheduleControl, skewLimit = 4, latencyLimit = 15)
       case Solver.Search => SearchMap.mapping(dfg, MRRG, mappingResultFilename, scheduleControl = scheduleControl, skewLimit = 4)
-      case Solver.Z3Prover => OmtMap.mapping(dfg, MRRG, filename = mappingResultFilename, separatedPR = true, scheduleControl = scheduleControl, skewLimit = 4, latencyLimit = 15)
+      case Solver.Z3Prover => OmtMap.mapping(dfg, MRRG, filename = mappingResultFilename, separatedPR = separatedPR, scheduleControl = scheduleControl, skewLimit = 4, latencyLimit = 15)
     }
     var endTime = new Date().getTime()
     println("Mapping runtime: " + (endTime - startTime))
