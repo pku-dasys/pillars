@@ -7,7 +7,7 @@ import chisel3.iotesters.PeekPokeTester
 import tetriski.pillars.archlib.TileLSUBlock
 import tetriski.pillars.core._
 import tetriski.pillars.hardware.{SynthesizedModule, TopModule}
-import tetriski.pillars.mapping.{DFG, DotReader, ILPMap, OmtMap, SearchMap}
+import tetriski.pillars.mapping.{DFG, DotReader, OmtMap, SearchMap}
 import tetriski.pillars.testers.{AppTestHelper, ApplicationTester}
 
 import scala.util.Random
@@ -153,15 +153,14 @@ object Tutorial {
     val mappingResultFilename = s"tutorial/ii$II"
 
     object Solver extends Enumeration {
-      val Gurobi, Search, Z3Prover = Value
+      val Search, Z3Prover = Value
     }
-    val solver = Solver.Gurobi
+    val solver = Solver.Search
     val separatedPR = true
     val scheduleControl = true
 
     var startTime = new Date().getTime()
     solver match {
-      case Solver.Gurobi => ILPMap.mapping(dfg, MRRG, filename = mappingResultFilename, separatedPR = separatedPR, scheduleControl = scheduleControl, skewLimit = 4, latencyLimit = 15)
       case Solver.Search => SearchMap.mapping(dfg, MRRG, mappingResultFilename, scheduleControl = scheduleControl, skewLimit = 4)
       case Solver.Z3Prover => OmtMap.mapping(dfg, MRRG, filename = mappingResultFilename, separatedPR = separatedPR, scheduleControl = scheduleControl, skewLimit = 4, latencyLimit = 15)
     }

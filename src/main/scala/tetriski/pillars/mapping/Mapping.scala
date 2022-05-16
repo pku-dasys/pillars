@@ -32,7 +32,7 @@ object Mapping {
     val mrrg: MRRG = new MRRG()
     mrrg.loadTXT(mrrgFilename)
     println("mrrg loaded!")
-    ILPMap.mapping(dfg, mrrg, filename = outFilename)
-    //Scheduler.schedule(dfg, mrrg, filename = outFilename, II = 1)
+//    ILPMap.mapping(dfg, mrrg, filename = outFilename)
+    Scheduler.schedule(dfg, mrrg, filename = outFilename, II = 1)
   }
 }
