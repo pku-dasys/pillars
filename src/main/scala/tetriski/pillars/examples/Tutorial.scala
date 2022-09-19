@@ -160,7 +160,8 @@ object Tutorial {
     val const20018 = 1
 
     // order of constvals should match with order of const in ii_r_xx.txt file
-    val constVals = Array(const1, const2, const4, const6,const7,const9, const11,const12, const14, const15, const16, const19, const20, const20017,const20018)
+//    val constVals = Array(const1, const2, const4, const6,const7,const9, const11,const12, const14, const15, const16, const19, const20, const20017,const20018)
+val constVals = Array(const1, const2, const4, const6,const9, const11,const12, const14, const15, const16, const19, const20, const20017,const20018)
 
     //Simulation settings.
     val simulationHelper = new SimulationHelper(arch)
@@ -315,7 +316,7 @@ class ArrayAddTester(c: TopModule, appTestHelper: AppTestHelper)
   step(90)
 //  checkLSUData()/
   val const4 = (2*M + 1) //*4
-  deqData(0,arrayC,const4)
+  deqData(3,arrayC,const4)
 //  checkPortOutsWithInput(testII)
 
 }
