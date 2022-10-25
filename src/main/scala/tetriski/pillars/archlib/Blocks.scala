@@ -1046,7 +1046,7 @@ class STDNOC_Block(name: String, x: Int, y: Int, numIn: Int, numOut: Int,
 
   /** A PE array which has torus connectivity.
    */
-  var peMap = Map[Int, STDNOC_PEBlock]()
+  var peMap = Map[Int, Parsed_PEBlock_Test]()
 //  var peMap = Map[Int, AdresPEBlock]()
 
   for (j <- 0 until y) {
@@ -1084,12 +1084,12 @@ class STDNOC_Block(name: String, x: Int, y: Int, numIn: Int, numOut: Int,
 
 
       if(i==0) {
-        val pe = new STDNOC_PEBlock("pe_" + j.toString + "_" + i.toString, opList = opList,
+        val pe = new Parsed_PEBlock_Test("pe_" + j.toString + "_" + i.toString, opList = opList,
           useMuxBypass = useMuxBypass,isMemPE=true, inPortsNeighbor = inPortsNeighbor, dataWidth = dataWidth)
         peMap = peMap + ((i + j * x) -> pe)
         addBlock(pe)
       }else{
-        val pe = new STDNOC_PEBlock("pe_" + j.toString + "_" + i.toString, opList = opList,
+        val pe = new Parsed_PEBlock_Test("pe_" + j.toString + "_" + i.toString, opList = opList,
           useMuxBypass = useMuxBypass,isMemPE=false, inPortsNeighbor = inPortsNeighbor, dataWidth = dataWidth)
         peMap = peMap + ((i + j * x) -> pe)
         addBlock(pe)
