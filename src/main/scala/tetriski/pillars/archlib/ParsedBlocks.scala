@@ -4,6 +4,8 @@ import chisel3.util.log2Up
 import tetriski.pillars.core.OpEnum.OpEnum
 import tetriski.pillars.core.{BlockTrait, ElementTrait, OpEnum}
 
+import scala.collection.mutable.LinkedHashMap
+
 
 /**
  * Parsed PE block with non-hardcoded values
@@ -25,16 +27,16 @@ class Parsed_PEBlock_Test(name: String, useMuxBypass: Boolean, opList: List[OpEn
   addOutPorts(Array("out_w", "out_e", "out_n", "out_s"))
   addInPorts(inPortsNeighbor)
 
-  val connections : Map[String, Array[String]] = Map(
-    "THIS.NORTH_I" -> Array("RF0.WP0","RF0.WP1","FU0.DP0_I1","FU0.DP0_I2","FU0.DP0_P"),
-    "THIS.EAST_I" -> Array("RF0.WP0","RF0.WP1","FU0.DP0_I1","FU0.DP0_I2","FU0.DP0_P"),
-    "THIS.WEST_I" -> Array("RF0.WP0","RF0.WP1","FU0.DP0_I1","FU0.DP0_I2","FU0.DP0_P"),
-    "THIS.SOUTH_I" -> Array("RF0.WP0","RF0.WP1","FU0.DP0_I1","FU0.DP0_I2","FU0.DP0_P"),
+  val connections : LinkedHashMap[String, Array[String]] = LinkedHashMap(
+    "THIS.WEST_I" -> Array("FU0.DP0_I1","FU0.DP0_I2","FU0.DP0_P", "RF0.WP0", "RF0.WP1"),
+    "THIS.EAST_I" -> Array("FU0.DP0_I1","FU0.DP0_I2","FU0.DP0_P", "RF0.WP0", "RF0.WP1"),
+    "THIS.NORTH_I" -> Array("FU0.DP0_I1","FU0.DP0_I2","FU0.DP0_P", "RF0.WP0", "RF0.WP1"),
+    "THIS.SOUTH_I" -> Array("FU0.DP0_I1","FU0.DP0_I2","FU0.DP0_P", "RF0.WP0", "RF0.WP1"),
     "RF0.RP0" -> Array("FU0.DP0_I1","FU0.DP0_I2","FU0.DP0_P","THIS.NORTH_O","THIS.EAST_O","THIS.WEST_O","THIS.SOUTH_O"),
     "RF0.RP1" -> Array("FU0.DP0_I1","FU0.DP0_I2","FU0.DP0_P","THIS.NORTH_O","THIS.EAST_O","THIS.WEST_O","THIS.SOUTH_O"),
     "FU0.DP0_T" -> Array("RF0.WP0","RF0.WP1","THIS.NORTH_O","THIS.EAST_O","THIS.WEST_O","THIS.SOUTH_O")
   )
-  val bigCaseIOToSmallCaseMap : Map[String, String] = Map(
+  val bigCaseIOToSmallCaseMap : LinkedHashMap[String, String] = LinkedHashMap(
     "NORTH_I" -> "input_n",
     "EAST_I" -> "input_e",
     "WEST_I" -> "input_w",
@@ -44,7 +46,7 @@ class Parsed_PEBlock_Test(name: String, useMuxBypass: Boolean, opList: List[OpEn
     "WEST_O" -> "out_w",
     "SOUTH_O" -> "out_s",
   )
-  val portNameToMuxNameMap : Map[String, String] = Map(
+  val portNameToMuxNameMap : LinkedHashMap[String, String] = LinkedHashMap(
     "DP0_I1" -> "muxI1",
     "DP0_I2" -> "muxI2",
     "DP0_P" -> "muxP",
@@ -55,14 +57,14 @@ class Parsed_PEBlock_Test(name: String, useMuxBypass: Boolean, opList: List[OpEn
     "WEST_O" -> "muxWO",
     "SOUTH_O" -> "muxSO",
   )
-  val submods : Map[String, Array[String]] =
+  val submods : LinkedHashMap[String, Array[String]] =
     if (isMemPE) {
-      Map (
+      LinkedHashMap (
         "FU_MEM" -> Array("FU0"),
         "RF" -> Array("RF0"),
       )
     } else {
-      Map (
+      LinkedHashMap (
         "FU" -> Array("FU0"),
         "RF" -> Array("RF0"),
       )
@@ -76,7 +78,7 @@ class Parsed_PEBlock_Test(name: String, useMuxBypass: Boolean, opList: List[OpEn
   val rfInPorts = Array("WP0", "WP1")
   val rfOutPorts = Array("RP0", "RP1")
   val rfRegs = Array("R0", "R1", "R2", "R3")
-  val rfConnections : Map[String, Array[String]] = Map(
+  val rfConnections : LinkedHashMap[String, Array[String]] = LinkedHashMap(
     "THIS.WP0" -> Array("THIS.R0","THIS.R1","THIS.R2","THIS.R3"),
     "THIS.WP1" -> Array("THIS.R0","THIS.R1","THIS.R2","THIS.R3"),
     "THIS.R0" -> Array("THIS.RP0","THIS.RP1"),
@@ -85,9 +87,9 @@ class Parsed_PEBlock_Test(name: String, useMuxBypass: Boolean, opList: List[OpEn
     "THIS.R3" -> Array("THIS.RP0","THIS.RP1")
   )
 
-  var rfs : Map[String, ElementRF] = Map()
-  var portToInConnections : Map[String, Array[String]] = Map()
-  var portToMux : Map[String, ElementMux] = Map()
+  var rfs : LinkedHashMap[String, ElementRF] = LinkedHashMap()
+  var portToInConnections : LinkedHashMap[String, Array[String]] = LinkedHashMap()
+  var portToMux : LinkedHashMap[String, ElementMux] = LinkedHashMap()
   val aluOpList =
     if (opList == null) {
       //default
@@ -97,15 +99,15 @@ class Parsed_PEBlock_Test(name: String, useMuxBypass: Boolean, opList: List[OpEn
       opList
     }
 
-  var fusInPortsToRFMap : Map[String, (Map[String, ElementRF], ElementTrait, String)] = Map()
-  var fuMemsInPortsToRFMap : Map[String, (Map[String, ElementRF], ElementTrait, String)] = Map()
+  var fusInPortsToRFMap : LinkedHashMap[String, (LinkedHashMap[String, ElementRF], ElementTrait, String)] = LinkedHashMap()
+  var fuMemsInPortsToRFMap : LinkedHashMap[String, (LinkedHashMap[String, ElementRF], ElementTrait, String)] = LinkedHashMap()
 
   if (submods.contains("FU")) {
     for (fu <- submods("FU")) {
       val (tmpInPortToRFMap, outComponent, outComponentOutPort) =
         addFu(aluInPorts, aluOutPort, aluOpList, aluSupBypass, false, dataWidth)
 
-      fusInPortsToRFMap = fusInPortsToRFMap + (fu -> (tmpInPortToRFMap, outComponent, outComponentOutPort))
+      fusInPortsToRFMap += (fu -> (tmpInPortToRFMap, outComponent, outComponentOutPort))
     }
   }
 
@@ -114,7 +116,8 @@ class Parsed_PEBlock_Test(name: String, useMuxBypass: Boolean, opList: List[OpEn
       val (tmpInPortToRFMap, outComponent, outComponentOutPort) =
         addFu(aluInPorts, aluOutPort, aluOpList, aluSupBypass, true, dataWidth)
 
-      fuMemsInPortsToRFMap = fuMemsInPortsToRFMap + (fuMem -> (tmpInPortToRFMap, outComponent, outComponentOutPort))
+      fuMemsInPortsToRFMap += (fuMem -> (tmpInPortToRFMap, outComponent, outComponentOutPort))
+
     }
   }
 
@@ -127,7 +130,7 @@ class Parsed_PEBlock_Test(name: String, useMuxBypass: Boolean, opList: List[OpEn
       rf0.addOutPorts(rfOutPorts)
       rf0.addInPorts(rfInPorts)
 
-      rfs = rfs + (rf -> rf0)
+      rfs += (rf -> rf0)
     }
   }
 
@@ -135,13 +138,29 @@ class Parsed_PEBlock_Test(name: String, useMuxBypass: Boolean, opList: List[OpEn
   for ((src, dsts) <- connections) {
     for (dst <- dsts) {
       if (!portToInConnections.contains(dst)) {
-        portToInConnections = portToInConnections + (dst -> new Array[String](0))
+        portToInConnections += (dst -> new Array[String](0))
       }
 
-      val newVal = portToInConnections(dst) :+ src
-      portToInConnections = portToInConnections.updated(dst, newVal)
+      val newVal : Array[String] = {
+        if (src.endsWith("DP0_T")) {
+          if (dst.startsWith("THIS")) {
+            Array(src) ++ portToInConnections(dst)
+          } else {
+            portToInConnections(dst) :+ src
+          }
+        } else {
+          portToInConnections(dst) :+ src
+        }
+      }
+      portToInConnections += (dst -> newVal)
     }
   }
+
+  println("portToInConnections: ")
+  portToInConnections.foreach(x => {
+    println("port: ", x._1)
+    println(x._2.mkString(", "))
+  })
 
   // create muxes and add mux -> dst connection
   for ((port, inConnections) <- portToInConnections) {
@@ -166,8 +185,8 @@ class Parsed_PEBlock_Test(name: String, useMuxBypass: Boolean, opList: List[OpEn
     addElement(mux)
     mux.addOutPorts(Array("out_0"))
     mux.addInPorts((0 until inConnections.size + extraNeighbors).map(i => s"input_$i").toArray)
-    portToMux = portToMux + (port -> mux)
 
+    portToMux += (port -> mux)
 
     if (comp == "THIS") {
       if (!bigCaseIOToSmallCaseMap.contains(name)) {
@@ -234,9 +253,9 @@ class Parsed_PEBlock_Test(name: String, useMuxBypass: Boolean, opList: List[OpEn
       }
     }
 
-    // TODO: remove hack
-    doHacks()
   }
+  // TODO: remove hack
+  doHacks()
 
   /**
    * Function for connecting ALU_OUT to muxI1.
@@ -269,7 +288,7 @@ class Parsed_PEBlock_Test(name: String, useMuxBypass: Boolean, opList: List[OpEn
    * @return
    */
   def addFu(fuInPorts: Array[String], fuOutPort: String, aluOpList: List[OpEnum], aluSupBypass: Boolean,
-            isMemFU: Boolean, dataWidth: Int) : (Map[String, ElementRF], ElementTrait, String) = {
+            isMemFU: Boolean, dataWidth: Int) : (LinkedHashMap[String, ElementRF], ElementTrait, String) = {
     val constInPort = "input_const"
 
     /** An ALU that can perform some operations.
@@ -283,7 +302,7 @@ class Parsed_PEBlock_Test(name: String, useMuxBypass: Boolean, opList: List[OpEn
     // dp0.addInPorts(fuInPorts.slice(0, fuInPorts.size - 1) :+ constInPort :+ fuInPorts.last)
     dp0.addOutPorts(Array(fuOutPort))
 
-    var inPortToRFMap : Map[String, ElementRF] = Map()
+    val inPortToRFMap : LinkedHashMap[String, ElementRF] = LinkedHashMap()
 
     for (inPort <- fuInPorts) {
       val rf = new ElementRF("rf" + inPort, List(0, 1, 1, dataWidth))
@@ -295,7 +314,7 @@ class Parsed_PEBlock_Test(name: String, useMuxBypass: Boolean, opList: List[OpEn
       // rf -> dp
       addConnect(rf / "out_0" -> dp0 / inPort)
 
-      inPortToRFMap = inPortToRFMap + (inPort -> rf)
+      inPortToRFMap += (inPort -> rf)
     }
 
     /** A const unit connected to the multiplexers.
