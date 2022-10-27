@@ -256,6 +256,10 @@ class Parsed_PEBlock_Test(name: String, useMuxBypass: Boolean, opList: List[OpEn
 
   /**
    * Function to add either a plain FU or mem FU
+   * Returns a 3-tuple of
+   * 1. Map of inPort to the RF that is connected to it
+   * 2. The component which contains the outPort of the FU
+   * 3. The name of the outPort on the outComponent
    * @param fuInPorts
    * @param fuOutPort
    * @param aluOpList
