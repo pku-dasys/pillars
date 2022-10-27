@@ -2,7 +2,7 @@ package tetriski.pillars.archlib
 
 import chisel3.util.log2Up
 import tetriski.pillars.core.OpEnum.OpEnum
-import tetriski.pillars.core.{BlockTrait, OpEnum}
+import tetriski.pillars.core.{BlockTrait, ElementTrait, OpEnum}
 
 
 /**
@@ -34,7 +34,27 @@ class Parsed_PEBlock_Test(name: String, useMuxBypass: Boolean, opList: List[OpEn
     "RF0.RP1" -> Array("FU0.DP0_I1","FU0.DP0_I2","FU0.DP0_P","THIS.NORTH_O","THIS.EAST_O","THIS.WEST_O","THIS.SOUTH_O"),
     "FU0.DP0_T" -> Array("RF0.WP0","RF0.WP1","THIS.NORTH_O","THIS.EAST_O","THIS.WEST_O","THIS.SOUTH_O")
   )
-
+  val bigCaseIOToSmallCaseMap : Map[String, String] = Map(
+    "NORTH_I" -> "input_n",
+    "EAST_I" -> "input_e",
+    "WEST_I" -> "input_w",
+    "SOUTH_I" -> "input_s",
+    "NORTH_O" -> "out_n",
+    "EAST_O" -> "out_e",
+    "WEST_O" -> "out_w",
+    "SOUTH_O" -> "out_s",
+  )
+  val portNameToMuxNameMap : Map[String, String] = Map(
+    "DP0_I1" -> "muxI1",
+    "DP0_I2" -> "muxI2",
+    "DP0_P" -> "muxP",
+    "WP0" -> "muxWP0",
+    "WP1" -> "muxWP1",
+    "NORTH_O" -> "muxNO",
+    "EAST_O" -> "muxEO",
+    "WEST_O" -> "muxWO",
+    "SOUTH_O" -> "muxSO",
+  )
   val submods : Map[String, Array[String]] =
     if (isMemPE) {
       Map (
@@ -48,9 +68,11 @@ class Parsed_PEBlock_Test(name: String, useMuxBypass: Boolean, opList: List[OpEn
       )
     }
 
+  var aluCount = 0
   val aluInPorts = Array("DP0_I1", "DP0_I2", "DP0_P")
   val aluOutPort = "DP0_T"
 
+  var rfCount = 0
   val rfInPorts = Array("WP0", "WP1")
   val rfOutPorts = Array("RP0", "RP1")
   val rfRegs = Array("R0", "R1", "R2", "R3")
@@ -63,8 +85,6 @@ class Parsed_PEBlock_Test(name: String, useMuxBypass: Boolean, opList: List[OpEn
     "THIS.R3" -> Array("THIS.RP0","THIS.RP1")
   )
 
-  var fus : Map[String, Parsed_ALU] = Map()
-  var fuMems : Map[String, Parsed_ALU_LSU] = Map()
   var rfs : Map[String, ElementRF] = Map()
   var portToInConnections : Map[String, Array[String]] = Map()
   var portToMux : Map[String, ElementMux] = Map()
@@ -77,34 +97,35 @@ class Parsed_PEBlock_Test(name: String, useMuxBypass: Boolean, opList: List[OpEn
       opList
     }
 
+  var fusInPortsToRFMap : Map[String, (Map[String, ElementRF], ElementTrait, String)] = Map()
+  var fuMemsInPortsToRFMap : Map[String, (Map[String, ElementRF], ElementTrait, String)] = Map()
+
   if (submods.contains("FU")) {
     for (fu <- submods("FU")) {
-      val fu0 = new Parsed_ALU(fu, aluInPorts, aluOutPort, aluOpList, aluSupBypass, dataWidth)
-      addBlock(fu0)
+      val (tmpInPortToRFMap, outComponent, outComponentOutPort) =
+        addFu(aluInPorts, aluOutPort, aluOpList, aluSupBypass, false, dataWidth)
 
-      fus = fus + (fu -> fu0)
+      fusInPortsToRFMap = fusInPortsToRFMap + (fu -> (tmpInPortToRFMap, outComponent, outComponentOutPort))
     }
   }
 
   if (submods.contains("FU_MEM")) {
     for (fuMem <- submods("FU_MEM")) {
-      val fu0 = new Parsed_ALU_LSU(fuMem, aluInPorts, aluOutPort, aluOpList, aluSupBypass, dataWidth)
-      addBlock(fu0)
+      val (tmpInPortToRFMap, outComponent, outComponentOutPort) =
+        addFu(aluInPorts, aluOutPort, aluOpList, aluSupBypass, true, dataWidth)
 
-      fuMems = fuMems + (fuMem -> fu0)
+      fuMemsInPortsToRFMap = fuMemsInPortsToRFMap + (fuMem -> (tmpInPortToRFMap, outComponent, outComponentOutPort))
     }
   }
 
   if (submods.contains("RF")) {
     for (rf <- submods("RF")) {
-      /*
-      val rf0 = new Parsed_RF(rf, rfInPorts, rfOutPorts, rfRegs, rfConnections, dataWidth)
-      addBlock(rf0)
-       */
-      val rf0 = new ElementRF(rf, List(3, 2, 2, dataWidth))
+      val rf0 = new ElementRF(s"rf$rfCount", List(3, 2, 2, dataWidth))
+      addElement(rf0)
+      rfCount = rfCount + 1
+
       rf0.addOutPorts(rfOutPorts)
       rf0.addInPorts(rfInPorts)
-      addElement(rf0)
 
       rfs = rfs + (rf -> rf0)
     }
@@ -124,22 +145,55 @@ class Parsed_PEBlock_Test(name: String, useMuxBypass: Boolean, opList: List[OpEn
 
   // create muxes and add mux -> dst connection
   for ((port, inConnections) <- portToInConnections) {
-    val mux = new ElementMux("mux" + port, List(inConnections.size, dataWidth))
-    mux.addOutPorts(Array("out_0"))
-    mux.addInPorts((0 until inConnections.size).map(i => "input_" + i.toString).toArray)
-    portToMux = portToMux + (port -> mux)
-
     val portSplit = port.split("\\.")
 
     val comp = portSplit(0)
     val name = portSplit(1)
+
+    if (!portNameToMuxNameMap.contains(name)) {
+      throw new Exception(s"unexpected port name $name")
+    }
+
+    // TODO: remove hack
+    val extraNeighbors =
+      if (port == "FU0.DP0_I1") {
+        1
+      } else {
+        0
+      }
+
+    val mux = new ElementMux(portNameToMuxNameMap(name), List(inConnections.size + extraNeighbors, dataWidth))
+    addElement(mux)
+    mux.addOutPorts(Array("out_0"))
+    mux.addInPorts((0 until inConnections.size + extraNeighbors).map(i => s"input_$i").toArray)
+    portToMux = portToMux + (port -> mux)
+
+
     if (comp == "THIS") {
-      addConnect(mux / "out_0" -> term(name))
+      if (!bigCaseIOToSmallCaseMap.contains(name)) {
+        throw new Exception(s"unexpected name $name")
+      }
+
+      val realName = bigCaseIOToSmallCaseMap(name)
+      addConnect(mux / "out_0" -> term(realName))
     } else {
-      if (fus.contains(comp)) {
-        addConnect(mux / "out_0" -> fus(comp) / name)
-      } else if (fuMems.contains(comp)) {
-        addConnect(mux / "out_0" -> fuMems(comp) / name)
+      if (fusInPortsToRFMap.contains(comp)) {
+        // connect to rf that is connected to alu
+        val (tmpInPortToRFMap, _, _) = fusInPortsToRFMap(comp)
+
+        if (tmpInPortToRFMap.contains(name)) {
+          addConnect(mux / "out_0" -> tmpInPortToRFMap(name) / "input_0")
+        } else {
+          throw new Exception(s"tmpInPortsToRFMap for $comp not contains $name")
+        }
+      } else if (fuMemsInPortsToRFMap.contains(comp)) {
+        val (tmpInPortToRFMap, _, _) = fuMemsInPortsToRFMap(comp)
+
+        if (tmpInPortToRFMap.contains(name)) {
+          addConnect(mux / "out_0" -> tmpInPortToRFMap(name) / "input_0")
+        } else {
+          throw new Exception(s"tmpInPortsToRFMap for $comp not contains $name")
+        }
       } else if (rfs.contains(comp)) {
         addConnect(mux / "out_0" -> rfs(comp) / name)
       } else {
@@ -159,19 +213,135 @@ class Parsed_PEBlock_Test(name: String, useMuxBypass: Boolean, opList: List[OpEn
       val comp = portSplit(0)
       val name = portSplit(1)
       if (comp == "THIS") {
-        addConnect(term(name) -> dstMux / ("input_" + idx))
-      } else {
-        if (fus.contains(comp)) {
-          addConnect(fus(comp) / name -> dstMux / ("input_" + idx))
-        } else if (fuMems.contains(comp)) {
-          addConnect(fuMems(comp) / name -> dstMux / ("input_" + idx))
+        if (!bigCaseIOToSmallCaseMap.contains(name)) {
+          throw new Exception(s"unexpected name $name")
         }
-        else if (rfs.contains(comp)) {
+
+        val realName = bigCaseIOToSmallCaseMap(name)
+        addConnect(term(realName) -> dstMux / ("input_" + idx))
+      } else {
+        if (fusInPortsToRFMap.contains(comp)) {
+          val (_, outComponent, outComponentOutPort) = fusInPortsToRFMap(comp)
+          addConnect(outComponent / outComponentOutPort -> dstMux / ("input_" + idx))
+        } else if (fuMemsInPortsToRFMap.contains(comp)) {
+          val (_, outComponent, outComponentOutPort) = fuMemsInPortsToRFMap(comp)
+          addConnect(outComponent / outComponentOutPort -> dstMux / ("input_" + idx))
+        } else if (rfs.contains(comp)) {
           addConnect(rfs(comp) / name -> dstMux / ("input_" + idx))
         } else {
           throw new Exception("invalid port name in connections: " + src)
         }
       }
+    }
+
+    // TODO: remove hack
+    doHacks()
+  }
+
+  /**
+   * Function for connecting ALU_OUT to muxI1.
+   */
+  def doHacks(): Unit = {
+    // hack? add connection from ALU_OUT to muxI1
+    val (_, aluOutComponent, aluOutComponentOutputPort) =
+      if (isMemPE) {
+        fuMemsInPortsToRFMap("FU0")
+      } else {
+        fusInPortsToRFMap("FU0")
+      }
+
+    val lastInputIdx = portToInConnections("FU0.DP0_I1").size
+    addConnect(aluOutComponent / aluOutComponentOutputPort -> portToMux("FU0.DP0_I1") / s"input_$lastInputIdx")
+  }
+
+  /**
+   * Function to add either a plain FU or mem FU
+   * @param fuInPorts
+   * @param fuOutPort
+   * @param aluOpList
+   * @param aluSupBypass
+   * @param isMemFU
+   * @param dataWidth
+   * @return
+   */
+  def addFu(fuInPorts: Array[String], fuOutPort: String, aluOpList: List[OpEnum], aluSupBypass: Boolean,
+            isMemFU: Boolean, dataWidth: Int) : (Map[String, ElementRF], ElementTrait, String) = {
+    val constInPort = "input_const"
+
+    /** An ALU that can perform some operations.
+     * TODO: changes for predicate support??
+     */
+    val dp0 = new ElementAlu(s"alu$aluCount", aluOpList, aluSupBypass, List(dataWidth))
+    addElement(dp0)
+    aluCount = aluCount + 1
+
+    dp0.addInPorts(Array("DP0_I1", "DP0_I2", "input_const", "DP0_P"))
+    // dp0.addInPorts(fuInPorts.slice(0, fuInPorts.size - 1) :+ constInPort :+ fuInPorts.last)
+    dp0.addOutPorts(Array(fuOutPort))
+
+    var inPortToRFMap : Map[String, ElementRF] = Map()
+
+    for (inPort <- fuInPorts) {
+      val rf = new ElementRF("rf" + inPort, List(0, 1, 1, dataWidth))
+      addElement(rf)
+
+      rf.addOutPorts(Array("out_0"))
+      rf.addInPorts(Array("input_0"))
+
+      // rf -> dp
+      addConnect(rf / "out_0" -> dp0 / inPort)
+
+      inPortToRFMap = inPortToRFMap + (inPort -> rf)
+    }
+
+    /** A const unit connected to the multiplexers.
+     */
+    val const0 = new ElementConst("const0", List(dataWidth))
+    addElement(const0)
+    const0.addOutPorts(Array("out_0"))
+
+    addConnect(const0 / "out_0" -> dp0 / constInPort)
+
+    if (isMemFU) {
+      /** An LSU can perform load or store operation.
+       */
+      val LSU = new ElementLSU2("loadStoreUnit", List(dataWidth))
+      LSU.addInPorts(Array("addr", "dataIn", "constIn"))
+      LSU.addOutPorts(Array("out"))
+      addElement(LSU)
+
+      addConnect(inPortToRFMap(fuInPorts(1)) / "out_0" -> LSU / "addr")
+      addConnect(inPortToRFMap(fuInPorts(0)) / "out_0" -> LSU / "dataIn")
+      addConnect(const0 / "out_0" -> LSU / "constIn")
+
+      val muxT = new ElementMux("muxT", List(2, dataWidth))
+      muxT.addOutPorts(Array("out_0"))
+      muxT.addInPorts(Array("input_0", "input_1"))
+      addElement(muxT)
+
+      /** A register with one input port and one output port.
+       * This makes latency of memPE is equal to two
+       */
+      val rfALUO = new ElementRF("rfALUO", List(0, 1,1, dataWidth))
+      rfALUO.addOutPorts(Array("out_0"))
+      rfALUO.addInPorts(Array("input_0"))
+      addElement(rfALUO)
+
+      addConnect(dp0 / fuOutPort -> rfALUO / "input_0")
+      addConnect(rfALUO / "out_0" -> muxT / "input_1")
+
+      val rfLSUO = new ElementRF("rfLSUO", List(0, 1,1, dataWidth))
+      rfLSUO.addOutPorts(Array("out_0"))
+      rfLSUO.addInPorts(Array("input_0"))
+      addElement(rfLSUO)
+
+      addConnect(LSU / "out" -> rfLSUO / "input_0")
+      addConnect(rfLSUO / "out_0" -> muxT / "input_0")
+
+      val outComponent = muxT
+      (inPortToRFMap, outComponent, "out_0")
+    } else {
+      (inPortToRFMap, dp0, fuOutPort)
     }
   }
 }

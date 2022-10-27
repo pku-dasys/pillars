@@ -34,7 +34,7 @@ trait ElementTrait extends Ports with BasicTrait {
    */
   def /(portName: String): ValidPort = {
     if (!(getInPorts().toSet.contains(portName) || getOutPorts().toSet.contains(portName))) {
-      System.err.println(s"Invalid port name $name / $portName!")
+      throw new Exception(s"Invalid port name $name / $portName!")
     }
     new ValidPort(name, portName)
   }

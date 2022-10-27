@@ -89,7 +89,7 @@ trait BlockTrait extends ElementTrait {
    */
   override def /(portName: String): ValidPort = {
     if (!(getInPorts().toSet.contains(portName) || getOutPorts().toSet.contains(portName))) {
-      System.err.println(s"Invalid port name $name / $portName!")
+      throw new Exception(s"Invalid port name $name / $portName!")
     }
     new ValidPort(name + "/", portName)
   }
@@ -109,7 +109,7 @@ trait BlockTrait extends ElementTrait {
    */
   def term(portName: String): ValidPort = {
     if (!(getInPorts().toSet.contains(portName) || getOutPorts().toSet.contains(portName))) {
-      System.err.println(s"Invalid port name $portName!")
+      throw new Exception(s"Invalid port name $portName!")
     }
     new ValidPort(null, portName)
   }
