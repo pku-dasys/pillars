@@ -16,7 +16,7 @@ import tetriski.pillars.examples.ApplicationExamples.simulationHelper
  * Example: matrix multiplication: C = A X B, where A is a M * 2 matrix, and B is a 2 * N matrix.
  * In the simulation, we can get C(i)(j) every II cycle.
  */
-object Tutorial {
+object Morpher {
   def main(args: Array[String]): Unit = {
     val rowNum = 4
     val colNum = 4
@@ -164,12 +164,19 @@ object Tutorial {
 val constVals = Array(const1, const2, const4, const6,const9, const11,const12, const14, const15, const16, const19, const20, const20017,const20018)
 
     //Simulation settings.
-    val simulationHelper = new SimulationHelper(arch)
-    val resultFilename = s"tutorial/ii$II" + "_r_array_add.txt"
-    val infoFilename = s"tutorial/ii$II" + "_i_array_add.txt"
-    simulationHelper.init(resultFilename)
-    simulationHelper.setConst(constVals, II)
+//    val simulationHelper = new SimulationHelper(arch)
+//    val resultFilename = s"tutorial/ii$II" + "_r_array_add.txt"
+//    val infoFilename = s"tutorial/ii$II" + "_i_array_add.txt"
+//    simulationHelper.init(resultFilename)
+//    simulationHelper.setConst(constVals, II)
 
+    val resultFilename = s"tutorial/array_add_r.txt"
+    val infoFilename = s"tutorial/array_add_i.txt"
+//        val resultFilename = s"tutorial/ii$II" + "_r_array_add_new.txt"
+//        val infoFilename = s"tutorial/ii$II" + "_i_array_add_new.txt"
+    simulationHelper.initNew(resultFilename)
+    simulationHelper.setConst(simulationHelper.constArray.toArray, II)
+//    sys.exit(0)
     val constInfo = simulationHelper.getConstInfo()
     val schedules = simulationHelper.getSchedules()
     val bitStreams = arch.genConfig(infoFilename, II, constInfo)
@@ -182,7 +189,14 @@ val constVals = Array(const1, const2, const4, const6,const9, const11,const12, co
     //Because the PEs in a row share an LSU, the number of LSUs is rowNum.
     (0 until rowNum).foreach(i =>
       inputDataMap = inputDataMap + (List(i, a_base) -> flattenedAB))
-    appTestHelper.addInData(inputDataMap)
+    //appTestHelper.addInData(inputDataMap)
+    //println(inputDataMap)
+    val testDataFilename = s"tutorial/array_add_trace_0.txt"
+    val dataLayoutFilename = s"tutorial/array_add_mem_alloc.txt"
+    val dataMemDetailsFilename = s"tutorial/datamem_details.txt"
+    simulationHelper.createDataMap(appTestHelper,testDataFilename, dataLayoutFilename, dataMemDetailsFilename)
+//    sys.exit(0)
+
 
     //Set cycles when we can put data through the input ports or get the result from the output ports,
     // which can be obtained from "*_r.txt"
@@ -234,7 +248,7 @@ val constVals = Array(const1, const2, const4, const6,const9, const11,const12, co
     //    }
 
     iotesters.Driver.execute(Array("-tgvo", "on", "-tbn", "verilator"), topDesign) {
-      c => new ArrayAddTester(c, appTestHelper)
+      c => new ArrayAddTester2(c, appTestHelper)
     }
 
 
@@ -288,7 +302,7 @@ val constVals = Array(const1, const2, const4, const6,const9, const11,const12, co
  * @param c             the top design
  * @param appTestHelper the class which is helpful when creating testers
  */
-class ArrayAddTester(c: TopModule, appTestHelper: AppTestHelper)
+class ArrayAddTester2(c: TopModule, appTestHelper: AppTestHelper)
   extends ApplicationTester(c, appTestHelper) {
   val M = 20
   val arrayA = new Array[Int](M)
@@ -315,8 +329,10 @@ class ArrayAddTester(c: TopModule, appTestHelper: AppTestHelper)
   //poke(c.io.en, 1)
   step(90)
 //  checkLSUData()/
-  val const4 = (2*M + 1) //*4
-  deqData(3,arrayC,const4)
+//  val const4 = (2*M + 1) //*4
+//  deqData(3,arrayC,const4)
+  val const4 = 0//(2*M + 1) //*4
+  deqData(0,arrayC,const4)
 //  checkPortOutsWithInput(testII)
 
 }

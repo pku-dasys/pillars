@@ -13,6 +13,9 @@ run:
 end2end:
 	sbt 'test:runMain tetriski.pillars.examples.Tutorial'
 
+morpher:
+	sbt 'test:runMain tetriski.pillars.examples.Morpher'
+
 clean:
 	rm -f *.json *.fir *.v
 	rm -rf test_run_dir/

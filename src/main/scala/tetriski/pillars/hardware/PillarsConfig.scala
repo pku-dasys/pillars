@@ -17,9 +17,9 @@ object PillarsConfig {
 
   /** Memory depth in Load/Store unit.
    */
-  val MEM_DEPTH = 256
-  val MEM_IN_WIDTH = 16//32
-  val MEM_OUT_WIDTH = 16//32
+  val MEM_DEPTH = 512 //2048/4
+  val MEM_IN_WIDTH = 32//32
+  val MEM_OUT_WIDTH = 32//32
 
   /** The limitation of the schedule length.
    * 3 for TopModuleWrapper generation and 5 for verilator test of examples.

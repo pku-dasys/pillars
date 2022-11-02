@@ -981,17 +981,29 @@ class LoadStoreUnit2(w: Int) extends Module {
       writeMem.en := true.B
       writeMem.we := true.B
       io.outs(0) :=  0.U(w.W)
+//      when(addr(1,0)===0.U(2.W)) {
+//        writeMem.din := 0.U(w.W)//Cat(0.U((3*w/4).W),dataIn(w/4-1,0))
+//      }.elsewhen(addr(1,0)===1.U(2.W)){
+//        writeMem.din := 0.U(w.W)//Cat(0.U((w/2).W),dataIn(w/4-1,0),0.U((w/4).W))
+//      }.elsewhen(addr(1,0)===0.U(2.W)) {
+//        writeMem.din := 0.U(w.W)//Cat(0.U((w/4).W),dataIn(w/4-1,0),0.U((w/2).W))
+//      }.elsewhen(addr(1,0)===2.U(2.W)){
+//        writeMem.din := 0.U(w.W)//Cat(dataIn(w/4-1,0),0.U((3*w/4).W))
+//      }.otherwise{
+//        writeMem.din := 0.U(w.W)//Cat(0.U((3*w/4).W),dataIn(w/4-1,0))
+//      }
       when(addr(1,0)===0.U(2.W)) {
-        writeMem.din := 0.U(w.W)//Cat(0.U((3*w/4).W),dataIn(w/4-1,0))
+        writeMem.din := Cat(0.U((3*w/4).W),dataIn(w/4-1,0))
       }.elsewhen(addr(1,0)===1.U(2.W)){
-        writeMem.din := 0.U(w.W)//Cat(0.U((w/2).W),dataIn(w/4-1,0),0.U((w/4).W))
+        writeMem.din := Cat(0.U((w/2).W),dataIn(w/4-1,0),0.U((w/4).W))
       }.elsewhen(addr(1,0)===0.U(2.W)) {
-        writeMem.din := 0.U(w.W)//Cat(0.U((w/4).W),dataIn(w/4-1,0),0.U((w/2).W))
+        writeMem.din := Cat(0.U((w/4).W),dataIn(w/4-1,0),0.U((w/2).W))
       }.elsewhen(addr(1,0)===2.U(2.W)){
-        writeMem.din := 0.U(w.W)//Cat(dataIn(w/4-1,0),0.U((3*w/4).W))
+        writeMem.din := Cat(dataIn(w/4-1,0),0.U((3*w/4).W))
       }.otherwise{
-        writeMem.din := 0.U(w.W)//Cat(0.U((3*w/4).W),dataIn(w/4-1,0))
+        writeMem.din := Cat(0.U((3*w/4).W),dataIn(w/4-1,0))
       }
+
     }.otherwise {
       readMem.en := false.B
       writeMem.en := false.B
