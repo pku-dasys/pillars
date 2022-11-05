@@ -188,7 +188,7 @@ class DeqMem(mem_io: TraitMemReadIO, out_width: Int) extends Module {
     // enq addr
     when(remain > 0.U) {
       iaddr.enq(mem_index)
-      when(iaddr.fire()) {
+      when(iaddr.fire() && odata.fire()) {
         mem_index := mem_index + 1.U
         remain := remain - 1.U
       }
@@ -203,6 +203,7 @@ class DeqMem(mem_io: TraitMemReadIO, out_width: Int) extends Module {
       state := s_idle
     }
   }
+
 }
 
 class EnqAddrDeqMem(mem_io: TraitMemReadIO) extends Module {

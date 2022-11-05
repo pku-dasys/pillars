@@ -328,11 +328,12 @@ class ArrayAddTester2(c: TopModule, appTestHelper: AppTestHelper)
   //enqData(1, onevariableArray ,  2 * 20)
   //poke(c.io.en, 1)
   step(90)
-//  checkLSUData()/
+  checkLgitSUData2()
 //  val const4 = (2*M + 1) //*4
 //  deqData(3,arrayC,const4)
   val const4 = 0//(2*M + 1) //*4
-  deqData(0,arrayC,const4)
+//  deqData(0,arrayC,const4)
+
 //  checkPortOutsWithInput(testII)
 
 }

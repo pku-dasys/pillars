@@ -27,10 +27,16 @@ class AppTestHelper(bitStreams: Array[BigInt], schedules: List[Int],
    */
   var inDataMap = Map[List[Int], Array[Int]]()
 
+
   /** A map between a list and the expected output data array.
    * The list consists of the identification number of targeted LSU and base address.
    */
   var outDataMap = Map[List[Int], Array[Int]]()
+
+  /** A map between the array names and a list.
+   * The list consists of the identification number of targeted LSU and base address.
+   */
+  var varNameList = List[String]()
 
   /** A map between the targeted output port and the expected data array.
    */
@@ -153,6 +159,14 @@ class AppTestHelper(bitStreams: Array[BigInt], schedules: List[Int],
    */
   def addOutData(outDatas: Map[List[Int], Array[Int]]): Unit = {
     outDataMap = outDataMap ++ outDatas
+  }
+
+  /** Concat varNameMap with varNameDatas.
+   *
+   * @param varNameDatas a map between the var names and a list
+   */
+  def addVarNameData(varNameDatas: List[String]): Unit = {
+    varNameList = varNameList ++ varNameDatas
   }
 
   /** Get the configurations.
@@ -403,6 +417,22 @@ class ApplicationTester(c: TopModule, appTestHelper: AppTestHelper) extends Peek
       val base = inDataItem._1(1)
       val refArray = inDataItem._2
       deqData(numInLSU, refArray, base)
+    }
+  }
+
+  /** Verifies data in LSUs under the guide of outDataMap in appTestHelper during the post-process.
+   */
+  def checkLSUData2(): Unit = {
+    //stream deq test
+    var i = 0
+    for (inDataItem <- appTestHelper.outDataMap) {
+      val numInLSU = inDataItem._1(0)
+      val base = inDataItem._1(1)
+      val refArray = inDataItem._2
+      println("")
+      println("Array Variable:" + appTestHelper.varNameList(i) + " Bank ID:" + numInLSU + " Base Address:" + base)
+      deqData(numInLSU, refArray, base)
+      i += 1
     }
   }
 }

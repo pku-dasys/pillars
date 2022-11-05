@@ -351,6 +351,8 @@ class SimulationHelper(arch: ArchitctureHierarchy) {
       }
     }
     var inputDataMap = Map[List[Int], Array[Int]]()
+    var expectedDataMap = Map[List[Int], Array[Int]]()
+    var varNameList = List[String]()
     /*
     * dataMemContent is a map of var name -> List[int offset, prerundata, postrundata]
     * Loop through the offset,prerundata,postrundata tuples of each variable
@@ -362,25 +364,32 @@ class SimulationHelper(arch: ArchitctureHierarchy) {
     * */
     for(memCont <- dataMemContent){
       println("var name:" + memCont._1 + ", var size in bytes:" + memCont._2.size)
+      val varName = memCont._1
       // There are integer (4 byte) arrays/scalars and also 1 byte scalars like loop start and loop end.
       if(memCont._2.size % 4 == 0) {// For Int variables
-        val intData = new Array[Int](memCont._2.size/4)
+        val inputData = new Array[Int](memCont._2.size/4)
+        val expectedData = new Array[Int](memCont._2.size/4)
         var i = 0
         var j = 0
-        val byteData = new Array[Byte](4)
+        val byteInData = new Array[Byte](4)
+        val byteExpData = new Array[Byte](4)
         for (prepostdata <- memCont._2) {
-          byteData(i) = prepostdata(1).toByte
+          byteInData(i) = prepostdata(1).toByte
+          byteExpData(i) = prepostdata(2).toByte
           i += 1
           if(i%4 == 0) {
             i = 0
-            intData(j) = bytesToInt(byteData,true)
+            inputData(j) = bytesToInt(byteInData,true)
+            expectedData(j) = bytesToInt(byteExpData,true)
             j += 1
           }
         }
         val LSUnum = (dataLayout(memCont._1)/bankSizeInB).floor.toInt
         val LSUbase = (dataLayout(memCont._1) - LSUnum*bankSizeInB)/4
-        inputDataMap += (List(LSUnum, LSUbase) -> intData)
-        println(LSUnum, LSUbase, intData)
+        inputDataMap += (List(LSUnum, LSUbase) -> inputData)
+        expectedDataMap += (List(LSUnum, LSUbase) -> expectedData)
+        varNameList = varNameList :+ varName
+        println(LSUnum, LSUbase, inputData, expectedData)
       }
       else if(memCont._2.size == 1 ){
         // For Byte values such as loop start and loop end.
@@ -404,6 +413,8 @@ class SimulationHelper(arch: ArchitctureHierarchy) {
     }
     println(inputDataMap)
     appTestHelper.addInData(inputDataMap)
+    appTestHelper.addOutData(expectedDataMap)
+    appTestHelper.addVarNameData(varNameList)
   }
 //  /** Create data map from morpher data trace and data layout.
 //   * morpher data layout is byte addressable
