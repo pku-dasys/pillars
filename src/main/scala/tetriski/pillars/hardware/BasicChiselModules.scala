@@ -969,9 +969,9 @@ class LoadStoreUnit2(w: Int) extends Module {
         io.outs(0):= Cat(1.B,0.U((3*w/4-1).W),readMem.dout(w/4-1,0))//valid bit,00..,byte
       }.elsewhen(addr(1,0)===1.U(2.W)){
         io.outs(0) := Cat(1.B,0.U((3*w/4-1).W),readMem.dout(w/2-1,w/4))
-      }.elsewhen(addr(1,0)===0.U(2.W)) {
+      }.elsewhen(addr(1,0)===2.U(2.W)) {
         io.outs(0) := Cat(1.B,0.U((3*w/4-1).W),readMem.dout(3*w/4-1,w/2))
-      }.elsewhen(addr(1,0)===2.U(2.W)){
+      }.elsewhen(addr(1,0)===3.U(2.W)){
         io.outs(0) := Cat(1.B,0.U((3*w/4-1).W),readMem.dout(w-1,3*w/4))
       }.otherwise{
         io.outs(0) := 0.U(w.W)
@@ -996,9 +996,239 @@ class LoadStoreUnit2(w: Int) extends Module {
         writeMem.din := Cat(0.U((3*w/4).W),dataIn(w/4-1,0))
       }.elsewhen(addr(1,0)===1.U(2.W)){
         writeMem.din := Cat(0.U((w/2).W),dataIn(w/4-1,0),0.U((w/4).W))
-      }.elsewhen(addr(1,0)===0.U(2.W)) {
+      }.elsewhen(addr(1,0)===2.U(2.W)) {
         writeMem.din := Cat(0.U((w/4).W),dataIn(w/4-1,0),0.U((w/2).W))
+      }.elsewhen(addr(1,0)===3.U(2.W)){
+        writeMem.din := Cat(dataIn(w/4-1,0),0.U((3*w/4).W))
+      }.otherwise{
+        writeMem.din := Cat(0.U((3*w/4).W),dataIn(w/4-1,0))
+      }
+
+    }.otherwise {
+      readMem.en := false.B
+      writeMem.en := false.B
+      writeMem.we := false.B
+      writeMem.din := dataIn
+      io.outs(0) :=  0.U(w.W)
+    }
+  }.otherwise {
+    readMem.en := false.B
+    writeMem.en := false.B
+    writeMem.we := false.B
+    readMem.addr := DontCare
+    writeMem.addr := DontCare
+    writeMem.din := DontCare
+    io.outs(0) :=  0.U(w.W)
+  }
+}
+
+
+/** A load/store unit which can perform load/store during the runtime of CGRA,
+ * and direct memory access (DMA) for transferring data during pre-process and post-process.
+ * This loadstore unit has predicate based execution
+ *
+ * @param w the data width
+ */
+class LoadStoreUnit3( numInI1: Int, numInI2: Int, numInP: Int, w: Int) extends Module {
+  val io = IO(new Bundle {
+    //0 for load, 1 for store
+    // 0:2 load,loadh,loadb, store,storeh,storeb 3: constvalid 4: neg pred
+    val configuration = Input(UInt(5.W))
+    val en = Input(Bool())
+    val skewing = Input(UInt((SKEW_WIDTH).W))
+
+    val streamIn = Flipped(EnqIO(UInt(MEM_IN_WIDTH.W)))
+    val len = Input(UInt(log2Ceil(MEM_DEPTH).W))
+    val streamOut = Flipped(DeqIO(UInt(MEM_OUT_WIDTH.W)))
+    val base = Input(UInt(log2Ceil(MEM_DEPTH).W))
+
+    val start = Input(Bool())
+    val enqEn = Input(Bool())
+    val deqEn = Input(Bool())
+    val idle = Output(Bool())
+
+    val input_mux_config = Input(MixedVec(Seq(UInt(log2Up(numInI1).W),
+                              UInt(log2Up(numInI2).W), UInt(log2Up(numInP).W))))
+//    val inputs = Input(MixedVec(UInt((log2Ceil(MEM_DEPTH) + 2).W), UInt(w.W), UInt(w.W), UInt(w.W)))
+  val inputs = Input(MixedVec(UInt(w.W), UInt(w.W), UInt(w.W), UInt(w.W)))
+    val outs = Output(MixedVec((1 to 1) map { i => UInt(w.W) }))
+  })
+  val memWrapper = Module(new LSMemWrapper(w))
+  memWrapper.io.base <> io.base
+  memWrapper.io.start <> io.start
+  memWrapper.io.idle <> io.idle
+  memWrapper.io.enqEn <> io.enqEn
+  memWrapper.io.deqEn <> io.deqEn
+  memWrapper.io.len <> io.len
+  memWrapper.io.in <> io.streamIn
+  memWrapper.io.out <> io.streamOut
+  memWrapper.io.workEn <> io.en
+
+  var constIn = io.inputs(2)
+  var const_valid = io.configuration(3)
+  /** The address where to load/store data.
+   */
+  var addr = Mux(const_valid, constIn, io.inputs(0))
+
+  var input_a_valid = io.inputs(0)(w-1)
+  /** The input data which is only used for storing.
+   */
+  var dataIn = io.inputs(1)
+  var input_b_valid = io.inputs(1)(w-1)
+  var negated_predicate = io.configuration(4)
+  var input_p = Mux(negated_predicate,Cat(io.inputs(3)(w-2,1),~io.inputs(3)(0)),io.inputs(3)(w-2,0))
+  var input_p_valid = io.inputs(3)(w-1)
+
+
+  var I1_mux_config = io.input_mux_config(0)
+  var I2_mux_config = io.input_mux_config(1)
+  var P_mux_config = io.input_mux_config(2)
+  val prev_I1_mux_config = Reg(UInt(log2Up(numInI1).W))
+  val prev_I2_mux_config = Reg(UInt(log2Up(numInI1).W))
+  val prev_P_mux_config = Reg(UInt(log2Up(numInI1).W))
+
+  when(io.en){
+    prev_I1_mux_config := I1_mux_config
+    prev_I2_mux_config := I2_mux_config
+    prev_P_mux_config := P_mux_config
+  }.otherwise{
+    prev_I1_mux_config := (math.pow(2, log2Up(numInI1)).toInt - 1).U(log2Up(numInI1).W) // all ones
+    prev_I2_mux_config := (math.pow(2, log2Up(numInI1)).toInt - 1).U(log2Up(numInI1).W)
+    prev_P_mux_config := (math.pow(2, log2Up(numInI1)).toInt - 1).U(log2Up(numInI1).W)
+  }
+
+  val not_to_exec_all_i1 = (prev_I1_mux_config =/= (math.pow(2, log2Up(numInI1)).toInt - 1).U(log2Up(numInI1).W) &&
+    input_a_valid=== 0.B)
+  val not_to_exec_all_i2 =   (const_valid =/= 1.B &&  prev_I2_mux_config =/=
+    (math.pow(2, log2Up(numInI2)).toInt - 1).U(log2Up(numInI2).W) &&  input_b_valid === 0.B)
+  val not_to_exec_all_p =   (prev_P_mux_config =/= (math.pow(2, log2Up(numInP)).toInt - 1).U(log2Up(numInP).W) &&
+    (input_p_valid===0.B || input_p(w-2,0) === 0.U))
+  val not_to_exec_all = not_to_exec_all_i1 || not_to_exec_all_i2 || not_to_exec_all_p
+
+  val predicated_exec =  input_p_valid && (input_p(0) === 1.B)
+    //!input_p_valid || (input_p(0) === 1.B)
+//  (const_valid =/= 1.B &&  prev_I2_mux_config
+
+  //  if (LOG_SKEW_LENGTH > 0) {
+  //    if (USE_RELATIVE_SKEW) {
+  //      val synchronizer = Module(new Synchronizer(w))
+  //      synchronizer.io.input0 := addr
+  //      synchronizer.io.input1 := dataIn
+  //
+  //      synchronizer.io.skewing := io.skewing
+  //
+  //      addr = synchronizer.io.skewedInput0
+  //      dataIn = synchronizer.io.skewedInput1
+  //    } else {
+  //      val regNextNaddr = Module(new RegNextN(w))
+  //      val regNextNdataIn = Module(new RegNextN(w))
+  //      regNextNaddr.io.input := addr
+  //      regNextNaddr.io.latency := io.skewing(LOG_SKEW_LENGTH - 1, 0)
+  //      regNextNdataIn.io.input := dataIn
+  //      regNextNdataIn.io.latency := io.skewing(2 * LOG_SKEW_LENGTH - 1, LOG_SKEW_LENGTH)
+  //
+  //      addr = regNextNaddr.io.out
+  //      dataIn = regNextNdataIn.io.out
+  //    }
+  //  }
+  val out = io.outs(0)
+
+  val readMem = memWrapper.io.readMem
+  val writeMem = memWrapper.io.writeMem
+
+
+
+  when(io.en) {
+    readMem.addr := addr((log2Ceil(MEM_DEPTH) + 2 - 1),2)
+    writeMem.addr := addr((log2Ceil(MEM_DEPTH) + 2 - 1),2)
+    //    writeMem.din := dataIn
+    when(io.configuration(2,0) === LSU_LOAD) {
+      readMem.en := true.B
+      writeMem.en := false.B
+      writeMem.we := false.B
+      writeMem.din := dataIn
+      io.outs(0) := Cat(1.B,readMem.dout(w-2,0))
+    }.elsewhen(io.configuration(2,0) === LSU_STORE && !not_to_exec_all) {
+//      if(predicated_exec) {
+        readMem.en := false.B
+        writeMem.en := true.B
+        writeMem.we := true.B
+        writeMem.din := Cat(0.B, dataIn(w - 2, 0)) //remove valid bit
+        io.outs(0) := 0.U(w.W)
+//      }
+//      else{
+//        readMem.en := false.B
+//        writeMem.en := false.B
+//        writeMem.we := false.B
+//        readMem.addr := DontCare
+//        writeMem.addr := DontCare
+//        writeMem.din := DontCare
+//        io.outs(0) :=  0.U(w.W)
+//      }
+    }.elsewhen(io.configuration(2,0) === LSU_LOADH) {
+      readMem.en := true.B
+      writeMem.en := false.B
+      writeMem.we := false.B
+      writeMem.din := dataIn
+      when(addr(1,0)===0.U(2.W)) {
+        io.outs(0) := Cat(0.U((w/2).W),readMem.dout(w/2-1,0))
       }.elsewhen(addr(1,0)===2.U(2.W)){
+        io.outs(0) := Cat(0.U((w/2).W),readMem.dout(w-1,w/2))
+      }.otherwise{
+        io.outs(0) := 0.U(w.W)
+      }
+    }.elsewhen(io.configuration(2,0) === LSU_STOREH && !not_to_exec_all) {
+      readMem.en := false.B
+      writeMem.en := true.B
+      writeMem.we := true.B
+      io.outs(0) :=  0.U(w.W)
+
+      when(addr(1,0)===0.U(2.W)) {
+        writeMem.din := Cat(0.U((w/2).W),dataIn(w/2-1,0))
+      }.elsewhen(addr(1,0)===2.U(2.W)){
+        writeMem.din := Cat(dataIn(w/2-1,0),0.U((w/2).W))
+      }.otherwise{
+        writeMem.din := Cat(0.U((w/2).W),dataIn(w/2-1,0))
+      }
+    }.elsewhen(io.configuration(2,0) === LSU_LOADB) {
+      readMem.en := true.B
+      writeMem.en := false.B
+      writeMem.we := false.B
+      writeMem.din := dataIn
+      when(addr(1,0)===0.U(2.W)) {
+        io.outs(0):= Cat(1.B,0.U((3*w/4-1).W),readMem.dout(w/4-1,0))//valid bit,00..,byte
+      }.elsewhen(addr(1,0)===1.U(2.W)){
+        io.outs(0) := Cat(1.B,0.U((3*w/4-1).W),readMem.dout(w/2-1,w/4))
+      }.elsewhen(addr(1,0)===2.U(2.W)) {
+        io.outs(0) := Cat(1.B,0.U((3*w/4-1).W),readMem.dout(3*w/4-1,w/2))
+      }.elsewhen(addr(1,0)===3.U(2.W)){
+        io.outs(0) := Cat(1.B,0.U((3*w/4-1).W),readMem.dout(w-1,3*w/4))
+      }.otherwise{
+        io.outs(0) := 0.U(w.W)
+      }
+    }.elsewhen(io.configuration(2,0) === LSU_STOREB && !not_to_exec_all) {
+      readMem.en := false.B
+      writeMem.en := true.B
+      writeMem.we := true.B
+      io.outs(0) :=  0.U(w.W)
+      //      when(addr(1,0)===0.U(2.W)) {
+      //        writeMem.din := 0.U(w.W)//Cat(0.U((3*w/4).W),dataIn(w/4-1,0))
+      //      }.elsewhen(addr(1,0)===1.U(2.W)){
+      //        writeMem.din := 0.U(w.W)//Cat(0.U((w/2).W),dataIn(w/4-1,0),0.U((w/4).W))
+      //      }.elsewhen(addr(1,0)===0.U(2.W)) {
+      //        writeMem.din := 0.U(w.W)//Cat(0.U((w/4).W),dataIn(w/4-1,0),0.U((w/2).W))
+      //      }.elsewhen(addr(1,0)===2.U(2.W)){
+      //        writeMem.din := 0.U(w.W)//Cat(dataIn(w/4-1,0),0.U((3*w/4).W))
+      //      }.otherwise{
+      //        writeMem.din := 0.U(w.W)//Cat(0.U((3*w/4).W),dataIn(w/4-1,0))
+      //      }
+      when(addr(1,0)===0.U(2.W)) {
+        writeMem.din := Cat(0.U((3*w/4).W),dataIn(w/4-1,0))
+      }.elsewhen(addr(1,0)===1.U(2.W)){
+        writeMem.din := Cat(0.U((w/2).W),dataIn(w/4-1,0),0.U((w/4).W))
+      }.elsewhen(addr(1,0)===2.U(2.W)) {
+        writeMem.din := Cat(0.U((w/4).W),dataIn(w/4-1,0),0.U((w/2).W))
+      }.elsewhen(addr(1,0)===3.U(2.W)){
         writeMem.din := Cat(dataIn(w/4-1,0),0.U((3*w/4).W))
       }.otherwise{
         writeMem.din := Cat(0.U((3*w/4).W),dataIn(w/4-1,0))

@@ -152,6 +152,27 @@ class ElementLSU2(name: String, params: List[Int]) extends ElementTrait {
   setMRRGMode(MEM_MODE)
 }
 
+/** An element corresponding predicated load/store unit.
+*
+* @constructor create an abstract LSU model
+* @param name      the name of the model
+* @param params    List(w)
+*/
+class ElementLSU3(name: String, params: List[Int]) extends ElementTrait {
+  //Module ID 4
+  setTypeID(4)
+
+  setSupOps(List(OpEnum.LOAD, OpEnum.STORE, OpEnum.LOADH, OpEnum.STOREH, OpEnum.LOADB, OpEnum.LOADB_CONST, OpEnum.STOREB, OpEnum.STOREB_CONST))
+
+  //0 for load, 1 for store
+  val configBits = 5 //including const valid and NPB
+  setParams(params :+ configBits)
+  setName(name)
+
+  addInternalNodesNum(1)
+  setMRRGMode(MEM_MODE)
+}
+
 /** A block.
  *
  * @deprecated

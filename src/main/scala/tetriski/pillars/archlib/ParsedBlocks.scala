@@ -328,13 +328,14 @@ class Parsed_PEBlock_Test(name: String, useMuxBypass: Boolean, opList: List[OpEn
     if (isMemFU) {
       /** An LSU can perform load or store operation.
        */
-      val LSU = new ElementLSU2("loadStoreUnit", List(dataWidth))
-      LSU.addInPorts(Array("addr", "dataIn", "constIn"))
+      val LSU = new ElementLSU3("loadStoreUnit", List(dataWidth))
+      LSU.addInPorts(Array("addr", "dataIn", "constIn", "pIn"))
       LSU.addOutPorts(Array("out"))
       addElement(LSU)
 
       addConnect(inPortToRFMap(fuInPorts(1)) / "out_0" -> LSU / "addr")
       addConnect(inPortToRFMap(fuInPorts(0)) / "out_0" -> LSU / "dataIn")
+      addConnect(inPortToRFMap(fuInPorts(2)) / "out_0" -> LSU / "pIn")
       addConnect(const0 / "out_0" -> LSU / "constIn")
 
       val muxT = new ElementMux("muxT", List(2, dataWidth))
