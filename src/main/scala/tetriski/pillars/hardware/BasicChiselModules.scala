@@ -298,6 +298,7 @@ class Alu(funSelect: Int, w: Int) extends Module {
  */
 
 class Alu2(funSelect: Int, numInI1: Int, numInI2: Int, numInP: Int, w: Int) extends Module {
+  //override val desiredName = s"DMD"
   val io = IO(new Bundle {
     val en = Input(Bool())
     val skewing = Input(UInt((SKEW_WIDTH).W))
@@ -339,7 +340,8 @@ class Alu2(funSelect: Int, numInI1: Int, numInI2: Int, numInP: Int, w: Int) exte
 //          case 13 => funSeq.append(ALU_COPY_B -> input_b)
           case 12 => funSeq.append(ALU_CMP -> (input_a === input_b))
           case 13 => funSeq.append(ALU_CGT -> (input_a > input_b))
-          case 14 => funSeq.append(ALU_SELECT -> Mux(const_valid, input_const, Mux(input_a_valid, input_a, Mux(input_b_valid, io.inputs(1)(w-2,0),0.U))))
+          case 14 => funSeq.append(ALU_SELECT -> Mux(const_valid, input_const, Mux(input_a_valid, input_a,
+            Mux(input_b_valid, io.inputs(1)(w-2,0),0.U))))
             /*
             SELECT
             5'b10000: begin
@@ -431,21 +433,26 @@ class Alu2(funSelect: Int, numInI1: Int, numInI2: Int, numInP: Int, w: Int) exte
   * */
 //  val not_to_exec_all =
 //    (prev_I1_mux_config =/= (math.pow(2, log2Up(numInI1)).toInt - 1).U(log2Up(numInI1).W) &&  input_a(w-1)=== 0.B) ||
-//    (const_valid =/= 1.B &&  prev_I2_mux_config =/= (math.pow(2, log2Up(numInI2)).toInt - 1).U(log2Up(numInI2).W) &&  input_b(w-1) === 0.B) ||
-//    (prev_P_mux_config =/= (math.pow(2, log2Up(numInP)).toInt - 1).U(log2Up(numInP).W) &&  (input_p(w-1)===0.B || input_p === 0.U))
+//    (const_valid =/= 1.B &&  prev_I2_mux_config =/= (math.pow(2, log2Up(numInI2)).toInt - 1).U(log2Up(numInI2).W) &&
+  //    input_b(w-1) === 0.B) ||
+//    (prev_P_mux_config =/= (math.pow(2, log2Up(numInP)).toInt - 1).U(log2Up(numInP).W) &&  (input_p(w-1)===0.B ||
+  //    input_p === 0.U))
 
-  val not_to_exec_all_i1 = (prev_I1_mux_config =/= (math.pow(2, log2Up(numInI1)).toInt - 1).U(log2Up(numInI1).W) &&  input_a_valid=== 0.B)
-  val not_to_exec_all_i2 =   (const_valid =/= 1.B &&  prev_I2_mux_config =/= (math.pow(2, log2Up(numInI2)).toInt - 1).U(log2Up(numInI2).W) &&  input_b_valid === 0.B)
-  val not_to_exec_all_p =   (prev_P_mux_config =/= (math.pow(2, log2Up(numInP)).toInt - 1).U(log2Up(numInP).W) &&  (input_p_valid===0.B || input_p(w-2,0) === 0.U))
+  val not_to_exec_all_i1 = (prev_I1_mux_config =/= (math.pow(2, log2Up(numInI1)).toInt - 1).U(log2Up(numInI1).W) &&
+    input_a_valid=== 0.B)
+  val not_to_exec_all_i2 =   (const_valid =/= 1.B &&  prev_I2_mux_config =/=
+    (math.pow(2, log2Up(numInI2)).toInt - 1).U(log2Up(numInI2).W) &&  input_b_valid === 0.B)
+  val not_to_exec_all_p =   (prev_P_mux_config =/= (math.pow(2, log2Up(numInP)).toInt - 1).U(log2Up(numInP).W)
+    &&  (input_p_valid===0.B || input_p(w-2,0) === 0.U))
   val not_to_exec_all = not_to_exec_all_i1 || not_to_exec_all_i2 || not_to_exec_all_p
   //missing const configs
 
   val not_to_exec_select =
     ((input_a_valid=== 0.B && input_b_valid=== 0.B) ||
-    (prev_P_mux_config =/= (math.pow(2, log2Up(numInI1)).toInt - 1).U(log2Up(numInI1).W) &&  (input_p_valid===0.B || input_p(w-2,0) === 0.U)))
+    (prev_P_mux_config =/= (math.pow(2, log2Up(numInI1)).toInt - 1).U(log2Up(numInI1).W) &&  (input_p_valid===0.B ||
+      input_p(w-2,0) === 0.U)))
 
   val funSeq = getFunSeq(shamt)
-  println("funSeq:" + funSeq)
 
   val out_data_ =  MuxLookup(io.configuration(3,0), input_b, funSeq)
   val out_data = out_data_(w-2,0)
@@ -890,28 +897,7 @@ class LoadStoreUnit2(w: Int) extends Module {
    */
   var dataIn = io.inputs(1)
 
-//  if (LOG_SKEW_LENGTH > 0) {
-//    if (USE_RELATIVE_SKEW) {
-//      val synchronizer = Module(new Synchronizer(w))
-//      synchronizer.io.input0 := addr
-//      synchronizer.io.input1 := dataIn
-//
-//      synchronizer.io.skewing := io.skewing
-//
-//      addr = synchronizer.io.skewedInput0
-//      dataIn = synchronizer.io.skewedInput1
-//    } else {
-//      val regNextNaddr = Module(new RegNextN(w))
-//      val regNextNdataIn = Module(new RegNextN(w))
-//      regNextNaddr.io.input := addr
-//      regNextNaddr.io.latency := io.skewing(LOG_SKEW_LENGTH - 1, 0)
-//      regNextNdataIn.io.input := dataIn
-//      regNextNdataIn.io.latency := io.skewing(2 * LOG_SKEW_LENGTH - 1, LOG_SKEW_LENGTH)
-//
-//      addr = regNextNaddr.io.out
-//      dataIn = regNextNdataIn.io.out
-//    }
-//  }
+
   val out = io.outs(0)
 
   val readMem = memWrapper.io.readMem
@@ -981,17 +967,6 @@ class LoadStoreUnit2(w: Int) extends Module {
       writeMem.en := true.B
       writeMem.we := true.B
       io.outs(0) :=  0.U(w.W)
-//      when(addr(1,0)===0.U(2.W)) {
-//        writeMem.din := 0.U(w.W)//Cat(0.U((3*w/4).W),dataIn(w/4-1,0))
-//      }.elsewhen(addr(1,0)===1.U(2.W)){
-//        writeMem.din := 0.U(w.W)//Cat(0.U((w/2).W),dataIn(w/4-1,0),0.U((w/4).W))
-//      }.elsewhen(addr(1,0)===0.U(2.W)) {
-//        writeMem.din := 0.U(w.W)//Cat(0.U((w/4).W),dataIn(w/4-1,0),0.U((w/2).W))
-//      }.elsewhen(addr(1,0)===2.U(2.W)){
-//        writeMem.din := 0.U(w.W)//Cat(dataIn(w/4-1,0),0.U((3*w/4).W))
-//      }.otherwise{
-//        writeMem.din := 0.U(w.W)//Cat(0.U((3*w/4).W),dataIn(w/4-1,0))
-//      }
       when(addr(1,0)===0.U(2.W)) {
         writeMem.din := Cat(0.U((3*w/4).W),dataIn(w/4-1,0))
       }.elsewhen(addr(1,0)===1.U(2.W)){
@@ -1206,22 +1181,11 @@ class LoadStoreUnit3( numInI1: Int, numInI2: Int, numInP: Int, w: Int) extends M
       }.otherwise{
         io.outs(0) := 0.U(w.W)
       }
-    }.elsewhen(io.configuration(2,0) === LSU_STOREB && !not_to_exec_all) {
+    }.elsewhen(io.configuration(2,0) === LSU_STOREB && !not_to_exec_all){// && predicated_exec) {
       readMem.en := false.B
       writeMem.en := true.B
       writeMem.we := true.B
       io.outs(0) :=  0.U(w.W)
-      //      when(addr(1,0)===0.U(2.W)) {
-      //        writeMem.din := 0.U(w.W)//Cat(0.U((3*w/4).W),dataIn(w/4-1,0))
-      //      }.elsewhen(addr(1,0)===1.U(2.W)){
-      //        writeMem.din := 0.U(w.W)//Cat(0.U((w/2).W),dataIn(w/4-1,0),0.U((w/4).W))
-      //      }.elsewhen(addr(1,0)===0.U(2.W)) {
-      //        writeMem.din := 0.U(w.W)//Cat(0.U((w/4).W),dataIn(w/4-1,0),0.U((w/2).W))
-      //      }.elsewhen(addr(1,0)===2.U(2.W)){
-      //        writeMem.din := 0.U(w.W)//Cat(dataIn(w/4-1,0),0.U((3*w/4).W))
-      //      }.otherwise{
-      //        writeMem.din := 0.U(w.W)//Cat(0.U((3*w/4).W),dataIn(w/4-1,0))
-      //      }
       when(addr(1,0)===0.U(2.W)) {
         writeMem.din := Cat(0.U((3*w/4).W),dataIn(w/4-1,0))
       }.elsewhen(addr(1,0)===1.U(2.W)){

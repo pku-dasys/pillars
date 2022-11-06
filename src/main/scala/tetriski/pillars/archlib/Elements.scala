@@ -14,7 +14,8 @@ import tetriski.pillars.hardware.PillarsConfig.USE_PREDICATE
  * @param supBypass a parameter indicating whether the ALU should support bypass
  * @param params    List(width)
  */
-class ElementAlu(name: String, aluOpList: List[OpEnum], supBypass: Boolean, params: List[Int]) extends ElementTrait {
+class ElementAlu(name: String, aluOpList: List[OpEnum], supBypass: Boolean, params: List[Int])
+  extends ElementTrait {
   //Module ID 0
   setTypeID(0)
 
@@ -42,6 +43,45 @@ class ElementAlu(name: String, aluOpList: List[OpEnum], supBypass: Boolean, para
 
 }
 
+
+/** An element corresponding arithmetic logical unit.
+ *
+ * @constructor create an abstract ALU model
+ * @param name      the name of the model
+ * @param globalName      the global name of the model
+ * @param aluOpList the subset of optional operations
+ * @param supBypass a parameter indicating whether the ALU should support bypass
+ * @param params    List(width)
+ */
+class ElementAluGN(name: String,globalName: String, aluOpList: List[OpEnum], supBypass: Boolean, params: List[Int])
+  extends ElementTrait {
+  //Module ID 0
+  setTypeID(0)
+
+  setSupOps(aluOpList)
+
+  val aluFunSelect = OpcodeTranslator.getAluFunSelect(aluOpList, supBypass)
+
+  //Currently, we have 14 optional operations, so the configBits is 4.
+  //TODO: automatically infer configBits to reduce the reconfiguration overhead of ALU.
+  var configBits = 4
+  if (USE_PREDICATE){
+    configBits = 6 // including const valid
+  }else {
+    configBits = 4
+  }
+  setParams((aluFunSelect +: params) :+ configBits)
+  setName(name)
+  setGlobalName(globalName)
+
+  // support bypass
+  if (supBypass) {
+    addInternalNodesNum(2)
+  } else {
+    addInternalNodesNum(1)
+  }
+
+}
 
 /** An element corresponding register file.
  *

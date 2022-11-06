@@ -246,69 +246,10 @@ class SimulationHelper(arch: ArchitctureHierarchy) {
     }
   }
 
-  /** Read the test data in trace files.
-   * Format: var_name,offset,pre-run-data,post-run-data
-   * @param testdataFilename the file name of the test data trace files
-   */
-  def readTestData(testdataFilename: String): Unit = {
-    val testdataArray = Source.fromFile(testdataFilename).getLines().drop(1).toArray
-    println(testdataArray(0))
-    println(testdataArray(1))
-//    resultArray.map(r => addResult(r))
-//    size = opArray.size
-//    //Set the cycle we can obtain the last result.
-//    if(outputPortCycleMap.size>0) {
-//      outputCycle = outputPortCycleMap.map(t => t._2)
-//        .reduce((t1, t2) => Math.max(t1, t2))
-//    }else{
-//      outputCycle = 0
-//    }
-  }
-
-  /** Read the data layout.
-   * Format: var_name,base_addr
-   * @param dataLayoutFilename the file name of the data layout
-   */
-  def readDataLayout(dataLayoutFilename: String): Unit = {
-    val dataLayoutArray = Source.fromFile(dataLayoutFilename).getLines().drop(1).toArray
-    println(dataLayoutArray(0))
-    println(dataLayoutArray(1))
-    //    resultArray.map(r => addResult(r))
-    //    size = opArray.size
-    //    //Set the cycle we can obtain the last result.
-    //    if(outputPortCycleMap.size>0) {
-    //      outputCycle = outputPortCycleMap.map(t => t._2)
-    //        .reduce((t1, t2) => Math.max(t1, t2))
-    //    }else{
-    //      outputCycle = 0
-    //    }
-  }
-
-//  /** Add the mapping result of a mapped DFG node.
-//   *
-//   * @example If the input is "add0 0:cgra.tile_0.pe_3_3.alu0.internalNode_0 1 0",
-//   *          it means that the DFG node whose name is "add0" is mapped onto
-//   *          a MRRG node whose name is "0:cgra.tile_0.pe_3_3.alu0.internalNode_0".
-//   *          The reconfiguration cycle of this MRRG node is 0.
-//   *          The fire time is 1 and the skew is 0.
-//   * @param result a line in the result TXT indicating the mapping result of a mapped DFG node
-//   */
-//  def addResult(result: String): Unit = {
-//    val tempList = result.split(" ").toList
-//
-//    //Add the name of the DFG node into opArray.
-//    val op = tempList(0)
-//    opArray.append(op)
-//
-//    //Add the element corresponding the mapped MRRG node into moduleArray.
-//    val moduleName = tempList(1).replaceAll("([0-9]+:)|<|>", "").split("\\.", 0)
-//    var temp = arch.asInstanceOf[BlockTrait]
-//
-//  }
   def bytesToInt(bytes: Array[Byte], littleEndian: Boolean): Int = {
     val buffer = java.nio.ByteBuffer.wrap(bytes)
-    if(littleEndian) buffer.order(java.nio.ByteOrder.LITTLE_ENDIAN).getInt
-    else buffer.getInt
+    if(littleEndian) {buffer.order(java.nio.ByteOrder.LITTLE_ENDIAN).getInt}
+    else {buffer.getInt}
   }
   /** Create data map from morpher data trace and data layout.
    * morpher data layout is byte addressable
@@ -321,22 +262,22 @@ class SimulationHelper(arch: ArchitctureHierarchy) {
     val dataLayoutArray = Source.fromFile(dataLayoutFilename).getLines().drop(1).toArray
     val dataMemDetails = Source.fromFile(dataMemDetailsFilename).getLines().toArray
 
-    val numofbanks = dataMemDetails(0).toInt
-    val bankSizeInB = dataMemDetails(1).toInt
+//    val numofbanks = dataMemDetails(0).toInt
+    val bankSizeInB = dataMemDetails(0).toInt
 
 
     // var name -> List[int offset, prerundata, postrundata]
     var dataMemContent = scala.collection.mutable.Map[String, List[List[Int]]]()
     var dataLayout = Map[String, Int]()
     for(var_base <- dataLayoutArray) {
-      println(var_base)
+//      println(var_base)
       val tempList = var_base.split(",").toList
       val varName = tempList(0).toString
       val baseAddr = tempList(1).toInt
       dataLayout = dataLayout + (varName -> baseAddr)
       dataMemContent += (varName -> Nil)
     }
-    println(dataLayout)
+//    println(dataLayout)
 
     for(testData <- testdataArray){
       val tempList = testData.split(",").toList
@@ -363,7 +304,7 @@ class SimulationHelper(arch: ArchitctureHierarchy) {
     * Following loop creates the integer arrays from morpher byte trace and create inputDataMap.
     * */
     for(memCont <- dataMemContent){
-      println("var name:" + memCont._1 + ", var size in bytes:" + memCont._2.size)
+//      println("var name:" + memCont._1 + ", var size in bytes:" + memCont._2.size)
       val varName = memCont._1
       // There are integer (4 byte) arrays/scalars and also 1 byte scalars like loop start and loop end.
       if(memCont._2.size % 4 == 0) {// For Int variables
@@ -389,7 +330,7 @@ class SimulationHelper(arch: ArchitctureHierarchy) {
         inputDataMap += (List(LSUnum, LSUbase) -> inputData)
         expectedDataMap += (List(LSUnum, LSUbase) -> expectedData)
         varNameList = varNameList :+ varName
-        println(LSUnum, LSUbase, inputData, expectedData)
+//        println(LSUnum, LSUbase, inputData, expectedData)
       }
       else if(memCont._2.size == 1 ){
         // For Byte values such as loop start and loop end.
@@ -404,81 +345,18 @@ class SimulationHelper(arch: ArchitctureHierarchy) {
         val LSUnum = (dataLayout(memCont._1)/bankSizeInB).floor.toInt
         val LSUbase = (dataLayout(memCont._1) - LSUnum*bankSizeInB)/4
         inputDataMap += (List(LSUnum, LSUbase) -> intData)
-        println(LSUnum, LSUbase, intData(0))
+//        println(LSUnum, LSUbase, intData(0))
       }
       else{
         println("Not an int array/scalar or byte scalar. Exiting..")
         sys.exit(0)
       }
     }
-    println(inputDataMap)
+//    println(inputDataMap)
     appTestHelper.addInData(inputDataMap)
     appTestHelper.addOutData(expectedDataMap)
     appTestHelper.addVarNameData(varNameList)
   }
-//  /** Create data map from morpher data trace and data layout.
-//   * morpher data layout is byte addressable
-//   * pillars memory enqdata method only support word (4 bytes) address
-//   *
-//   */
-//  def createDataMap(appTestHelper:AppTestHelper, testdataFilename: String, dataLayoutFilename: String
-//                    , dataMemDetailsFilename: String): Unit = {
-//    val testdataArray = Source.fromFile(testdataFilename).getLines().drop(1).toArray
-//
-//    val dataLayoutArray = Source.fromFile(dataLayoutFilename).getLines().drop(1).toArray
-//    val dataMemDetails = Source.fromFile(dataMemDetailsFilename).getLines().toArray
-//
-//    val numofbanks = dataMemDetails(0).toInt
-//    val bankSizeInB = dataMemDetails(1).toInt
-//
-//
-//
-//    // var name -> List[int offset, prerundata, postrundata]
-//    var dataMemContent = scala.collection.mutable.Map[String, List[List[Int]]]()
-//    var dataLayout = Map[String, Int]()
-//    for(var_base <- dataLayoutArray) {
-//      println(var_base)
-//      val tempList = var_base.split(",").toList
-//      val varName = tempList(0).toString
-//      val baseAddr = tempList(1).toInt
-//      dataLayout = dataLayout + (varName -> baseAddr)
-//      dataMemContent += (varName -> Nil)
-//
-//    }
-//    println(dataLayout)
-//
-//    for(testData <- testdataArray){
-//      val tempList = testData.split(",").toList
-//      val varName = tempList(0).toString
-//      val offset = tempList(1).toInt
-//      val prerundata = tempList(2).toInt
-//      val postrundata = tempList(3).toInt
-//
-//      dataMemContent.get(varName) match {
-//        case Some(xs:List[List[Int]]) => dataMemContent.update(varName, xs :+ List(offset,prerundata,postrundata))
-//        case None => dataMemContent
-//      }
-//    }
-//    println("Done")
-//    //println(dataMemContent)
-//    var inputDataMap = Map[List[Int], Array[Int]]()
-//    for(memCont <- dataMemContent){
-////      println(memCont._1+ ":" +memCont._2.size)
-//
-//      val intData = new Array[Int](memCont._2.size)
-//      var i = 0
-//      for (prepostdata <- memCont._2) {
-//        intData(i) = prepostdata(1)
-//        i += 1
-//      }
-//      val LSUnum = (dataLayout(memCont._1)/bankSizeInB).floor.toInt
-//      val LSUbase = (dataLayout(memCont._1) - LSUnum*bankSizeInB)
-//      inputDataMap += (List(LSUnum, LSUbase) -> intData)
-//      //println(LSUnum, LSUbase, intData)
-//
-//    }
-//    appTestHelper.addInData(inputDataMap)
-//  }
 
   /** Get the schedules of the mapping result.
    *
@@ -501,17 +379,17 @@ class SimulationHelper(arch: ArchitctureHierarchy) {
   def setConst(vals: Array[Int], testII: Int): Unit = {
     constInfo.reset(testII)
     var valIndex = 0
-    println("\nSet Const:  size " + size)
+//    println("\nSet Const:  size " + size)
     for (i <- 0 until size) {
       val module = moduleArray(i)
-      println("module " + module)
+//      println("module " + module)
       if (module.getTypeID() == 3) {
         constInfo.addConst(module.getModuleID(), RCArray(i), vals(valIndex))
-        println("module.getModuleID() " + module.getModuleID())
-        println("vals(valIndex) " + vals(valIndex))
+//        println("module.getModuleID() " + module.getModuleID())
+//        println("vals(valIndex) " + vals(valIndex))
         valIndex = valIndex + 1
       }
-      println("")
+//      println("")
     }
   }
 

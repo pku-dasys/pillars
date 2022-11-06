@@ -156,10 +156,10 @@ class Parsed_PEBlock_Test(name: String, useMuxBypass: Boolean, opList: List[OpEn
     }
   }
 
-  println("portToInConnections: ")
+//  println("portToInConnections: ")
   portToInConnections.foreach(x => {
-    println("port: ", x._1)
-    println(x._2.mkString(", "))
+//    println("port: ", x._1)
+//    println(x._2.mkString(", "))
   })
 
   // create muxes and add mux -> dst connection
@@ -294,7 +294,7 @@ class Parsed_PEBlock_Test(name: String, useMuxBypass: Boolean, opList: List[OpEn
     /** An ALU that can perform some operations.
      * TODO: changes for predicate support??
      */
-    val dp0 = new ElementAlu(s"alu$aluCount", aluOpList, aluSupBypass, List(dataWidth))
+    val dp0 = new ElementAluGN(s"alu$aluCount", this.getHierarchyName()(0).toString() + "_" + s"alu$aluCount",aluOpList, aluSupBypass, List(dataWidth))
     addElement(dp0)
     aluCount = aluCount + 1
 

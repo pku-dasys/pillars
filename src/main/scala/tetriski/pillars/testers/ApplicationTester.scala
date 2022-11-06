@@ -260,9 +260,9 @@ class ApplicationTester(c: TopModule, appTestHelper: AppTestHelper) extends Peek
     poke(c.io.streamInLSU(numInLSU).valid, 0)
     poke(c.io.baseLSU(numInLSU), base)
     step(1)
-    println("enqData")
-    println("Base: " + base)
-    println("InData array: " + inData)
+//    println("enqData")
+//    println("Base: " + base)
+//    println("InData array: " + inData)
     // push
     for (x <- inData) {
       poke(c.io.streamInLSU(numInLSU).valid, 1)
@@ -294,6 +294,8 @@ class ApplicationTester(c: TopModule, appTestHelper: AppTestHelper) extends Peek
    */
   def deqData(numInLSU: Int, refArray: Array[Int], base: Int): Unit = {
     // exec
+    var matches = 0
+    var mismatches = 0
     poke(c.io.startLSU(numInLSU), 1)
     poke(c.io.baseLSU(numInLSU), base)
     poke(c.io.lenLSU(numInLSU), refArray.length)
@@ -309,11 +311,17 @@ class ApplicationTester(c: TopModule, appTestHelper: AppTestHelper) extends Peek
           step(1)
         }
       }
-      expect(c.io.streamOutLSU(numInLSU).bits, asUnsignedInt(refArray(i)))
-      println(i + " " + asUnsignedInt(refArray(i)).toString + " " + peek(c.io.streamOutLSU(numInLSU).bits).toString())
+      val gotExpected = expect(c.io.streamOutLSU(numInLSU).bits, asUnsignedInt(refArray(i)))
+      println(i + " " + asUnsignedInt(refArray(i)).toString + " " + peek(c.io.streamOutLSU(numInLSU).bits).toString() +
+        " " + gotExpected)
+      if (gotExpected){
+        matches += 1
+      }else{
+        mismatches += 1
+      }
       step(1)
     }
-
+    println("Matches: " + matches + ", Mismatches:" + mismatches)
     poke(c.io.deqEnLSU(numInLSU), 0)
   }
 

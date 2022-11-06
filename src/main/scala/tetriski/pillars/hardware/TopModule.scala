@@ -143,6 +143,7 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
       }
       alu.io.en <> aluScheduleController.io.valid
       alu.io.skewing <> aluScheduleController.io.skewing
+      alu.name
     }
   } else {
     for (i <- 0 until aluNum) {
@@ -281,7 +282,7 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
       }
 
       if (typeID == 0){
-        println("ALU Module ID " + moduleID)
+//        println("ALU Module ID " + moduleID)
 
         val ALU_muxI1_configPort = alus(moduleID).io.input_mux_config(0)
         val ALU_muxI2_configPort = alus(moduleID).io.input_mux_config(1)
@@ -290,7 +291,7 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
       }
 
       if (typeID == 4){
-        println("LSU Module ID " + moduleID)
+//        println("LSU Module ID " + moduleID)
         val LSU_muxI1_configPort = LSUs(moduleID).io.input_mux_config(0)
         val LSU_muxI2_configPort = LSUs(moduleID).io.input_mux_config(1)
         val LSU_muxP_configPort = LSUs(moduleID).io.input_mux_config(2)
@@ -308,27 +309,27 @@ class TopModule(val moduleInfos: PillarsModuleInfo, val connect: Map[List[Int], 
     regionConfigBits = regionConfigBits :+ regionTotalBits
     val dispatch = Module(new Dispatch(regionTotalBits, configBits))
     dispatch.io.en <> io.en
-    println("Region: " + region)
+//    println("Region: " + region)
 
     for (i <- 0 until configBits.size) {
       configPorts(i) := dispatch.io.outs(i)
       //println("Config Ports: " + i + ":" + configPorts(i))
     }
-    println("Number of ALUs in region: " + ALUs_in_region)
-    println("Number of RFs in region: " + RFs_in_region)
-    println("Number of LSUs in region: " + LSUs_in_region)
+//    println("Number of ALUs in region: " + ALUs_in_region)
+//    println("Number of RFs in region: " + RFs_in_region)
+//    println("Number of LSUs in region: " + LSUs_in_region)
     //connecting mux configurations to ALU in order to generate valid signal
     if(ALUs_in_region == 1) {
       for (i <- 0 until ALU_mux_configPorts.size) {
         ALU_mux_configPorts(i) := dispatch.io.outs(i + ALUs_in_region + RFs_in_region)
-        println("ALU mux Config Ports: " + i + ":" + ALU_mux_configPorts(i))
+//        println("ALU mux Config Ports: " + i + ":" + ALU_mux_configPorts(i))
       }
     }
 
     if(LSUs_in_region == 1) {
       for (i <- 0 until ALU_mux_configPorts.size) {
         LSU_mux_configPorts(i) := dispatch.io.outs(i + ALUs_in_region + RFs_in_region)
-        println("LSU mux Config Ports: " + i + ":" + LSU_mux_configPorts(i))
+//        println("LSU mux Config Ports: " + i + ":" + LSU_mux_configPorts(i))
       }
     }
     configControllers.append(configController)

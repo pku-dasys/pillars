@@ -501,7 +501,7 @@ class STDNOC_PEBlock(name: String, useMuxBypass: Boolean, opList: List[OpEnum] =
 //    addConnect(List(LSU.getName(), "out"),List(muxT.getName(),"input_0"))
 
     /** A register with one input port and one output port.
-     * This makes latency of memPE is equal to two
+     * This makes latency of memPE equal to two
      */
     val rfALUO = new ElementRF("rfALUO", List(0, 1,1, dataWidth))
     rfALUO.addOutPorts(Array("out_0"))

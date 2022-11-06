@@ -101,6 +101,12 @@ trait BlockTrait extends ElementTrait {
     setName(arg)
   }
 
+  /** Initialize the name and hierarchy name of this block.
+   */
+  def getHierarchyName(): ArrayBuffer[String] = {
+    hierarchyName
+  }
+
   /** Get a port of this block.
    * It will be used for get ports of current block when designing the architecture.
    *
@@ -165,7 +171,7 @@ trait BlockTrait extends ElementTrait {
    */
   def  addConnect(arg: List[List[String]]): Unit = {
     connectArray.append(arg)
-    println("AddConnect arg: "+arg)
+//    println("AddConnect arg: "+arg)
   }
 
   /** Add a connection into this block.

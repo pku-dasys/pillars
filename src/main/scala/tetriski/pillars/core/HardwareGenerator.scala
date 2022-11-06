@@ -41,7 +41,7 @@ class HardwareGenerator(arch: BlockTrait, connect: Connect) {
         if (strs(i)(strs(i).size - 1) == '/') {
           temp = temp(strs(i).substring(0, strs(i).size - 1))
         } else if (i == strs.size - 2) {
-          println("getElement: " + strs(i))
+//          println("getElement: " + strs(i))
           val target = temp.getElement(strs(i))
           return List(target.getTypeID(), target.getModuleID(), target.getPortID(strs(strs.size - 1)))
         }
@@ -50,12 +50,12 @@ class HardwareGenerator(arch: BlockTrait, connect: Connect) {
     }
 
 
-    println("src: " + src)
+//    println("src: " + src)
     val encodeSrc = encode(src)
-    println("encodeSrc: " + encodeSrc)
-    println("dsts: " + dsts)
+//    println("encodeSrc: " + encodeSrc)
+//    println("dsts: " + dsts)
     val encodeDsts = dsts.map(encode).toList
-    println("encodeDsts: " + encodeDsts)
+//    println("encodeDsts: " + encodeDsts)
 //    if(encodeDsts.size != 0) {
     Map(encodeSrc -> encodeDsts)
 //    }else{

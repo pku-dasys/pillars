@@ -26,6 +26,10 @@ trait BasicTrait {
    */
   var name = ""
 
+  /** The global name of this abstract model.
+   */
+  var globalName = ""
+
   /** The opcodes supported by the module represented by this abstract model.
    */
   var supOps = new ArrayBuffer[OpEnum]
@@ -82,6 +86,15 @@ trait BasicTrait {
     name = arg
   }
 
+
+  /** Set the global name of this abstract model.
+   *
+   * @param arg the new width
+   */
+  def setGlobalName(arg: String): Unit = {
+    globalName = arg
+  }
+
   /** Set the opcodes supported by the module represented by this abstract model.
    * When using this function,
    * users should guarantee correct correspondence of the opcodes owned by a
@@ -112,7 +125,7 @@ trait BasicTrait {
     configBit = arg
     for (i <- 0 until arg)
       configArray.append(1)//is this default config?
-    println("Set default config bit" + configArray)
+//    println("Set default config bit" + configArray)
   }
 
   /** Set fire time of the module represented by this abstract model in a reconfiguration cycle.
@@ -171,6 +184,14 @@ trait BasicTrait {
    */
   def getName(): String = {
     name
+  }
+
+  /** Get the global name of the this abstract model.
+   *
+   * @return the name of the this abstract model
+   */
+  def getGlobalName(): String = {
+    globalName
   }
 
   /** Get the width of the module represented by this abstract model.
