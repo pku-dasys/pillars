@@ -44,6 +44,7 @@ val defaultVersions = Map(
   //"chisel-testers2" -> "0.1.2"
 )
 
+libraryDependencies += "com.typesafe.play" %% "play-json" % "2.9.3"
 libraryDependencies ++= Seq("chisel3","chisel-iotesters").map {
   dep: String => "edu.berkeley.cs" %% dep % sys.props.getOrElse(dep + "Version", defaultVersions(dep)) }
 scalacOptions := Seq("-unchecked", "-deprecation")
