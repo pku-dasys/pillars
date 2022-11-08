@@ -1,8 +1,7 @@
 package tetriski.pillars.examples
 
 import chisel3.iotesters
-import tetriski.pillars.archlib.TileLSUBlock
-import tetriski.pillars.archlib.STDNOC_Block
+import tetriski.pillars.archlib.{PillarsArch, STDNOC_Block, TileLSUBlock}
 import tetriski.pillars.core.{ArchitctureHierarchy, Connect, HardwareGenerator, OpEnum, SimulationHelper}
 import tetriski.pillars.hardware.{SynthesizedModule, TopModule}
 import tetriski.pillars.mapping.{DotReader, ILPMap, Scheduler}
@@ -11,6 +10,9 @@ import tetriski.pillars.testers.{AppTestHelper, ApplicationTester}
 import scala.collection.mutable.ArrayBuffer
 import chisel3.iotesters.PeekPokeTester
 import tetriski.pillars.examples.ApplicationExamples.simulationHelper
+
+import java.io.FileInputStream
+import play.api.libs.json._
 
 /** An end2end_test tutorial of Pillars.
  * Example: matrix multiplication: C = A X B, where A is a M * 2 matrix, and B is a 2 * N matrix.
@@ -24,6 +26,10 @@ object Tutorial {
     val outputPort = 2
     val dataWidth = 32
 
+    val pillarsJsonFileStream = new FileInputStream("tutorial/stdnoc.json")
+    val json = Json.parse(pillarsJsonFileStream).as[JsObject]
+    val pillarsArch = new PillarsArch(json)
+
     //Initialize the top block.
     val arch = new ArchitctureHierarchy()
     arch.addInPorts((0 until inputPort).map(i => s"input_$i").toArray)
@@ -31,7 +37,7 @@ object Tutorial {
 
     //    val tile = new TileLSUBlock("tile_0", colNum, rowNum, inputPort, outputPort,
     //      useMuxBypass = false, complex = true, dataWidth = dataWidth)
-    val tile = new STDNOC_Block("tile_0", colNum, rowNum, inputPort, outputPort,
+    val tile = new STDNOC_Block("tile_0", pillarsArch, colNum, rowNum, inputPort, outputPort,
       useMuxBypass = false, complex = true, dataWidth = dataWidth)
     arch.addBlock(tile)
 

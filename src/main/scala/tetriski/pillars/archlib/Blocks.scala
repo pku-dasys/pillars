@@ -1024,7 +1024,7 @@ class TileLSUBlock(name: String, x: Int, y: Int, numIn: Int, numOut: Int,
  * @param alternation  a parameter indicating whether using alternate opLists
  * @param dataWidth    the data width
  */
-class STDNOC_Block(name: String, x: Int, y: Int, numIn: Int, numOut: Int,
+class STDNOC_Block(name: String, pillarsArch: PillarsArch, x: Int, y: Int, numIn: Int, numOut: Int,
                    useMuxBypass: Boolean = true, complex: Boolean = false,
                    alternation: Boolean = false, dataWidth: Int = 32)
   extends BlockTrait {
@@ -1084,12 +1084,12 @@ class STDNOC_Block(name: String, x: Int, y: Int, numIn: Int, numOut: Int,
 
 
       if(i==0) {
-        val pe = new Parsed_PEBlock_Test("pe_" + j.toString + "_" + i.toString, opList = opList,
+        val pe = new Parsed_PEBlock_Test("pe_" + j.toString + "_" + i.toString, pillarsArch, opList = opList,
           useMuxBypass = useMuxBypass,isMemPE=true, inPortsNeighbor = inPortsNeighbor, dataWidth = dataWidth)
         peMap = peMap + ((i + j * x) -> pe)
         addBlock(pe)
       }else{
-        val pe = new Parsed_PEBlock_Test("pe_" + j.toString + "_" + i.toString, opList = opList,
+        val pe = new Parsed_PEBlock_Test("pe_" + j.toString + "_" + i.toString, pillarsArch, opList = opList,
           useMuxBypass = useMuxBypass,isMemPE=false, inPortsNeighbor = inPortsNeighbor, dataWidth = dataWidth)
         peMap = peMap + ((i + j * x) -> pe)
         addBlock(pe)

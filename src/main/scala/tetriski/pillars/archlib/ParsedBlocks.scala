@@ -17,7 +17,7 @@ import scala.collection.mutable.LinkedHashMap
  * @param inPortsNeighbor
  * @param dataWidth
  */
-class Parsed_PEBlock_Test(name: String, useMuxBypass: Boolean, opList: List[OpEnum] = null,
+class Parsed_PEBlock_Test(name: String, pillarsArch: PillarsArch, useMuxBypass: Boolean, opList: List[OpEnum] = null,
                      aluSupBypass: Boolean = true, isMemPE: Boolean =true, inPortsNeighbor: Array[String] = null,
                      dataWidth: Int = 32) extends BlockTrait {
   initName(name)
@@ -27,15 +27,8 @@ class Parsed_PEBlock_Test(name: String, useMuxBypass: Boolean, opList: List[OpEn
   addOutPorts(Array("out_w", "out_e", "out_n", "out_s"))
   addInPorts(inPortsNeighbor)
 
-  val connections : LinkedHashMap[String, Array[String]] = LinkedHashMap(
-    "THIS.WEST_I" -> Array("FU0.DP0_I1","FU0.DP0_I2","FU0.DP0_P", "RF0.WP0", "RF0.WP1"),
-    "THIS.EAST_I" -> Array("FU0.DP0_I1","FU0.DP0_I2","FU0.DP0_P", "RF0.WP0", "RF0.WP1"),
-    "THIS.NORTH_I" -> Array("FU0.DP0_I1","FU0.DP0_I2","FU0.DP0_P", "RF0.WP0", "RF0.WP1"),
-    "THIS.SOUTH_I" -> Array("FU0.DP0_I1","FU0.DP0_I2","FU0.DP0_P", "RF0.WP0", "RF0.WP1"),
-    "RF0.RP0" -> Array("FU0.DP0_I1","FU0.DP0_I2","FU0.DP0_P","THIS.NORTH_O","THIS.EAST_O","THIS.WEST_O","THIS.SOUTH_O"),
-    "RF0.RP1" -> Array("FU0.DP0_I1","FU0.DP0_I2","FU0.DP0_P","THIS.NORTH_O","THIS.EAST_O","THIS.WEST_O","THIS.SOUTH_O"),
-    "FU0.DP0_T" -> Array("RF0.WP0","RF0.WP1","THIS.NORTH_O","THIS.EAST_O","THIS.WEST_O","THIS.SOUTH_O")
-  )
+
+
   val bigCaseIOToSmallCaseMap : LinkedHashMap[String, String] = LinkedHashMap(
     "NORTH_I" -> "input_n",
     "EAST_I" -> "input_e",
@@ -57,35 +50,25 @@ class Parsed_PEBlock_Test(name: String, useMuxBypass: Boolean, opList: List[OpEn
     "WEST_O" -> "muxWO",
     "SOUTH_O" -> "muxSO",
   )
+  val connections : LinkedHashMap[String, Array[String]] =
+    if (isMemPE) {
+      pillarsArch.memPEConnections
+    } else {
+      pillarsArch.peConnections
+    }
   val submods : LinkedHashMap[String, Array[String]] =
     if (isMemPE) {
-      LinkedHashMap (
-        "FU_MEM" -> Array("FU0"),
-        "RF" -> Array("RF0"),
-      )
+      pillarsArch.memPESubmods
     } else {
-      LinkedHashMap (
-        "FU" -> Array("FU0"),
-        "RF" -> Array("RF0"),
-      )
+      pillarsArch.submods
     }
-
   var aluCount = 0
-  val aluInPorts = Array("DP0_I1", "DP0_I2", "DP0_P")
-  val aluOutPort = "DP0_T"
+  val aluInPorts = pillarsArch.aluInPorts
+  val aluOutPort = pillarsArch.aluOutPort
 
   var rfCount = 0
-  val rfInPorts = Array("WP0", "WP1")
-  val rfOutPorts = Array("RP0", "RP1")
-  val rfRegs = Array("R0", "R1", "R2", "R3")
-  val rfConnections : LinkedHashMap[String, Array[String]] = LinkedHashMap(
-    "THIS.WP0" -> Array("THIS.R0","THIS.R1","THIS.R2","THIS.R3"),
-    "THIS.WP1" -> Array("THIS.R0","THIS.R1","THIS.R2","THIS.R3"),
-    "THIS.R0" -> Array("THIS.RP0","THIS.RP1"),
-    "THIS.R1" -> Array("THIS.RP0","THIS.RP1"),
-    "THIS.R2" -> Array("THIS.RP0","THIS.RP1"),
-    "THIS.R3" -> Array("THIS.RP0","THIS.RP1")
-  )
+  val rfInPorts = pillarsArch.rfInPorts
+  val rfOutPorts = pillarsArch.rfOutPorts
 
   var rfs : LinkedHashMap[String, ElementRF] = LinkedHashMap()
   var portToInConnections : LinkedHashMap[String, Array[String]] = LinkedHashMap()
