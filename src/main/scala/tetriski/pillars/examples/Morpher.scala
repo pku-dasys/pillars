@@ -54,10 +54,9 @@ object Morpher {
     arch.dumpArchitecture()
 
     //Generate the top design.
-    println("arch.ConnectArray: " + arch.connectArray)
+//    println("arch.ConnectArray: " + arch.connectArray)
     val connect = new Connect(arch.connectArray)
 //    connect.dumpConnect()
-    //    print("connect: "+ connect)
     val hardwareGenerator = new HardwareGenerator(arch, connect)
     val topDesign = () => new TopModule(hardwareGenerator.pillarsModuleInfo,
       hardwareGenerator.connectMap, hardwareGenerator.regionList, dataWidth)
