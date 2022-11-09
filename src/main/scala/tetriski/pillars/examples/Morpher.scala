@@ -1,8 +1,7 @@
 package tetriski.pillars.examples
 
 import chisel3.iotesters
-import tetriski.pillars.archlib.TileLSUBlock
-import tetriski.pillars.archlib.STDNOC_Block
+import tetriski.pillars.archlib.{PillarsArch, STDNOC_Block, TileLSUBlock}
 import tetriski.pillars.core.{ArchitctureHierarchy, Connect, HardwareGenerator, OpEnum, SimulationHelper}
 import tetriski.pillars.hardware.{SynthesizedModule, TopModule}
 import tetriski.pillars.mapping.{DotReader, ILPMap, Scheduler}
@@ -14,6 +13,10 @@ import tetriski.pillars.examples.ApplicationExamples.simulationHelper
 
 import scala.io.Source
 
+import java.io.FileInputStream
+import play.api.libs.json._
+
+
 /** An end2end_test for Morpher generated mapping and test data
  */
 object Morpher {
@@ -24,15 +27,23 @@ object Morpher {
     val outputPort = 2
     val dataWidth = 32
     val execCycles = 500
-    var kernel_folder = s"tutorial/"
-    var kernel_name = s"array_add"
+    var kernelFolder = s"tutorial/"
+    var kernelName = s"array_add"
+    var archDesc = s"stdnoc.json"
 
-    if(args.size == 2){
-      kernel_folder = args(0)
-      kernel_name = args(1)
-      println("Kernel subfolder: " + kernel_folder)
-      println("Kernel name: " + kernel_name)
+    if(args.size == 3){
+      kernelFolder = args(0)
+      kernelName = args(1)
+      archDesc = args(2)
     }
+    println("Kernel subfolder: " + kernelFolder)
+    println("Kernel name: " + kernelName)
+    println("Architecture description file name: " + archDesc)
+    kernelFolder + s"*.json"
+    val archDescFile = kernelFolder + archDesc
+    val pillarsJsonFileStream = new FileInputStream(archDescFile)
+    val json = Json.parse(pillarsJsonFileStream).as[JsObject]
+    val pillarsArch = new PillarsArch(json)
 
     //Initialize the top block.
     val arch = new ArchitctureHierarchy()
@@ -41,7 +52,7 @@ object Morpher {
 
     //    val tile = new TileLSUBlock("tile_0", colNum, rowNum, inputPort, outputPort,
     //      useMuxBypass = false, complex = true, dataWidth = dataWidth)
-    val tile = new STDNOC_Block("tile_0", colNum, rowNum, inputPort, outputPort,
+    val tile = new STDNOC_Block("tile_0", pillarsArch, colNum, rowNum, inputPort, outputPort,
       useMuxBypass = false, complex = true, dataWidth = dataWidth)
     arch.addBlock(tile)
 
@@ -62,17 +73,17 @@ object Morpher {
       hardwareGenerator.connectMap, hardwareGenerator.regionList, dataWidth)
 
     //Generate the RTL codes.
-    chisel3.Driver.execute(Array("-td", kernel_folder + "RTL/"), topDesign)
+    chisel3.Driver.execute(Array("-td", kernelFolder + "RTL/"), topDesign)
 
     //Simulate with the mapping result.
 
-    val mappedIIFilename = kernel_folder + s"mapped_ii.txt"
+    val mappedIIFilename = kernelFolder + s"mapped_ii.txt"
     val mappedIIarr = Source.fromFile(mappedIIFilename).getLines().toArray
     val II = mappedIIarr(0).toInt
 
 
-    val resultFilename = kernel_folder + kernel_name + s"_r.txt"
-    val infoFilename = kernel_folder + kernel_name + s"_i.txt"
+    val resultFilename = kernelFolder + kernelName + s"_r.txt"
+    val infoFilename = kernelFolder + kernelName + s"_i.txt"
     simulationHelper.initNew(resultFilename)
     simulationHelper.setConst(simulationHelper.constArray.toArray, II)
 
@@ -82,9 +93,9 @@ object Morpher {
     val appTestHelper = new AppTestHelper(bitStreams, schedules, II)
 
 
-    val testDataFilename = kernel_folder + kernel_name + s"_trace_0.txt"
-    val dataLayoutFilename = kernel_folder + kernel_name + s"_mem_alloc.txt"
-    val dataMemDetailsFilename = kernel_folder + s"datamem_details.txt"
+    val testDataFilename = kernelFolder + kernelName + s"_trace_0.txt"
+    val dataLayoutFilename = kernelFolder + kernelName + s"_mem_alloc.txt"
+    val dataMemDetailsFilename = kernelFolder + s"datamem_details.txt"
     simulationHelper.createDataMap(appTestHelper,testDataFilename, dataLayoutFilename, dataMemDetailsFilename)
 
 

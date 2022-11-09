@@ -29,13 +29,15 @@ class PillarsArch(json: JsObject) {
 
   def initPeConnections(connection : JsObject, outMap : LinkedHashMap[String, Array[String]]): Unit = {
     for ((src, dstsVal) <- connection.fields) {
-      val dsts = dstsVal.as[JsArray]
-      var convertedDsts = Array[String]()
-      for (dstVal <- dsts.value) {
-        val dst = dstVal.as[String]
-        convertedDsts = convertedDsts :+ dst
+      if(!src.contains(".MEMPORT")){
+        val dsts = dstsVal.as[JsArray]
+        var convertedDsts = Array[String]()
+        for (dstVal <- dsts.value) {
+          val dst = dstVal.as[String]
+          convertedDsts = convertedDsts :+ dst
+        }
+        outMap += (src -> convertedDsts)
       }
-      outMap += (src -> convertedDsts)
     }
   }
 
