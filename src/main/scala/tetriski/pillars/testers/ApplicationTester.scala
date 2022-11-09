@@ -439,6 +439,7 @@ class ApplicationTester(c: TopModule, appTestHelper: AppTestHelper) extends Peek
       val refArray = inDataItem._2
       println("")
       println("Array Variable:" + appTestHelper.varNameList(i) + " Bank ID:" + numInLSU + " Base Address:" + base)
+      println("offset, expected, output")
       deqData(numInLSU, refArray, base)
       i += 1
     }

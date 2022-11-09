@@ -8,12 +8,13 @@ import tetriski.pillars.mapping.{DotReader, ILPMap, Scheduler}
 import tetriski.pillars.testers.{AppTestHelper, ApplicationTester}
 
 import scala.collection.mutable.ArrayBuffer
-import chisel3.iotesters.PeekPokeTester
+import chisel3.iotesters.{PeekPokeTester, TesterOptionsManager}
 import tetriski.pillars.examples.ApplicationExamples.simulationHelper
 
 import scala.io.Source
-
 import java.io.FileInputStream
+
+import chisel3.iotesters.Driver.execute
 import play.api.libs.json._
 
 
@@ -103,10 +104,14 @@ object Morpher {
     // which can be obtained from "*_r.txt"
     appTestHelper.setPortCycle(simulationHelper)
 
-
-
-    iotesters.Driver.execute(Array("-tgvo", "on", "-tbn", "verilator"), topDesign) {
-      c => new MorpherTester(c, appTestHelper, execCycles)
+    //Simulation with verilator
+    val optionsManager = new TesterOptionsManager
+    optionsManager.setTargetDirName(kernelFolder + s"test_run_dir")
+    optionsManager.parse(Array("-tgvo", "on", "-tbn", "verilator")) match {
+      case true =>
+        execute(topDesign, optionsManager)(c => new MorpherTester(c, appTestHelper, execCycles))
+      case _ =>
+        false
     }
 
   }

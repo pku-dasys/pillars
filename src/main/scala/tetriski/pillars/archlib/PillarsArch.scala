@@ -24,7 +24,7 @@ class PillarsArch(json: JsObject) {
     initSubmods((json \ "ARCH" \ "PE_MEM" \ "SUBMODS").get.as[JsObject], memPESubmods)
     initFU()
     initRF()
-    show()
+//    show()
   }
 
   def initPeConnections(connection : JsObject, outMap : LinkedHashMap[String, Array[String]]): Unit = {
