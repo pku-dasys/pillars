@@ -20,7 +20,7 @@ SCALA_VERSION=2.12.10 ALMOND_VERSION=0.9.1
 ./almond --install
 ```
 
-### 3. Open Start ``hello.ipynb`` in Jupyter Notebook
+### 3. Open ``hello.ipynb`` in Jupyter Notebook
 
 ```
 jupyter notebook
