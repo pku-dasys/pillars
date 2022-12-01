@@ -33,7 +33,7 @@ ENV JUPYTER_CONFIG_DIR=/jupyter/config
 ENV JUPITER_DATA_DIR=/jupyter/data
 
 RUN mkdir -p $JUPYTER_CONFIG_DIR/custom
-RUN cp source/custom.js $JUPYTER_CONFIG_DIR/custom/
+RUN cp tutorial/custom.js $JUPYTER_CONFIG_DIR/custom/
 
 # Second stage - download Scala requirements and the Scala kernel
 FROM base as intermediate-builder

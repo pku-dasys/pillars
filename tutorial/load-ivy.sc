@@ -1,5 +1,5 @@
+val pillars_version = "1.0.0"
 val scala_version = "2.12"
-val pillars_version = "3.1.1" // FIXME
 
 interp.repositories() ::: List(
   coursierapi.MavenRepository.of("https://oss.sonatype.org/content/repositories/snapshots")
