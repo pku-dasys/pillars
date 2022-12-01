@@ -9,10 +9,18 @@ RUN \
     DEBIAN_FRONTEND=noninteractive apt-get install -y \
         ca-certificates-java \
         curl \
+        default-jdk-headless \
+        gnupg \
         graphviz \
-        openjdk-8-jre-headless \
+        make \
         python3-distutils \
+        verilator \
         && \
+    echo "deb https://repo.scala-sbt.org/scalasbt/debian all main" | tee /etc/apt/sources.list.d/sbt.list && \
+    echo "deb https://repo.scala-sbt.org/scalasbt/debian /" | tee /etc/apt/sources.list.d/sbt_old.list && \
+    curl -sL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x2EE0EA64E40A89B84B2DF73499E82A75642AC823" | apt-key add && \
+    apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y sbt && \
     rm -rf /var/lib/apt/lists/*
 
 RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
@@ -54,7 +62,8 @@ RUN \
     \rm -rf almond couriser /root/.cache/coursier 
 
 # Execute a notebook to ensure Chisel is downloaded into the image for offline work
-RUN jupyter nbconvert --to notebook --output=/tmp/0_demo --execute 0_demo.ipynb
+RUN make build
+RUN jupyter nbconvert --to notebook --output=/tmp/hello --execute tutorial/hello.ipynb
 
 # Last stage
 FROM base as final
@@ -62,6 +71,7 @@ FROM base as final
 # copy the Scala requirements and kernel into the image 
 COPY --from=intermediate-builder /coursier_cache/ /coursier_cache/
 COPY --from=intermediate-builder /usr/local/share/jupyter/kernels/scala/ /usr/local/share/jupyter/kernels/scala/
+COPY --from=intermediate-builder /pillars-tutorial/target/ /pillars-tutorial/target/
 
 RUN chown -R tutorial:tutorial /pillars-tutorial
 
