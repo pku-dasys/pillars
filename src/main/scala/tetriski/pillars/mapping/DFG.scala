@@ -2,16 +2,15 @@ package tetriski.pillars.mapping
 
 import java.io.FileWriter
 import java.util
-import java.util.{List}
+import java.util.List
 
 import tetriski.pillars.core.OpEnum
 import tetriski.pillars.core.OpEnum.OpEnum
 
-//import scala.collection
 import scala.collection.mutable.ArrayBuffer
 import scala.io.Source
 
-/** An abstract class of nodes in DFG（IR).
+/** An abstract class of nodes in DFG (IR).
  *
  */
 class NodeDFG() {

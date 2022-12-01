@@ -1,11 +1,11 @@
 ## Jupyter Notebook for pillars
 
-### 1. Check the existence of Scala for Jupyter
+### 1. List installed kernels in [Jupyter](https://jupyter.org/install)
 
 ```
 jupyter kernelspec list
 ```
-You may skip the next step when a scala kernel exists.
+You may skip the next step when a Scala kernel exists.
 
 ### 2. Install [Jupyter Backend for Scala](https://github.com/freechipsproject/chisel-bootcamp/blob/master/Install.md#jupyter-backend-for-scala)
 
