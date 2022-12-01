@@ -10,6 +10,7 @@ RUN \
         ca-certificates-java \
         curl \
         default-jdk-headless \
+        g++ \
         gnupg \
         graphviz \
         make \
