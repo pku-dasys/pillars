@@ -10,18 +10,9 @@ RUN \
         ca-certificates-java \
         curl \
         default-jdk-headless \
-        g++ \
         gnupg \
-        graphviz \
-        make \
         python3-distutils \
-        verilator \
         && \
-    echo "deb https://repo.scala-sbt.org/scalasbt/debian all main" | tee /etc/apt/sources.list.d/sbt.list && \
-    echo "deb https://repo.scala-sbt.org/scalasbt/debian /" | tee /etc/apt/sources.list.d/sbt_old.list && \
-    curl -sL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x2EE0EA64E40A89B84B2DF73499E82A75642AC823" | apt-key add && \
-    apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y sbt && \
     rm -rf /var/lib/apt/lists/*
 
 RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
@@ -35,8 +26,8 @@ ENV ALMOND_VERSION=0.9.1
 
 ENV COURSIER_CACHE=/coursier_cache
 
-ADD . /pillars-tutorial/
-WORKDIR /pillars-tutorial
+ADD . /pillars/
+WORKDIR /pillars
 
 ENV JUPYTER_CONFIG_DIR=/jupyter/config
 ENV JUPITER_DATA_DIR=/jupyter/data
@@ -62,9 +53,23 @@ RUN \
     ./almond --install --global && \
     \rm -rf almond couriser /root/.cache/coursier 
 
+RUN \
+    echo "deb https://repo.scala-sbt.org/scalasbt/debian all main" | tee /etc/apt/sources.list.d/sbt.list && \
+    echo "deb https://repo.scala-sbt.org/scalasbt/debian /" | tee /etc/apt/sources.list.d/sbt_old.list && \
+    curl -sL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x2EE0EA64E40A89B84B2DF73499E82A75642AC823" | apt-key add && \
+    apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y \
+        g++ \
+        graphviz \
+        make \
+        sbt \
+        verilator \
+        && \
+    rm -rf /var/lib/apt/lists/*
+
 # Execute a notebook to ensure Chisel is downloaded into the image for offline work
 RUN make build
-RUN jupyter nbconvert --to notebook --output=/tmp/hello --execute tutorial/hello.ipynb
+RUN jupyter nbconvert --to notebook --output=/tmp/5-gen-hardware --execute tutorial/5-gen-hardware.ipynb
 
 # Last stage
 FROM base as final
@@ -72,12 +77,12 @@ FROM base as final
 # copy the Scala requirements and kernel into the image 
 COPY --from=intermediate-builder /coursier_cache/ /coursier_cache/
 COPY --from=intermediate-builder /usr/local/share/jupyter/kernels/scala/ /usr/local/share/jupyter/kernels/scala/
-COPY --from=intermediate-builder /pillars-tutorial/target/ /pillars-tutorial/target/
+COPY --from=intermediate-builder /pillars/target/ /pillars/target/
 
-RUN chown -R tutorial:tutorial /pillars-tutorial
+RUN chown -R tutorial:tutorial /pillars
 
 USER tutorial
-WORKDIR /pillars-tutorial
+WORKDIR /pillars
 
 EXPOSE 8888
 CMD jupyter notebook --no-browser --ip 0.0.0.0 --port 8888
