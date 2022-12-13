@@ -546,6 +546,257 @@ class STDNOC_PEBlock(name: String, useMuxBypass: Boolean, opList: List[OpEnum] =
 }
 
 
+
+/** An STDNOC PE block with a local RF, an ALU and a multiplexer.
+ * Author: DMD
+ * @constructor create an abstract PE model
+ * @param name            the name of the model
+ * @param useMuxBypass    a parameter indicating whether this PE uses two additional
+ *                        bypass multiplexers
+ * @param opList          the subset of optional operations for the ALU in this PE
+ * @param aluSupBypass    a parameter indicating whether the ALU should support bypass
+ * @param inPortsNeighbor the names of input ports of this block
+ * @param dataWidth       the data width
+ */
+class STDNOC_ALUDPENDENT_PEBlock(name: String, useMuxBypass: Boolean, opList: List[OpEnum] = null,
+                     aluSupBypass: Boolean = true, isMemPE: Boolean =true, inPortsNeighbor: Array[String] = null,
+                     dataWidth: Int = 32) extends BlockTrait {
+  initName(name)
+  //Set configuration region.
+  setConfigRegion()
+
+  addOutPorts(Array("out_w", "out_e", "out_n", "out_s"))
+  addInPorts(inPortsNeighbor)
+
+  val neighborSize = inPortsNeighbor.size
+
+  var aluOpList = opList
+  if (aluOpList == null) {
+    aluOpList = List(OpEnum.ADD, OpEnum.MUL)
+  }
+
+  /** An ALU that can perform some operations.
+   */
+  val alu0 = new ElementAlu("alu0", aluOpList, aluSupBypass, List(dataWidth))//TODO: changes for predicate support??
+
+  alu0.addOutPorts(Array("out_0"))
+  alu0.addInPorts(Array("input_a", "input_b", "input_const", "input_p"))
+  addElement(alu0)
+
+  /** A multiplexer that can choose a data source for I1 of the ALU from 7 sources(N,E,W,S,RP0,RP1,ALU_OUT)
+   */
+  val muxI1 = new ElementMux("muxI1", List(neighborSize + 3, dataWidth))
+  muxI1.addOutPorts(Array("out_0"))
+  muxI1.addInPorts((0 until neighborSize + 3).map(i => "input_" + i.toString).toArray)
+  addElement(muxI1)
+  /** A multiplexer that can choose a data source for I2 of the ALU from 7 sources(N,E,W,S,RP0,RP1)
+   */
+  val muxI2 = new ElementMux("muxI2", List(neighborSize + 2, dataWidth))
+  muxI2.addOutPorts(Array("out_0"))
+  muxI2.addInPorts((0 until neighborSize + 2).map(i => "input_" + i.toString).toArray)
+  addElement(muxI2)
+  /** A multiplexer that can choose a data source for P of the ALU from 7 sources(N,E,W,S,RP0,RP1)
+   */
+  val muxP = new ElementMux("muxP", List(neighborSize + 2, dataWidth))
+  muxP.addOutPorts(Array("out_0"))
+  muxP.addInPorts((0 until neighborSize + 2).map(i => "input_" + i.toString).toArray)
+  addElement(muxP)
+
+  /** A multiplexer that can choose a data source for North_Out from 1 source(T)
+   */
+  val muxNO = new ElementMux("muxNO", List(1, dataWidth))
+  muxNO.addOutPorts(Array("out_0"))
+  muxNO.addInPorts((0 until 1).map(i => "input_" + i.toString).toArray)
+  addElement(muxNO)
+
+  /** A multiplexer that can choose a data source for East_Out from 1 sources(T)
+   */
+  val muxEO = new ElementMux("muxEO", List(1, dataWidth))
+  muxEO.addOutPorts(Array("out_0"))
+  muxEO.addInPorts((0 until 1).map(i => "input_" + i.toString).toArray)
+  addElement(muxEO)
+
+  /** A multiplexer that can choose a data source for West_Out from 1 sources(T)
+   */
+  val muxWO = new ElementMux("muxWO", List(1, dataWidth))
+  muxWO.addOutPorts(Array("out_0"))
+  muxWO.addInPorts((0 until 1).map(i => "input_" + i.toString).toArray)
+  addElement(muxWO)
+
+  /** A multiplexer that can choose a data source for South_Out from 1 sources(T)
+   */
+  val muxSO = new ElementMux("muxSO", List(1, dataWidth))
+  muxSO.addOutPorts(Array("out_0"))
+  muxSO.addInPorts((0 until 1).map(i => "input_" + i.toString).toArray)
+  addElement(muxSO)
+
+  /** A multiplexer that can choose a data source for WP0 from 5 sources(T,N,E,W,S)
+   */
+  val muxWP0 = new ElementMux("muxWP0", List(5, dataWidth))
+  muxWP0.addOutPorts(Array("out_0"))
+  muxWP0.addInPorts((0 until 5).map(i => "input_" + i.toString).toArray)
+  addElement(muxWP0)
+
+  /** A multiplexer that can choose a data source for WP1 from 5 sources(T,N,E,W,S)
+   */
+  val muxWP1 = new ElementMux("muxWP1", List(5, dataWidth))
+  muxWP1.addOutPorts(Array("out_0"))
+  muxWP1.addInPorts((0 until 5).map(i => "input_" + i.toString).toArray)
+  addElement(muxWP1)
+
+  /** A 4-RF with two input ports and two output ports.
+   * Its output port 0 is connected to mux0.
+   * Its output port 1 is connected to the output port of this PE or muxOut.
+   * log2Regs should be 2
+   * val rf0 = new ElementRF("rf0", List(2, 2, 2, dataWidth))
+   * Changed to 3 to avoid bug: garbage values are written in to register 3 (due to default config 11),
+   * otherwise need wr_en signal to avoid this
+   */
+  val rf0 = new ElementRF("rf0", List(3, 2, 2, dataWidth))
+  rf0.addOutPorts(Array("out_0", "out_1"))
+  rf0.addInPorts(Array("input_0", "input_1"))
+  addElement(rf0)
+
+  /** A register with one input port and one output port.
+   */
+  val rfI1 = new ElementRF("rfI1", List(0, 1,1, dataWidth))
+  rfI1.addOutPorts(Array("out_0"))
+  rfI1.addInPorts(Array("input_0"))
+  addElement(rfI1)
+
+  /** A register with one input port and one output port.
+   */
+  val rfI2 = new ElementRF("rfI2", List(0, 1,1, dataWidth))
+  rfI2.addOutPorts(Array("out_0"))
+  rfI2.addInPorts(Array("input_0"))
+  addElement(rfI2)
+
+  /** A register with one input port and one output port.
+   */
+  val rfP = new ElementRF("rfP", List(0, 1,1, dataWidth))
+  rfP.addOutPorts(Array("out_0"))
+  rfP.addInPorts(Array("input_0"))
+  addElement(rfP)
+  /** A const unit connected to the multiplexers.
+   */
+  val const0 = new ElementConst("const0", List(dataWidth))
+  const0.addOutPorts(Array("out_0"))
+  addElement(const0)
+
+
+  for (i <- 0 until neighborSize) {
+    addConnect(term(inPortsNeighbor(i)) -> muxI1 / s"input_$i")
+    addConnect(term(inPortsNeighbor(i)) -> muxI2 / s"input_$i")
+    addConnect(term(inPortsNeighbor(i)) -> muxP / s"input_$i")
+    addConnect(term(inPortsNeighbor(i)) -> muxWP0 / s"input_$i")
+    addConnect(term(inPortsNeighbor(i)) -> muxWP1 / s"input_$i")
+  }
+
+
+  addConnect(rf0 / "out_0" -> muxI1 / s"input_$neighborSize")
+  addConnect(rf0 / "out_1" -> muxI1 / ("input_" + (neighborSize + 1).toString))
+  addConnect(rf0 / "out_0" -> muxI2 / s"input_$neighborSize")
+  addConnect(rf0 / "out_1" -> muxI2 / ("input_" + (neighborSize + 1).toString))
+  addConnect(rf0 / "out_0" -> muxP / s"input_$neighborSize")
+  addConnect(rf0 / "out_1" -> muxP / ("input_" + (neighborSize + 1).toString))
+
+  addConnect(muxI1 / "out_0" -> rfI1 / "input_0")
+  addConnect(muxI2 / "out_0" -> rfI2 / "input_0")
+  addConnect(muxP / "out_0" -> rfP / "input_0")
+  addConnect(muxWP0 / "out_0" -> rf0 / "input_0")
+  addConnect(muxWP1 / "out_0" -> rf0 / "input_1")
+
+
+//  addConnect(rf0 / "out_0" -> muxNO / "input_1")
+//  addConnect(rf0 / "out_1" -> muxNO / "input_2")
+//
+//  addConnect(rf0 / "out_0" -> muxEO / "input_1")
+//  addConnect(rf0 / "out_1" -> muxEO / "input_2")
+//
+//  addConnect(rf0 / "out_0" -> muxWO / "input_1")
+//  addConnect(rf0 / "out_1" -> muxWO / "input_2")
+//
+//  addConnect(rf0 / "out_0" -> muxSO / "input_1")
+//  addConnect(rf0 / "out_1" -> muxSO / "input_2")
+
+  addConnect(muxNO / "out_0" ->  term("out_n"))
+  addConnect(muxEO / "out_0" ->  term("out_e"))
+  addConnect(muxWO / "out_0" ->  term("out_w"))
+  addConnect(muxSO / "out_0" ->  term("out_s"))
+
+  addConnect(rfI1 / "out_0" -> alu0 / "input_a")
+  addConnect(rfI2 / "out_0" -> alu0 / "input_b")
+  addConnect(rfP / "out_0" -> alu0 / "input_p")
+  addConnect(const0 / "out_0" -> alu0 / "input_const")
+
+  if(isMemPE){
+    /** A multiplexer that can choose a data source for data address.
+     */
+
+
+    /** A multiplexer that can choose a data source for input data.
+     */
+
+    /** An LSU can perform load or store operation.
+     */
+    val LSU = new ElementLSU2("loadStoreUnit", List(dataWidth))
+    LSU.addInPorts(Array("addr", "dataIn", "constIn"))
+    LSU.addOutPorts(Array("out"))
+    addElement(LSU)
+
+    addConnect(rfI2 / "out_0" -> LSU / "addr")
+    addConnect(rfI1 / "out_0" -> LSU / "dataIn")
+    addConnect(const0 / "out_0" -> LSU / "constIn")
+
+    val muxT = new ElementMux("muxT", List(2, dataWidth))
+    muxT.addOutPorts(Array("out_0"))
+    muxT.addInPorts(Array("input_0", "input_1"))
+    addElement(muxT)
+
+    /** A register with one input port and one output port.
+     * This makes latency of memPE equal to two
+     */
+    val rfALUO = new ElementRF("rfALUO", List(0, 1,1, dataWidth))
+    rfALUO.addOutPorts(Array("out_0"))
+    rfALUO.addInPorts(Array("input_0"))
+    addElement(rfALUO)
+
+    addConnect(alu0 / "out_0" -> rfALUO / "input_0")
+    addConnect(rfALUO / "out_0" -> muxT / "input_1")
+
+    val rfLSUO = new ElementRF("rfLSUO", List(0, 1,1, dataWidth))
+    rfLSUO.addOutPorts(Array("out_0"))
+    rfLSUO.addInPorts(Array("input_0"))
+    addElement(rfLSUO)
+
+    addConnect(LSU / "out" -> rfLSUO / "input_0")
+    addConnect(rfLSUO / "out_0" -> muxT / "input_0")
+
+    addConnect(muxT / "out_0" -> muxWP0 / s"input_$neighborSize")
+    addConnect(muxT / "out_0" -> muxWP1 / s"input_$neighborSize")
+    addConnect(muxT / "out_0" -> muxNO / "input_0")
+    addConnect(muxT / "out_0" -> muxEO / "input_0")
+    addConnect(muxT / "out_0" -> muxWO / "input_0")
+    addConnect(muxT / "out_0" -> muxSO / "input_0")
+    addConnect(muxT / "out_0" -> muxI1 / ("input_" + (neighborSize + 2).toString))
+  } else{
+
+    addConnect(alu0 / "out_0" -> muxWP0 / s"input_$neighborSize")
+    addConnect(alu0 / "out_0" -> muxWP1 / s"input_$neighborSize")
+
+    addConnect(alu0 / "out_0" -> muxNO / "input_0")
+    addConnect(alu0 / "out_0" -> muxEO / "input_0")
+    addConnect(alu0 / "out_0" -> muxWO / "input_0")
+    addConnect(alu0 / "out_0" -> muxSO / "input_0")
+
+
+    addConnect(alu0 / "out_0" -> muxI1 / ("input_" + (neighborSize + 2).toString))
+
+  }
+
+
+}
+
 /** An ADRES VLIW PE block with an ALU and some multiplexers.
  * This PE is connected to a global RF and the IO block, so it have some additional ports.
  *
@@ -1047,6 +1298,7 @@ class STDNOC_Block(name: String, pillarsArch: PillarsArch, x: Int, y: Int, numIn
   /** A PE array which has torus connectivity.
    */
   var peMap = Map[Int, Parsed_PEBlock_Test]()
+//  var peMap = Map[Int, STDNOC_PEBlock]()
 //  var peMap = Map[Int, AdresPEBlock]()
 
   for (j <- 0 until y) {
@@ -1094,6 +1346,20 @@ class STDNOC_Block(name: String, pillarsArch: PillarsArch, x: Int, y: Int, numIn
         peMap = peMap + ((i + j * x) -> pe)
         addBlock(pe)
       }
+
+//            if(i==0) {
+//              val pe = new STDNOC_PEBlock("pe_" + j.toString + "_" + i.toString, opList = opList,
+//                useMuxBypass = useMuxBypass,isMemPE=true, inPortsNeighbor = inPortsNeighbor, dataWidth = dataWidth)
+//              peMap = peMap + ((i + j * x) -> pe)
+//              addBlock(pe)
+//            }else{
+//              val pe = new STDNOC_PEBlock("pe_" + j.toString + "_" + i.toString, opList = opList,
+//                useMuxBypass = useMuxBypass,isMemPE=false, inPortsNeighbor = inPortsNeighbor, dataWidth = dataWidth)
+//              peMap = peMap + ((i + j * x) -> pe)
+//              addBlock(pe)
+//            }
+
+//      STDNOC_ALUDPENDENT_PEBlock
 
 //      val pe = new STDNOC_PEBlock("pe_" + j.toString + "_" + i.toString, opList = opList,
 //        useMuxBypass = useMuxBypass, inPortsNeighbor = inPortsNeighbor, dataWidth = dataWidth)
