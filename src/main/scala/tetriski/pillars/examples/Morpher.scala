@@ -4,7 +4,6 @@ import chisel3.iotesters
 import tetriski.pillars.archlib.{PillarsArch, STDNOC_Block, TileLSUBlock}
 import tetriski.pillars.core.{ArchitctureHierarchy, Connect, HardwareGenerator, OpEnum, SimulationHelper}
 import tetriski.pillars.hardware.{SynthesizedModule, TopModule}
-import tetriski.pillars.mapping.{DotReader, ILPMap, Scheduler}
 import tetriski.pillars.testers.{AppTestHelper, ApplicationTester}
 
 import scala.collection.mutable.ArrayBuffer
