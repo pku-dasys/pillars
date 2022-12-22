@@ -16,7 +16,8 @@ interp.configureCompiler(x => x.settings.source.value = scala.tools.nsc.settings
 import $ivy.`edu.berkeley.cs::chisel3:3.2.2`
 import $ivy.`edu.berkeley.cs::chisel-iotesters:1.3.2`
 import $ivy.`com.typesafe.play::play-json:2.8.0`
-// import $ivy.`com.apache.logging.log4j::log4j-core:2.17.2`
+import $ivy.`com.apache.logging.log4j::log4j-core:2.17.2`
+import $ivy.`com.apache.logging.log4j::log4j-api:2.17.2`
 
 // Load the pillars package (in two JAR files)
 val jar_path = System.getProperty("user.dir") + s"/../target/scala-$scala_version/pillars-project_$scala_version-$pillars_version"
