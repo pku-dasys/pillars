@@ -7,9 +7,13 @@ import java.util.*;
 
 import static java.util.Arrays.asList;
 
+import org.apache.logging.log4j.LogManager;
+
 import java.util.zip.InflaterInputStream;
 
 public class searchMap {
+    org.apache.logging.log4j.Logger logger = LogManager.getLogger(searchMap.class);
+
     //for DFG
     int singlePathTimeLimit = 5;
     int singlePathEdgeLimit = 25;
@@ -260,22 +264,30 @@ public class searchMap {
         ok &= ValidateFiretime();
         ok &= ValidatePathUse();
         if (ok) {
-            System.out.println("niu bi!");
+            logger.info("niu bi!");
+            //System.out.println("niu bi!");
         }
     }
 
     void OutputSolution() throws IOException {
-        System.out.printf("I find the solution!\n");
-        System.out.printf("match : %s\n", Arrays.toString(match));
+        logger.info("I find the solution!\n");
+        logger.info("match : " + Arrays.toString(match));
+//        System.out.printf("I find the solution!\n");
+//        System.out.printf("match : %s\n", Arrays.toString(match));
         for (int x = 0; x < numDFG; x++) {
-            System.out.printf("out(%d) : %s\n", x, DFGout[x].toString());
+            logger.debug("out(" + x + ") : " + DFGout[x].toString());
+//            System.out.printf("out(%d) : %s\n", x, DFGout[x].toString());
             for (int y : DFGout[x]) {
-                System.out.printf("path(%d->%d): %s\n", x, y, Arrays.toString(resultPath[x][y]));
-                System.out.printf("path(%s->%s): ", DFGOpNodeName.get(x), DFGOpNodeName.get(y));
+                logger.debug("path(" + x + "->" + y + "): " + Arrays.toString(resultPath[x][y]));
+                logger.debug("path(" + DFGOpNodeName.get(x) + "->" + DFGOpNodeName.get(y) + "): ");
+//                System.out.printf("path(%d->%d): %s\n", x, y, Arrays.toString(resultPath[x][y]));
+//                System.out.printf("path(%s->%s): ", DFGOpNodeName.get(x), DFGOpNodeName.get(y));
                 for (int i = 1; i < resultPath[x][y].length - 1; i++) {
-                    System.out.printf(MRRGRoutingName[resultPath[x][y][i]] + ", ");
+                    logger.debug(MRRGRoutingName[resultPath[x][y][i]] + ", ");
+//                    System.out.printf(MRRGRoutingName[resultPath[x][y][i]] + ", ");
                 }
-                System.out.printf("\n");
+                logger.debug("Path found\n");
+//                System.out.printf("\n");
             }
         }
 
@@ -335,7 +347,8 @@ public class searchMap {
                             fanout.add(Integer.valueOf(i));
                     }
                     if (fanin.size() > 1) {
-                        System.out.println("   " + MRRGRoutingName[r] + "<-" + DFGOpNodeName.get(routingUsed[r]));
+                        logger.debug("   " + MRRGRoutingName[r] + "<-" + DFGOpNodeName.get(routingUsed[r]));
+//                        System.out.println("   " + MRRGRoutingName[r] + "<-" + DFGOpNodeName.get(routingUsed[r]));
                     }
                     if (fanin.size() > 0 && fanout.size() > 0) {
                         infoFile.write("<" + MRRGRoutingName[r] + ">\n");
@@ -545,12 +558,14 @@ public class searchMap {
 
     int[] GetPathTo(int[][] toArray, int a, int b, int len) {
         List<Integer> p = new ArrayList<Integer>();
-        System.out.printf("path %d->%d (len %d), toArray %d\n", a, b, len, toArray[len][a]);
+        logger.trace("path " + a + "->" + b + " (len " + len + "), toArray" + toArray[len][a]);
+//        System.out.printf("path %d->%d (len %d), toArray %d\n", a, b, len, toArray[len][a]);
         while (!(a == b && len == 0)) {
             p.add(a);
             int na = toArray[len][a];
             if (na == -1) {
-                System.out.println("cant find path to");
+                logger.trace("cant find path to");
+//                System.out.println("cant find path to");
                 return new int[0];
             }
             len -= getLatency(a, na);
@@ -774,8 +789,11 @@ public class searchMap {
         TRYS++;
         if (TRYS >= 100) return;
         //System.out.printf("%d\n",x);
-        System.out.println(TRYS);
-        System.out.println(Arrays.toString(match));
+//        System.out.println(TRYS);
+//        System.out.println(Arrays.toString(match));
+
+        logger.debug("Trys:" + TRYS);
+        logger.trace(Arrays.toString(match));
 
         String[] debug;
         debug = new String[match.length];
@@ -786,7 +804,8 @@ public class searchMap {
                 debug[j] = MRRGFunctionName[match[j]];
             }
         }
-        System.out.println(Arrays.toString(debug));
+        logger.trace(Arrays.toString(debug));
+//        System.out.println(Arrays.toString(debug));
 
         if (x == dfgOPNodes.size()) {
             report();
@@ -916,7 +935,8 @@ public class searchMap {
     public void get2() throws IOException {
         //ReconstructDFG();
         time = new int[numDFG];
-        System.out.printf("start to searchMap, II is %d\n", II);
+        logger.info("start to searchMap, II is " + II);
+//        System.out.printf("start to searchMap, II is %d\n", II);
         waitPath = new int[numDFG][];
         int numLatency0 = 0;
         List<Integer> latency1 = new ArrayList<Integer>();
@@ -925,9 +945,12 @@ public class searchMap {
                 numLatency0 += 1;
             } else latency1.add(i);
         }
-        System.out.printf("MRRG node: %d\n", numMRRG);
-        System.out.printf("latency 1 node: %s\n", latency1.toString());
-        System.out.printf("Func nodes is %s\n", Arrays.toString(mrrgFuncNodes.toArray()));
+        logger.info("MRRG node: " + numMRRG);
+        logger.info("latency 1 node: " + latency1.toString());
+        logger.info("Func nodes is " + Arrays.toString(mrrgFuncNodes.toArray()));
+//        System.out.printf("MRRG node: %d\n", numMRRG);
+//        System.out.printf("latency 1 node: %s\n", latency1.toString());
+//        System.out.printf("Func nodes is %s\n", Arrays.toString(mrrgFuncNodes.toArray()));
         /*
         for(int x:mrrgFuncNodes){
             System.out.printf(" %d op : %s\n",x,MRRGop[x].toString());
@@ -935,7 +958,8 @@ public class searchMap {
         */
 
         for (int i = 0; i < numDFG; i++) {
-            System.out.printf("dfg in (%d)= %s\n", i, DFGin[i].toString());
+            logger.debug("dfg in (" + i + ")= " + DFGin[i].toString());
+//            System.out.printf("dfg in (%d)= %s\n", i, DFGin[i].toString());
         }
         shortestDis = new int[numMRRG][numMRRG];
 
@@ -965,7 +989,8 @@ public class searchMap {
                     sum += shortestDis[x][y];
                     cnt++;
                 }
-            System.out.printf("%d :%d %d\n", x, sum, cnt);
+            logger.debug(x + " :" + sum + " " + cnt);
+//            System.out.printf("%d :%d %d\n", x, sum, cnt);
         }
 
 
@@ -996,7 +1021,7 @@ public class searchMap {
                 }
                 if (DFGout[node.get(0)].size() > 0) {
                     for (Integer next : DFGout[node.get(0)]) {
-                        if(next != node.get(0)) {
+                        if (next != node.get(0)) {
                             List<Integer> nextList = new ArrayList<Integer>();
                             nextList.add(next);
                             nextList.addAll(node);
