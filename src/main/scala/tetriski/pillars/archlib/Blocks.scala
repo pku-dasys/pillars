@@ -602,48 +602,6 @@ class STDNOC_ALUDPENDENT_PEBlock(name: String, useMuxBypass: Boolean, opList: Li
   muxP.addInPorts((0 until neighborSize + 2).map(i => "input_" + i.toString).toArray)
   addElement(muxP)
 
-  /** A multiplexer that can choose a data source for North_Out from 1 source(T)
-   */
-  val muxNO = new ElementMux("muxNO", List(1, dataWidth))
-  muxNO.addOutPorts(Array("out_0"))
-  muxNO.addInPorts((0 until 1).map(i => "input_" + i.toString).toArray)
-  addElement(muxNO)
-
-  /** A multiplexer that can choose a data source for East_Out from 1 sources(T)
-   */
-  val muxEO = new ElementMux("muxEO", List(1, dataWidth))
-  muxEO.addOutPorts(Array("out_0"))
-  muxEO.addInPorts((0 until 1).map(i => "input_" + i.toString).toArray)
-  addElement(muxEO)
-
-  /** A multiplexer that can choose a data source for West_Out from 1 sources(T)
-   */
-  val muxWO = new ElementMux("muxWO", List(1, dataWidth))
-  muxWO.addOutPorts(Array("out_0"))
-  muxWO.addInPorts((0 until 1).map(i => "input_" + i.toString).toArray)
-  addElement(muxWO)
-
-  /** A multiplexer that can choose a data source for South_Out from 1 sources(T)
-   */
-  val muxSO = new ElementMux("muxSO", List(1, dataWidth))
-  muxSO.addOutPorts(Array("out_0"))
-  muxSO.addInPorts((0 until 1).map(i => "input_" + i.toString).toArray)
-  addElement(muxSO)
-
-  /** A multiplexer that can choose a data source for WP0 from 5 sources(T,N,E,W,S)
-   */
-  val muxWP0 = new ElementMux("muxWP0", List(5, dataWidth))
-  muxWP0.addOutPorts(Array("out_0"))
-  muxWP0.addInPorts((0 until 5).map(i => "input_" + i.toString).toArray)
-  addElement(muxWP0)
-
-  /** A multiplexer that can choose a data source for WP1 from 5 sources(T,N,E,W,S)
-   */
-  val muxWP1 = new ElementMux("muxWP1", List(5, dataWidth))
-  muxWP1.addOutPorts(Array("out_0"))
-  muxWP1.addInPorts((0 until 5).map(i => "input_" + i.toString).toArray)
-  addElement(muxWP1)
-
   /** A 4-RF with two input ports and two output ports.
    * Its output port 0 is connected to mux0.
    * Its output port 1 is connected to the output port of this PE or muxOut.
@@ -688,8 +646,6 @@ class STDNOC_ALUDPENDENT_PEBlock(name: String, useMuxBypass: Boolean, opList: Li
     addConnect(term(inPortsNeighbor(i)) -> muxI1 / s"input_$i")
     addConnect(term(inPortsNeighbor(i)) -> muxI2 / s"input_$i")
     addConnect(term(inPortsNeighbor(i)) -> muxP / s"input_$i")
-    addConnect(term(inPortsNeighbor(i)) -> muxWP0 / s"input_$i")
-    addConnect(term(inPortsNeighbor(i)) -> muxWP1 / s"input_$i")
   }
 
 
@@ -703,26 +659,6 @@ class STDNOC_ALUDPENDENT_PEBlock(name: String, useMuxBypass: Boolean, opList: Li
   addConnect(muxI1 / "out_0" -> rfI1 / "input_0")
   addConnect(muxI2 / "out_0" -> rfI2 / "input_0")
   addConnect(muxP / "out_0" -> rfP / "input_0")
-  addConnect(muxWP0 / "out_0" -> rf0 / "input_0")
-  addConnect(muxWP1 / "out_0" -> rf0 / "input_1")
-
-
-//  addConnect(rf0 / "out_0" -> muxNO / "input_1")
-//  addConnect(rf0 / "out_1" -> muxNO / "input_2")
-//
-//  addConnect(rf0 / "out_0" -> muxEO / "input_1")
-//  addConnect(rf0 / "out_1" -> muxEO / "input_2")
-//
-//  addConnect(rf0 / "out_0" -> muxWO / "input_1")
-//  addConnect(rf0 / "out_1" -> muxWO / "input_2")
-//
-//  addConnect(rf0 / "out_0" -> muxSO / "input_1")
-//  addConnect(rf0 / "out_1" -> muxSO / "input_2")
-
-  addConnect(muxNO / "out_0" ->  term("out_n"))
-  addConnect(muxEO / "out_0" ->  term("out_e"))
-  addConnect(muxWO / "out_0" ->  term("out_w"))
-  addConnect(muxSO / "out_0" ->  term("out_s"))
 
   addConnect(rfI1 / "out_0" -> alu0 / "input_a")
   addConnect(rfI2 / "out_0" -> alu0 / "input_b")
@@ -739,13 +675,14 @@ class STDNOC_ALUDPENDENT_PEBlock(name: String, useMuxBypass: Boolean, opList: Li
 
     /** An LSU can perform load or store operation.
      */
-    val LSU = new ElementLSU2("loadStoreUnit", List(dataWidth))
-    LSU.addInPorts(Array("addr", "dataIn", "constIn"))
+    val LSU = new ElementLSU3("loadStoreUnit", List(dataWidth))
+    LSU.addInPorts(Array("addr", "dataIn", "constIn", "pIn"))
     LSU.addOutPorts(Array("out"))
     addElement(LSU)
 
     addConnect(rfI2 / "out_0" -> LSU / "addr")
     addConnect(rfI1 / "out_0" -> LSU / "dataIn")
+    addConnect(rfP / "out_0" -> LSU / "pIn")
     addConnect(const0 / "out_0" -> LSU / "constIn")
 
     val muxT = new ElementMux("muxT", List(2, dataWidth))
@@ -772,22 +709,22 @@ class STDNOC_ALUDPENDENT_PEBlock(name: String, useMuxBypass: Boolean, opList: Li
     addConnect(LSU / "out" -> rfLSUO / "input_0")
     addConnect(rfLSUO / "out_0" -> muxT / "input_0")
 
-    addConnect(muxT / "out_0" -> muxWP0 / s"input_$neighborSize")
-    addConnect(muxT / "out_0" -> muxWP1 / s"input_$neighborSize")
-    addConnect(muxT / "out_0" -> muxNO / "input_0")
-    addConnect(muxT / "out_0" -> muxEO / "input_0")
-    addConnect(muxT / "out_0" -> muxWO / "input_0")
-    addConnect(muxT / "out_0" -> muxSO / "input_0")
+    addConnect(muxT / "out_0" -> rf0 / s"input_0")
+    addConnect(muxT / "out_0" -> rf0 / s"input_1")
+    addConnect(muxT / "out_0" -> term("out_n"))
+    addConnect(muxT / "out_0" -> term("out_e"))
+    addConnect(muxT / "out_0" -> term("out_w"))
+    addConnect(muxT / "out_0" -> term("out_s"))
     addConnect(muxT / "out_0" -> muxI1 / ("input_" + (neighborSize + 2).toString))
   } else{
 
-    addConnect(alu0 / "out_0" -> muxWP0 / s"input_$neighborSize")
-    addConnect(alu0 / "out_0" -> muxWP1 / s"input_$neighborSize")
+    addConnect(alu0 / "out_0" -> rf0 / s"input_0")
+    addConnect(alu0 / "out_0" -> rf0 / s"input_1")
 
-    addConnect(alu0 / "out_0" -> muxNO / "input_0")
-    addConnect(alu0 / "out_0" -> muxEO / "input_0")
-    addConnect(alu0 / "out_0" -> muxWO / "input_0")
-    addConnect(alu0 / "out_0" -> muxSO / "input_0")
+    addConnect(alu0 / "out_0" -> term("out_n"))
+    addConnect(alu0 / "out_0" -> term("out_e"))
+    addConnect(alu0 / "out_0" -> term("out_w"))
+    addConnect(alu0 / "out_0" -> term("out_s"))
 
 
     addConnect(alu0 / "out_0" -> muxI1 / ("input_" + (neighborSize + 2).toString))
@@ -1338,11 +1275,20 @@ class STDNOC_Block(name: String, pillarsArch: PillarsArch, x: Int, y: Int, numIn
       if(i==0) {
         val pe = new Parsed_PEBlock_Test("pe_" + j.toString + "_" + i.toString, pillarsArch, opList = opList,
           useMuxBypass = useMuxBypass,isMemPE=true, inPortsNeighbor = inPortsNeighbor, dataWidth = dataWidth)
+
+        /*
+        val pe = new STDNOC_ALUDPENDENT_PEBlock("pe_" + j.toString + "_" + i.toString, opList = opList,
+          useMuxBypass = useMuxBypass, isMemPE = true, inPortsNeighbor = inPortsNeighbor, dataWidth = dataWidth)
+         */
         peMap = peMap + ((i + j * x) -> pe)
         addBlock(pe)
       }else{
         val pe = new Parsed_PEBlock_Test("pe_" + j.toString + "_" + i.toString, pillarsArch, opList = opList,
           useMuxBypass = useMuxBypass,isMemPE=false, inPortsNeighbor = inPortsNeighbor, dataWidth = dataWidth)
+        /*
+        val pe = new STDNOC_ALUDPENDENT_PEBlock("pe_" + j.toString + "_" + i.toString, opList = opList,
+          useMuxBypass = useMuxBypass, isMemPE = false, inPortsNeighbor = inPortsNeighbor, dataWidth = dataWidth)
+         */
         peMap = peMap + ((i + j * x) -> pe)
         addBlock(pe)
       }

@@ -50,8 +50,6 @@ object Morpher {
     arch.addInPorts((0 until inputPort).map(i => s"input_$i").toArray)
     arch.addOutPorts((0 until outputPort).map(i => s"out_$i").toArray)
 
-    //    val tile = new TileLSUBlock("tile_0", colNum, rowNum, inputPort, outputPort,
-    //      useMuxBypass = false, complex = true, dataWidth = dataWidth)
     val tile = new STDNOC_Block("tile_0", pillarsArch, colNum, rowNum, inputPort, outputPort,
       useMuxBypass = false, complex = true, dataWidth = dataWidth)
     arch.addBlock(tile)
@@ -61,13 +59,10 @@ object Morpher {
     (0 until outputPort).foreach(i =>
       arch.addConnect(tile / s"out_$i" -> arch.term(s"out_$i")))
     arch.init()
-
     arch.dumpArchitecture()
 
-    //Generate the top design.
-//    println("arch.ConnectArray: " + arch.connectArray)
     val connect = new Connect(arch.connectArray)
-//    connect.dumpConnect()
+    connect.dumpConnect()
     val hardwareGenerator = new HardwareGenerator(arch, connect)
     val topDesign = () => new TopModule(hardwareGenerator.pillarsModuleInfo,
       hardwareGenerator.connectMap, hardwareGenerator.regionList, dataWidth)
