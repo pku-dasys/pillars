@@ -1,4 +1,0 @@
-div0 0:cgra.tile_0.pe_0_0.alu0.internalNode_0 1 0
-const1 0:cgra.tile_0.pe_0_1.const0.internalNode_0 0 0
-const2 0:cgra.tile_0.pe_0_0.const0.internalNode_0 1 0
-output3 0:cgra.out_0.fun 2 0

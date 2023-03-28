@@ -1,9 +1,0 @@
-digraph G {
-add0[opcode=add];
-const1[opcode=const];
-input2[opcode=input];
-output3[opcode=output];
-add0->output3[operand=0];
-const1->add0[operand=0];
-input2->add0[operand=1];
-}
