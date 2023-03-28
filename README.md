@@ -80,16 +80,15 @@ sudo apt-get install verilator
 └── src
     └── main
         └── scala
-            └── tetriski
-                └── pillars
-                    ├── archlib     //the library of elements and blocks
-                    ├── core        //the core of Pillars
-                    ├── examples    //some examples showing how to use Pillars
-                    ├── hardware    //hardware implemented in Chisel
-                    ├── mapping     //mapping tools
-                    ├── Pillars.scala
-                    ├── testers     //testers in Pillars
-                    └── util        //utiliy for realizing hardware
+            └── pillars
+                ├── archlib     //the library of elements and blocks
+                ├── core        //the core of Pillars
+                ├── examples    //some examples showing how to use Pillars
+                ├── hardware    //hardware implemented in Chisel
+                ├── mapping     //mapping tools
+                ├── Pillars.scala
+                ├── testers     //testers in Pillars
+                └── util        //utiliy for realizing hardware
 ```
 
 
@@ -116,7 +115,7 @@ make end2end
 
 ### Mapping
 
-Users can map a DFG onto MRRG with our ILP mapper (tetriski.pillars.mapping.ILPMap.mapping).
+Users can map a DFG onto MRRG with our ILP mapper (pillars.mapping.ILPMap.mapping).
 
 ``` Java
 object ILPMap {

@@ -8,10 +8,10 @@ doc:
 	sbt doc
 
 run:
-	sbt 'test:runMain tetriski.pillars.Pillars'
+	sbt 'test:runMain pillars.Pillars'
 
 end2end:
-	LD_LIBRARY_PATH=$$LD_LIBRARY_PATH:./lib sbt 'test:runMain tetriski.pillars.examples.Tutorial'
+	LD_LIBRARY_PATH=$$LD_LIBRARY_PATH:./lib sbt 'test:runMain pillars.examples.Tutorial'
 
 clean:
 	rm -f *.json *.fir *.v
