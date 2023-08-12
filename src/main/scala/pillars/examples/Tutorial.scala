@@ -146,7 +146,7 @@ object Tutorial {
     // and use loadTXT(mrrgFilename) to load the MRRG.
     val II = 1
     val MRRG = arch.getMRRG(II)
-    val dfgFilename = "tutorial/Vadd_Reverse_.dot"
+    val dfgFilename = "tutorial/Vadd_Reverse.dot"
 //    val dfgFilename = "dfg/accum/accum.dot"
     val dfg = DotReader.loadDot(dfgFilename, II)
     val mappingResultFilename = s"tutorial/ii$II"
