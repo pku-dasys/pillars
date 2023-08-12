@@ -36,11 +36,11 @@ object PillarsConfig {
 
   /** Log2 of the limitation of the skew.
    *
-   * @example If LOG_SCHEDULE_SIZE = 4, the compliant skew of the CGRA architecture is 0 ~ 15.
-   * @example If LOG_SCHEDULE_SIZE = -1 and USE_RELATIVE_SKEW = true, which means SKEW_WIDTH = 0,
+   * @example If LOG_SKEW_LENGTH = 4, the compliant skew of the CGRA architecture is 0 ~ 15.
+   * @example If LOG_SKEW_LENGTH = -1 and USE_RELATIVE_SKEW = true, which means SKEW_WIDTH = 0,
    *          the Synchronizers will not be employed in the architecture.
    */
-  var LOG_SKEW_LENGTH = log2Up(SKEW_REGISTER_NUM + 1)
+  var LOG_SKEW_LENGTH = if(SKEW_REGISTER_NUM == -1){-1}else{log2Up(SKEW_REGISTER_NUM + 1)}
 
   /** A parameter indicating we use relative skew or wait skew in the schedule.
    *
@@ -59,6 +59,16 @@ object PillarsConfig {
   }
 
   var USE_AUXILIARY_SCHEDULER = (SKEW_WIDTH != 0) || (LOG_SCHEDULE_SIZE != 0)
+
+  def update_auxiliary(): Unit ={
+    LOG_SKEW_LENGTH = if(SKEW_REGISTER_NUM == -1){-1}else{log2Up(SKEW_REGISTER_NUM + 1)}
+    SKEW_WIDTH = if (USE_RELATIVE_SKEW) {
+      LOG_SKEW_LENGTH + 1
+    } else {
+      LOG_SKEW_LENGTH * 2
+    }
+    USE_AUXILIARY_SCHEDULER = (SKEW_WIDTH != 0) || (LOG_SCHEDULE_SIZE != 0)
+  }
 
   var USE_TOKEN = false
 

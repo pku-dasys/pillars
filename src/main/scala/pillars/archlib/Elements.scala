@@ -38,7 +38,7 @@ class ElementAlu(name: String, aluOpList: List[OpEnum],
   }
 
   def genModuleRule()={
-    val rule = () => Module(new Alu(aluFunSelect, moduleParams(0)))
+    val rule = () => Module(new Alu(aluFunSelect, moduleParams(0), name = getName()))
     rule
   }
 
@@ -72,7 +72,9 @@ class ElementRF(name: String, moduleParams: List[Int]) extends ElementTrait {
   setMRRGMode(REG_MODE)
 
   def genModuleRule()={
-    val rule = () => Module(new RegisterFile(moduleParams(0), moduleParams(1), moduleParams(2), moduleParams(3)))
+    val rule = () =>
+      Module(new RegisterFile(moduleParams(0), moduleParams(1),
+        moduleParams(2), moduleParams(3), name = getName()))
     rule
   }
 
@@ -100,7 +102,7 @@ class ElementMux(name: String, moduleParams: List[Int]) extends ElementTrait {
   addInternalNodesNum(1)
 
   def genModuleRule()={
-    val rule = () => Module(new Multiplexer(moduleParams(0), moduleParams(1)))
+    val rule = () => Module(new Multiplexer(moduleParams(0), moduleParams(1), name = getName()))
     rule
   }
 
@@ -128,7 +130,7 @@ class ElementConst(name: String, moduleParams: List[Int]) extends ElementTrait {
   addInternalNodesNum(1)
 
   def genModuleRule()={
-    val rule = () => Module(new ConstUnit(moduleParams(0)))
+    val rule = () => Module(new ConstUnit(moduleParams(0), name = getName()))
     rule
   }
 
@@ -157,7 +159,7 @@ class ElementLSU(name: String, moduleParams: List[Int]) extends ElementTrait {
   setMRRGMode(MEM_MODE)
 
   def genModuleRule()={
-    val rule = () => Module(new LoadStoreUnit(moduleParams(0)))
+    val rule = () => Module(new LoadStoreUnit(moduleParams(0), name = getName()))
     rule
   }
 
@@ -184,7 +186,7 @@ class ElementCounter(name: String, moduleParams: List[Int]) extends ElementTrait
   addInternalNodesNum(1)
 
   def genModuleRule()={
-    val rule = () => Module(new Counter(moduleParams(0)))
+    val rule = () => Module(new Counter(moduleParams(0), name = getName()))
     rule
   }
 

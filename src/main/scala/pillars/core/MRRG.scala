@@ -5,6 +5,7 @@ import OpEnum.OpEnum
 import scala.collection.mutable.ArrayBuffer
 import MRRGMode._
 import pillars.mapping.NodeDFG
+import pillars.mapping.thirdParty.Digraph
 
 import scala.collection.mutable
 
@@ -276,8 +277,8 @@ class MRRG extends Cloneable {
       now += 1
       val name: String = file(now).substring(1, file(now).length - 1)
       addNode(new NodeMRRG(name))
-      if((name.indexOf("rf0.internalNode") != -1) ||
-        (name.indexOf("global_rf.internalNode") != -1)){
+      if ((name.indexOf("rf0.internalNode") != -1) ||
+        (name.indexOf("global_rf.internalNode") != -1)) {
         nodes(i).mode = REG_MODE
       }
       now += 1
@@ -295,7 +296,7 @@ class MRRG extends Cloneable {
       now += 1
       val name: String = file(now).substring(1, file(now).length - 1)
       addNode(new NodeMRRG(name))
-      if(name.indexOf("loadStoreUnit.internalNode") != -1){
+      if (name.indexOf("loadStoreUnit.internalNode") != -1) {
         nodes(i + numRoutingNodes).mode = MEM_MODE
       }
       now += 1
@@ -416,6 +417,37 @@ class MRRG extends Cloneable {
 
     shortestDistanceMap.toMap
   }
+
+  def GenGraph(name: String): Digraph = {
+    def repair(name: String): String = "RC" + name.replaceAll(":", "_").replaceAll("\\.", "_")
+
+    val g = new Digraph(name)
+    for (node <- nodes) {
+      val color = if (node.mapNode != null) {
+        "red"
+      } else {
+        "blue"
+      }
+      if(node.ops.size >0){
+        g.node(repair(node.name), attrs = mutable.Map("color" -> color, "shape" -> "box"))
+      }else{
+        g.node(repair(node.name), attrs = mutable.Map("color" -> color))
+      }
+    }
+
+    for (node <- nodes) {
+      for (out <- node.fanOut) {
+        val color = if (node.mapNode != null && out.mapNode != null) {
+          "red"
+        } else {
+          "blue"
+        }
+        g.edge(repair(node.name), repair(out.name), attrs = mutable.Map("color" -> color))
+      }
+    }
+    g
+  }
+
 }
 
 /** MRRG generation mode which keeps the major consistency requirement, modeling consistency.

@@ -8,6 +8,7 @@ import pillars.hardware.{TokenIO, TopModule}
 import pillars.util.SplitOrConcat
 
 import scala.collection.mutable.ArrayBuffer
+import scala.io.Source
 
 /** A class which is helpful when creating testers.
  * Since configuration controllers can repeat stored configurations every II cycles,
@@ -57,13 +58,57 @@ class AppTestHelper(testII: Int) {
    * @param     runtimeInfo    the runtime information
    */
   def init(arch: ArchitectureHierarchy, simulationHelper: SimulationHelper,
-           moduleInfoFilename: String, runtimeInfo: RuntimeInfo): Unit = {
+           moduleInfoFilename: String, runtimeInfo: RuntimeInfo, print: Boolean =false): Unit = {
+    if(print) {
+      println("""-----------------------------------------------------------------------------------------------
+The *_i.txt (Information TXT) will be printed,
+which contains the mapping results to guide the config generation of user-defined modules.
+
+Example 1:
+"<0:cgra.tile_0.pe_1_1.muxOut.internalNode_0>"
+"1                                           "
+"0                                           "
+It means that the module corresponding to a element
+whose hierarchy name is "cgra.tile_0.pe_1_1.muxOut",
+should route the data from input port "1" to the output port "0".
+So its configuration should be 1 at reconfiguration cycle 0.
+
+Example 2:
+"<0:cgra.tile_0.pe_3_0.alu0.internalNode_0>"
+"SELECTED_OP                               "
+"8                                         "
+It means that the module corresponding to a element
+whose hierarchy name is "cgra.tile_0.pe_3_0.alu0",
+should perform the opcode "8" (i.e. ADD).
+So its configuration should be 0, seen in OpcodeTranslator.
+-----------------------------------------------------------------------------------------------""")
+      Source.fromFile(moduleInfoFilename).getLines().foreach(item => println(item))
+    }
     val constInfo = simulationHelper.constInfo
     val counterInfo = simulationHelper.counterInfo
     counterNum = arch.CountersArray.size
     bitStreams = arch.genConfig(moduleInfoFilename, testII, constInfo, counterInfo)
+    if(print){
+      println("-----------------------------------------------------------------------------------------------\n" +
+        "Config bits of user-defined modules:")
+      for(ii <- 0 until bitStreams.size){
+        println("RC = " + ii + ", hexadecimal code:")
+        println(bitStreams(ii).toString(16))
+      }
+      println("-----------------------------------------------------------------------------------------------")
+    }
     //NOTE: getSchedules should be called after genConfig if ALUs are allowed to perform bypass.
     schedules = arch.getSchedules()
+    if(print){
+      val scheduleBigInt = getSchedulesBigInt()
+      println("-----------------------------------------------------------------------------------------------\n" +
+        "Config bits of auxiliary modules: ")
+      for(ii <- 0 until bitStreams.size){
+        println("RC = " + ii + ", hexadecimal code:")
+        println(scheduleBigInt(ii).toString(16))
+      }
+      println("-----------------------------------------------------------------------------------------------")
+    }
 
     //Set cycles when we can put data through the input ports or get the result from the output ports,
     // which can be obtained from "*_r.txt"

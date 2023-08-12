@@ -44,12 +44,15 @@ val defaultVersions = Map(
   //"chisel-testers2" -> "0.1.2"
 )
 
+
 libraryDependencies ++= Seq("chisel3","chisel-iotesters").map {
   dep: String => "edu.berkeley.cs" %% dep % sys.props.getOrElse(dep + "Version", defaultVersions(dep)) }
 libraryDependencies += "com.typesafe.play" %% "play-json" % "2.8.0"
 libraryDependencies += "org.apache.logging.log4j" % "log4j-core" % "2.17.2"
 libraryDependencies += "org.apache.logging.log4j" % "log4j-api" % "2.17.2"
 libraryDependencies += "org.apache.logging.log4j" % "log4j-slf4j-impl" % "2.17.2"
+libraryDependencies += "edu.berkeley.cs" %% "firrtl-diagrammer" % "1.1.0"
+
 scalacOptions := Seq("-unchecked", "-deprecation")
 scalacOptions ++= scalacOptionsVersion(scalaVersion.value)
 javacOptions ++= javacOptionsVersion(scalaVersion.value)

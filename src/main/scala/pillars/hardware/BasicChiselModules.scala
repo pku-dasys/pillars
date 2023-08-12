@@ -231,7 +231,8 @@ class MultiIIScheduleController(DualInput: Boolean = true) extends Module {
  * @param funSelect the subset of optional operations
  * @param w         the data width
  */
-class Alu(funSelect: Int, w: Int) extends Module {
+class Alu(funSelect: Int, w: Int, name: String = "ALU") extends Module {
+  override val desiredName = name
   val io = IO(new Bundle {
     val en = Input(Bool())
     val skewing = Input(UInt((SKEW_WIDTH).W))
@@ -321,7 +322,9 @@ class Alu(funSelect: Int, w: Int) extends Module {
   }
 }
 
-class DefaultBasicModule(w: Int, configBits: Int, numIn: Int, numOut: Int, inputII: Boolean = false) extends Module {
+class DefaultBasicModule(w: Int, configBits: Int, numIn: Int, numOut: Int,
+                         inputII: Boolean = false, customName: String = "defaultModule") extends Module {
+  override val desiredName = customName
   val widthII = if (inputII) {
     LOG_II_UPPER_BOUND
   } else {
@@ -345,7 +348,8 @@ class DefaultBasicModule(w: Int, configBits: Int, numIn: Int, numOut: Int, input
  *          the output should be 3, 0, 5, 0, 7, 0, 9, 0, 11, 0, 0, 0.....
  * @param w the data width
  */
-class SingleCounter(w: Int) extends DefaultBasicModule(w, 4 * w, 0, 1) {
+class SingleCounter(w: Int, name:String = "Counter")
+  extends DefaultBasicModule(w, 4 * w, 0, 1,customName = name) {
 
   val freq = io.configuration(4 * w - 1, 3 * w)
   val end = io.configuration(3 * w - 1, 2 * w)
@@ -404,8 +408,8 @@ class SingleCounter(w: Int) extends DefaultBasicModule(w, 4 * w, 0, 1) {
  *          1,    4,    7,    10,    13,   0.....
  * @param w the data width
  */
-class Counter(w: Int) extends DefaultBasicModule(w, 4 * w, 0, 1, true) {
-  val counters = (0 until II_UPPER_BOUND).map(_ => Module(new SingleCounter(w)))
+class Counter(w: Int,name:String = "Counter") extends DefaultBasicModule(w, 4 * w, 0, 1, true, customName = name) {
+  val counters = (0 until II_UPPER_BOUND).map(_ => Module(new SingleCounter(w,name + "_simple")))
 
   val cycleReg = RegInit((0).U(LOG_II_UPPER_BOUND.W))
   //  when(io.en === true.B) {
@@ -444,8 +448,8 @@ class Counter(w: Int) extends DefaultBasicModule(w, 4 * w, 0, 1, true) {
  * @param numOut   the number of output ports
  * @param w        the data width
  */
-class RegisterFile(log2Regs: Int, numIn: Int, numOut: Int, w: Int)
-  extends DefaultBasicModule(w, log2Regs * (numIn + numOut) + 1, numIn, numOut) {
+class RegisterFile(log2Regs: Int, numIn: Int, numOut: Int, w: Int, name:String = "RF")
+  extends DefaultBasicModule(w, log2Regs * (numIn + numOut) + 1, numIn, numOut, customName = name) {
   if (log2Regs == 0 && numIn == 1 && numOut == 1) {
     //single register
     val reg = RegInit(0.U(w.W))
@@ -483,7 +487,8 @@ class RegisterFile(log2Regs: Int, numIn: Int, numOut: Int, w: Int)
  * @param numIn the number of input ports
  * @param w     the data width
  */
-class Multiplexer(numIn: Int, w: Int) extends DefaultBasicModule(w, log2Up(numIn), numIn, 1) {
+class Multiplexer(numIn: Int, w: Int, name:String = "Mux")
+  extends DefaultBasicModule(w, log2Up(numIn), numIn, 1,customName = name) {
   //  val input0 = io.inputs(0)
   //  val input1 = io.inputs(1)
   val out = io.outs(0)
@@ -515,7 +520,8 @@ class Multiplexer(numIn: Int, w: Int) extends DefaultBasicModule(w, log2Up(numIn
  *
  * @param w the data width
  */
-class ConstUnit(w: Int) extends DefaultBasicModule(w, w, 0, 1) {
+class ConstUnit(w: Int, name:String = "ConstUnit")
+  extends DefaultBasicModule(w, w, 0, 1,customName = name) {
   if (USE_TOKEN) {
     io.outs(0).asInstanceOf[TokenIO].data := io.configuration
     io.outs(0).asInstanceOf[TokenIO].token := true.B
@@ -719,7 +725,8 @@ class LSMemWrapper(w: Int) extends Module {
  *
  * @param w the data width
  */
-class LoadStoreUnit(w: Int) extends Module {
+class LoadStoreUnit(w: Int, name:String = "LSU") extends Module {
+  override val desiredName = name
   val widthII = if (USE_TOKEN) {
     LOG_II_UPPER_BOUND
   } else {

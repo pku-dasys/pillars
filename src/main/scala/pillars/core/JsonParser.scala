@@ -9,8 +9,9 @@ import pillars.testers.AppTestHelper
 import scala.io.Source
 
 object JsonParser extends App {
-  def readJson(filename: String = "runtime.json") = {
+  def readJson(filename: String = "runtime.json", print:Boolean = false) = {
     val in = Source.fromFile(filename).getLines().reduce(_ + _)
+    if(print) Source.fromFile(filename).getLines().foreach(item => println(item))
     val json = Json.parse(in)
     RuntimeInfo.read(json)
   }

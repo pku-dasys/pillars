@@ -62,6 +62,7 @@ object DotReader {
 
     for (i <- 1 until lines) {
       val line = file(i).replaceAll(" ", "")
+        .replaceAll("\t", "")
       val index0 = line.indexOf("->")
       val index1 = line.indexOf('[')
       val index2 = line.indexOf('=')

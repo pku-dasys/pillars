@@ -1,12 +1,11 @@
 package pillars.examples
 
 import java.util.Date
-
 import chisel3.iotesters
 import chisel3.iotesters.PeekPokeTester
 import pillars.archlib.TileLSUBlock
 import pillars.core._
-import pillars.hardware.{SynthesizedModule, TopModule}
+import pillars.hardware.{PillarsConfig, SynthesizedModule, TopModule}
 import pillars.mapping.{DFG, DotReader, ILPMap, OmtMap, SearchMap}
 import pillars.testers.{AppTestHelper, ApplicationTester}
 
@@ -147,7 +146,7 @@ object Tutorial {
     // and use loadTXT(mrrgFilename) to load the MRRG.
     val II = 1
     val MRRG = arch.getMRRG(II)
-    val dfgFilename = "tutorial/Vadd_Reverse.dot"
+    val dfgFilename = "tutorial/Vadd_Reverse_.dot"
 //    val dfgFilename = "dfg/accum/accum.dot"
     val dfg = DotReader.loadDot(dfgFilename, II)
     val mappingResultFilename = s"tutorial/ii$II"
@@ -155,7 +154,7 @@ object Tutorial {
     object Solver extends Enumeration {
       val Gurobi, Search, Z3Prover = Value
     }
-    val solver = Solver.Search
+    val solver = Solver.Gurobi
     val separatedPR = true
     val scheduleControl = true
 
@@ -167,8 +166,6 @@ object Tutorial {
     }
     var endTime = new Date().getTime()
     println("Mapping runtime: " + (endTime - startTime))
-
-    //    PillarsConfig.USE_TOKEN = true
 
     //Generate the top design.
     val connect = new Connect(arch.connectArray)

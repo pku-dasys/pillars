@@ -174,10 +174,29 @@ class SimulationHelper(arch: ArchitectureHierarchy) {
    * @param runtimeInfo    the runtime information
    * @param testII         the targeted II
    */
-  def init(resultFilename: String, runtimeInfo: RuntimeInfo = null, testII: Int = 1): Unit = {
+  def init(resultFilename: String, runtimeInfo: RuntimeInfo = null, testII: Int = 1, print : Boolean = false): Unit = {
     reset()
 
     val resultArray = Source.fromFile(resultFilename).getLines().toArray
+    if(print) {
+      println("""-----------------------------------------------------------------------------------------------
+The *_r.txt (Result TXT) will be printed,
+which contains the mapping results to guide schedule.
+
+Example 1:
+"input0 0:cgra.input_1.fun 0 0"
+It means the op "input0" in DFG is mapped onto the node "0:cgra.input_1.fun" in MRRG.
+The initial cycle of this op is 0.
+The value to guide synchronization is 0.
+
+Example 2:
+"add1 0:cgra.tile_0.pe_1_3.alu0.internalNode_0 3 2"
+It means the op "add1" in DFG is mapped onto the node "0:cgra.tile_0.pe_1_3.alu0.internalNode_0" in MRRG.
+The initial cycle of this op is 3.
+The value to guide synchronization is 0, the difference of arrival clock cycles between inputs of this op is 2.
+-----------------------------------------------------------------------------------------------""")
+      Source.fromFile(resultFilename).getLines().foreach(item => println(item))
+    }
     resultArray.map(r => addResult(r))
     size = opArray.size
     //Set the cycle we can obtain the last result.
