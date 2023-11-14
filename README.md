@@ -13,7 +13,7 @@ programming (ILP) CAD tool can map data-flow graph (DFG)
 onto the specified CGRA, generating contexts for CGRA RTL level
 simulation.
 
-![avatar](fig/overview.png)
+![avatar](fig/overview.png?raw=true)
 
 ## Installing Necessary Dependencies
 
@@ -149,8 +149,8 @@ You can design your own CGRA architectures by create blocks like what in the arc
 
 Examples:
 
-![avatar](fig/BlockImmediate.jpg)
-![avatar](fig/BlockMesh.jpg)
+![avatar](fig/BlockImmediate.jpg?raw=true)
+![avatar](fig/BlockMesh.jpg?raw=true)
 
 Note: If you want to add or modify a basic module, you can design your own elements and basic chisel modules.
 Do not forget to keep the modeling consistency and runtime consistency as mentioned in annotation.
