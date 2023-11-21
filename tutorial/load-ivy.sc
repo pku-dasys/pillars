@@ -129,7 +129,7 @@ def generateVisualizations(gen: () => chisel3.RawModule): (String, String) = {
     val targetDir = "build"
     val chiselIR = chisel3.Driver.elaborate(gen)
     val firrtlIR = chisel3.Driver.emit(chiselIR)
-    val config = Config(targetDir = "build", firrtlSource = firrtlIR)
+    val config = Config(targetDir = targetDir, firrtlSource = firrtlIR)
   
     val sourceFirrtl = {
       if(config.firrtlSource.nonEmpty) {
@@ -179,10 +179,10 @@ def generateVisualizations(gen: () => chisel3.RawModule): (String, String) = {
     s"cp build/${readableTop}_hierarchy.dot.svg build/${uniqueTop}_hierarchy.dot.svg"!!
     
     val moduleView = targetDir + "/" + uniqueTop + ".dot.svg"
-    val x = """<a name="top"></a><img src=" """ + moduleView + """" alt="Module View";" />"""
+    val x = """<a name="top"></a><img src='""" + moduleView + """' alt="Module View";" />"""
     
     val instanceView = targetDir + "/" + uniqueTop + "_hierarchy.dot.svg"
-    val y = """<a name="top"></a><img src=" """ + instanceView + """" alt="Hierarchy View" style="width:480px;" />"""
+    val y = """<a name="top"></a><img src='""" + instanceView + """' alt="Hierarchy View" style="width:480px;" />"""
     (x, y)
 
 }
@@ -199,6 +199,6 @@ def visualizeHierarchy(gen: () => chisel3.RawModule): Unit = {
 }
 
 def viewDFG(path:String): Unit ={
-  val x = """<a name="top"></a><img src=" """ + path + """" alt="Module View";" />"""
+  val x = """<a name="top"></a><img src='""" + path + """' alt="Module View";" />"""
   html(x)
 }
