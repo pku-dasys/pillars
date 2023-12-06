@@ -30,7 +30,7 @@ version := "1.0.0"
 
 scalaVersion := "2.12.10"
 
-crossScalaVersions := Seq("2.12.6", "2.11.12")
+crossScalaVersions := Seq("2.12.10", "2.11.12")
 
 resolvers ++= Seq(
   Resolver.sonatypeRepo("snapshots"),
@@ -39,7 +39,7 @@ resolvers ++= Seq(
 
 // Provide a managed dependency on X if -DXVersion="" is supplied on the command line.
 val defaultVersions = Map(
-  "chisel3" -> "3.2.2",
+  "chisel3" -> "3.3.3",
   "chisel-iotesters" -> "1.3.2"
   //"chisel-testers2" -> "0.1.2"
 )

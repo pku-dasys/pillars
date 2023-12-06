@@ -361,8 +361,8 @@ object MemTest extends App {
 }
 
 object SinglePortSramVerilog extends App {
-  chisel3.Driver.execute(args, () => new SinglePortSram(10000, 32))
+  (new chisel3.stage.ChiselStage).emitVerilog(new SinglePortSram(10000, 32), args)
 }
 object SimpleDualPortSramVerilog extends App {
-  chisel3.Driver.execute(args, () => new SimpleDualPortSram(10000, 32))
+  (new chisel3.stage.ChiselStage).emitVerilog(new SimpleDualPortSram(10000, 32), args)
 }

@@ -456,7 +456,7 @@ object LSUTest extends App {
 /** A object generating the Verilog of a load/store unit.
  */
 object LoadStoreUnitVerilog extends App {
-  chisel3.Driver.execute(args, () => new LoadStoreUnit(32))
+  (new chisel3.stage.ChiselStage).emitVerilog(new LoadStoreUnit(32), args)
 }
 
 /** A tester of a multiplexer.
@@ -477,7 +477,7 @@ class MultiplexerUnitTester(c: Multiplexer) extends PeekPokeTester(c) {
 /** A object invoking the tester of a multiplexer.
  */
 object MuxTest extends App {
-  chisel3.Driver.execute(args, () => new Multiplexer(6, 32))
+  (new chisel3.stage.ChiselStage).emitVerilog(new Multiplexer(6, 32), args)
   iotesters.Driver.execute(Array("-tgvo", "on", "-tbn", "verilator"),
     () => new Multiplexer(6, 32)) { c => new MultiplexerUnitTester(c) }
 }

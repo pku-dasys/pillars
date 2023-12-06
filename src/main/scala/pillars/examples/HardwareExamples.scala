@@ -56,9 +56,11 @@ object HardwareExamples {
     val dataWidth = 32
 
     //Verilog generation
-    chisel3.Driver.execute(Array(""),
-      () => new TopModule(hardwareGenerator.pillarsModuleInfo,
-        hardwareGenerator.connectMap, hardwareGenerator.regionList, dataWidth))
+    (new chisel3.stage.ChiselStage).emitVerilog(
+      new TopModule(hardwareGenerator.pillarsModuleInfo,
+        hardwareGenerator.connectMap, hardwareGenerator.regionList, dataWidth),
+      Array("")
+    )
 
     //Run tester
     iotesters.Driver.execute(Array("-tgvo", "on"),
@@ -119,9 +121,11 @@ object HardwareExamples {
 
 
     //Verilog generation
-    chisel3.Driver.execute(Array("--no-check-comb-loops", "-td", "ADRESv0"),
-      () => new TopModule(hardwareGenerator.pillarsModuleInfo,
-        hardwareGenerator.connectMap, hardwareGenerator.regionList, dataWidth))
+    (new chisel3.stage.ChiselStage).emitVerilog(
+      new TopModule(hardwareGenerator.pillarsModuleInfo,
+        hardwareGenerator.connectMap, hardwareGenerator.regionList, dataWidth),
+      Array("--no-check-comb-loops", "-td", "ADRESv0")
+    )
 
     val constInfo = new ConstInfo(1)
     constInfo.addConfig(arch("tile_0")("pe_0_0").getElement("const0").getModuleID(), 0, 4)
@@ -176,9 +180,11 @@ object HardwareExamples {
     val hardwareGenerator = new HardwareGenerator(arch, connect)
 
     //Verilog generation
-    chisel3.Driver.execute(Array("--no-check-comb-loops", "-td", "ADRESv1"),
-      () => new TopModule(hardwareGenerator.pillarsModuleInfo,
-        hardwareGenerator.connectMap, hardwareGenerator.regionList, dataWidth))
+    (new chisel3.stage.ChiselStage).emitVerilog(
+      new TopModule(hardwareGenerator.pillarsModuleInfo,
+        hardwareGenerator.connectMap, hardwareGenerator.regionList, dataWidth),
+      Array("--no-check-comb-loops", "-td", "ADRESv1")
+    )
 
     val constInfo = new ConstInfo(1)
     constInfo.addConfig(arch("tile_0")("pe_0_1").getElement("const0").getModuleID(), 0, 0)
@@ -249,9 +255,11 @@ object HardwareExamples {
 
 
     //Verilog generation
-    chisel3.Driver.execute(Array("--no-check-comb-loops", "-td", "ADRESv2"),
-      () => new TopModule(hardwareGenerator.pillarsModuleInfo, hardwareGenerator.connectMap,
-        hardwareGenerator.regionList, dataWidth))
+    (new chisel3.stage.ChiselStage).emitVerilog(
+      new TopModule(hardwareGenerator.pillarsModuleInfo, hardwareGenerator.connectMap,
+        hardwareGenerator.regionList, dataWidth),
+      Array("--no-check-comb-loops", "-td", "ADRESv2")
+    )
 
     val constInfo = new ConstInfo(targetedII)
     constInfo.addConfig(arch("tile_0")("pe_0_3").getElement("const0").getModuleID(), 0, 1)

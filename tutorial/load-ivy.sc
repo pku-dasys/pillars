@@ -29,13 +29,13 @@ for (jar <- jar_files) {
     interp.load.cp(new java.io.File(jar).toURI.toURL)
 }
 
-import $ivy.`edu.berkeley.cs::chisel3:3.2.2` 
+import $ivy.`edu.berkeley.cs::chisel3:3.3.3`
 import $ivy.`edu.berkeley.cs::chisel-iotesters:1.3.0`
 import $ivy.`edu.berkeley.cs::chisel-testers2:0.1.0`
 import $ivy.`edu.berkeley.cs::dsptools:1.2.0`
 import $ivy.`org.scalanlp::breeze:0.13.2`
 import $ivy.`edu.berkeley.cs::rocket-dsptools:1.2.0`
-import $ivy.`edu.berkeley.cs::firrtl-diagrammer:1.1.0`
+import $ivy.`edu.berkeley.cs::firrtl-diagrammer:1.2.+`
 
 // Convenience function to invoke Chisel and grab emitted Verilog.
 def getVerilog(dut: => chisel3.core.UserModule): String = {
