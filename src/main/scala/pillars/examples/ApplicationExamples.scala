@@ -6,6 +6,7 @@ import pillars.hardware.{TopModule, TopModuleWrapper, TopModuleWrapperSolid}
 import pillars.testers._
 
 import chiseltest._
+import firrtl.transforms.DontCheckCombLoopsAnnotation
 import org.scalatest.flatspec.AnyFlatSpec
 
 /** Some examples showing how to test applications with a 4*4 TileCompleteBlock.
@@ -72,7 +73,7 @@ object ApplicationExamples {
     */
   def dumpWrapperVerilog(): Unit = {
     //Verilog generation
-    (new chisel3.stage.ChiselStage).emitVerilog(
+    chisel3.emitVerilog(
       new TopModuleWrapper(
         hardwareGenerator.pillarsModuleInfo,
         hardwareGenerator.connectMap,
@@ -158,7 +159,9 @@ object ApplicationExamples {
                   hardwareGenerator.regionList,
                   dataWidth
                 )
-            ).runPeekPoke(new VaddWrapperTester(_, appTestHelper))
+            )
+            .withAnnotations(Seq(DontCheckCombLoopsAnnotation, VerilatorBackendAnnotation))
+            .runPeekPoke(new VaddWrapperTester(_, appTestHelper))
           }
         })
       } else {
@@ -171,7 +174,9 @@ object ApplicationExamples {
                   hardwareGenerator.regionList,
                   dataWidth
                 )
-            ).runPeekPoke(new VaddTester(_, appTestHelper))
+            )
+            .withAnnotations(Seq(DontCheckCombLoopsAnnotation, VerilatorBackendAnnotation))
+            .runPeekPoke(new VaddTester(_, appTestHelper))
           }
         })
       }
@@ -329,7 +334,9 @@ object ApplicationExamples {
                   hardwareGenerator.regionList,
                   dataWidth
                 )
-            ).runPeekPoke(new SumWrapperTester(_, appTestHelper))
+            )
+            .withAnnotations(Seq(DontCheckCombLoopsAnnotation, VerilatorBackendAnnotation))
+            .runPeekPoke(new SumWrapperTester(_, appTestHelper))
           }
         })
       } else {
@@ -342,7 +349,9 @@ object ApplicationExamples {
                   hardwareGenerator.regionList,
                   dataWidth
                 )
-            ).runPeekPoke(new SumTester(_, appTestHelper))
+            )
+            .withAnnotations(Seq(DontCheckCombLoopsAnnotation, VerilatorBackendAnnotation))
+            .runPeekPoke(new SumTester(_, appTestHelper))
           }
         })
       }
@@ -501,7 +510,9 @@ object ApplicationExamples {
                 hardwareGenerator.regionList,
                 dataWidth
               )
-          ).runPeekPoke(new AccumTester(_, appTestHelper))
+          )
+          .withAnnotations(Seq(DontCheckCombLoopsAnnotation, VerilatorBackendAnnotation))
+          .runPeekPoke(new AccumTester(_, appTestHelper))
         }
       })
     }
@@ -654,7 +665,9 @@ object ApplicationExamples {
                 hardwareGenerator.regionList,
                 dataWidth
               )
-          ).runPeekPoke(new CapTester(_, appTestHelper))
+          )
+          .withAnnotations(Seq(DontCheckCombLoopsAnnotation, VerilatorBackendAnnotation))
+          .runPeekPoke(new CapTester(_, appTestHelper))
         }
       })
     }

@@ -466,7 +466,7 @@ object LSUTest extends App {
 /** A object generating the Verilog of a load/store unit.
  */
 object LoadStoreUnitVerilog extends App {
-  (new chisel3.stage.ChiselStage).emitVerilog(new LoadStoreUnit(32), args)
+  chisel3.emitVerilog(new LoadStoreUnit(32), args)
 }
 
 /** A tester of a multiplexer.
@@ -487,7 +487,7 @@ class MultiplexerUnitTester(c: Multiplexer) extends PeekPokeTester(c) {
 /** A object invoking the tester of a multiplexer.
  */
 object MuxTest extends App {
-  (new chisel3.stage.ChiselStage).emitVerilog(new Multiplexer(6, 32), args)
+  chisel3.emitVerilog(new Multiplexer(6, 32), args)
   org.scalatest.run(new AnyFlatSpec with ChiselScalatestTester {
     behavior of "Multiplexer"
     it should "work" in {

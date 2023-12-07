@@ -156,8 +156,7 @@ object Tutorial {
           dataWidth
         )
 
-      (new chisel3.stage.ChiselStage)
-        .emitVerilog(synthesizedDesign(), Array("-td", "tutorial/RTL/"))
+      chisel3.emitVerilog(synthesizedDesign(), Array("-td", "tutorial/RTL/"))
 
       val inputToPort = runtimeInfo.inputToPort
       val outputFromPort = runtimeInfo.outputFromPort
@@ -274,8 +273,7 @@ object Tutorial {
       )
 
     //Generate the RTL codes.
-    (new chisel3.stage.ChiselStage)
-      .emitVerilog(topDesign(), Array("-td", "tutorial/RTL/"))
+    chisel3.emitVerilog(topDesign(), Array("-td", "tutorial/RTL/"))
 
     //Simulate with the mapping result.
     JsonParser.writeJson(prepareRuntimeInfo(dfg, rowNum), "runtime.json")

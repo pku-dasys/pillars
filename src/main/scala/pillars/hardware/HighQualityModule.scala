@@ -125,7 +125,7 @@ class HighQualityAdder(w: Int) extends Module {
 object Test {
   def main(args: Array[String]): Unit = {
     val topDesign = () => new HighQualityAdder(4)
-    (new chisel3.stage.ChiselStage).emitVerilog(topDesign(), Array("-td", "tutorial/RTL/"))
+    chisel3.emitVerilog(topDesign(), Array("-td", "tutorial/RTL/"))
 
     org.scalatest.run(new AnyFlatSpec with ChiselScalatestTester {
       it should "work" in {

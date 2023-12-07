@@ -375,8 +375,8 @@ object MemTest extends App {
 }
 
 object SinglePortSramVerilog extends App {
-  (new chisel3.stage.ChiselStage).emitVerilog(new SinglePortSram(10000, 32), args)
+  chisel3.emitVerilog(new SinglePortSram(10000, 32), args)
 }
 object SimpleDualPortSramVerilog extends App {
-  (new chisel3.stage.ChiselStage).emitVerilog(new SimpleDualPortSram(10000, 32), args)
+  chisel3.emitVerilog(new SimpleDualPortSram(10000, 32), args)
 }
