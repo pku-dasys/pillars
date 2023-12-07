@@ -39,19 +39,18 @@ resolvers ++= Seq(
 
 // Provide a managed dependency on X if -DXVersion="" is supplied on the command line.
 val defaultVersions = Map(
-  "chisel3" -> "3.3.3",
-  "chisel-iotesters" -> "1.3.2"
-  //"chisel-testers2" -> "0.1.2"
+  "chisel3" -> "3.5.6",
+  "chiseltest" -> "0.5.6"
 )
 
-
-libraryDependencies ++= Seq("chisel3","chisel-iotesters").map {
+addCompilerPlugin("edu.berkeley.cs" % "chisel3-plugin" % "3.5.6" cross CrossVersion.full)
+libraryDependencies ++= Seq("chisel3","chiseltest").map {
   dep: String => "edu.berkeley.cs" %% dep % sys.props.getOrElse(dep + "Version", defaultVersions(dep)) }
 libraryDependencies += "com.typesafe.play" %% "play-json" % "2.8.0"
 libraryDependencies += "org.apache.logging.log4j" % "log4j-core" % "2.17.2"
 libraryDependencies += "org.apache.logging.log4j" % "log4j-api" % "2.17.2"
 libraryDependencies += "org.apache.logging.log4j" % "log4j-slf4j-impl" % "2.17.2"
-libraryDependencies += "edu.berkeley.cs" %% "firrtl-diagrammer" % "1.1.0"
+libraryDependencies += "edu.berkeley.cs" %% "firrtl-diagrammer" % "1.5.6"
 
 scalacOptions := Seq("-unchecked", "-deprecation")
 scalacOptions ++= scalacOptionsVersion(scalaVersion.value)

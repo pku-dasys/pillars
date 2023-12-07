@@ -1,6 +1,6 @@
 package pillars.testers
 
-import chisel3.iotesters.PeekPokeTester
+import chiseltest.iotesters.PeekPokeTester
 import pillars.hardware.TopModuleWrapper
 
 /** A base class of testers for applications when the top design has a wrapper.

@@ -1,15 +1,17 @@
 package pillars.examples
 
-import java.util.Date
-import chisel3.iotesters
-import chisel3.iotesters.PeekPokeTester
 import pillars.archlib.TileLSUBlock
 import pillars.core._
 import pillars.hardware.{PillarsConfig, SynthesizedModule, TopModule}
 import pillars.mapping.{DFG, DotReader, ILPMap, OmtMap, SearchMap}
 import pillars.testers.{AppTestHelper, ApplicationTester}
 
+import chiseltest._
+import chiseltest.iotesters.PeekPokeTester
+import chiseltest.simulator.VerilatorBackendAnnotation
+import org.scalatest.flatspec.AnyFlatSpec
 import scala.util.Random
+import java.util.Date
 
 /** An end2end tutorial of Pillars.
   * Example: a DFG contains vector addition and vector reverse.
@@ -159,17 +161,21 @@ object Tutorial {
 
       val inputToPort = runtimeInfo.inputToPort
       val outputFromPort = runtimeInfo.outputFromPort
-      iotesters.Driver
-        .execute(Array("-tgvo", "on", "-tbn", "verilator"), synthesizedDesign) {
-          c =>
+      org.scalatest.run(new AnyFlatSpec with ChiselScalatestTester {
+        it should "work" in {
+          test(synthesizedDesign())
+          .withAnnotations(Seq(VerilatorBackendAnnotation))
+          .runPeekPoke(
             new SynthesizedModuleTester(
-              c,
+              _,
               inputToPort(0).data.toArray,
               outputFromPort(0).expectedData.toArray,
               outputFromSRAM(0).expectedData.toArray,
               simulationHelper.getOutputCycle()
             )
+          )
         }
+      })
     }
 
     val rowNum = 4
@@ -218,7 +224,7 @@ object Tutorial {
     object Solver extends Enumeration {
       val Gurobi, Search, Z3Prover = Value
     }
-    val solver = Solver.Search
+    val solver = Solver.Gurobi
     val separatedPR = true
     val scheduleControl = true
 
@@ -286,10 +292,15 @@ object Tutorial {
 
     //    JsonParser.dumpRuntimeInfo(simulationHelper, appTestHelper, dfg)
 
-    iotesters.Driver
-      .execute(Array("-tgvo", "on", "-tbn", "verilator"), topDesign) { c =>
-        new VaddReverseTester(c, appTestHelper)
+    org.scalatest.run(new AnyFlatSpec with ChiselScalatestTester {
+      it should "work" in {
+        test(topDesign())
+        .withAnnotations(Seq(VerilatorBackendAnnotation))
+        .runPeekPoke(
+          new VaddReverseTester(_, appTestHelper)
+        )
       }
+    })
 
 //    if (II == 1) {
 //      testSynthesize(dfg, simulationHelper, dataWidth, runtimeInfo)

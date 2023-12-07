@@ -1,12 +1,12 @@
 package pillars.testers
 
-import chisel3.{UInt, assert}
-import chisel3.iotesters.PeekPokeTester
 import pillars.core.{ArchitectureHierarchy, RuntimeInfo, SimulationHelper}
 import pillars.hardware.PillarsConfig._
 import pillars.hardware.{TokenIO, TopModule}
 import pillars.util.SplitOrConcat
 
+import chisel3.{UInt, assert}
+import chiseltest.iotesters.PeekPokeTester
 import scala.collection.mutable.ArrayBuffer
 import scala.io.Source
 

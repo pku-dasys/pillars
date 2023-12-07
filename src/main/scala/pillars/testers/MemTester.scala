@@ -1,11 +1,13 @@
 package pillars.testers
 
-import chisel3._
-import chisel3.util._
-import chisel3.iotesters
-import chisel3.iotesters.{ChiselFlatSpec, Driver, PeekPokeTester}
 import pillars.hardware.LoadStoreUnit
 import pillars.util._
+
+import chisel3._
+import chisel3.util._
+import chiseltest._
+import chiseltest.iotesters.PeekPokeTester
+import org.scalatest.flatspec.AnyFlatSpec
 
 class SinglePortSramUnitTester(c: SinglePortSram) extends PeekPokeTester(c) {
   val addr = Array(0x0000, 0xffff, 0xcafe)
@@ -344,20 +346,32 @@ object MemTest extends App {
   //iotesters.Driver.execute(args, () => new SinglePortMem(32, 10000)) { c => new SinglePortMemUnitTester(c) }
   //iotesters.Driver.execute(args, () => new SimpleDualPortMem(32, 10000)) { c => new SimpleDualPortMemUnitTester(c) }
 
-  iotesters.Driver.execute(args, () => new SinglePortSram(10000, 32)) { c => new SinglePortSramUnitTester(c) }
-  iotesters.Driver.execute(Array("-tgvo", "on", "-tbn", "verilator"),
-    () => new SimpleDualPortSram(10000, 32, true)) { c => new SimpleDualPortSramUnitTester(c) }
+  org.scalatest.run(new AnyFlatSpec with ChiselScalatestTester {
+    it should "work with SinglePortSram" in {
+      test(new SinglePortSram(10000, 32)) // FIXME: FAILED
+    }.runPeekPoke(new SinglePortSramUnitTester(_))
 
-  iotesters.Driver.execute(args, () => new EnqMemWrapper(32, 32, 10000)) { c => new EnqMemUnitTester(c) }
-  iotesters.Driver.execute(args, () => new EnqMemWrapper(128, 32, 10000)) { c => new EnqMemUnitTester(c) }
-  iotesters.Driver.execute(args, () => new EnqMemWrapper(8, 32, 10000)) { c => new EnqMemUnitTester(c) }
+    it should "work with SimpleDualPortSram" in {
+      test(new SimpleDualPortSram(10000, 32, true))
+    }.withAnnotations(Seq(VerilatorBackendAnnotation))
+     .runPeekPoke(new SimpleDualPortSramUnitTester(_))
 
-  iotesters.Driver.execute(args, () =>
-    new EnqAddrDeqMemWrapper(new MemReadIO(10000, 32))) { c => new EnqAddrDeqMemUnitTester(c) }
+    it should "work with EnqMem" in {
+      test(new EnqMemWrapper(32, 32, 10000))
+      test(new EnqMemWrapper(128, 32, 10000))
+      test(new EnqMemWrapper(8, 32, 10000))
+    }.runPeekPoke(new EnqMemUnitTester(_))
 
-  iotesters.Driver.execute(args, () => new DeqMemWrapper(32, 32, 10000)) { c => new DeqMemUnitTester(c) }
-  iotesters.Driver.execute(args, () => new DeqMemWrapper(8, 32, 10000)) { c => new DeqMemUnitTester(c) }
-  iotesters.Driver.execute(args, () => new DeqMemWrapper(128, 32, 10000)) { c => new DeqMemUnitTester(c) }
+    it should "work with EnqAddrDeqMem" in {
+      test(new EnqAddrDeqMemWrapper(new MemReadIO(10000, 32)))
+    }.runPeekPoke(new EnqAddrDeqMemUnitTester(_))
+
+    it should "work with DeqMem" in {
+      test(new DeqMemWrapper(32, 32, 10000))
+      test(new DeqMemWrapper(8, 32, 10000))
+      test(new DeqMemWrapper(128, 32, 10000))
+    }.runPeekPoke(new DeqMemUnitTester(_))
+  })
 }
 
 object SinglePortSramVerilog extends App {

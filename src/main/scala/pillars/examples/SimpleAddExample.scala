@@ -10,11 +10,11 @@ import pillars.core.OpEnum.OpEnum
 import pillars.mapping.{DFG, DotReader, ILPMap, OmtMap, SearchMap}
 import pillars.testers.{AppTestHelper, ApplicationTester}
 
+import chiseltest._
+import org.scalatest.flatspec.AnyFlatSpec
 import scala.util.Random
 import java.lang.Math
 import java.util.Date
-
-import chisel3.iotesters
 
 class SimpleBlockWithReg(name: String, isRegion: Boolean = false) extends BlockTrait {
   initName(name)
@@ -101,7 +101,7 @@ object SimpleAddExample {
     object Solver extends Enumeration {
       val Gurobi, Search, Z3Prover = Value
     }
-    val solver = Solver.Gurobi
+    val solver = Solver.Search
     val separatedPR = true
     val scheduleControl = true
 
@@ -133,9 +133,13 @@ object SimpleAddExample {
     val topDesign = () => new TopModule(hardwareGenerator.pillarsModuleInfo,
       hardwareGenerator.connectMap, hardwareGenerator.regionList, dataWidth)
 
-    iotesters.Driver.execute(Array("-tgvo", "on", "-tbn", "verilator"), topDesign) {
-      c => new AddTester(c, appTestHelper)
-    }
+    org.scalatest.run(new AnyFlatSpec with ChiselScalatestTester {
+      behavior of "SimpleAdd"
+      it should "work" in {
+        test(topDesign()).runPeekPoke(
+          new AddTester(_, appTestHelper))
+      }
+    })
   }
 }
 

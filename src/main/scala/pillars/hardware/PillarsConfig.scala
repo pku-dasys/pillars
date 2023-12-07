@@ -1,7 +1,7 @@
 package pillars.hardware
 
 import chisel3._
-import chisel3.util.{Log2, log2Up}
+import chisel3.util.{Log2, log2Ceil}
 
 /** Hardware config in Pillars including the depth of RAM in LSU,
  * limitation of II and the schedule length.
@@ -40,7 +40,7 @@ object PillarsConfig {
    * @example If LOG_SKEW_LENGTH = -1 and USE_RELATIVE_SKEW = true, which means SKEW_WIDTH = 0,
    *          the Synchronizers will not be employed in the architecture.
    */
-  var LOG_SKEW_LENGTH = if(SKEW_REGISTER_NUM == -1){-1}else{log2Up(SKEW_REGISTER_NUM + 1)}
+  var LOG_SKEW_LENGTH = if(SKEW_REGISTER_NUM == -1){-1}else{log2Ceil(SKEW_REGISTER_NUM + 1)}
 
   /** A parameter indicating we use relative skew or wait skew in the schedule.
    *
@@ -61,7 +61,7 @@ object PillarsConfig {
   var USE_AUXILIARY_SCHEDULER = (SKEW_WIDTH != 0) || (LOG_SCHEDULE_SIZE != 0)
 
   def update_auxiliary(): Unit ={
-    LOG_SKEW_LENGTH = if(SKEW_REGISTER_NUM == -1){-1}else{log2Up(SKEW_REGISTER_NUM + 1)}
+    LOG_SKEW_LENGTH = if(SKEW_REGISTER_NUM == -1){-1}else{log2Ceil(SKEW_REGISTER_NUM + 1)}
     SKEW_WIDTH = if (USE_RELATIVE_SKEW) {
       LOG_SKEW_LENGTH + 1
     } else {

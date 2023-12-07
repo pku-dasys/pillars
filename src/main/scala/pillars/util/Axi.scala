@@ -26,7 +26,7 @@ class AxiMasterReadIO(val addr_width: Int, val data_width: Int) extends TraitAxi
     this(parent.addr_width, parent.data_width)
   }
 
-  override def cloneType: this.type = new AxiMasterReadIO(addr_width, data_width).asInstanceOf[this.type]
+  //override def cloneType: this.type = new AxiMasterReadIO(addr_width, data_width).asInstanceOf[this.type]
 }
 
 class AxiMasterWriteIO(val addr_width: Int, val data_width: Int) extends TraitAxiMasterWriteIO {
@@ -248,7 +248,7 @@ trait TraitAxiLiteAddressIO extends DecoupledIO[UInt] {
 }
 
 class AxiLiteAddressIO(gen: UInt) extends DecoupledIO(gen) with TraitAxiLiteAddressIO {
-  override def cloneType: this.type = new AxiLiteAddressIO(gen).asInstanceOf[this.type]
+  //override def cloneType: this.type = new AxiLiteAddressIO(gen).asInstanceOf[this.type]
 }
 
 trait TraitAxiLiteReadDataIO extends DecoupledIO[UInt] {
@@ -265,7 +265,7 @@ trait TraitAxiLiteReadDataIO extends DecoupledIO[UInt] {
   }
 }
 class AxiLiteReadDataIO(gen: UInt) extends DecoupledIO(gen) with TraitAxiLiteReadDataIO {
-  override def cloneType: this.type = new AxiLiteReadDataIO(gen).asInstanceOf[this.type]
+  //override def cloneType: this.type = new AxiLiteReadDataIO(gen).asInstanceOf[this.type]
 }
 
 trait TraitAxiLiteWriteDataIO extends DecoupledIO[UInt] {
@@ -283,7 +283,7 @@ trait TraitAxiLiteWriteDataIO extends DecoupledIO[UInt] {
   }
 }
 class AxiLiteWriteDataIO(gen: UInt) extends DecoupledIO(gen) with TraitAxiLiteWriteDataIO {
-  override def cloneType: this.type = new AxiLiteWriteDataIO(gen).asInstanceOf[this.type]
+  //override def cloneType: this.type = new AxiLiteWriteDataIO(gen).asInstanceOf[this.type]
 }
 
 trait TraitAxiLiteWriteResponseIO extends DecoupledIO[UInt] {
@@ -298,7 +298,7 @@ trait TraitAxiLiteWriteResponseIO extends DecoupledIO[UInt] {
   }
 }
 class AxiLiteWriteResponseIO(gen: UInt) extends DecoupledIO(gen) with TraitAxiLiteWriteResponseIO {
-  override def cloneType: this.type = new AxiLiteWriteResponseIO(gen).asInstanceOf[this.type]
+  //override def cloneType: this.type = new AxiLiteWriteResponseIO(gen).asInstanceOf[this.type]
 }
 
 // Implementations of the AXI IOs //////////////////////////////////////////////
@@ -352,7 +352,7 @@ class AxiAddressIO(gen: UInt) extends DecoupledIO(gen) with AxiIdentifier with T
   def getLen() = (len + 1.U((Axi4Config.len.width + 1).W))
   def getSize() = (1.U << size)
 
-  override def cloneType: this.type = new AxiAddressIO(gen).asInstanceOf[this.type]
+  //override def cloneType: this.type = new AxiAddressIO(gen).asInstanceOf[this.type]
 }
 
 class AxiReadDataIO(gen: UInt) extends DecoupledIO(gen) with AxiIdentifier with TraitAxiLiteReadDataIO {
@@ -364,7 +364,7 @@ class AxiReadDataIO(gen: UInt) extends DecoupledIO(gen) with AxiIdentifier with 
     super[TraitAxiLiteReadDataIO].s_init()
     last := false.B
   }
-  override def cloneType: this.type = new AxiReadDataIO(gen).asInstanceOf[this.type]
+  //override def cloneType: this.type = new AxiReadDataIO(gen).asInstanceOf[this.type]
 }
 
 class AxiWriteDataIO(gen: UInt) extends DecoupledIO(gen) with AxiIdentifier with TraitAxiLiteWriteDataIO {
@@ -376,7 +376,7 @@ class AxiWriteDataIO(gen: UInt) extends DecoupledIO(gen) with AxiIdentifier with
     super[TraitAxiLiteWriteDataIO].m_init()
     last := false.B
   }
-  override def cloneType: this.type = new AxiWriteDataIO(gen).asInstanceOf[this.type]
+  //override def cloneType: this.type = new AxiWriteDataIO(gen).asInstanceOf[this.type]
 }
 
 class AxiWriteResponseIO(gen: UInt) extends DecoupledIO(gen) with AxiIdentifier with TraitAxiLiteWriteResponseIO {
@@ -386,5 +386,5 @@ class AxiWriteResponseIO(gen: UInt) extends DecoupledIO(gen) with AxiIdentifier 
     super[AxiIdentifier].init()
     super[TraitAxiLiteWriteResponseIO].s_init()
   }
-  override def cloneType: this.type = new AxiWriteResponseIO(gen).asInstanceOf[this.type]
+  //override def cloneType: this.type = new AxiWriteResponseIO(gen).asInstanceOf[this.type]
 }

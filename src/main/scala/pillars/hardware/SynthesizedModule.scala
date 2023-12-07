@@ -65,9 +65,9 @@ class DualInputModule(w: Int, opEnum: OpEnum) extends Module {
     case OpEnum.XOR => input_a ^ input_b
     case OpEnum.MUL => input_a * input_b
     case OpEnum.SLT => input_a.asSInt < input_b.asSInt
-    case OpEnum.SHLL => (input_a << input_b(log2Up(w), 0).asUInt).asUInt()
+    case OpEnum.SHLL => (input_a << input_b(log2Up(w), 0).asUInt).asUInt
     case OpEnum.SLTU => input_a < input_b
-    case OpEnum.SHRL => (input_a >> input_b(log2Up(w), 0).asUInt).asUInt()
+    case OpEnum.SHRL => (input_a >> input_b(log2Up(w), 0).asUInt).asUInt
     case OpEnum.SHRA => (input_a.asSInt >> input_b(log2Up(w), 0).asUInt).asUInt
     case OpEnum.DIV => input_a / input_b
   }

@@ -1,7 +1,7 @@
 package pillars.core
 
 import chisel3.Module
-import chisel3.util.log2Up
+import chisel3.util.log2Ceil
 import pillars.archlib.ElementLSU
 import pillars.core.MRRGMode._
 
@@ -68,7 +68,7 @@ trait ElementTrait extends BasicTrait {
         val outPortNum = getOutPorts().size
         val internalNumBigInt: BigInt = internalNum
         val internalNodeNum = internalNodes.size
-        val singleConfigSize = log2Up(internalNodeNum)
+        val singleConfigSize = log2Ceil(internalNodeNum)
         val oldConfig = getBigIntConfig()
         var newConfig: BigInt = oldConfig
         val singleConfigMask: BigInt = ((1 << singleConfigSize) - 1)

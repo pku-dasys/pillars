@@ -1,10 +1,13 @@
 package pillars.testers
 
-import chisel3.{Data, UInt, assert, iotesters}
-import chisel3.iotesters.PeekPokeTester
 import pillars.hardware.PillarsConfig._
 import pillars.hardware._
 import pillars.util.SplitOrConcat
+
+import chisel3.{Data, UInt, assert}
+import chiseltest._
+import chiseltest.iotesters.PeekPokeTester
+import org.scalatest.flatspec.AnyFlatSpec
 
 /** A tester of the Counter.
  *
@@ -45,9 +48,12 @@ class CounterTester(c: Counter) extends PeekPokeTester(c) {
 }
 
 object CTest extends App{
-  iotesters.Driver.execute(Array("-tgvo", "on", "-tbn", "verilator"), () => new Counter(8)) {
-    c => new CounterTester(c)
-  }
+  org.scalatest.run(new AnyFlatSpec with ChiselScalatestTester {
+    behavior of "Counter"
+    it should "work" in {
+      test(new Counter(8)).runPeekPoke(new CounterTester(_))
+    }
+  })
 }
 
 
@@ -449,8 +455,12 @@ class LoadStoreUnitTester(c: LoadStoreUnit) extends PeekPokeTester(c) {
  * @deprecated
  */
 object LSUTest extends App {
-  iotesters.Driver.execute(Array("-tgvo", "on", "-tbn", "verilator"),
-    () => new LoadStoreUnit(32)) { c => new LoadStoreUnitTester(c) }
+  org.scalatest.run(new AnyFlatSpec with ChiselScalatestTester {
+    behavior of "LoadStoreUnit"
+    it should "work" in {
+      test(new LoadStoreUnit(32)).runPeekPoke(new LoadStoreUnitTester(_))
+    }
+  })
 }
 
 /** A object generating the Verilog of a load/store unit.
@@ -478,8 +488,12 @@ class MultiplexerUnitTester(c: Multiplexer) extends PeekPokeTester(c) {
  */
 object MuxTest extends App {
   (new chisel3.stage.ChiselStage).emitVerilog(new Multiplexer(6, 32), args)
-  iotesters.Driver.execute(Array("-tgvo", "on", "-tbn", "verilator"),
-    () => new Multiplexer(6, 32)) { c => new MultiplexerUnitTester(c) }
+  org.scalatest.run(new AnyFlatSpec with ChiselScalatestTester {
+    behavior of "Multiplexer"
+    it should "work" in {
+      test(new Multiplexer(6, 32)).runPeekPoke(new MultiplexerUnitTester(_))
+    }
+  })
 }
 
 /** A tester of a synchronizer with skew = 3.
@@ -525,5 +539,10 @@ class SynchronizerTester(c: SkewSynchronizer) extends PeekPokeTester(c) {
 /** A object invoking the tester of a synchronizer.
  */
 object SkewTest extends App {
-  iotesters.Driver.execute(args, () => new SkewSynchronizer(32)) { c => new SynchronizerTester(c) }
+  org.scalatest.run(new AnyFlatSpec with ChiselScalatestTester {
+    behavior of "SkewSynchronizer"
+    it should "work" in {
+      test(new SkewSynchronizer(32)).runPeekPoke(new SynchronizerTester(_))
+    }
+  })
 }

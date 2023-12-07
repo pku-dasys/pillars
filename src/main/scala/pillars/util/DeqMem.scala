@@ -138,7 +138,7 @@ class DeqMem(mem_io: TraitMemReadIO, out_width: Int) extends Module {
       case SplitOrConcat.Normal =>
         when(state === s_exec) {
           io.out.enq(mem_data)
-          when(io.out.fire()) {
+          when(io.out.fire) {
             fetch()
           }
         }
@@ -149,7 +149,7 @@ class DeqMem(mem_io: TraitMemReadIO, out_width: Int) extends Module {
 
         when(state === s_exec) {
           io.out.enq(multi_word(word_index))
-          when(io.out.fire()) {
+          when(io.out.fire) {
             val next_word_index = word_index + 1.U
             word_index := next_word_index
             when(next_word_index === manip.factor.U) {
@@ -168,7 +168,7 @@ class DeqMem(mem_io: TraitMemReadIO, out_width: Int) extends Module {
             val next_multi_word = WireInit(multi_word)
             next_multi_word(word_index) := mem_data
             io.out.enq(next_multi_word.asUInt)
-            when(io.out.fire()) {
+            when(io.out.fire) {
               printf("[DeqMem] %x %x = mem[%d] %d\n", next_multi_word.asUInt, multi_word.asUInt,
                 mem_index - manip.factor.U, manip.factor.U)
               fetch()
@@ -188,14 +188,14 @@ class DeqMem(mem_io: TraitMemReadIO, out_width: Int) extends Module {
     // enq addr
     when(remain > 0.U) {
       iaddr.enq(mem_index)
-      when(iaddr.fire()) {
+      when(iaddr.fire) {
         mem_index := mem_index + 1.U
         remain := remain - 1.U
       }
     }
     // deq data
     mem_data := odata.deq()
-    when(odata.fire()) {
+    when(odata.fire) {
       state := s_exec
     }.elsewhen(imo.idle() === false.B) {
       state := s_fetch
@@ -229,7 +229,7 @@ class EnqAddrDeqMem(mem_io: TraitMemReadIO) extends Module {
 
   when(token) {
     io.odata.enq(io.mem.dout)
-    when(io.odata.fire()) {
+    when(io.odata.fire) {
       token := false.B
       next_token := false.B
     }
@@ -237,7 +237,7 @@ class EnqAddrDeqMem(mem_io: TraitMemReadIO) extends Module {
 
   when(next_token === false.B) {
     val addr = io.iaddr.deq()
-    when(io.iaddr.fire()) {
+    when(io.iaddr.fire) {
       token := true.B
       io.mem.enable()
       io.mem.addr := addr

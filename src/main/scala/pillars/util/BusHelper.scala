@@ -39,7 +39,7 @@ object DecoupledBus {
 
     def read(base: UInt, len: UInt) {
 
-      val counter = RegInit(0.U(len_width))
+      val counter = RegInit(0.U(len_width.W))
       when (state === s_start) {
 
         bus.read_addr.setLen(len)

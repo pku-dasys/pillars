@@ -16,8 +16,6 @@ interp.configureCompiler(x => x.settings.source.value = scala.tools.nsc.settings
 //import $ivy.`edu.berkeley.cs::chisel3:3.4.+`
 //import $ivy.`edu.berkeley.cs::chisel-iotesters:1.4.+`
 
-
-
 import $ivy.`com.typesafe.play::play-json:2.8.0`
 import $ivy.`org.apache.logging.log4j:log4j-core:2.17.2`
 import $ivy.`org.apache.logging.log4j:log4j-api:2.17.2`
@@ -29,9 +27,8 @@ for (jar <- jar_files) {
     interp.load.cp(new java.io.File(jar).toURI.toURL)
 }
 
-import $ivy.`edu.berkeley.cs::chisel3:3.3.3`
-import $ivy.`edu.berkeley.cs::chisel-iotesters:1.3.0`
-import $ivy.`edu.berkeley.cs::chisel-testers2:0.1.0`
+import $ivy.`edu.berkeley.cs::chisel3:3.5.6`
+import $ivy.`edu.berkeley.cs::chiseltest:0.5.6`
 import $ivy.`edu.berkeley.cs::dsptools:1.2.0`
 import $ivy.`org.scalanlp::breeze:0.13.2`
 import $ivy.`edu.berkeley.cs::rocket-dsptools:1.2.0`

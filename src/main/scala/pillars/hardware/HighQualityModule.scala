@@ -1,8 +1,10 @@
 package pillars.hardware
 
-import chisel3.iotesters.PeekPokeTester
 import chisel3.util._
 import chisel3.{Bundle, Input, Module, Output, UInt, _}
+import chiseltest._
+import chiseltest.iotesters.PeekPokeTester
+import org.scalatest.flatspec.AnyFlatSpec
 
 class BlackCell extends Module {
   val io = IO(new Bundle {
@@ -113,24 +115,24 @@ class HighQualityAdder(w: Int) extends Module {
     }
   }
 
-  var sum = (1 until w).map(i => pArray(w - i) ^ GMap(List(depth - 1, w - i - 1)).asUInt())
+  var sum = (1 until w).map(i => pArray(w - i) ^ GMap(List(depth - 1, w - i - 1)).asUInt)
     .reduce(Cat(_, _))
   sum = Cat(sum, pArray(0))
 
   io.outs(0) := sum
 }
 
-object test {
+object Test {
   def main(args: Array[String]): Unit = {
     val topDesign = () => new HighQualityAdder(4)
     (new chisel3.stage.ChiselStage).emitVerilog(topDesign(), Array("-td", "tutorial/RTL/"))
-    iotesters.Driver.execute(Array("-tgvo", "on", "-tbn", "verilator"), topDesign) {
-      c => new HighQualityAdderTester(c)
-    }
 
-    iotesters.Driver.execute(Array("-tgvo", "on", "-tbn", "verilator"), () => new HighQualityAdder(8)) {
-      c => new HighQualityAdderTester(c)
-    }
+    org.scalatest.run(new AnyFlatSpec with ChiselScalatestTester {
+      it should "work" in {
+        test(topDesign())
+        test(new HighQualityAdder(8))
+      }.runPeekPoke(new HighQualityAdderTester(_))
+    })
   }
 }
 

@@ -137,7 +137,7 @@ class EnqMem(mem_io: TraitMemWriteIO, in_width: Int) extends Module {
 
   def pull_data() {
     data_in := io.in.deq()
-    when (io.in.fire()) {
+    when (io.in.fire) {
       state := s_exec
     } .otherwise {
       state := s_fetch

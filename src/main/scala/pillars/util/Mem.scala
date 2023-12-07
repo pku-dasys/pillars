@@ -7,7 +7,7 @@ class WriteRequest[T <: Data](addr_gen: T, data_gen: T) extends Bundle {
   val addr = addr_gen
   val data = data_gen
 
-  override def cloneType: this.type = new WriteRequest(addr_gen, data_gen).asInstanceOf[this.type]
+  //override def cloneType: this.type = new WriteRequest(addr_gen, data_gen).asInstanceOf[this.type]
 }
 
 trait TraitMemIO extends TraitMemWriteIO with TraitMemReadIO {
@@ -109,7 +109,7 @@ class MemReadIO(val mem_depth: Int, val mem_width: Int) extends TraitMemReadIO {
   val addr = Output(UInt(log2Ceil(mem_depth).W))
   val dout = Input(UInt(mem_width.W))
 
-  override def cloneType: this.type = new MemReadIO(mem_depth, mem_width).asInstanceOf[this.type]
+  //override def cloneType: this.type = new MemReadIO(mem_depth, mem_width).asInstanceOf[this.type]
 }
 
 class MemWriteIO(val mem_depth: Int, val mem_width: Int) extends TraitMemWriteIO {
@@ -118,7 +118,7 @@ class MemWriteIO(val mem_depth: Int, val mem_width: Int) extends TraitMemWriteIO
   val addr = Output(UInt(log2Ceil(mem_depth).W))
   val din = Output(UInt(mem_width.W))
 
-  override def cloneType: this.type = new MemWriteIO(mem_depth, mem_width).asInstanceOf[this.type]
+  //override def cloneType: this.type = new MemWriteIO(mem_depth, mem_width).asInstanceOf[this.type]
 }
 
 class MemIO(val mem_depth: Int, val mem_width: Int) extends TraitMemIO {
@@ -128,7 +128,7 @@ class MemIO(val mem_depth: Int, val mem_width: Int) extends TraitMemIO {
   val din = Output(UInt(mem_width.W))
   val dout = Input(UInt(mem_width.W))
 
-  override def cloneType: this.type = new MemIO(mem_depth, mem_width).asInstanceOf[this.type]
+  //override def cloneType: this.type = new MemIO(mem_depth, mem_width).asInstanceOf[this.type]
 }
 
 // exclusive read or write

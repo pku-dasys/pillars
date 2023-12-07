@@ -1,10 +1,12 @@
 package pillars.examples
 
-import chisel3.iotesters
 import pillars.archlib.TileCompleteBlock
 import pillars.core._
 import pillars.hardware.{TopModule, TopModuleWrapper, TopModuleWrapperSolid}
 import pillars.testers._
+
+import chiseltest._
+import org.scalatest.flatspec.AnyFlatSpec
 
 /** Some examples showing how to test applications with a 4*4 TileCompleteBlock.
   * We suggest users employ functions and classes in this object.
@@ -147,27 +149,31 @@ object ApplicationExamples {
       appTestHelper.setThroughput(throughput)
 
       if (useWrapper) {
-        iotesters.Driver.execute(
-          Array("--no-check-comb-loops", "-tgvo", "on", "-tbn", "verilator"),
-          () =>
-            new TopModuleWrapper(
-              hardwareGenerator.pillarsModuleInfo,
-              hardwareGenerator.connectMap,
-              hardwareGenerator.regionList,
-              dataWidth
-            )
-        ) { c => new VaddWrapperTester(c, appTestHelper) }
+        org.scalatest.run(new AnyFlatSpec with ChiselScalatestTester {
+          it should "work" in {
+            test(
+                new TopModuleWrapper(
+                  hardwareGenerator.pillarsModuleInfo,
+                  hardwareGenerator.connectMap,
+                  hardwareGenerator.regionList,
+                  dataWidth
+                )
+            ).runPeekPoke(new VaddWrapperTester(_, appTestHelper))
+          }
+        })
       } else {
-        iotesters.Driver.execute(
-          Array("--no-check-comb-loops", "-tgvo", "on", "-tbn", "verilator"),
-          () =>
-            new TopModule(
-              hardwareGenerator.pillarsModuleInfo,
-              hardwareGenerator.connectMap,
-              hardwareGenerator.regionList,
-              dataWidth
-            )
-        ) { c => new VaddTester(c, appTestHelper) }
+        org.scalatest.run(new AnyFlatSpec with ChiselScalatestTester {
+          it should "work" in {
+            test(
+                new TopModule(
+                  hardwareGenerator.pillarsModuleInfo,
+                  hardwareGenerator.connectMap,
+                  hardwareGenerator.regionList,
+                  dataWidth
+                )
+            ).runPeekPoke(new VaddTester(_, appTestHelper))
+          }
+        })
       }
     }
 
@@ -314,27 +320,31 @@ object ApplicationExamples {
       appTestHelper.setPortCycle(simulationHelper)
 
       if (useWrapper) {
-        iotesters.Driver.execute(
-          Array("--no-check-comb-loops", "-tgvo", "on", "-tbn", "verilator"),
-          () =>
-            new TopModuleWrapper(
-              hardwareGenerator.pillarsModuleInfo,
-              hardwareGenerator.connectMap,
-              hardwareGenerator.regionList,
-              dataWidth
-            )
-        ) { c => new SumWrapperTester(c, appTestHelper) }
+        org.scalatest.run(new AnyFlatSpec with ChiselScalatestTester {
+          it should "work" in {
+            test(
+                new TopModuleWrapper(
+                  hardwareGenerator.pillarsModuleInfo,
+                  hardwareGenerator.connectMap,
+                  hardwareGenerator.regionList,
+                  dataWidth
+                )
+            ).runPeekPoke(new SumWrapperTester(_, appTestHelper))
+          }
+        })
       } else {
-        iotesters.Driver.execute(
-          Array("--no-check-comb-loops", "-tgvo", "on", "-tbn", "verilator"),
-          () =>
-            new TopModule(
-              hardwareGenerator.pillarsModuleInfo,
-              hardwareGenerator.connectMap,
-              hardwareGenerator.regionList,
-              dataWidth
-            )
-        ) { c => new SumTester(c, appTestHelper) }
+        org.scalatest.run(new AnyFlatSpec with ChiselScalatestTester {
+          it should "work" in {
+            test(
+                new TopModule(
+                  hardwareGenerator.pillarsModuleInfo,
+                  hardwareGenerator.connectMap,
+                  hardwareGenerator.regionList,
+                  dataWidth
+                )
+            ).runPeekPoke(new SumTester(_, appTestHelper))
+          }
+        })
       }
     }
 
@@ -482,16 +492,18 @@ object ApplicationExamples {
       appTestHelper.setOutputCycle(outputCycle)
       appTestHelper.setThroughput(throughput)
 
-      iotesters.Driver.execute(
-        Array("--no-check-comb-loops", "-tgvo", "on", "-tbn", "verilator"),
-        () =>
-          new TopModule(
-            hardwareGenerator.pillarsModuleInfo,
-            hardwareGenerator.connectMap,
-            hardwareGenerator.regionList,
-            dataWidth
-          )
-      ) { c => new AccumTester(c, appTestHelper) }
+      org.scalatest.run(new AnyFlatSpec with ChiselScalatestTester {
+        it should "work" in {
+          test(
+              new TopModule(
+                hardwareGenerator.pillarsModuleInfo,
+                hardwareGenerator.connectMap,
+                hardwareGenerator.regionList,
+                dataWidth
+              )
+          ).runPeekPoke(new AccumTester(_, appTestHelper))
+        }
+      })
     }
 
     //********     II = 1     ********
@@ -633,16 +645,18 @@ object ApplicationExamples {
       appTestHelper.setOutputCycle(outputCycle)
       appTestHelper.setThroughput(throughput)
 
-      iotesters.Driver.execute(
-        Array("--no-check-comb-loops", "-tgvo", "on", "-tbn", "verilator"),
-        () =>
-          new TopModule(
-            hardwareGenerator.pillarsModuleInfo,
-            hardwareGenerator.connectMap,
-            hardwareGenerator.regionList,
-            dataWidth
-          )
-      ) { c => new CapTester(c, appTestHelper) }
+      org.scalatest.run(new AnyFlatSpec with ChiselScalatestTester {
+        it should "work" in {
+          test(
+              new TopModule(
+                hardwareGenerator.pillarsModuleInfo,
+                hardwareGenerator.connectMap,
+                hardwareGenerator.regionList,
+                dataWidth
+              )
+          ).runPeekPoke(new CapTester(_, appTestHelper))
+        }
+      })
     }
 
     //********     II = 1     ********

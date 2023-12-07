@@ -1,6 +1,6 @@
 package pillars.archlib
 
-import Chisel.log2Up
+import chisel3.util.log2Ceil
 import chisel3.Module
 import pillars.core.OpEnum.OpEnum
 import pillars.core.{BlockTrait, ElementTrait, ModuleRegistry, OpEnum, OpcodeTranslator}
@@ -95,7 +95,7 @@ class ElementMux(name: String, moduleParams: List[Int]) extends ElementTrait {
 
   setSupOps(List())
 
-  val configBits = log2Up(moduleParams(0))
+  val configBits = log2Ceil(moduleParams(0))
   setParams(moduleParams :+ configBits)
   setName(name)
 
